@@ -585,7 +585,7 @@ static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv)
 		if (strnum == -1) {  //忽略空行
 			continue;
 		}
-		websWrite(wp, T("%s</br>"), buf);
+		websWrite(wp, T("%s"), buf);
 	}
 	fclose(fp);
 	return 0;

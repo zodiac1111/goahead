@@ -16,41 +16,8 @@
 <script type="text/javascript" src="/style/jquery-ui-timepicker-addon.js"></script>
 <script type="text/javascript" src="/style/jquery-ui-timepicker-zh-CN-GB2312.js"></script>
 <script type="text/javascript" src="/style/jquery-ui-sliderAccess.js"></script>
+<script type="text/javascript" src="/style/reset.js"></script> 
 <!-- 基于jquery的日期时间控件所需要的文件 -结束 -->
-<script type="text/javascript">
-	var stime = document.getElementById("stime_stamp");
-	var etime = document.getElementById("etime_stamp");
-	var mtr_no = document.getElementById("mtr_no");
-	$(document).ready(
-		function() {
-			$("#btn").click(function() {
-				$.get("/um/compara1.asp", function(result) {
-					$("#myDiv").html(result);
-				});
-			});
-			$("#btnPost").click(
-				function() {
-					//显示
-					$("#msgbox_wait").show("fade", {}, 1);
-					$.post('/goform/get_tou',$("#history_tou")
-						.serialize(), function(result) {
-						$("#tr_dat").html(result);
-						// 动态加载完的页面才可以接收鼠标悬停等事件
-						$("#history_tou tr").mouseover(function() {
-							$(this).addClass("over");
-							var rows = $(this).attr('relrow');
-						});
-						$("#history_tou tr").mouseout(function() {
-							$(this).removeClass("over");
-						});
-						//完成之后隐藏
-						$("#msgbox_wait").hide("fade", {}, 1);
-						$("#msgbox_ok").show("fade", {}, 1);
-						$("#msgbox_ok").hide("fade", {}, 1000);
-					});
-				});
-		});
-</script>
 <% init_sysparam(); //加载系统参数 %>
 </head>
 <body>
@@ -218,9 +185,12 @@
 		}
 	});
 </script>
-  <button id="btn">子页面加载</button>
-  <button id="btnPost">查询</button>
-  <button id="showLog">查看日志</button>
+  <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+    id="btn">子页面加载</button>
+  <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+    id="btnPost">查询</button>
+  <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+    id="showLog">查看日志</button>
   <div id="msgbox_wait" style="display: none;" class=msgbox_wait>
     <input type=image src="/style/images/wait.gif">
   </div>
@@ -261,6 +231,7 @@
     </thead>
     <tbody id=tr_dat></tbody>
   </table>
-  <p> <% show_log(); %> </p>
+  <div id=log></div>
+ <textarea> <% show_log(); %> </textarea>
 </body>
 </html>
