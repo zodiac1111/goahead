@@ -570,7 +570,7 @@ static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char buf[MAX_ERR_LOG_LINE_LENTH];
+	char buf[MAX_ERR_LOG_LINE_LENTH]={0};
 	int strnum = 0;
 	FILE*fp = fopen("./err.log", "r");
 	if (fp == NULL ) {

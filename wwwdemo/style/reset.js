@@ -55,4 +55,9 @@ $(document).ready(
 									$("#msgbox_ok").hide("fade", {}, 1000);
 								});
 					});
+			  $("#download_log").click(function (e) {
+	               e.preventDefault();  //stop the browser from following
+	               window.location.href = $("#log_txt").value;//ÎÄ¼þÎ»ÖÃ
+	           });
+			  
 		});

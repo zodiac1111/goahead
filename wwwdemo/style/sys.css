@@ -180,7 +180,7 @@
 	BACKGROUND-COLOR: #F7FAFF;
 }
 
-.msnbox{
+.msnbox {
 	BACKGROUND-COLOR: #76A8D9;
 }
 /*鼠标划过的行样式 addclass 或removeclass */
@@ -988,7 +988,7 @@ body {
 }
 
 .shadow {
-	filter: DropShadow(Offx =     3, Offy =     3, Positive =     1);
+	filter: DropShadow(Offx =       3, Offy =       3, Positive =       1);
 }
 
 .calSelect {
@@ -1562,4 +1562,16 @@ TD.lb-bkg-w {
 	PADDING-BOTTOM: 0px;
 	FONT-SIZE: 12px;
 	FONT-FAMILY: "宋体"
+}
+/*显示日志文本*/
+.log_txt {
+	border-radius: 3px;
+	padding: 5px;
+	border: 1px solid #ccc;
+	display: block;
+	width: 80%;
+	height: 300px;
+	box-shadow: 0pt 1px 2px rgba(0, 0, 0, 0.18) inset;
+	overflow-y: auto;
+	margin: auto;
 }
