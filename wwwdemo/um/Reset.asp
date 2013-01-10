@@ -232,6 +232,7 @@
     <tbody id=tr_dat></tbody>
   </table>
   <div id=log></div>
- <textarea> <% show_log(); %> </textarea>
+ <textarea class=log_txt><% show_log(); %></textarea>
+ <button id="download_log">обтьхуж╬</button>
 </body>
 </html>
