@@ -10,7 +10,7 @@
 <!-- 基于jquery的日期时间控件所需要的文件 -开始 -->
 <link rel="stylesheet" media="all" type="text/css" href="/style/jquery-ui.css" />
 <link rel="stylesheet" media="all" type="text/css" href="/style/jquery-ui-timepicker-addon.css" />
-<script type="text/javascript" src="/style/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="/js/jquery-1.8.3.js"></script>
 <script type="text/javascript" src="/style/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/style/jquery-ui.min-zh-CN-GB2312.js"></script>
 <script type="text/javascript" src="/style/jquery-ui-timepicker-addon.js"></script>
@@ -238,6 +238,6 @@
  <button id="load_log" >读取</button>
  <button id="save_log" >保存</button>
   <div id=log></div>
- <textarea class=log_txt><% show_log(); %></textarea>
+ <textarea id=log_text class=log_txt><% show_log(); %></textarea>
 </body>
 </html>

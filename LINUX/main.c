@@ -571,6 +571,7 @@ static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
 static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char buf[MAX_ERR_LOG_LINE_LENTH]={0};
+	//char line[MAX_ERR_LOG_LINE_LENTH]={0};
 	int strnum = 0;
 	FILE*fp = fopen("./err.log", "r");
 	if (fp == NULL ) {
@@ -582,6 +583,7 @@ static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv)
 	fseek(fp, 0, SEEK_SET);
 	while (ftell(fp) < flen) {
 		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
+		//strnum = sscanf(buf, "%255s\n", line);
 		if (strnum == -1) {  //忽略空行
 			continue;
 		}
