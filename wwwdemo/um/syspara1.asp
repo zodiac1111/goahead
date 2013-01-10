@@ -17,7 +17,7 @@
 $(document).ready(
 function() {
 	$("#load").click(function()  {
-		$.load(  '<% netports_num(); %>');
+		$.load( '<% netports_num(); %>');
 		});
 	});
 </script>
