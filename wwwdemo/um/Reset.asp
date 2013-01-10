@@ -22,33 +22,33 @@
 	var etime = document.getElementById("etime_stamp");
 	var mtr_no = document.getElementById("mtr_no");
 	$(document).ready(
-			function() {
-				$("#btn").click(function() {
-					$.get("/um/compara1.asp", function(result) {
-						$("#myDiv").html(result);
+		function() {
+			$("#btn").click(function() {
+				$.get("/um/compara1.asp", function(result) {
+					$("#myDiv").html(result);
+				});
+			});
+			$("#btnPost").click(
+				function() {
+					//显示
+					$("#msgbox_wait").show("fade", {}, 1);
+					$.post('/goform/get_tou', $("#history_tou")
+							.serialize(), function(result) {// 动态加载完的页面才可以接收鼠标悬停等事件
+						$("#tr_dat").html(result);
+						$("#history_tou tr").mouseover(function() {
+							$(this).addClass("over");
+							var rows = $(this).attr('relrow');
+						});
+						$("#history_tou tr").mouseout(function() {
+							$(this).removeClass("over");
+						});
+						//完成之后隐藏
+						$("#msgbox_wait").hide("fade", {}, 1);
+						$("#msgbox_ok").show("fade", {}, 1);
+						$("#msgbox_ok").hide("fade", {}, 1000);
 					});
 				});
-				$("#btnPost").click(
-						function() {
-							//显示
-							$("#msgbox_wait").show("fade", {}, 1);
-							$.post('/goform/get_tou', $("#history_tou")
-									.serialize(), function(result) {// 动态加载完的页面才可以接收鼠标悬停等事件
-								$("#tr_dat").html(result);
-								$("#history_tou tr").mouseover(function() {
-									$(this).addClass("over");
-									var rows = $(this).attr('relrow');
-								});
-								$("#history_tou tr").mouseout(function() {
-									$(this).removeClass("over");
-								});
-								//完成之后隐藏
-								$("#msgbox_wait").hide("fade", {}, 1);
-								$("#msgbox_ok").show("fade", {}, 1);
-								$("#msgbox_ok").hide("fade", {}, 1000);
-							});
-						});
-			});
+		});
 </script>
 <% init_sysparam(); //加载系统参数 %>
 </head>
@@ -134,90 +134,90 @@
     <br>
   </form>
   <script language=javascript>
-			var startDateTextBox = $('#stime');
-			var endDateTextBox = $('#etime');
-			var stime_stamp = document.getElementById("stime_stamp");
-			var etime_stamp = document.getElementById("etime_stamp");
-			var tz = document.getElementById("timezone");
-			var tz2 = document.getElementById("timezone2");
-			//开始时间控件的属性设置
-			startDateTextBox.datetimepicker({
-				maxDate : 0,
-				controlType : 'select', //选择方式选时刻
-				dateFormat : "yy-mm-dd", //日期格式
-				//showSecond: true,	//显示秒
-				timeFormat : 'HH:mm z', //时刻格式
-				separator : ' ', //日期时刻分割字符(串)
-				//showTimezone: true,	//显示时区
-				//timezone: '+0800',		//默认时区
-				//点击关闭(完成)按钮事件 
-				//如果开始时间晚于结束时间,则将开始时间设置为结束时间 
-				onClose : function(dateText, inst) {
-					if (endDateTextBox.val() != '') {
-						var testStartDate = startDateTextBox
-								.datetimepicker('getDate');
-						var testEndDate = endDateTextBox
-								.datetimepicker('getDate');
-						if (testStartDate > testEndDate)
-							endDateTextBox.datetimepicker('setDate',
-									testStartDate);
-					} else {
-						endDateTextBox.val(dateText);
-					}
-					var testStartDate = startDateTextBox
-							.datetimepicker('getDate');
-					etime_stamp.value = testStartDate.getTime() / 1000;
-					//Date.parse(endDateTextBox.datetimepicker('getDate'))/1000;
-				},
-				onSelect : function(selectedDateTime) {//选择时限定开始时间必须早于结束时间
-					endDateTextBox.datetimepicker('option', 'minDate',
-							startDateTextBox.datetimepicker('getDate'));
-					//tz.value=startDateTextBox.datetimepicker.timezone;
-					var testStartDate = startDateTextBox
-							.datetimepicker('getDate');
-					tz.value = testStartDate.getTimezoneOffset();
-					//这里转换成位标准时间,没有时区信息了.
-					stime_stamp.value = testStartDate.getTime() / 1000;
-					//Date.parse(startDateTextBox.datetimepicker('getDate'))/1000;
-				}
-			});
-			//结束时间控件的属性设置
-			endDateTextBox.datetimepicker({
-				maxDate : 0,//不能选择未来
-				controlType : 'select', //选择方式选时刻
-				dateFormat : "yy-mm-dd", //日期格式
-				//showSecond: true,	//显示秒
-				timeFormat : 'HH:mm z', //时刻格式
-				separator : ' ', //日期时刻分割字符(串)
-				//showTimezone: true,	//显示时区
-				//timezone: '+0800',		//默认时区
-				onClose : function(dateText, inst) {//关闭时候判断
-					if (startDateTextBox.val() != '') {
-						var testStartDate = startDateTextBox
-								.datetimepicker('getDate');
-						var testEndDate = endDateTextBox
-								.datetimepicker('getDate');
-						if (testStartDate > testEndDate)
-							startDateTextBox.datetimepicker('setDate',
-									testEndDate);
-					} else {
-						startDateTextBox.val(dateText);
-					}
-					var testEndDate = endDateTextBox.datetimepicker('getDate');
-					etime_stamp.value = testEndDate.getTime() / 1000;
-					//stime_stamp.value=
-					//	Date.parse(startDateTextBox.datetimepicker('getDate'))/1000;
-				},
-				onSelect : function(selectedDateTime) {//选择时候防止误选
-					startDateTextBox.datetimepicker('option', 'maxDate',
-							endDateTextBox.datetimepicker('getDate'));
+	var startDateTextBox = $('#stime');
+	var endDateTextBox = $('#etime');
+	var stime_stamp = document.getElementById("stime_stamp");
+	var etime_stamp = document.getElementById("etime_stamp");
+	var tz = document.getElementById("timezone");
+	var tz2 = document.getElementById("timezone2");
+	//开始时间控件的属性设置
+	startDateTextBox.datetimepicker({
+		maxDate : 0,
+		controlType : 'select', //选择方式选时刻
+		dateFormat : "yy-mm-dd", //日期格式
+		//showSecond: true,	//显示秒
+		timeFormat : 'HH:mm z', //时刻格式
+		separator : ' ', //日期时刻分割字符(串)
+		//showTimezone: true,	//显示时区
+		//timezone: '+0800',		//默认时区
+		//点击关闭(完成)按钮事件 
+		//如果开始时间晚于结束时间,则将开始时间设置为结束时间 
+		onClose : function(dateText, inst) {
+			if (endDateTextBox.val() != '') {
+				var testStartDate = startDateTextBox
+						.datetimepicker('getDate');
+				var testEndDate = endDateTextBox
+						.datetimepicker('getDate');
+				if (testStartDate > testEndDate)
+					endDateTextBox.datetimepicker('setDate',
+							testStartDate);
+			} else {
+				endDateTextBox.val(dateText);
+			}
+			var testStartDate = startDateTextBox
+					.datetimepicker('getDate');
+			stime_stamp.value = testStartDate.getTime() / 1000;
+			//Date.parse(endDateTextBox.datetimepicker('getDate'))/1000;
+		},
+		onSelect : function(selectedDateTime) {//选择时限定开始时间必须早于结束时间
+			endDateTextBox.datetimepicker('option', 'minDate',
+					startDateTextBox.datetimepicker('getDate'));
+			//tz.value=startDateTextBox.datetimepicker.timezone;
+			var testStartDate = startDateTextBox
+					.datetimepicker('getDate');
+			tz.value = testStartDate.getTimezoneOffset();
+			//这里转换成位标准时间,没有时区信息了.
+			stime_stamp.value = testStartDate.getTime() / 1000;
+			//Date.parse(startDateTextBox.datetimepicker('getDate'))/1000;
+		}
+	});
+	//结束时间控件的属性设置
+	endDateTextBox.datetimepicker({
+		maxDate : 0,//不能选择未来
+		controlType : 'select', //选择方式选时刻
+		dateFormat : "yy-mm-dd", //日期格式
+		//showSecond: true,	//显示秒
+		timeFormat : 'HH:mm z', //时刻格式
+		separator : ' ', //日期时刻分割字符(串)
+		//showTimezone: true,	//显示时区
+		//timezone: '+0800',		//默认时区
+		onClose : function(dateText, inst) {//关闭时候判断
+			if (startDateTextBox.val() != '') {
+				var testStartDate = startDateTextBox
+						.datetimepicker('getDate');
+				var testEndDate = endDateTextBox
+						.datetimepicker('getDate');
+				if (testStartDate > testEndDate)
+					startDateTextBox.datetimepicker('setDate',
+							testEndDate);
+			} else {
+				startDateTextBox.val(dateText);
+			}
+			var testEndDate = endDateTextBox.datetimepicker('getDate');
+			etime_stamp.value = testEndDate.getTime() / 1000;
+			//stime_stamp.value=
+			//	Date.parse(startDateTextBox.datetimepicker('getDate'))/1000;
+		},
+		onSelect : function(selectedDateTime) {//选择时候防止误选
+			startDateTextBox.datetimepicker('option', 'maxDate',
+					endDateTextBox.datetimepicker('getDate'));
 
-					var testEndDate = endDateTextBox.datetimepicker('getDate');
-					tz2.value = testEndDate.getTimezoneOffset();
-					etime_stamp.value = testEndDate.getTime() / 1000;
-				}
-			});
-		</script>
+			var testEndDate = endDateTextBox.datetimepicker('getDate');
+			tz2.value = testEndDate.getTimezoneOffset();
+			etime_stamp.value = testEndDate.getTime() / 1000;
+		}
+	});
+</script>
   <button id="btn">子页面加载</button>
   <button id="btnPost">查询</button>
   <button id="showLog">查看日志</button>

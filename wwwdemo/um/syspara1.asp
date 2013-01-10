@@ -14,12 +14,14 @@
 <!-- 基于jquery的日期时间控件所需要的文件 -结束 -->
 <script src="/style/wwyfunc.js" language='javascript' type='text/JavaScript'></script>
 <script type="text/javascript">
-$(document).ready(
-function() {
-	$("#load").click(function()  {
-		$.load( '<% netports_num(); %>');
+	$(document).ready(
+		function() {
+			$("#load").click(function(){
+				alert("click");
+			});
 		});
-	});
+
+	
 </script>
 <% init_sysparam(); //加载系统参数 %>
 </HEAD>
@@ -67,7 +69,7 @@ function() {
                     </td>
                     <td align="center">网口数目:</td>
                     <td align="left">
-                      <input type=text name=netports_num size=12 value="<% netports_num(); %>" maxlength=3 onchange="lessthan1byte(event);">
+                      <input id=netport type=text name=netports_num size=12 value="<% netports_num(); %>" maxlength=3 onchange="lessthan1byte(event);">
                     </td>
                   </tr>
                   <tr align="left">
