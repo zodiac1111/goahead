@@ -16,7 +16,7 @@
 <script type="text/javascript" src="/style/jquery-ui-timepicker-addon.js"></script>
 <script type="text/javascript" src="/style/jquery-ui-timepicker-zh-CN-GB2312.js"></script>
 <script type="text/javascript" src="/style/jquery-ui-sliderAccess.js"></script>
-<script type="text/javascript" src="/style/reset.js"></script> 
+<script type="text/javascript" src="/js/reset.js"></script> 
 <!-- 基于jquery的日期时间控件所需要的文件 -结束 -->
 <% init_sysparam(); //加载系统参数 %>
 </head>
