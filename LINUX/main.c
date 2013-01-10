@@ -328,11 +328,11 @@ static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	//第一行:有效标识
 	websWrite(wp, T("<tr>\n"));
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("%s"), CSTR_SAVECYCLE_FLAG);
 	websWrite(wp, T("</td>\n"));
 	for (i = 0; i < SAVE_CYCLE_ITEM; i++) {
-		websWrite(wp, T("<td%s>\n"), TD_CLASS);
+		websWrite(wp, T("<td>\n"));
 		websWrite(wp, T("<input type=checkbox "
 				"name=chk_save_enable value=%d %s %s>\n"),
 				sav[i].enable & 0x01,
@@ -346,12 +346,12 @@ static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	//第二行:储存周期
 	websWrite(wp, T("<tr>\n"));
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("%s"), CSTR_SAVECYCLE_CYCLE);
 	websWrite(wp, T("</td>\n"));
 	for (i = 0; i < SAVE_CYCLE_ITEM; i++) {
 		int j;
-		websWrite(wp, T("<td%s>\n"), TD_CLASS);
+		websWrite(wp, T("<td>\n"));
 		websWrite(wp, T("<select name=cycle >\n"));
 		for (j = 0; j < sizeof(SAVE_CYCLE) / sizeof(SAVE_CYCLE[0]);
 				j++) {
