@@ -1,0 +1,205 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+}
+
+p {
+	font-size: 9pt;
+	margin-left: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333
+}
+
+h1 {
+	font-size: 14pt;
+	font-weight: bold;
+	margin-left: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0066CC
+}
+
+h2 {
+	font-size: 12pt;
+	font-weight: bold;
+	margin-left: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0066CC
+}
+
+h3 {
+	font-size: 10pt;
+	font-weight: bold;
+	margin-left: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0066CC
+}
+
+h4 {
+	font-size: 9pt;
+	font-weight: bold;
+	margin-left: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #0066CC
+}
+
+pre {
+	line-height: normal;
+	color: #000000;
+	font-family: "Courier New", Courier, mono;
+	font-size: 9pt;
+	margin-left: 10px;
+	background-color: #EEEEEE;
+	padding-left: 20px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-right: 20px
+}
+
+td {
+	font-size: 9pt;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333; /*包括字体颜色 */
+	/*border-color:#FF9933;*/
+	white-space: nowrap; /* 不换行*/
+}
+
+ol {
+	margin-left: 40px;
+	color: #333333;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt
+}
+
+ul {
+	font-size: 9pt;
+	margin-left: 30px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333
+}
+
+#table {
+	margin-left: 10px;
+	color: #000000
+}
+
+input {
+	border-color: white;
+}
+
+.inpBtn {
+	height: 20;
+	border-width: 1px;
+	/*border-color:#ffffff;*/
+	border-style: solid;
+	/* background-color:#D3D3FF;*/
+	background-color: #9EB5C1;
+	cursor: hand;
+}
+
+.tbbordclo {
+	margin-left: 15px;
+	margin-top: 15px;
+
+	/*background-color:#ffffff;  
+	/*border-color:#F59933; 
+	border-left-color: #ffffff; 
+	border-bottom-color: #ffffff; 
+	border-right-color: #ffffff; 
+	border-style:solid;*/
+}
+
+.innertab {
+	width: 780px; /*调节右表 宽度 */
+	background-color: #F5F5F5;
+	border-left-color: #FF9933;
+	border-bottom-color: #FF9933;
+	border-right-color: #FF9933;
+	border-bottom-width: 0;
+	border-left-width: 0;
+	border-right-width: 0;
+	border-style: solid;
+}
+
+.inertab_w700 {
+	width: 700px; /*调节右表 宽度 */
+	background-color: #F5F5F5;
+	border-left-color: #FF9933;
+	border-bottom-color: #FF9933;
+	border-right-color: #FF9933;
+	border-bottom-width: 0;
+	border-left-width: 0;
+	border-right-width: 0;
+	border-style: solid;
+}
+
+.hideinp {
+	display: none;
+}
+
+.btnde /*行删除按钮的CSS样式*/ {
+	height: 20;
+	border-width: thin;
+	border-color: #183EAD;
+	border-style: solid;
+	/* background-color:#D3D3FF;*/
+	background-color: White;
+}
+
+.btnup /*行更新按钮的CSS样式*/ {
+	height: 20;
+	border-width: thin;
+	border-color: #183EAD;
+	border-style: solid;
+	/* background-color:#D3D3FF;*/
+	background-color: White;
+}
+
+.btnsch {
+	height: 20px;
+	border-style: none;
+	text-decoration: underline;
+	color: Blue;
+	font-size: x-small;
+	cursor: hand;
+	background-color: Transparent;
+}
+
+.hedtr /* 列头CSS*/ {
+	background-color: #6699FF; /*#C9C9C9:light gray --#6699FF*/
+}
+
+.ntx /*放在td里的input的CSS样式*/ { /*margin:0px; 
+	*/
+	border-style: none;
+}
+/* 
+a:link
+{
+	color:  Blue; 
+}
+a:visited
+{
+  color:  Blue;text-decoration: none;
+}
+a:hover
+{
+	color: Red; text-decoration:underline; cursor:hand; 
+}
+a:active
+{
+	color:Red;    
+} */
+.acs {color = Blue;
+	text-decoration: underline;
+	cursor: hand;
+}
+/*实时数据值格的样式  */
+.numbTd {
+	background-color: #ffffff;
+}
+/*------------子页的CSS------------*/
+/*---添加或编辑子页面的INPUT的样式----*/
+.hfont {
+	font-family: 楷体_GB2312;
+	font-weight: bolder;
+}

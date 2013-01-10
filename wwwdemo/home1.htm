@@ -1,0 +1,89 @@
+
+<html>
+<!--  Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
+<head>
+<title>1</title>
+<meta http-equiv="Content-Type" content="text/html"> 
+<BASE TARGET="view"><base>
+<link href="/style/menuExpandable3.css" rel="stylesheet" type="text/css"></link>
+<SCRIPT src="/style/menuExpandable3.js" type=text/javascript></SCRIPT>
+<style type="text/css">
+img {border-width: 0px 0px 0px 0px}
+</style>
+<SCRIPT type=text/javascript>      
+   window.onload = function() 
+   { 
+		 //alert('refresh'); 
+         initializeMenu("productsMenu", "productsActuator"); 
+         initializeMenu("products1Menu", "products1Actuator");   
+         initializeMenu("programParaMenu", "programParaActuator");  
+	 initializeMenu("resendParaMenu", "resParaActuator");         
+ }   
+</SCRIPT>
+
+</head>
+<body leftmargin="0" downmargin="0" bgcolor="#4682B4" width="100%"
+	height="100%">
+	<table>
+		<tr>
+			<td>
+				<DIV id=mainMenu onclick="">
+					<ul id=menuList>
+						<li class=menubar><a href="#" class=actuator
+							id=products1Actuator><img src="/graphics/logo11.png"
+								height="45" /></a>
+							<ul class=menu id=products1Menu>
+								<li style="BACKGROUND-IMAGE: url(/graphics/minus.gif)"><a
+									class=actuator id="a1" href="um/syspara1.asp"><img
+										src="/graphics/logo20.png"
+										onmouseover="this.src='/graphics/logo21.png';"
+										onmouseout="this.src='/graphics/logo20.png';" height="40" /></a></li>
+								<li style="BACKGROUND-IMAGE: url(/graphics/minus.gif)"><a
+									class=actuator id="a2" href="um/compara1.asp"><img
+										src="/graphics/logo30.png"
+										onmouseover="this.src='/graphics/logo31.png';"
+										onmouseout="this.src='/graphics/logo30.png';" height="40" /></a></li>
+								<li style="BACKGROUND-IMAGE: url(/graphics/minus.gif)"><a
+									class=actuator id="a3" href="um/netpara1.asp"><img
+										src="/graphics/logo40.png"
+										onmouseover="this.src='/graphics/logo41.png';"
+										onmouseout="this.src='/graphics/logo40.png';" height="40" /></a></li>
+								<li style="BACKGROUND-IMAGE: url(/graphics/minus.gif)"><a
+									class=actuator id="a4" href="um/monpara1.asp"><img
+										src="/graphics/logo50.png"
+										onmouseover="this.src='/graphics/logo51.png';"
+										onmouseout="this.src='/graphics/logo51.png';" height="40" /></a></li>
+							</ul></li>
+					</ul>
+				</div>
+				<DIV id=mainMenu onclick="">
+					<ul id=menuList>
+						<li class=menubar><a href="#" class=actuator
+							id=productsActuator><img src="/graphics/logo12.png"
+								height="45"></a>
+							<ul class=menu id=productsMenu>
+								<li style="BACKGROUND-IMAGE: url(/graphics/minus.gif)"><a
+									class=actuator id="a7" href="um/meterpara1.asp"><img
+										src="/graphics/logo60.png"
+										onmouseover="this.src='/graphics/logo61.png';"
+										onmouseout="this.src='/graphics/logo60.png';" height="40" /></a></li>
+								<li style="BACKGROUND-IMAGE: url(/graphics/minus.gif)"><a
+									class=actuator id="a8" href="um/savcirc0.asp"><img
+										src="/graphics/logo70.png"
+										onmouseover="this.src='/graphics/logo71.png';"
+										onmouseout="this.src='/graphics/logo70.png';" height="40" /></a>
+							</ul></li>
+					</ul>
+				</div>
+				<DIV id=mainMenu onclick="">
+					<ul id=menuList>
+						<li class=menubar><a class=actuator id=programParaActuator
+							href="um/data1.asp"><img src="/graphics/logo13.png"
+								height="45"></a></li>
+					</ul>
+				</div>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
