@@ -56,8 +56,9 @@ $(document).ready(
 								});
 					});
 			  $("#download_log").click(function (e) {
-	               e.preventDefault();  //stop the browser from following
-	               window.location.href = $("#log_txt").value;//文件位置
+	               //e.preventDefault();  //stop the browser from following
+	               //show.document.execCommand("SaveAs");
+		       window.location.href = "/err.log";//文件位置
 	           });
 			  
 		});

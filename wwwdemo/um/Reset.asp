@@ -231,8 +231,13 @@
     </thead>
     <tbody id=tr_dat></tbody>
   </table>
+ <p>对服务器端日志(配置)文件操作 待完善</p>
+ <button id="import_log" >导入</button>
+ <button id="export_log" >导出</button>
+  _______
+ <button id="load_log" >读取</button>
+ <button id="save_log" >保存</button>
   <div id=log></div>
  <textarea class=log_txt><% show_log(); %></textarea>
- <button id="download_log">下载日志</button>
 </body>
 </html>
