@@ -32,9 +32,10 @@
 				function() {
 					//显示
 					$("#msgbox_wait").show("fade", {}, 1);
-					$.post('/goform/get_tou', $("#history_tou")
-							.serialize(), function(result) {// 动态加载完的页面才可以接收鼠标悬停等事件
+					$.post('/goform/get_tou',$("#history_tou")
+						.serialize(), function(result) {
 						$("#tr_dat").html(result);
+						// 动态加载完的页面才可以接收鼠标悬停等事件
 						$("#history_tou tr").mouseover(function() {
 							$(this).addClass("over");
 							var rows = $(this).attr('relrow');
@@ -99,7 +100,6 @@
       <input class=hideinp type=text name=OpType value="" id="optype">
     </p>
   </form>
-  
   <form id="history_tou" name="history_tou">
     <p>
     <h1>获取和设置日期时间:</h1>
@@ -259,8 +259,8 @@
         <th>谷</th>
       </tr>
     </thead>
-    <tbody id=tr_dat>
+    <tbody id=tr_dat></tbody>
   </table>
-  <p><% show_log(); %></p>
+  <p> <% show_log(); %> </p>
 </body>
 </html>

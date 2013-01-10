@@ -161,11 +161,11 @@ int write2web(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no)
 	localtime_r(&t2, &t);
 #endif
 	websWrite(wp, T("<tr>"));
-	websWrite(wp, T("<td%s>%d</td>"), TD_CLASS, mtr_no);
-	websWrite(wp, T("<td%s>%d</td>"), TD_CLASS, i);
+	websWrite(wp, T("<td>%d</td>"), mtr_no);
+	websWrite(wp, T("<td>%d</td>"), i);
 	websWrite(wp,
-	                T("<td%s>%04d-%02d-%02d %02d:%02d:%02d %s</td>"),
-	                TD_CLASS, t.tm_year+1900,
+	                T("<td>%04d-%02d-%02d %02d:%02d:%02d %s</td>"),
+	                t.tm_year+1900,
 	                t.tm_mon+1, t.tm_mday, t.tm_hour,
 	                t.tm_min, t.tm_sec, t.tm_zone);
 	webWrite1Tou(wp, tou);
@@ -176,49 +176,49 @@ int write2web(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no)
 int webWrite1Tou(webs_t wp, const stTou tou)
 {
 	///用于显示无效的样式,有效的使用默认的
-	const char *iv = " style=\"text-decoration:line-through;\" ";
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	const char *iv = " style=\"color: gray;\" ";
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FA.total.iv ? "" : iv, tou.FA.total.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FA.tip.iv ? "" : iv, tou.FA.tip.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FA.peak.iv ? "" : iv, tou.FA.peak.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FA.flat.iv ? "" : iv, tou.FA.flat.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FA.valley.iv ? iv : "", tou.FA.valley.val);
 
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RA.total.iv ? "" : iv, tou.RA.total.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RA.tip.iv ? "" : iv, tou.RA.tip.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RA.peak.iv ? "" : iv, tou.RA.peak.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>") ,
 	                tou.RA.flat.iv ? "" : iv, tou.RA.flat.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RA.valley.iv ? iv : "", tou.RA.valley.val);
 
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FR.total.iv ? "" : iv, tou.FR.total.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FR.tip.iv ? "" : iv, tou.FR.tip.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FR.peak.iv ? "" : iv, tou.FR.peak.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FR.flat.iv ? "" : iv, tou.FR.flat.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.FR.valley.iv ? iv : "", tou.FR.valley.val);
 
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RR.total.iv ? "" : iv, tou.RR.total.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RR.tip.iv ? "" : iv, tou.RR.tip.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RR.peak.iv ? "" : iv, tou.RR.peak.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RR.flat.iv ? "" : iv, tou.RR.flat.val);
-	websWrite(wp, T("<td%s %s>%d</td>"), TD_CLASS,
+	websWrite(wp, T("<td %s>%d</td>"),
 	                tou.RR.valley.iv ? iv : "", tou.RR.valley.val);
 
 	return 0;
