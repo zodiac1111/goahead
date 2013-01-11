@@ -8,6 +8,31 @@ var form_load_monport ="/goform/load_monport_cfg";
 var form_save_monport ="/goform/save_monport_cfg";
 
 $(document).ready(function() {
+	$("#btnResetPro").click(function() {
+		$.post('/goform/reset',"OpType=1",
+				function(result) {
+			alert("操作完成");
+		});
+	});
+	$("#btnResetWeb").click(function() {
+		$.post('/goform/reset',"OpType=2",
+				function(result) {
+			alert("操作完成");
+		});
+	});
+	$("#btnResetSample").click(function() {
+		$.post('/goform/reset',"OpType=3",
+				function(result) {
+			alert("操作完成");
+		});
+	});
+	$("#btnResetRtu").click(function() {
+		$.post('/goform/reset',"OpType=4",
+				function(result) {
+			alert("操作完成");
+		});
+	});
+	
 	var monport_txt=document.getElementById("monport_text");
 	$(".dialog").hide();
 	$("#btn").click(function() {

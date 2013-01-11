@@ -31,76 +31,73 @@
       <li><a href="#tabs-other">其他</a></li>
     </ul>
     <div id="tabs_func">
-      <form action="/goform/reset" method=post ID="resetform" name="resetform">
-        <table class="sioplanTable" id=tbl_sysReset border="1" cellspacing="1" cellpadding="1">
-          <thead>
-            <tr>
-              <th>序号</th>
-              <th>说明</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="sysTDNcLItemStyle">
-              <td>1</td>
-              <td>服务器端重新加载规约文本.</td>
-              <td>
-                <button class=reboot OnClick="reset_procotol();"></button>
-              </td>
-            </tr>
-            <tr class="sysTDNcLItemStyle">
-              <td>2</td>
-              <td>重启web服务器.</td>
-              <td>
-                <button class=reboot OnClick="reset_web();"></button>
-              </td>
-            </tr>
-            <tr class="sysTDNcLItemStyle">
-              <td>3</td>
-              <td>重启抄表程序</td>
-              <td>
-                <button class=reboot OnClick="reset_sample();"></button>
-              </td>
-            </tr>
-            <tr class="sysTDNcLItemStyle">
-              <td>4</td>
-              <td>重启终端操作系统</td>
-              <td>
-                <button class=reboot OnClick="reset_web();"></button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <p ALIGN="CENTER">
-          <!--隐藏的输入框,用于提交form命令类型 -->
-          <input class=hideinp type=text name=OpType value="" id="optype">
-        </p>
-      </form>
+      <table class="sioplanTable" id=tbl_sysReset border="1" cellspacing="1" cellpadding="1">
+        <thead>
+          <tr>
+            <th>序号</th>
+            <th>说明</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>服务器端重新加载规约文本.</td>
+            <td>
+              <button id=btnResetPro class=reboot></button>
+            </td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>重启web服务器.</td>
+            <td>
+              <button id=btnResetWeb class=reboot></button>
+            </td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>重启抄表程序</td>
+            <td>
+              <button id=btnResetSample class=reboot></button>
+            </td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>重启终端操作系统</td>
+            <td>
+              <button id=btnResetRtu class=reboot></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <!-- ###标签2 ### -->
     <div id="tabs-log">
-      <p ALIGN="CENTER">
+      <textarea id=log_text class=log_txt></textarea>
+      <p ALIGN="center">
+        <!--  
         <button id="import_log">导入</button>
         <button id="export_log">导出</button>
-        _______
+      
+        _______-->
         <button id="load_log" title="从终端读取日志文件.">读取</button>
         <button id="save_log" title="将文本保存到终端日志文件中.">保存</button>
+        <img class="waiticon" id=log_wait></img>
       </p>
       <!-- 保存确认对话框1 -->
       <div id="dialog-confirm" class=dialog title="确认将修改保存到终端中?">
         <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>
         这个操作会将文本框中的内容保存到终端日志文件中,不能撤销,请自留备份.是否保存到终端?
       </div>
-      <img class="waiticon" id=log_wait></img>
-      <textarea id=log_text class=log_txt></textarea>
     </div>
     <div id="tabs-monport-cfg">
-      <p ALIGN="CENTER">
+      <textarea id=monport_text class=log_txt></textarea>
+      <p ALIGN="center">
         <button id="import_monprot" title="调试中...">导入</button>
         <button id="export_monprot" title="调试中...">导出</button>
-        _______
         <button id="load_monport" title="从终端读取监视端口配置文件(文本格式)">读取</button>
         <button id="save_monport" title="将文本保存到终端监视端口文件">保存</button>
+        <img class="waiticon" id=monprot_wait></img>
       </p>
       <!-- 保存确认对话框1 -->
       <div id="dialog-confirm-monport" class=dialog title="确认将修改保存到终端中?">
@@ -113,11 +110,8 @@
           是否保存到终端?
         </p>
       </div>
-      <img class="waiticon" id=monprot_wait></img>
-      <textarea id=monport_text class=log_txt></textarea>
     </div>
-    <div id="tabs-other">
-    </div>
+    <div id="tabs-other"></div>
   </div>
   <form id="history_tou" name="history_tou">
     <p>

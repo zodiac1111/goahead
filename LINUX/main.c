@@ -1743,8 +1743,8 @@ int ipstr2ipfile(char *ipstr, u8 ipfile[12])
  */
 static void form_reset(webs_t wp, char_t *path, char_t *query)
 {
-#define RET_WEB 1
-#define REINIT_PROTOCOL_FILE 2
+#define REINIT_PROTOCOL_FILE 1
+#define RET_WEB 2
 #define RET_SAMPLE_PROC 3
 #define RET_RTU 4
 #define RET_TEST 10
@@ -1758,6 +1758,14 @@ static void form_reset(webs_t wp, char_t *path, char_t *query)
 	typ = atoi(str_typ);
 	printf("type=%d\n", typ);
 	switch (typ) {
+	case REINIT_PROTOCOL_FILE:
+		ret = read_protocol_file(procotol_name, &procotol_num,
+		                PORC_FILE);
+		if (ret!=0) {
+			fprintf(stderr, "%s", myweberrstr[ret]);
+			PRINT_HERE
+		}
+		break;
 	case RET_WEB:
 		readlink("/proc/self/exe", app, 128);
 		pid = fork();
@@ -1776,20 +1784,17 @@ static void form_reset(webs_t wp, char_t *path, char_t *query)
 
 		}
 		break;
-	case REINIT_PROTOCOL_FILE:
-		ret = read_protocol_file(procotol_name, &procotol_num,
-		                PORC_FILE);
-		if (ret!=0) {
-			fprintf(stderr, "%s", myweberrstr[ret]);
-			PRINT_HERE
-		}
-		break;
 	case RET_SAMPLE_PROC:
 		system("killall hl3104_com ");
 		break;
 	case RET_RTU:
 		reflash_this_wp(wp, PAGE_RESET);
+#if __i386 == 1
+		system("ls");
+#else
 		system("reboot");
+#endif
+
 		return;
 		break;
 	case RET_TEST:
@@ -2437,13 +2442,13 @@ static void form_save_log(webs_t wp, char_t *path, char_t *query)
 //	fclose(fp);
 //	websDone(wp, 200);
 //	return;
-	save_file( wp, path, query, ERR_LOG);
+	save_file(wp, path, query, ERR_LOG);
 }
 static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
-	save_file( wp, path, query, MON_PORT_NAME_FILE);
+	save_file(wp, path, query, MON_PORT_NAME_FILE);
 }
- void save_file(webs_t wp, char_t *path, char_t *query,const char* file)
+void save_file(webs_t wp, char_t *path, char_t *query, const char* file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	websWrite(wp, T("HTTP/1.0 200 OK\n"));
@@ -2492,7 +2497,7 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 //		websWrite(wp, T("%s"), buf);
 //	}
 	fclose(fp);
-WEB_END:
+	WEB_END:
 	//websFooter(wp);
 	websDone(wp, 200);
 	return;
@@ -2500,9 +2505,9 @@ WEB_END:
 
 static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
-	 load_file( wp,  path,  query,MON_PORT_NAME_FILE);
+	load_file(wp, path, query, MON_PORT_NAME_FILE);
 }
- void load_file(webs_t wp, char_t *path, char_t *query,const char*file)
+void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
@@ -2524,7 +2529,7 @@ static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 	}
 //	while (ftell(fp) < flen) {
 	fclose(fp);
-WEB_END:
+	WEB_END:
 	//websFooter(wp);
 	websDone(wp, 200);
 	return;
