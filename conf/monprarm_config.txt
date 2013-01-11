@@ -11,17 +11,14 @@ COM2
 COM3
 COM4
  # 示例注释 2  
-COM5
+COM5(GPRS)
 COM6
 COM7
 COM8
-
 #网口1-2
 ETH1
 ETH2
-
 #其他
 Master-0
-
 
 

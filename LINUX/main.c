@@ -283,6 +283,8 @@ static int initWebs(int demo)
 	websFormDefine(T("get_tou"), form_get_tou);
 	websFormDefine(T("save_log"), form_save_log);
 	websFormDefine(T("load_log"), form_load_log);
+	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
+	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
 
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
 
@@ -2424,10 +2426,29 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
  */
 static void form_save_log(webs_t wp, char_t *path, char_t *query)
 {
+//	printf("%s:%s\n", __FUNCTION__, query);
+//	websWrite(wp, T("HTTP/1.0 200 OK\n"));
+//	char * txt = query;
+//	FILE*fp = fopen(ERR_LOG, "w");
+//	if (fp==NULL) {
+//		return;
+//	}
+//	fwrite(txt, strlen(txt), 1, fp);
+//	fclose(fp);
+//	websDone(wp, 200);
+//	return;
+	save_file( wp, path, query, ERR_LOG);
+}
+static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	save_file( wp, path, query, MON_PORT_NAME_FILE);
+}
+ void save_file(webs_t wp, char_t *path, char_t *query,const char* file)
+{
 	printf("%s:%s\n", __FUNCTION__, query);
 	websWrite(wp, T("HTTP/1.0 200 OK\n"));
 	char * txt = query;
-	FILE*fp = fopen(ERR_LOG, "w");
+	FILE*fp = fopen(file, "w");
 	if (fp==NULL) {
 		return;
 	}
@@ -2470,6 +2491,38 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 //		}
 //		websWrite(wp, T("%s"), buf);
 //	}
+	fclose(fp);
+WEB_END:
+	//websFooter(wp);
+	websDone(wp, 200);
+	return;
+}
+
+static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	 load_file( wp,  path,  query,MON_PORT_NAME_FILE);
+}
+ void load_file(webs_t wp, char_t *path, char_t *query,const char*file)
+{
+	printf("%s:%s\n", __FUNCTION__, query);
+	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
+	//websHeader_GB2312(wp);
+	char buf[1024] = { 0 };
+	int ret;
+	FILE*fp = fopen(file, "r");
+	if (fp==NULL) {
+		websWrite(wp, T("No info."));
+		goto WEB_END;
+	}
+	while (1) {
+		ret = fread(&buf, sizeof(char), 1024, fp);
+		if (ret>0) {
+			websWrite(wp, T("%s"), buf);
+		} else {
+			break;
+		}
+	}
+//	while (ftell(fp) < flen) {
 	fclose(fp);
 WEB_END:
 	//websFooter(wp);

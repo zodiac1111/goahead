@@ -4,8 +4,10 @@
 var stime = document.getElementById("stime_stamp");
 var etime = document.getElementById("etime_stamp");
 var mtr_no = document.getElementById("mtr_no");
+var form_load_monport ="/goform/load_monport_cfg";
+var form_save_monport ="/goform/save_monport_cfg";
+
 $(document).ready(function() {
-	var form_monprot_conf_file ="/goform/save_log";
 	var monport_txt=document.getElementById("monport_text");
 	$(".dialog").hide();
 	$("#btn").click(function() {
@@ -85,7 +87,7 @@ $(document).ready(function() {
 	//从服务器加载错误日志文件
 	$("#load_monport").click(function() {
 		$("#monprot_wait").show("fade", {}, 1);
-		$.post(form_monprot_conf_file,
+		$.post(form_load_monport,
 			"load_monport",
 			function(result) {
 				$("#monprot_wait").hide("fade", {}, 1000);		
@@ -99,7 +101,6 @@ $(document).ready(function() {
 	// 将文本保存到服务器的
 	$("#save_monport").click(function () {
 		if (monport_txt.value==""){
-			//
 			alert("文本不能为空");
 		}else{
 			//确认信息框
@@ -111,7 +112,7 @@ $(document).ready(function() {
 							$( this ).dialog( "close" );
 							//alert("确认保存");
 							$("#monprot_wait").show("fade", {}, 1);
-							$.post(form_monprot_conf_file,
+							$.post(form_save_monport,
 								$("#monport_text").val(),
 								function(result) {
 									// 完成之后隐藏

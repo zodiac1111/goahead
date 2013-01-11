@@ -120,6 +120,11 @@ static int reflash_this_wp(webs_t wp,const char *page);
 char * point2next(char** s,const char split);
 static void form_save_log(webs_t wp, char_t *path, char_t *query);
 static void form_load_log(webs_t wp, char_t *path, char_t *query);
+static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
+static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
+//
+ void load_file(webs_t wp, char_t *path, char_t *query,const char*file);
+void save_file(webs_t wp, char_t *path, char_t *query,const char* file);
 ////设置函数
 static int initWebs(int demo);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
