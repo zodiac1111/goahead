@@ -22,51 +22,103 @@
 </head>
 <body>
   <br />
-  <form action="/goform/reset" method=post ID="resetform" name="resetform">
-    <table class="sioplanTable" id=tbl_sysReset border="1" cellspacing="1" cellpadding="1">
-      <thead>
-        <tr>
-          <th>序号</th>
-          <th>说明</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="sysTDNcLItemStyle">
-          <td>1</td>
-          <td>服务器端重新加载规约文本.</td>
-          <td>
-            <input type=image src="/graphics/Reset12.png" onmouseover="this.src='/graphics/Reset121.png';" onmouseout="this.src='/graphics/Reset12.png';" alt="Submit" OnClick="reset_procotol();">
-          </td>
-        </tr>
-        <tr class="sysTDNcLItemStyle">
-          <td>2</td>
-          <td>重启web服务器.</td>
-          <td>
-            <input type=image src="/graphics/Reset11.png" onmouseover="this.src='/graphics/Reset111.png';" onmouseout="this.src='/graphics/Reset11.png';" alt="Submit" OnClick="reset_web();">
-          </td>
-        </tr>
-        <tr class="sysTDNcLItemStyle">
-          <td>3</td>
-          <td>重启抄表程序</td>
-          <td>
-            <input type=image src="/graphics/Reset13.png" onmouseover="this.src='/graphics/Reset131.png';" onmouseout="this.src='/graphics/Reset13.png';" alt="Submit" OnClick="reset_sample();">
-          </td>
-        </tr>
-        <tr class="sysTDNcLItemStyle">
-          <td>4</td>
-          <td>重启终端操作系统</td>
-          <td>
-            <input type=image src="/graphics/Reset11.png" onmouseover="this.src='/graphics/Reset111.png';" onmouseout="this.src='/graphics/Reset11.png';" alt="Submit" OnClick="reset_web();">
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <p ALIGN="CENTER">
-      <!--隐藏的输入框,用于提交form命令类型 -->
-      <input class=hideinp type=text name=OpType value="" id="optype">
-    </p>
-  </form>
+  <h1>功能操作</h1>
+  <div id="tabs">
+    <ul>
+      <li><a href="#tabs_func">系统操作</a></li>
+      <li><a href="#tabs-log">日志</a></li>
+      <li><a href="#tabs-monport-cfg">监视端口配置</a></li>
+      <li><a href="#tabs-other">其他</a></li>
+    </ul>
+    <div id="tabs_func">
+      <form action="/goform/reset" method=post ID="resetform" name="resetform">
+        <table class="sioplanTable" id=tbl_sysReset border="1" cellspacing="1" cellpadding="1">
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>说明</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="sysTDNcLItemStyle">
+              <td>1</td>
+              <td>服务器端重新加载规约文本.</td>
+              <td>
+                <button class=reboot OnClick="reset_procotol();"></button>
+              </td>
+            </tr>
+            <tr class="sysTDNcLItemStyle">
+              <td>2</td>
+              <td>重启web服务器.</td>
+              <td>
+                <button class=reboot OnClick="reset_web();"></button>
+              </td>
+            </tr>
+            <tr class="sysTDNcLItemStyle">
+              <td>3</td>
+              <td>重启抄表程序</td>
+              <td>
+                <button class=reboot OnClick="reset_sample();"></button>
+              </td>
+            </tr>
+            <tr class="sysTDNcLItemStyle">
+              <td>4</td>
+              <td>重启终端操作系统</td>
+              <td>
+                <button class=reboot OnClick="reset_web();"></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p ALIGN="CENTER">
+          <!--隐藏的输入框,用于提交form命令类型 -->
+          <input class=hideinp type=text name=OpType value="" id="optype">
+        </p>
+      </form>
+    </div>
+    <!-- ###标签2 ### -->
+    <div id="tabs-log">
+      <p ALIGN="CENTER">
+        <button id="import_log">导入</button>
+        <button id="export_log">导出</button>
+        _______
+        <button id="load_log" title="从终端读取日志文件.">读取</button>
+        <button id="save_log" title="将文本保存到终端日志文件中.">保存</button>
+      </p>
+      <!-- 保存确认对话框1 -->
+      <div id="dialog-confirm" class=dialog title="确认将修改保存到终端中?">
+        <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>
+        这个操作会将文本框中的内容保存到终端日志文件中,不能撤销,请自留备份.是否保存到终端?
+      </div>
+      <img class="waiticon" id=log_wait></img>
+      <textarea id=log_text class=log_txt></textarea>
+    </div>
+    <div id="tabs-monport-cfg">
+      <p ALIGN="CENTER">
+        <button id="import_monprot" title="调试中...">导入</button>
+        <button id="export_monprot" title="调试中...">导出</button>
+        _______
+        <button id="load_monport" title="从终端读取监视端口配置文件(文本格式)">读取</button>
+        <button id="save_monport" title="将文本保存到终端监视端口文件">保存</button>
+      </p>
+      <!-- 保存确认对话框1 -->
+      <div id="dialog-confirm-monport" class=dialog title="确认将修改保存到终端中?">
+        <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>
+        <p>
+          这个操作会将文本框中的内容保存到终端监视端口文件中.
+          <br>
+          终端重启后生效.该操作不能撤销,请自留备份.
+          <br>
+          是否保存到终端?
+        </p>
+      </div>
+      <img class="waiticon" id=monprot_wait></img>
+      <textarea id=monport_text class=log_txt></textarea>
+    </div>
+    <div id="tabs-other">
+    </div>
+  </div>
   <form id="history_tou" name="history_tou">
     <p>
     <h1>获取和设置日期时间:</h1>
@@ -77,11 +129,11 @@
     </label>
     <label>
       时间范围:
-      <input type="text" name="stime" id="stime" readonly class=date>
+      <input type="text" name="stime" id="stime" readonly class=date title="选择开始时刻">
     </label>
     <label>
       ~
-      <input type="text" name="etime" id="etime" readonly class=date>
+      <input type="text" name="etime" id="etime" readonly class=date title="选择截止时刻">
     </label>
     <br>
     <label>
@@ -112,11 +164,11 @@
 				maxDate : 0,
 				controlType : 'select', //选择方式选时刻
 				dateFormat : "yy-mm-dd", //日期格式
-				//showSecond: true,	//显示秒
+				//showSecond: true, //显示秒
 				timeFormat : 'HH:mm z', //时刻格式
 				separator : ' ', //日期时刻分割字符(串)
-				//showTimezone: true,	//显示时区
-				//timezone: '+0800',		//默认时区
+				//showTimezone: true, //显示时区
+				//timezone: '+0800',    //默认时区
 				//点击关闭(完成)按钮事件 
 				//如果开始时间晚于结束时间,则将开始时间设置为结束时间 
 				onClose : function(dateText, inst) {
@@ -153,11 +205,11 @@
 				maxDate : 0,//不能选择未来
 				controlType : 'select', //选择方式选时刻
 				dateFormat : "yy-mm-dd", //日期格式
-				//showSecond: true,	//显示秒
+				//showSecond: true, //显示秒
 				timeFormat : 'HH:mm z', //时刻格式
 				separator : ' ', //日期时刻分割字符(串)
-				//showTimezone: true,	//显示时区
-				//timezone: '+0800',		//默认时区
+				//showTimezone: true, //显示时区
+				//timezone: '+0800',    //默认时区
 				onClose : function(dateText, inst) {//关闭时候判断
 					if (startDateTextBox.val() != '') {
 						var testStartDate = startDateTextBox
@@ -173,7 +225,7 @@
 					var testEndDate = endDateTextBox.datetimepicker('getDate');
 					etime_stamp.value = testEndDate.getTime() / 1000;
 					//stime_stamp.value=
-					//	Date.parse(startDateTextBox.datetimepicker('getDate'))/1000;
+					//  Date.parse(startDateTextBox.datetimepicker('getDate'))/1000;
 				},
 				onSelect : function(selectedDateTime) {//选择时候防止误选
 					startDateTextBox.datetimepicker('option', 'maxDate',
@@ -185,9 +237,9 @@
 				}
 			});
 		</script>
-  <button class="ui-button" id="btn">子页面加载</button>
-  <button class="ui-button" id="btnPost">查询</button>
-  <button class="ui-button" id="showLog">查看日志</button>
+  <button class="ui-button" id="btn" title="测试中...">子页面加载</button>
+  <button class="ui-button" id="btnPost" title="查询选中时段和指定表计的电量数据">查询</button>
+  <button class="ui-button" id="showLog" title="从服务器加载日志">查看日志</button>
   <img class="waiticon" id=msgbox_wait />
   <table class="sioplanTable" ID="history_tou" border="1" cellspacing="1" cellpadding="1">
     <thead>
@@ -225,13 +277,5 @@
     </thead>
     <tbody id=tr_dat></tbody>
   </table>
-  <p>对服务器端日志(配置)文件操作 待完善</p>
-  <button id="import_log">导入</button>
-  <button id="export_log">导出</button>
-  _______
-  <button id="load_log">读取</button>
-  <button id="save_log">保存</button>
-  <img class="waiticon" id=log_wait></img>
-  <textarea id=log_text class=log_txt></textarea>
 </body>
 </html>
