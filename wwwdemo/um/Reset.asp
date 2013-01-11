@@ -77,11 +77,11 @@
     </label>
     <label>
       时间范围:
-      <input type="text" name="stime" id="stime" readonly>
+      <input type="text" name="stime" id="stime" readonly class=date>
     </label>
     <label>
       ~
-      <input type="text" name="etime" id="etime" readonly>
+      <input type="text" name="etime" id="etime" readonly class=date>
     </label>
     <br>
     <label>
@@ -185,15 +185,13 @@
 		}
 	});
 </script>
-  <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+  <button class="ui-button" 
     id="btn">子页面加载</button>
-  <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+  <button class="ui-button" 
     id="btnPost">查询</button>
-  <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" 
+  <button class="ui-button" 
     id="showLog">查看日志</button>
-  <div id="msgbox_wait" style="display: none;" class=msgbox_wait>
-    <input type=image src="/style/images/wait.gif">
-  </div>
+  <img  class="waiticon" id=msgbox_wait src=/style/images/ui-anim_basic_16x16.gif alt="Wait"/>
   <div id="msgbox_ok" style="display: none;" class=msgbox_ok>完成</div>
   <table class="sioplanTable" ID="history_tou" border="1" cellspacing="1" cellpadding="1">
     <thead>

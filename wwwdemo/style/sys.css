@@ -1577,7 +1577,10 @@ TD.lb-bkg-w {
 }
 /*µÈ´ýÍ¼±ê*/
 .waiticon {
-	/*display: none;*/
+	display: none;
 	/*background:transparent url("./images/ui-anim_basic_16x16.gif") 0 0;*/
 	/*background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat;*/
+}
+.date {
+	background:  url('/style/images/calendar.gif') right center no-repeat;
 }
