@@ -9,7 +9,7 @@
 COM1
 COM2
 COM3
-COM4
+RS485-4
  # 示例注释 2  
 COM5(GPRS)
 COM6
