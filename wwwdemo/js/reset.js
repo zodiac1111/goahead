@@ -142,7 +142,7 @@ $(document).ready(function() {
 			$(function() {
 				$( "#dialog-confirm-monport" ).dialog({
 					modal: true,
-					position: { my: "center", at: "bottom", of: window },
+					//position: { my: "center", at: "center", of: window },
 					buttons: {
 						"±£´æ": function() {
 							$( this ).dialog( "close" );
