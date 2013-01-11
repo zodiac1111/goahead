@@ -1,0 +1,7 @@
+simc:13456767805
+mode:client
+apn:CMNET
+dcip:192.168.001.212
+dcpt:11000
+pitc:0
+hbcy:5
