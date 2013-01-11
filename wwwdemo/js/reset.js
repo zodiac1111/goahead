@@ -8,6 +8,9 @@ var form_load_monport ="/goform/load_monport_cfg";
 var form_save_monport ="/goform/save_monport_cfg";
 
 $(document).ready(function() {
+	/**
+	 * 功能操作
+	 */
 	$("#btnResetPro").click(function() {
 		$.post('/goform/reset',"OpType=1",
 				function(result) {
@@ -32,7 +35,9 @@ $(document).ready(function() {
 			alert("操作完成");
 		});
 	});
-	
+	/**
+	 * 对话框
+	 */
 	var monport_txt=document.getElementById("monport_text");
 	$(".dialog").hide();
 	$("#btn").click(function() {
@@ -40,6 +45,9 @@ $(document).ready(function() {
 			$("#log").html(result);
 		});
 	});
+	/**
+	 * 历史电量查询post
+	 */
 	$("#btnPost").click(function() {
 		// 显示
 		$("#msgbox_wait").show("fade", {}, 1);
@@ -50,7 +58,6 @@ $(document).ready(function() {
 				// 动态加载完的页面才可以接收鼠标悬停等事件
 				$("#history_tou tr").mouseover(function() {
 					$(this).addClass("over");
-					//var rows = $(this).attr('relrow');
 				});
 				$("#history_tou tr").mouseout(function() {
 					$(this).removeClass("over");
@@ -59,7 +66,9 @@ $(document).ready(function() {
 				$("#msgbox_wait").hide("fade", {}, 1000);
 			});
 	});
-	//从服务器加载错误日志文件
+	/**
+	 * 从服务器加载错误日志文件
+	 */
 	$("#load_log").click(function() {
 		// 显示
 		$("#log_wait").show("fade", {}, 1);
@@ -68,18 +77,15 @@ $(document).ready(function() {
 			function(result) {
 				$("#log_wait").hide("fade", {}, 1000);
 				var b=document.getElementById("log_text");
-				b.value=result;
-				//$("#log_text").html("1231");
-				//$("#log_text").html(result);
-				// 完成之后隐藏
-				
+				b.value=result;			
 			});
 	});
-	//将文本保存到服务器的错误日志文件
+	/**
+	 * 将文本保存到服务器的错误日志文件
+	 */
 	$("#save_log").click(function () {
 		var b=document.getElementById("log_text");
 		if (b.value==""){
-			//
 			alert("文本不能为空");
 		}else{
 			//确认信息框
@@ -101,7 +107,6 @@ $(document).ready(function() {
 						"取消": function() {
 							$( this ).dialog( "close" );
 							//alert("取消了");
-							//return;
 						}
 					}
 				});
@@ -109,7 +114,9 @@ $(document).ready(function() {
 		}
 	});
 	//   监视端口配置文件
-	//从服务器加载错误日志文件
+	/**
+	 * 从服务器加载 监视端口配置文件(端口文本描述)
+	 */
 	$("#load_monport").click(function() {
 		$("#monprot_wait").show("fade", {}, 1);
 		$.post(form_load_monport,
@@ -123,7 +130,9 @@ $(document).ready(function() {
 				
 			});
 	});
-	// 将文本保存到服务器的
+	/**
+	 * 将文本保存到服务器的监视端口配置文件
+	 */
 	$("#save_monport").click(function () {
 		if (monport_txt.value==""){
 			alert("文本不能为空");
@@ -132,6 +141,7 @@ $(document).ready(function() {
 			$(function() {
 				$( "#dialog-confirm-monport" ).dialog({
 					modal: true,
+					position: { my: "center", at: "bottom", of: window },
 					buttons: {
 						"保存": function() {
 							$( this ).dialog( "close" );
@@ -155,7 +165,7 @@ $(document).ready(function() {
 		}
 	});
 });
-//文本提示信息,鼠标移上 显示
+//文本提示信息,鼠标移上 显示提示信息
 $(function() {
 	$( document ).tooltip();
 });
