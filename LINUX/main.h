@@ -37,7 +37,6 @@ static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_all_sioplan(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **arg);
 //小项目
 static int asp_list_mtr_protocol(int eid, webs_t wp, int argc, char_t **argv);
@@ -120,6 +119,7 @@ int rtu_addr_str2array(const char* str,u8 a[4]);
 static int reflash_this_wp(webs_t wp,const char *page);
 char * point2next(char** s,const char split);
 static void form_save_log(webs_t wp, char_t *path, char_t *query);
+static void form_load_log(webs_t wp, char_t *path, char_t *query);
 ////设置函数
 static int initWebs(int demo);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,

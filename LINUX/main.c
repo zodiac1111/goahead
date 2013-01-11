@@ -272,7 +272,6 @@ static int initWebs(int demo)
 	websAspDefine(T("ph_wire2"), ph_wire2);
 	websAspDefine(T("sioplan"), asp_list_sioplan);
 	websAspDefine(T("factory"), asp_factory);
-	websAspDefine(T("show_log"), asp_show_log);
 	///form define
 	websFormDefine(T("formTest"), form_set_mtrparams);
 	websFormDefine(T("sysparam"), form_set_sysparam);
@@ -283,6 +282,7 @@ static int initWebs(int demo)
 	websFormDefine(T("reset"), form_reset);
 	websFormDefine(T("get_tou"), form_get_tou);
 	websFormDefine(T("save_log"), form_save_log);
+	websFormDefine(T("load_log"), form_load_log);
 
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
 
@@ -559,42 +559,6 @@ static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
 		(void) webWrite_forward_mtr_num(wp, no, monpara);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	return 0;
-}
-/**
- * 打印错误日志
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv)
-{
-	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
-	int ret;
-	FILE*fp = fopen("./err.log", "r");
-	if (fp==NULL) {
-		websWrite(wp, T("No log."));
-		return 0;
-	}
-	while (1) {
-		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
-		if (ret>0) {
-			websWrite(wp, T("%s"), buf);
-		} else {
-			break;
-		}
-	}
-//	while (ftell(fp) < flen) {
-//		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
-//		//strnum = sscanf(buf, "%255s\n", line);
-//		if (strnum == -1) {  //忽略空行
-//			continue;
-//		}
-//		websWrite(wp, T("%s"), buf);
-//	}
-	fclose(fp);
 	return 0;
 }
 /**
@@ -2468,6 +2432,40 @@ static void form_save_log(webs_t wp, char_t *path, char_t *query)
 	fwrite(txt,strlen(txt),1,fp);
 	fclose(fp);
 	return;
+}
+/**
+ * 加载日志文件到客户端
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_load_log(webs_t wp, char_t *path, char_t *query)
+{
+	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
+	int ret;
+	FILE*fp = fopen("./err.log", "r");
+	if (fp==NULL) {
+		websWrite(wp, T("No log."));
+		return ;
+	}
+	while (1) {
+		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
+		if (ret>0) {
+			websWrite(wp, T("%s"), buf);
+		} else {
+			break;
+		}
+	}
+//	while (ftell(fp) < flen) {
+//		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
+//		//strnum = sscanf(buf, "%255s\n", line);
+//		if (strnum == -1) {  //忽略空行
+//			continue;
+//		}
+//		websWrite(wp, T("%s"), buf);
+//	}
+	fclose(fp);
+	return ;
 }
 /**
  * 以split为分割字符,指向下一个项.
