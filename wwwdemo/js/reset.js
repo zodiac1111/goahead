@@ -50,9 +50,10 @@ $(document).ready(function() {
 	 */
 	$("#btnPost").click(function() {
 		// 显示
+		//$("#tr_dat").html("");
 		$("#msgbox_wait").show("fade", {}, 1);
 		$.post('/goform/get_tou',
-			$("#history_tou").serialize(),
+			$("#history_tou").serialize()+"&mtr_no="+$("#mtr_no").val(),
 			function(result) {
 				$("#tr_dat").html(result);
 				// 动态加载完的页面才可以接收鼠标悬停等事件

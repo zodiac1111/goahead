@@ -1577,6 +1577,8 @@ TD.lb-bkg-w {
 }
 /*µÈ´ýÍ¼±ê*/
 .waiticon {
+	position:fixed;
+	float:left;
 	display: none;
 	border:0px;
 	width:16px;
@@ -1586,5 +1588,9 @@ TD.lb-bkg-w {
 	/*background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat;*/
 }
 .date {
+	size:20;
 	background:  url('/style/images/calendar.gif') right center no-repeat;
+}
+.hide{
+	display: none;
 }

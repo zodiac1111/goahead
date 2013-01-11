@@ -2356,7 +2356,8 @@ static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
  */
 static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s query:%s\n", __FUNCTION__, query);
+	printf("%s ***query:%s\n", __FUNCTION__, query);
+	//PRINT_HERE
 	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
 	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
 	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
@@ -2367,23 +2368,32 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 	int ret;
 	int i = 0;
 	//int tou_test=1100;
-	int mtr_no;
+	int mtr_no=0;
 	stTou tou;
 	memset(&tou, 0x00, sizeof(stTou));
-	//int ret;
-	sscanf(strmtr_no, "%d", &mtr_no);
-	sscanf(stime_t, "%ld", &tr.s);
-	sscanf(etime_t, "%ld", &tr.e);
-	printf("时间戳(数值)范围:%ld~%ld\n", tr.s, tr.e);
+	ret=sscanf(strmtr_no, "%d", &mtr_no);
+	if(ret!=1){
+		web_err_proc(EL);
+	}
+	ret=sscanf(stime_t, "%ld", &tr.s);
+	if(ret!=1){
+		web_err_proc(EL);
+	}
+	ret=sscanf(etime_t, "%ld", &tr.e);
+	if(ret!=1){
+		web_err_proc(EL);
+	}
+	//PRINT_HERE
+	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e,mtr_no);
 #if __arm__ ==2
-	tr.s+=8*60*60;
-	tr.e+=8*60*60;
-	printf("时间戳校正(数值)范围:%ld~%ld\n", tr.s, tr.e);
+//	tr.s+=8*60*60;
+//	tr.e+=8*60*60;
+//	printf("时间戳校正(数值)范围:%ld~%ld\n", tr.s, tr.e);
 #endif
 	//tr.s = time(NULL );
 	//tr.e = tr.s + 60 * 60;  //60分钟,没分钟60秒
 	websHeader_GB2312(wp);
-	ret = load_tou_dat(0, tr, &tou, wp);
+	ret = load_tou_dat(mtr_no, tr, &tou, wp);
 	if (ret==ERR) {
 		web_err_proc(EL);
 	}
