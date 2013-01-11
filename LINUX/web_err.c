@@ -95,16 +95,21 @@ void web_err_proc(EL_ARGS)
 	/**
 	 * 2. 写入文件
 	 */
-	FILE*fp=fopen(ERR_LOG,"a");
+	FILE*fp;
+	fp=fopen(ERR_LOG,"r+");
 	if(fp==NULL){
-		goto END;
+		FILE*fp=fopen(ERR_LOG,"w");
+		if(fp==NULL){
+			perror("create errlog file err:");
+			goto END;
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	if (flen>=MAX_ERR_LOG_FILE_SIZE ){//文件过长,简单的截断为0
 		int fd = fileno(fp);
-		ftruncate(fd,0);
+		ftruncate(fd,MAX_ERR_LOG_FILE_SIZE/2);
 	}
 	fprintf(fp,"%s",errstring);
 	fclose(fp);

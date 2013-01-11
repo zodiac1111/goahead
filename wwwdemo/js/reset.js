@@ -31,40 +31,31 @@ $(document).ready(function() {
 				$("#msgbox_ok").hide("fade", {}, 1000);
 			});
 	});
+	//从服务器加载错误日志文件
 	$("#load_log").click(function() {
 		// 显示
-		$("#msgbox_wait").show("fade", {}, 1);
-		$.post('/goform/get_tou',
-			$("#history_tou").serialize(),
+		$("#log_wait").show("fade", {}, 1);
+		$.post('/goform/load_log',
+			"load",
 			function(result) {
-				$("#tr_dat").html(result);
-				// 动态加载完的页面才可以接收鼠标悬停等事件
-				$("#history_tou tr").mouseover(function() {
-					$(this).addClass("over");
-					//var rows = $(this).attr('relrow');
-				});
-				$("#history_tou tr").mouseout(function() {
-					$(this).removeClass("over");
-				});
+				$("#log_wait").hide("fade", {}, 1000);
+				var b=document.getElementById("log_text");
+				b.value=result;
+				//$("#log_text").html("1231");
+				//$("#log_text").html(result);
 				// 完成之后隐藏
-				$("#msgbox_wait").hide("fade", {}, 1);
-				$("#msgbox_ok").show("fade", {}, 1);
-				$("#msgbox_ok").hide("fade", {}, 1000);
+				
 			});
 	});
-	$("#save_log").click(function (e) {
+	//将文本保存到服务器的错误日志文件
+	$("#save_log").click(function () {
+		$("#log_wait").show("fade", {}, 1);
 		$.post('/goform/save_log',
 			$("#log_text").val(),
 			function(result) {
-				$("#tr_dat").html(result);
 				// 完成之后隐藏
-				$("#msgbox_wait").hide("fade", {}, 1);
-				$("#msgbox_ok").show("fade", {}, 1);
-				$("#msgbox_ok").hide("fade", {}, 1000);
+				$("#log_wait").hide("fade", {}, 1000);
 			});
-		//e.preventDefault();  //stop the browser from following
-		//show.document.execCommand("SaveAs");
-		//window.location.href = "/err.log";//文件位置
 	});
 
 });

@@ -237,7 +237,7 @@
   _______
  <button id="load_log" >∂¡»°</button>
  <button id="save_log" >±£¥Ê</button>
-  <div id=log></div>
- <textarea id=log_text class=log_txt><% show_log(); %></textarea>
+ <img  class="waiticon" id=log_wait src=/style/images/ui-anim_basic_16x16.gif alt="Wait"/>
+ <textarea id=log_text class=log_txt></textarea>
 </body>
 </html>

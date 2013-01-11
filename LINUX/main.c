@@ -2388,7 +2388,7 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 	int cycle = 60*15;
 	//[start,end]两边闭区间
 	for (t = tr.s; t<=tr.e; t += cycle) {     //测试15分钟为一周期
-		int t_mod = t%cycle;	//向上园整至采样周期.
+		int t_mod = t%cycle;     //向上园整至采样周期.
 		if (t_mod!=0) {     //需要园整
 			t += (cycle-t_mod);
 		}
@@ -2424,13 +2424,16 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
  */
 static void form_save_log(webs_t wp, char_t *path, char_t *query)
 {
+	printf("%s:%s\n", __FUNCTION__, query);
+	websWrite(wp, T("HTTP/1.0 200 OK\n"));
 	char * txt = query;
-	FILE*fp = fopen(ERR_LOG, "r+");
+	FILE*fp = fopen(ERR_LOG, "w");
 	if (fp==NULL) {
 		return;
 	}
-	fwrite(txt,strlen(txt),1,fp);
+	fwrite(txt, strlen(txt), 1, fp);
 	fclose(fp);
+	websDone(wp, 200);
 	return;
 }
 /**
@@ -2441,12 +2444,15 @@ static void form_save_log(webs_t wp, char_t *path, char_t *query)
  */
 static void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
+	printf("%s:%s\n", __FUNCTION__, query);
+	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
+	//websHeader_GB2312(wp);
 	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
 	int ret;
 	FILE*fp = fopen("./err.log", "r");
 	if (fp==NULL) {
 		websWrite(wp, T("No log."));
-		return ;
+		goto WEB_END;
 	}
 	while (1) {
 		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
@@ -2465,7 +2471,10 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 //		websWrite(wp, T("%s"), buf);
 //	}
 	fclose(fp);
-	return ;
+WEB_END:
+	//websFooter(wp);
+	websDone(wp, 200);
+	return;
 }
 /**
  * 以split为分割字符,指向下一个项.
