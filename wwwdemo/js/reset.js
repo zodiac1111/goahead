@@ -7,7 +7,7 @@ var mtr_no = document.getElementById("mtr_no");
 var form_load_monport ="/goform/load_monport_cfg";
 var form_save_monport ="/goform/save_monport_cfg";
 
-$(document).ready(function() {
+$(document).ready(function() { 
 	/**
 	 * ¹¦ÄÜ²Ù×÷
 	 */
