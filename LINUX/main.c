@@ -49,16 +49,16 @@ static void memLeaks();
 int g_cur_mtr_no = 0;
 long maddr = 0;
 stSysParam sysparam = { 0 };
-static char *procotol_name[MAX_PROCOTOL_NUM]; ///<规约文件中的规约名称.
-static int procotol_num = MAX_PROCOTOL_NUM; ///<规约文件中的实际规约数,初始化为最大
-static char *mon_port_name[MAX_MON_PORT_NUM]; ///<规约文件中的规约名称.
-static int mon_port_num = MAX_MON_PORT_NUM; ///<规约文件中的实际规约数,初始化为最大
+static char *procotol_name[MAX_PROCOTOL_NUM];     ///<规约文件中的规约名称.
+static int procotol_num = MAX_PROCOTOL_NUM;     ///<规约文件中的实际规约数,初始化为最大
+static char *mon_port_name[MAX_MON_PORT_NUM];     ///<规约文件中的规约名称.
+static int mon_port_num = MAX_MON_PORT_NUM;     ///<规约文件中的实际规约数,初始化为最大
 
 int main(int argc, char** argv)
 {
 	int i, demo = 1;
-	for (i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-demo") == 0) {
+	for (i = 1; i<argc; i++) {
+		if (strcmp(argv[i], "-demo")==0) {
 			demo++;
 		}
 	}
@@ -68,14 +68,14 @@ int main(int argc, char** argv)
 	 *	60KB allows for several concurrent page requests.  If more space
 	 *	is required, malloc will be used for the overflow.
 	 */
-	bopen(NULL, (60 * 1024), B_USE_MALLOC);
-	signal(SIGPIPE, SIG_IGN );
+	bopen(NULL, (60*1024), B_USE_MALLOC);
+	signal(SIGPIPE, SIG_IGN);
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
 	/*
 	 *	Initialize the web server
 	 */
-	if (initWebs(demo) < 0) {
+	if (initWebs(demo)<0) {
 		return -1;
 	}
 
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 	 */
 	finished = 0;
 	while (!finished) {
-		if (socketReady(-1) || socketSelect(-1, 1000)) {
+		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);
 		}
 		websCgiCleanup();
@@ -139,7 +139,7 @@ static int initWebs(int demo)
 {
 	struct hostent *hp;
 	struct in_addr intaddr;
-	char host[128], dir[128]={0}, webdir[128];
+	char host[128], dir[128] = { 0 }, webdir[128];
 	char *cp;
 	char_t wbuf[128];
 	//Initialize the socket subsystem
@@ -155,16 +155,16 @@ static int initWebs(int demo)
 	 *	Define the local Ip address, host name, default home page and the
 	 *	root web directory.
 	 */
-	if (gethostname(host, sizeof(host)) < 0) {
+	if (gethostname(host, sizeof(host))<0) {
 		error(E_L, E_LOG, T("Can't get hostname"));
 		return -1;
 	}
-	if ((hp = gethostbyname(host)) == NULL ) {
+	if ((hp = gethostbyname(host))==NULL) {
 		error(E_L, E_LOG, T("Can't get host address"));
 		return -1;
 	}
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
-			(size_t) hp->h_length);
+	                (size_t) hp->h_length);
 
 	/*
 	 *	Set ../web as the root web. Modify this to suit your needs
@@ -178,12 +178,12 @@ static int initWebs(int demo)
 	//读取程序自身路径,用于计算www root,(依赖 webs和www的相对位置.不健壮)
 	///@todo 像其他服务器一样使用配置文件配置web服务器的根目录.
 	int count = readlink("/proc/self/exe", dir, 128);
-	if (count < 0 || count > 128) {
+	if (count<0||count>128) {
 		PRINT_RET(count);
 		web_err_proc(EL);
 	}
 	printf("app dir is %s\n", dir);
-	if ((cp = strrchr(dir, '/'))) { ///向上回2级父目录
+	if ((cp = strrchr(dir, '/'))) {     ///向上回2级父目录
 		*cp = '\0';
 	}
 	if ((cp = strrchr(dir, '/'))) {
@@ -227,18 +227,18 @@ static int initWebs(int demo)
 	 * handler, forms handler and the default web page handler.
 	 */
 	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler,
-			WEBS_HANDLER_FIRST);
+	                WEBS_HANDLER_FIRST);
 	websUrlHandlerDefine(T("/goform"), NULL, 0, websFormHandler, 0);
 	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
 	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
-			WEBS_HANDLER_LAST);
+	                WEBS_HANDLER_LAST);
 	//载入配置文件
 	if (-1
-			== init_monparam_port_name(mon_port_name, &mon_port_num,
-					MON_PORT_NAME_FILE)) {
+	                ==init_monparam_port_name(mon_port_name, &mon_port_num,
+	                                MON_PORT_NAME_FILE)) {
 		web_err_proc(EL);
 	}
-	if (-1 == read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
+	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
 		web_err_proc(EL);
 	}
 	/*
@@ -257,8 +257,8 @@ static int initWebs(int demo)
 	websAspDefine(T("control_ports"), control_ports);
 	websAspDefine(T("sioplan_num"), sioplan_num);
 	///表计参数
-	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);  ///加载表参数
-	websAspDefine(T("read_mtr_no"), read_mtr_no);  ///读取表号
+	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
+	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///asp define
 	websAspDefine(T("init_sysparam"), asp_load_sysparam);
 	websAspDefine(T("load_all_mtr_param"), asp_load_all_mtr_param);
@@ -282,6 +282,7 @@ static int initWebs(int demo)
 	websFormDefine(T("savecycle"), form_set_savecycle);
 	websFormDefine(T("reset"), form_reset);
 	websFormDefine(T("get_tou"), form_get_tou);
+	websFormDefine(T("save_log"), form_save_log);
 
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
 
@@ -302,10 +303,10 @@ static int initWebs(int demo)
 static int asp_load_sysparam(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int ret = load_sysparam(&sysparam, CFG_SYS);
-	if (ret == -1) {
+	if (ret==-1) {
 		PRINT_HERE
 		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
-				__LINE__, __FUNCTION__);
+		                __LINE__, __FUNCTION__);
 		g_cur_mtr_no = -1;
 		web_err_proc(EL);
 		return 0;
@@ -320,9 +321,9 @@ static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
 	int i = 0;
 	int ret = load_savecycle(sav, CFG_SAVE_CYCLE);
-	if (ret == -1) {
+	if (ret==-1) {
 		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
-				__LINE__, __FUNCTION__);
+		                __LINE__, __FUNCTION__);
 		web_err_proc(EL);
 		return 0;
 	}
@@ -331,17 +332,17 @@ static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("%s"), CSTR_SAVECYCLE_FLAG);
 	websWrite(wp, T("</td>\n"));
-	for (i = 0; i < SAVE_CYCLE_ITEM; i++) {
+	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
 		websWrite(wp, T("<td>\n"));
 		websWrite(wp, T("<input type=checkbox "
 				"name=chk_save_enable value=%d %s %s>\n"),
-				sav[i].enable & 0x01,
-				(sav[i].enable == 1) ? "checked" : "",
-				CHKBOX_ONCLICK);
+		                sav[i].enable&0x01,
+		                (sav[i].enable==1) ? "checked" : "",
+		                CHKBOX_ONCLICK);
 		///post不能传递没有被选中的复选框的值,通过text传递 class=hideinp
 		websWrite(wp, T("<input %s type=text "
 				"size=1 name=flag value=%d >\n"), HIDE_CLASS,
-				sav[i].enable);
+		                sav[i].enable);
 		websWrite(wp, T("</td>\n"));
 	}
 	//第二行:储存周期
@@ -349,15 +350,15 @@ static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("%s"), CSTR_SAVECYCLE_CYCLE);
 	websWrite(wp, T("</td>\n"));
-	for (i = 0; i < SAVE_CYCLE_ITEM; i++) {
+	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
 		int j;
 		websWrite(wp, T("<td>\n"));
 		websWrite(wp, T("<select name=cycle >\n"));
-		for (j = 0; j < sizeof(SAVE_CYCLE) / sizeof(SAVE_CYCLE[0]);
-				j++) {
+		for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);
+		                j++) {
 			websWrite(wp, T("<option value=%d %s>%s</option>\n"), j,
-					(j == sav[i].cycle) ? "selected" : "",
-					SAVE_CYCLE[j]);
+			                (j==sav[i].cycle) ? "selected" : "",
+			                SAVE_CYCLE[j]);
 		}
 		websWrite(wp, T("</td>\n"));
 	}
@@ -398,11 +399,11 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv)
 {
 	printf("读取服务器时间\n");
 	char strtime[128] = { 0 };
-	time_t timer = time(NULL );
+	time_t timer = time(NULL);
 	struct tm * t = localtime(&timer);
-	sprintf(strtime, "%04d-%02d-%02d %02d:%02d:%02d", t->tm_year + 1900,
-			t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min,
-			t->tm_sec);
+	sprintf(strtime, "%04d-%02d-%02d %02d:%02d:%02d", t->tm_year+1900,
+	                t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min,
+	                t->tm_sec);
 	return websWrite(wp, T("%s"), strtime);
 }
 ///控制端口数目
@@ -430,11 +431,11 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 {
 	stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
 	int ret = load_mtrparam(&mtr, CFG_MTR, g_cur_mtr_no);
-	if (ret == -1) {
+	if (ret==-1) {
 		PRINT_HERE
 		return websWrite(wp, T("<font color=red font-size:120%>"
 				"<b>ERR %s,l:%d,fn:%s:%s</b></font>"), __FILE__,
-				__LINE__, __FUNCTION__, myweberrstr[ret]);
+		                __LINE__, __FUNCTION__, myweberrstr[ret]);
 		web_err_proc(EL);
 	}
 	return 0;
@@ -452,12 +453,12 @@ static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 	int no;
 	stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
 	printf("%s\n", __FUNCTION__);
-	for (no = 0; no < sysparam.meter_num; no++) {
-		if (-1 == load_mtrparam(&mtr, CFG_MTR, no)) {
+	for (no = 0; no<sysparam.meter_num; no++) {
+		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
 			web_err_proc(EL);
 			continue;
 		}
-		websWrite(wp, T("<tr>\n"));  //一行
+		websWrite(wp, T("<tr>\n"));     //一行
 		(void) webWrite_mtrno(wp, no);
 		(void) webWrite_iv(wp, mtr);
 		(void) webWrite_line(wp, mtr);
@@ -486,8 +487,8 @@ static int asp_load_all_sioplan(int eid, webs_t wp, int argc, char_t **argv)
 	int no;
 	stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	for (no = 0; no < sysparam.sioplan_num; no++) {
-		if (-1 == load_sioplan(&plan, CFG_SIOPALN, no)) {
+	for (no = 0; no<sysparam.sioplan_num; no++) {
+		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -514,8 +515,8 @@ static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int no;
 	stNetparam netparam;
-	for (no = 0; no < sysparam.netports_num; no++) {
-		if (-1 == load_netparam(&netparam, CFG_NET, no)) {
+	for (no = 0; no<sysparam.netports_num; no++) {
+		if (-1==load_netparam(&netparam, CFG_NET, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -541,8 +542,8 @@ static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int no;
 	stMonparam monpara;
-	for (no = 0; no < sysparam.monitor_ports; no++) {
-		if (-1 == load_monparam(&monpara, CFG_MON_PARAM, no)) {
+	for (no = 0; no<sysparam.monitor_ports; no++) {
+		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -570,25 +571,29 @@ static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int asp_show_log(int eid, webs_t wp, int argc, char_t **argv)
 {
-	char buf[MAX_ERR_LOG_LINE_LENTH]={0};
-	//char line[MAX_ERR_LOG_LINE_LENTH]={0};
-	int strnum = 0;
+	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
+	int ret;
 	FILE*fp = fopen("./err.log", "r");
-	if (fp == NULL ) {
+	if (fp==NULL) {
 		websWrite(wp, T("No log."));
 		return 0;
 	}
-	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	while (ftell(fp) < flen) {
-		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
-		//strnum = sscanf(buf, "%255s\n", line);
-		if (strnum == -1) {  //忽略空行
-			continue;
+	while (1) {
+		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
+		if (ret>0) {
+			websWrite(wp, T("%s"), buf);
+		} else {
+			break;
 		}
-		websWrite(wp, T("%s"), buf);
 	}
+//	while (ftell(fp) < flen) {
+//		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
+//		//strnum = sscanf(buf, "%255s\n", line);
+//		if (strnum == -1) {  //忽略空行
+//			continue;
+//		}
+//		websWrite(wp, T("%s"), buf);
+//	}
 	fclose(fp);
 	return 0;
 }
@@ -616,12 +621,12 @@ static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T("<input type=checkbox name=forward_chk "
 			"value=%d %s %s>\n"), monport.forward_enable,
-			(monport.forward_enable) ? "checked" : "",
-			CHKBOX_ONCLICK);
+	                (monport.forward_enable) ? "checked" : "",
+	                CHKBOX_ONCLICK);
 	///post不能传递没有被选中的复选框的值,通过text传递
 	websWrite(wp, T("<input %s type=\"text\""
 			"size=1 readonly name=forward value=%d>\n"), HIDE_CLASS,
-			monport.forward_enable);
+	                monport.forward_enable);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -631,12 +636,12 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T("<input type=checkbox name=time_syn_chk "
 			" value=%d %s %s>\n "), monport.chktime_valid_flag,
-			(monport.chktime_valid_flag) ? "checked" : "",
-			CHKBOX_ONCLICK);
+	                (monport.chktime_valid_flag) ? "checked" : "",
+	                CHKBOX_ONCLICK);
 	///post不能传递没有被选中的复选框的值,通过text传递
 	websWrite(wp, T("<input %s type=text "
 			" size=1 readonly name=time_syn value=%d>\n"),
-			HIDE_CLASS, monport.chktime_valid_flag);
+	                HIDE_CLASS, monport.chktime_valid_flag);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -650,14 +655,14 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
-			monport.prot_addr[1], monport.prot_addr[2],
-			monport.prot_addr[3]);
+	                monport.prot_addr[1], monport.prot_addr[2],
+	                monport.prot_addr[3]);
 	int i;
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T(" <input class=ntx type=text size=4 maxlength=4 "
 			" onchange=\"verify_rtu_addr(event);\" "
 			" name=rtu_addr value=\""));
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i<4; i++) {
 		websWrite(wp, T("%1d"), monport.prot_addr[i]);
 	}
 	websWrite(wp, T("\"> </td>\n"));
@@ -670,11 +675,11 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	int i;
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T(" <select name=protocol>\n"));
-	for (i = 0; i < procotol_num; i++) {
+	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s"
 				"</option>\n"), i,
-				(i == monport.port_type) ? "selected" : "",
-				procotol_name[i]);
+		                (i==monport.port_type) ? "selected" : "",
+		                procotol_name[i]);
 	}
 	websWrite(wp, T("<select>\n"));
 	websWrite(wp, T("</td>\n"));
@@ -687,10 +692,10 @@ static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport)
 	int i;
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T(" <select name=sioplan>\n"));
-	for (i = 0; i < sioplan_num; i++) {
+	for (i = 0; i<sioplan_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >"CSTR_PLAN
 				"%d</option>\n"), i,
-				(i == monport.sioplan) ? "selected" : "", i);
+		                (i==monport.sioplan) ? "selected" : "", i);
 	}
 	websWrite(wp, T("<select>\n"));
 	websWrite(wp, T("</td>\n"));
@@ -701,7 +706,7 @@ static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 {
 	int i;
 	printf("监视参数-监听端口:");
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i<5; i++) {
 		printf("%d", monport.listen_port[i]);
 	}
 	printf("\n");
@@ -709,7 +714,7 @@ static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 	websWrite(wp, T(" <input type=text name=listenport %s"
 			" onchange=\"verify_port(event);\" "
 			" size=5  maxlength=5 value="), INPUT_CLASS);
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i<5; i++) {
 		websWrite(wp, T("%d"), monport.listen_port[i]);
 	}
 	websWrite(wp, T(">\n"));
@@ -722,7 +727,7 @@ static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T(" <input type=text name=mon_no %s"
 			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
-			no);
+	                no);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -732,11 +737,11 @@ static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 	int i;
 	websWrite(wp, T("<td%s>\n"), TD_CLASS);
 	websWrite(wp, T(" <select name=commport >\n"));
-	for (i = 0; i < mon_port_num; i++) {
+	for (i = 0; i<mon_port_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s"
 				"</option>\n"), i,
-				(i == monport.comm_port) ? "selected" : "",
-				mon_port_name[i]);
+		                (i==monport.comm_port) ? "selected" : "",
+		                mon_port_name[i]);
 	}
 	websWrite(wp, T(" <select>\n"));
 	websWrite(wp, T("</td>\n"));
@@ -749,7 +754,7 @@ static int webWrite_net_no(webs_t wp, int no, stNetparam netparam)
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input %s type=text name=net_no "
 			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
-			no);
+	                no);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 
@@ -767,9 +772,9 @@ static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam)
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=eth >\n"));
-	for (i = 0; i < net_num; i++) {
+	for (i = 0; i<net_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >ETH%d</option>\n"),
-				i, (i == netparam.no) ? "selected" : "", i + 1);
+		                i, (i==netparam.no) ? "selected" : "", i+1);
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
@@ -783,9 +788,9 @@ static int webWrite_ip(webs_t wp, int no, stNetparam netparam)
 			" onchange=\"isIPv4(event);\" "
 			" name=ip value=\""), INPUT_CLASS);
 
-	for (i = 0; i < IPV4_LEN; i++) {
+	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), netparam.ip[i]);
-		if (((i + 1) % 3 == 0) && (i != 11)) {  //aaa.bbb.ccc.ddd
+		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
 			websWrite(wp, T("."));
 		}
 	}
@@ -801,9 +806,9 @@ static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
 			" onchange=\"isIPv4(event);\" "
 			" name=mask value=\""), INPUT_CLASS);
 
-	for (i = 0; i < IPV4_LEN; i++) {
+	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), netparam.mask[i]);
-		if (((i + 1) % 3 == 0) && (i != 11)) {  //aaa.bbb.ccc.ddd
+		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
 			websWrite(wp, T("."));
 		}
 	}
@@ -819,9 +824,9 @@ static int webWrite_gateway(webs_t wp, int no, stNetparam netparam)
 			" onchange=\"isIPv4(event);\" "
 			" name=gateway value="), INPUT_CLASS);
 
-	for (i = 0; i < IPV4_LEN; i++) {
+	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), netparam.gateway[i]);
-		if (((i + 1) % 3 == 0) && (i != 11)) {  //aaa.bbb.ccc.ddd
+		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
 			websWrite(wp, T("."));
 		}
 	}
@@ -844,11 +849,12 @@ static int webWrite_parity(webs_t wp, int no, stUart_plan plan)
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <select name=parity >\n"));
-	for (i = 0; i < sizeof(UART_P) / sizeof(UART_P[0]); i++) {
+	for (i = 0; i<sizeof(UART_P)/sizeof(UART_P[0]); i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-				(i == plan.parity) ?
-						"selected=\"selected\"" : "",
-				UART_P[i]);
+		                (i==plan.parity) ?
+		                                   "selected=\"selected\"" :
+		                                   "",
+		                UART_P[i]);
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
@@ -860,11 +866,12 @@ static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan)
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <select name=data >\n"));
-	for (i = 0; i < sizeof(UART_DAT_BIT) / sizeof(UART_DAT_BIT[0]); i++) {
+	for (i = 0; i<sizeof(UART_DAT_BIT)/sizeof(UART_DAT_BIT[0]); i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-				(i + 7 == plan.data) ?
-						"selected=\"selected\"" : "",
-				UART_DAT_BIT[i]);
+		                (i+7==plan.data) ?
+		                                   "selected=\"selected\"" :
+		                                   "",
+		                UART_DAT_BIT[i]);
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
@@ -876,10 +883,10 @@ static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan)
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <select name=stop >\n"));
-	for (i = 0; i < sizeof(UART_STOP) / sizeof(UART_STOP[0]); i++) {
+	for (i = 0; i<sizeof(UART_STOP)/sizeof(UART_STOP[0]); i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-				(i == plan.stop) ? "selected" : "",
-				UART_STOP[i]);
+		                (i==plan.stop) ? "selected" : "",
+		                UART_STOP[i]);
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
@@ -891,10 +898,10 @@ static int webWrite_baud(webs_t wp, int no, stUart_plan plan)
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <select name=baud >\n"));
-	for (i = 0; i < sizeof(UART_BAUD) / sizeof(UART_BAUD[0]); i++) {
+	for (i = 0; i<sizeof(UART_BAUD)/sizeof(UART_BAUD[0]); i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-				(i == plan.baud) ? "selected=\"selected\"" : "",
-				UART_BAUD[i]);
+		                (i==plan.baud) ? "selected=\"selected\"" : "",
+		                UART_BAUD[i]);
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
@@ -905,12 +912,13 @@ static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
 	//printf("串口方案-通讯方式(0-异步,1同步): %x \n", plan.Commtype);
 	int i;
 	websWrite(wp, T("<td>\n<select name=comm_type >\n"));
-	for (i = 0; i < sizeof(UART_COMM_TYPE) / sizeof(UART_COMM_TYPE[0]);
-			i++) {
+	for (i = 0; i<sizeof(UART_COMM_TYPE)/sizeof(UART_COMM_TYPE[0]);
+	                i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-				(i == plan.Commtype) ?
-						"selected=\"selected\"" : "",
-				UART_COMM_TYPE[i]);
+		                (i==plan.Commtype) ?
+		                                     "selected=\"selected\"" :
+		                                     "",
+		                UART_COMM_TYPE[i]);
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
@@ -921,11 +929,12 @@ static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
 static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int i;
-	for (i = 0; i < sysparam.meter_num; i++) {
+	for (i = 0; i<sysparam.meter_num; i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%d</option>\n"), i,
-				(i == g_cur_mtr_no) ?
-						"selected=\"selected\"" : "",
-				i);
+		                (i==g_cur_mtr_no) ?
+		                                    "selected=\"selected\"" :
+		                                    "",
+		                i);
 	}
 	//printf("asp read_mtr_no:%d \n", g_cur_mtr_no);
 	return websWrite(wp, T("%d"), g_cur_mtr_no);
@@ -938,7 +947,7 @@ static int webWrite_line(webs_t wp, stMtr mtr)
 			"onchange=\"line_changed(event);\""
 			"name=line value=\""));
 	int i;
-	for (i = 0; i < LINE_LEN; i++) {
+	for (i = 0; i<LINE_LEN; i++) {
 		//if (mtr.webWrite_line[i]!=0)
 		websWrite(wp, T("%1d"), mtr.line[i]);
 	}
@@ -953,7 +962,7 @@ static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 			"<input class=ntx type=text size=12 maxlength=12 "
 			"onchange=\"addr_changed(event);\""
 			"name=addr value=\""));
-	for (i = 0; i < ADDR_LEN; i++) {
+	for (i = 0; i<ADDR_LEN; i++) {
 		//if (mtr.addr[i]!=0)
 		websWrite(wp, T("%1d"), mtr.addr[i]);
 	}
@@ -968,7 +977,7 @@ static int webWrite_pwd(webs_t wp, stMtr mtr)
 			"<input class=ntx type=text size=8 maxlength=8 "
 			"onchange=\"pwd_changed(event);\""
 			"name=pwd value=\""));
-	for (i = 0; i < PWD_LEN; i++) {
+	for (i = 0; i<PWD_LEN; i++) {
 		//if (mtr.webWrite_pwd[i]!=0)
 		websWrite(wp, T("%1d"), mtr.pwd[i]);
 	}
@@ -1049,10 +1058,10 @@ static int webWrite_uartport(webs_t wp, stMtr mtr)
 	printf("表计参数-使用串口号:%d\n", mtr.port);
 	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
 			"<select name=port >\n"));
-	for (i = 0; i < sysparam.sioports_num; i++) {
+	for (i = 0; i<sysparam.sioports_num; i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >com%d</option>\n"), i,
-				(i == mtr.port) ? "selected=\"selected\"" : "",
-				i + 1);
+		                (i==mtr.port) ? "selected=\"selected\"" : "",
+		                i+1);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1064,13 +1073,15 @@ static int webWrite_uartPlan(webs_t wp, stMtr mtr)
 	printf("表计参数-串口方案号:%d 串口数 %d\n", mtr.portplan, sysparam.sioplan_num);
 	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
 			"<select name=portplan >\n"));
-	for (i = 0; i < sysparam.sioplan_num; i++) {
-		websWrite(wp,
-				T("<option value=\"%d\" %s >"CSTR_PLAN"%d</option>\n"),
-				i,
-				(i == mtr.portplan) ?
-						"selected=\"selected\"" : "",
-				i);
+	for (i = 0; i<sysparam.sioplan_num; i++) {
+		websWrite(
+		                wp,
+		                T("<option value=\"%d\" %s >"CSTR_PLAN"%d</option>\n"),
+		                i,
+		                (i==mtr.portplan) ?
+		                                    "selected=\"selected\"" :
+		                                    "",
+		                i);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1082,11 +1093,12 @@ static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
 	printf("表计参数-表计规约:%d\n", mtr.protocol);
 	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
 			"<select name=protocol >\n"));
-	for (i = 0; i < procotol_num; i++) {
+	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-				(i == mtr.protocol) ?
-						"selected=\"selected\"" : "",
-				procotol_name[i]);
+		                (i==mtr.protocol) ?
+		                                    "selected=\"selected\"" :
+		                                    "",
+		                procotol_name[i]);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1105,9 +1117,9 @@ static int asp_list_mtr_protocol(int eid, webs_t wp, int argc, char_t **argv)
 	int i;
 	websWrite(wp, T("<select name=all_protocol "
 			"onchange=\"changeall_mtr_protocol(event);\">\n"));
-	for (i = 0; i < procotol_num; i++) {
+	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T(" <option value=\"%d\" >%s</option>"), i,
-				procotol_name[i]);
+		                procotol_name[i]);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1127,10 +1139,12 @@ static int asp_list_sioplan(int eid, webs_t wp, int argc, char_t **argv)
 	int i;
 	websWrite(wp, T("<select name=all_portplan "
 			"onchange=\"changeall_sioplan(event);\">\n"));
-	for (i = 0; i < sysparam.sioplan_num; i++) {
-		websWrite(wp,
-				T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
-				i, i);
+	for (i = 0; i<sysparam.sioplan_num; i++) {
+		websWrite(
+		                wp,
+		                T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
+		                i,
+		                i);
 	}
 	return 0;
 }
@@ -1148,12 +1162,12 @@ static int asp_factory(int eid, webs_t wp, int argc, char_t **argv)
 //PRINT_HERE;
 	int i;
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-	printf("加载所有生产厂家:共%d个\n", sizeof(fact) / sizeof(fact[0]));
+	printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
 	websWrite(wp, T("<select name=all_factory "));
 	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
-	for (i = 0; i < sizeof(fact) / sizeof(fact[0]); i++) {
+	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
 		websWrite(wp, T("<option value=\"%d\">%s</option>"), i,
-				fact[i]);
+		                fact[i]);
 	}
 	return 0;
 }
@@ -1171,9 +1185,9 @@ static int ph_wire2(int eid, webs_t wp, int argc, char_t **argv)
 	//就一个选择列表框.
 	websWrite(wp, T("<select name=ph_wire_all "
 			"onchange=\"type_all_changed(event);\">\n"));
-	for (i = 0; i < sizeof(PW) / sizeof(PW[0]); i++) {
+	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
 		websWrite(wp, T("<option value=\"%d\" >%s</option>"), i,
-				PW[i]);
+		                PW[i]);
 	}
 	return 0;
 }
@@ -1186,10 +1200,10 @@ static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 	int i;
 	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
 			"<select name=ph_wire >\n"));
-	for (i = 0; i < sizeof(PW) / sizeof(PW[0]); i++) {
+	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-				(i == mtr.p3w4) ? "selected=\"selected\"" : "",
-				PW[i]);
+		                (i==mtr.p3w4) ? "selected=\"selected\"" : "",
+		                PW[i]);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1203,10 +1217,10 @@ static int webWrite_factory(webs_t wp, stMtr mtr)
 	printf("表计参数-生产厂家:%d\n", mtr.fact);
 	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
 			"<select name=factory >\n"));
-	for (i = 0; i < sizeof(fact) / sizeof(fact[0]); i++) {
+	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-				(i == mtr.fact) ? "selected=\"selected\"" : "",
-				fact[i]);
+		                (i==mtr.fact) ? "selected=\"selected\"" : "",
+		                fact[i]);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1219,10 +1233,10 @@ static int webWrite_iv(webs_t wp, stMtr mtr)
 	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
 			"<input type=checkbox  name=iv_check value=\"%d\" %s "
 			" id=ivchk onclick=\"chk_change(event);\" >"
-			"\n"), mtr.iv & 0x01, (mtr.iv & 0x01) ? "checked" : "");
+			"\n"), mtr.iv&0x01, (mtr.iv&0x01) ? "checked" : "");
 	///post不能传递没有被选中的复选框的值,通过text传递
 	websWrite(wp, T("<input class=\"hideinp\" type=\"text\""
-			"size=1 name=\"iv\" value=%d >"), mtr.iv & 0x01);
+			"size=1 name=\"iv\" value=%d >"), mtr.iv&0x01);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -1254,7 +1268,7 @@ static int split(char **ret, char* in)
 //printf("in %s \n", in);
 	char* token = strtok(in, " ");
 //PRINT_HERE
-	while (token != NULL ) {
+	while (token!=NULL) {
 		//PRINT_HERE
 		//printf("%s ", token);
 		//PRINT_HERE
@@ -1275,8 +1289,8 @@ static int split(char **ret, char* in)
 static int is_all_equ(int n[], int num)
 {
 	int i;
-	for (i = 1; i < num; i++) {
-		if (n[i] != n[0]) {
+	for (i = 1; i<num; i++) {
+		if (n[i]!=n[0]) {
 			printf("POST数量[%d]=%d,表数目=%d\n", i, n[i], n[0]);
 			return -2000;
 		}
@@ -1295,9 +1309,9 @@ static int is_all_equ(int n[], int num)
  * @retval 小于0 :错误代码
  */
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, char_t *query,
-		u32 e[MAX_MTR_NUM])
+        u32 e[MAX_MTR_NUM])
 {
-	int n[20] = { 0 };  //一共的记录条数
+	int n[20] = { 0 };     //一共的记录条数
 	int i = 0;
 	char * errstr = NULL;
 	char *no[MAX_MTR_NUM];
@@ -1398,14 +1412,14 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, char_t *query,
 	}
 	if (websTestVar(wp, T("portplan"))) {
 		n[13] = split(portplan,
-				websGetVar(wp, T("portplan"), T("null")));
+		                websGetVar(wp, T("portplan"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1120;
 	}
 	if (websTestVar(wp, T("protocol"))) {
 		n[14] = split(protocol,
-				websGetVar(wp, T("protocol"), T("null")));
+		                websGetVar(wp, T("protocol"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1130;
@@ -1431,87 +1445,87 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, char_t *query,
 	}
 ///n[0]~n[18]应该完全相等,不然肯定是某一项目少传了
 	int ret = is_all_equ(n, 18);
-	if (ret != 0) {
+	if (ret!=0) {
 		return ret;
 	}
 //PRINT_HERE
 	printf("record num[0]=%d\n", n[0]);
-	for (i = 0; i < n[0]; i++) {
+	for (i = 0; i<n[0]; i++) {
 		printf("接收循环[%d]\n", i);
 		amtr[i].mtrno = strtoul(no[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b1;
 		}
 		(void) strtoull(line[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b10;
 		}
 		(void) strtoull(addr[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b100;
 		}
 		//PRINT_HERE
-		(void) strtoul(pwd[i], &errstr, 10); //32位无符号,最多4,294,967,295能存所有9位十进制数
-		if (*errstr != '\0') {
+		(void) strtoul(pwd[i], &errstr, 10);     //32位无符号,最多4,294,967,295能存所有9位十进制数
+		if (*errstr!='\0') {
 			e[i] |= 0b1000;
 		}
 		amtr[i].it_dot = strtoul(it_dot[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b10000;
 		}
 		amtr[i].v_dot = strtol(v_dot[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 
 			e[i] |= 0b100000;
 		}
 		amtr[i].p_dot = strtol(p_dot[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b1000000;
 		}
 		amtr[i].q_dot = strtol(q_dot[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b10000000;
 		}
 		amtr[i].i_dot = strtol(i_dot[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b100000000;
 		}
 		//PRINT_HERE
 		amtr[i].xl_dot = strtol(xl_dot[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b1000000000;
 		}
 		amtr[i].ue = strtol(ue[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b10000000000;
 		}
 		amtr[i].ie = strtol(ie[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b100000000000;
 		}
 		amtr[i].port = strtol(port[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b1000000000000;
 		}
 		amtr[i].portplan = strtol(portplan[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b10000000000000;
 		}
 		amtr[i].protocol = strtol(protocol[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b100000000000000;
 		}
 		//PRINT_HERE
 		amtr[i].p3w4 = strtol(ph_wire[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b1000000000000000;
 		}
 		amtr[i].fact = strtol(factory[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b10000000000000000;
 		}
 		amtr[i].iv = strtol(iv[i], &errstr, 10);
-		if (*errstr != '\0') {
+		if (*errstr!='\0') {
 			e[i] |= 0b100000000000000000;
 		}
 		//PRINT_HERE
@@ -1523,36 +1537,36 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, char_t *query,
 		//PRINT_HERE
 		l = strlen(line[i]);
 		//PRINT_HERE
-		delta = LINE_LEN - l;
-		if (delta >= 0) {  //输入的位数少,前面补0
-			memcpy(&amtr[i].line[0] + delta, line[i], l);
-		} else {  //输入的位数多,后面截断
+		delta = LINE_LEN-l;
+		if (delta>=0) {     //输入的位数少,前面补0
+			memcpy(&amtr[i].line[0]+delta, line[i], l);
+		} else {     //输入的位数多,后面截断
 			memcpy(&amtr[i].line[0], line[i], LINE_LEN);
 		}
 		l = strlen(addr[i]);
 		//PRINT_HERE
-		delta = ADDR_LEN - l;
-		if (delta >= 0) {
-			memcpy(&amtr[i].addr[0] + delta, addr[i], l);
+		delta = ADDR_LEN-l;
+		if (delta>=0) {
+			memcpy(&amtr[i].addr[0]+delta, addr[i], l);
 		} else {
 			memcpy(&amtr[i].addr[0], addr[i], ADDR_LEN);
 		}
 		l = strlen(pwd[i]);
-		delta = PWD_LEN - l;
-		if (delta >= 0) {
-			memcpy(&amtr[i].pwd[0] + delta, pwd[i], l);
+		delta = PWD_LEN-l;
+		if (delta>=0) {
+			memcpy(&amtr[i].pwd[0]+delta, pwd[i], l);
 		} else {
 			memcpy(&amtr[i].pwd[0], pwd[i], PWD_LEN);
 		}
 		//PRINT_HERE
 		int j = 0;
-		for (j = 0; j < LINE_LEN; j++) {
+		for (j = 0; j<LINE_LEN; j++) {
 			amtr[i].line[j] -= 0x30;
 		}
-		for (j = 0; j < ADDR_LEN; j++) {
+		for (j = 0; j<ADDR_LEN; j++) {
 			amtr[i].addr[j] -= 0x30;
 		}
-		for (j = 0; j < PWD_LEN; j++) {
+		for (j = 0; j<PWD_LEN; j++) {
 			amtr[i].pwd[j] -= 0x30;
 		}
 		//PRINT_HERE
@@ -1643,20 +1657,20 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	while (1) {
 		//串口方案序号
 		n = sscanf(sioplanno, "%hhu", &no);
-		if (n != 1) {	//正常完结
+		if (n!=1) {     //正常完结
 			break;
 		}
 		sioplanno = point2next(&sioplanno, ' ');
 		//校验位
 		n = sscanf(parity, "%hhu", &plan.parity);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
 		parity = point2next(&parity, ' ');
 		//数据位
 		n = sscanf(data, "%hhu", &plan.data);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -1664,21 +1678,21 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		plan.data += 7;
 		//停止位
 		n = sscanf(stop, "%hhu", &plan.stop);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
 		stop = point2next(&stop, ' ');
 		//波特率
 		n = sscanf(baud, "%hhu", &plan.baud);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
 		baud = point2next(&baud, ' ');
 		//通讯类型 同步异步
 		n = sscanf(comm_type, "%hhu", &plan.Commtype);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -1691,8 +1705,8 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	//stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
 	websHeader_GB2312(wp);
-	for (no = 0; no < sysparam.sioplan_num; no++) {
-		if (-1 == load_sioplan(&plan, CFG_SIOPALN, no)) {
+	for (no = 0; no<sysparam.sioplan_num; no++) {
+		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -1724,36 +1738,36 @@ int ipstr2ipfile(char *ipstr, u8 ipfile[12])
 	int j = 0;
 	//字符串转化为数值数组
 	int val[4] = { 0, 0, 0, 0 };
-	while (*(ipstr + j) != ' ' && *(ipstr + j) != '\0') {
+	while (*(ipstr+j)!=' '&&*(ipstr+j)!='\0') {
 		//分割各组数据
-		if (*(ipstr + j) == '.') {
+		if (*(ipstr+j)=='.') {
 			sub++;
 		} else {
 			//服务端验证数字
-			if (*(ipstr + j) < '0' || *(ipstr + j) > '9') {
+			if (*(ipstr+j)<'0'||*(ipstr+j)>'9') {
 				return -2;
 			}
 			//转化成为数值型
-			val[sub] = val[sub] * 10 + (*(ipstr + j) - '0');
+			val[sub] = val[sub]*10+(*(ipstr+j)-'0');
 		}
 		j++;
 	}
-	if (sub != 3) {		///一共应该有4项 aaa.bbb.ccc.ddd
+	if (sub!=3) {		///一共应该有4项 aaa.bbb.ccc.ddd
 		return -1;
 	}
-	ipfile[0] = (val[0] / 100) % 10;
-	ipfile[1] = (val[0] / 10) % 10;
-	ipfile[2] = (val[0] / 1) % 10;
-	ipfile[3] = (val[1] / 100) % 10;
-	ipfile[4] = (val[1] / 10) % 10;
-	ipfile[5] = (val[1] / 1) % 10;
-	ipfile[6] = (val[2] / 100) % 10;
-	ipfile[7] = (val[2] / 10) % 10;
-	ipfile[8] = (val[2] / 1) % 10;
-	ipfile[9] = (val[3] / 100) % 10;
-	ipfile[10] = (val[3] / 10) % 10;
-	ipfile[11] = (val[3] / 1) % 10;
-	return j + 1;
+	ipfile[0] = (val[0]/100)%10;
+	ipfile[1] = (val[0]/10)%10;
+	ipfile[2] = (val[0]/1)%10;
+	ipfile[3] = (val[1]/100)%10;
+	ipfile[4] = (val[1]/10)%10;
+	ipfile[5] = (val[1]/1)%10;
+	ipfile[6] = (val[2]/100)%10;
+	ipfile[7] = (val[2]/10)%10;
+	ipfile[8] = (val[2]/1)%10;
+	ipfile[9] = (val[3]/100)%10;
+	ipfile[10] = (val[3]/10)%10;
+	ipfile[11] = (val[3]/1)%10;
+	return j+1;
 }
 /**
  * 客户端发送重启表单,分类重启.
@@ -1781,25 +1795,25 @@ static void form_reset(webs_t wp, char_t *path, char_t *query)
 	case RET_WEB:
 		readlink("/proc/self/exe", app, 128);
 		pid = fork();
-		if (pid == -1) {
+		if (pid==-1) {
 			fprintf(stderr, "fork() error.errno:%d error:%s\n",
-					errno, strerror(errno));
+			                errno, strerror(errno));
 			break;
 		}
-		if (pid == 0) {		//子进程.
+		if (pid==0) {		//子进程.
 			system("killall webs");
-			execl(app, app, NULL );
+			execl(app, app, NULL);
 			exit(0);
 		}
 
-		if (pid > 0) {
+		if (pid>0) {
 
 		}
 		break;
 	case REINIT_PROTOCOL_FILE:
 		ret = read_protocol_file(procotol_name, &procotol_num,
-				PORC_FILE);
-		if (ret != 0) {
+		                PORC_FILE);
+		if (ret!=0) {
 			fprintf(stderr, "%s", myweberrstr[ret]);
 			PRINT_HERE
 		}
@@ -1844,22 +1858,22 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
 	char * time_syn = websGetVar(wp, T("time_syn"), T("null"));
 	char * forward = websGetVar(wp, T("forward"), T("null"));
 	char * forward_mtr_num = websGetVar(wp, T("forward_mtr_num"),
-			T("null"));
+	                T("null"));
 	printf("val: \n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", mon_no, commport,
-			listenport, sioplan, protocol, rtu_addr, time_syn,
-			forward, forward_mtr_num);
+	                listenport, sioplan, protocol, rtu_addr, time_syn,
+	                forward, forward_mtr_num);
 
 	int param_no = 0;		///参数序号,即数据库的主键,base 0.没有物理意义
 	while (1) {
 		//监视参数序号
 		n = sscanf(mon_no, "%d", &param_no);
-		if (n != 1) {		//正常完结
+		if (n!=1) {		//正常完结
 			break;
 		}
 		mon_no = point2next(&mon_no, ' ');
 		//端口类型,COM ETH Master等
 		n = sscanf(commport, "%hhu", &monparam.comm_port);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -1869,14 +1883,14 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
 		listenport = point2next(&listenport, ' ');
 		//串口方案号
 		n = sscanf(sioplan, "%hhu", &monparam.sioplan);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
 		sioplan = point2next(&sioplan, ' ');
 		//规约号
 		n = sscanf(protocol, "%hhu", &monparam.port_type);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -1886,21 +1900,21 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
 		rtu_addr = point2next(&rtu_addr, ' ');
 		//是否对时
 		n = sscanf(time_syn, "%hhu", &monparam.chktime_valid_flag);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
 		time_syn = point2next(&time_syn, ' ');
 		//是否转发
 		n = sscanf(forward, "%hhu", &monparam.forward_enable);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
 		forward = point2next(&forward, ' ');
 		//转发数量
 		n = sscanf(forward_mtr_num, "%hhu", &monparam.forward_mtr_num);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -1920,19 +1934,19 @@ int rtu_addr_str2array(const char* str, u8 a[4])
 {
 	int i = 0;		//查找的个数,
 	int val = 0;
-	while (*str != '\0' && *str != ' ') {
-		if (*str < '0' || *str > '9') {
+	while (*str!='\0'&&*str!=' ') {
+		if (*str<'0'||*str>'9') {
 			return -2;
 		}
-		val = val * 10 + (*str - '0');
+		val = val*10+(*str-'0');
 		str++;
 		i++;
 	}
-	a[0] = (val / 1000) % 10;
-	a[1] = (val / 100) % 10;
-	a[2] = (val / 10) % 10;
-	a[3] = (val / 1) % 10;
-	return i + 1;
+	a[0] = (val/1000)%10;
+	a[1] = (val/100)%10;
+	a[2] = (val/10)%10;
+	a[3] = (val/1)%10;
+	return i+1;
 }
 /**
  * 将"10000 10002 9999"这样的字符串中5位的端口号,不足前面补0,返回原指针偏移数
@@ -1944,20 +1958,20 @@ int listen_port_str2array(const char* str, u8 a[5])
 {
 	int i = 0;		//查找的个数,
 	int val = 0;
-	while (*str != '\0' && *str != ' ') {
-		if (*str < '0' || *str > '9') {
+	while (*str!='\0'&&*str!=' ') {
+		if (*str<'0'||*str>'9') {
 			return -2;
 		}
-		val = val * 10 + (*str - '0');
+		val = val*10+(*str-'0');
 		str++;
 		i++;
 	}
-	a[0] = (val / 10000) % 10;
-	a[1] = (val / 1000) % 10;
-	a[2] = (val / 100) % 10;
-	a[3] = (val / 10) % 10;
-	a[4] = (val / 1) % 10;
-	return i + 1;
+	a[0] = (val/10000)%10;
+	a[1] = (val/1000)%10;
+	a[2] = (val/100)%10;
+	a[3] = (val/10)%10;
+	a[4] = (val/1)%10;
+	return i+1;
 }
 /**
  * "1"或"001"或"255"这样的字符串转化成u8类型,返回转化一个字节原字符串指针向后移动的
@@ -1970,16 +1984,16 @@ int portstr2u8(const char * str, u8* val)
 {
 	int i = 0;		//查找的个数,
 	int tmp = 0;
-	while (*str != '\0' && *str != ' ') {
-		if (*str < '0' || *str > '9') {
+	while (*str!='\0'&&*str!=' ') {
+		if (*str<'0'||*str>'9') {
 			return -2;
 		}
-		tmp = tmp * 10 + (*str - '0');
+		tmp = tmp*10+(*str-'0');
 		str++;
 		i++;
 	}
 	*val = tmp;
-	return i + 1;
+	return i+1;
 }
 /**
  * 网口参数(多个)表单提交处理函数
@@ -2003,13 +2017,13 @@ static void form_set_netparas(webs_t wp, char_t *path, char_t *query)
 	while (1) {
 		//网口参数序号
 		n = sscanf(net_no, "%d", &param_no);
-		if (n != 1) {		//正常完结
+		if (n!=1) {		//正常完结
 			break;
 		}
 		net_no = point2next(&net_no, ' ');
 		//网口号
 		n = sscanf(eth, "%hhu", &netparam.no);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -2078,43 +2092,43 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 	char * str_sioports_num = websGetVar(wp, T("sioports_num"), T("null"));
 	char * str_netports_num = websGetVar(wp, T("netports_num"), T("null"));
 	char * str_monitor_ports = websGetVar(wp, T("monitor_ports"),
-			T("null"));
+	                T("null"));
 	char * str_control_ports = websGetVar(wp, T("control_ports"),
-			T("null"));
+	                T("null"));
 	char * str_sioplan_num = websGetVar(wp, T("sioplan_num"), T("null"));
 ///检查输入合法性
 	char * errstr = NULL;
 	int meter_num = strtol(str_meter_num, &errstr, 10);
-	if (*errstr != '\0' || meter_num <= 0 || meter_num >= 256) {
+	if (*errstr!='\0'||meter_num<=0||meter_num>=256) {
 		printf("1:%s\n", errstr);
 		erritem |= 0b1;
 	}
 	int sioports_num = strtol(str_sioports_num, &errstr, 10);
-	if (*errstr != '\0' || sioports_num <= 0 || meter_num >= 256) {
+	if (*errstr!='\0'||sioports_num<=0||meter_num>=256) {
 		printf("2:%s\n", errstr);
 		erritem |= 0b10;
 	}
 	int netports_num = strtol(str_netports_num, &errstr, 10);
-	if (*errstr != '\0' || netports_num <= 0 || meter_num >= 256) {
+	if (*errstr!='\0'||netports_num<=0||meter_num>=256) {
 		printf("3:%s\n", errstr);
 		erritem |= 0b100;
 	}
 	int monitor_ports = strtol(str_monitor_ports, &errstr, 10);
-	if (*errstr != '\0' || monitor_ports <= 0 || meter_num >= 256) {
+	if (*errstr!='\0'||monitor_ports<=0||meter_num>=256) {
 		printf("4:%s\n", errstr);
 		erritem |= 0b1000;
 	}
 	int control_ports = strtol(str_control_ports, &errstr, 10);
-	if (*errstr != '\0' || control_ports <= 0 || meter_num >= 256) {
+	if (*errstr!='\0'||control_ports<=0||meter_num>=256) {
 		printf("5:%s\n", errstr);
 		erritem |= 0b10000;
 	}
 	int sioplan_num = strtol(str_sioplan_num, &errstr, 10);
-	if (*errstr != '\0' || sioplan_num <= 0 || meter_num >= 256) {
+	if (*errstr!='\0'||sioplan_num<=0||meter_num>=256) {
 		printf("6:%s\n", errstr);
 		erritem |= 0b100000;
 	}
-	if (erritem == 0) {  //只有所有输入都合法
+	if (erritem==0) {     //只有所有输入都合法
 		sysparam.meter_num = meter_num;
 		sysparam.sioports_num = sioports_num;
 		sysparam.netports_num = netports_num;
@@ -2124,7 +2138,7 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 		sysparam.sioplan_num = sioplan_num;
 		ret = save_sysparam(&sysparam, CFG_SYS);
 	}
-	websHeader_GB2312(wp);  //头和尾完成了除head和body标签在内的东西
+	websHeader_GB2312(wp);     //头和尾完成了除head和body标签在内的东西
 //设置完成自动跳转回原来的页面.
 	websWrite(wp, T("<head>\n"));
 	websWrite(wp, T("<title>"CSTR_SET_PARAM"</title>\n"));
@@ -2134,35 +2148,36 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 //body start
 	websWrite(wp, T("<body>\n"));
 	websWrite(wp, T("<p>\n"));
-	websWrite(wp, T("%s"), (erritem & 0b1) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1) ? Fail : Success);
 	websWrite(wp, T(CSTR_MTR_NUM":\"%s\"</br>"), str_meter_num);
-	websWrite(wp, T("%s"), (erritem & 0b10) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10) ? Fail : Success);
 	websWrite(wp, T(CSTR_UART_PORT_NUM":\"%s\"</br>"), str_sioports_num);
-	websWrite(wp, T("%s"), (erritem & 0b100) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100) ? Fail : Success);
 	websWrite(wp, T(CSTR_NET_NUM":\"%s\"</br>"), str_netports_num);
-	websWrite(wp, T("%s"), (erritem & 0b1000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1000) ? Fail : Success);
 	websWrite(wp, T(CSTR_MONPORT_NUM":\"%s\"</br>"), str_monitor_ports);
-	websWrite(wp, T("%s"), (erritem & 0b10000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10000) ? Fail : Success);
 	websWrite(wp, T(CSTR_CTRLPORT_NUM":\"%s\"</br>"), str_control_ports);
-	websWrite(wp, T("%s"), (erritem & 0b100000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100000) ? Fail : Success);
 	websWrite(wp, T(CSTR_UART_PLAN_NUM":\"%s\"</br>"), str_sioplan_num);
 	websWrite(wp, T("</p>\n"));
 	websWrite(wp, T("<p>\n"));
-	if (ret == 0 && erritem == 0) {	//只有在全部没有出错的情况下才自动跳回.
+	if (ret==0&&erritem==0) {     //只有在全部没有出错的情况下才自动跳回.
 		websWrite(wp, T("<font color=green font-size:120%><b>"
 				CSTR_SET_OK"</b></font>"));
 		websWrite(wp, T("<meta http-equiv=refresh content=\"2;"
 				"url=%s\">\n"), PAGE_SYSTEM_PARAMETER);
 	} else {	//只有在全部没有出错的情况下才自动跳回.
-		if (erritem != 0) {
-			websWrite(wp,
-					T("<font color=red font-size:120%>"
-							"<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
-					erritem);
+		if (erritem!=0) {
+			websWrite(
+			                wp,
+			                T("<font color=red font-size:120%>"
+					                "<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
+			                erritem);
 		} else {
 			websWrite(wp, T("<font color=red font-size:120%>"
 					"<b>"CSTR_SET_ERR_FILE":%d</b></font>"),
-					ret);
+			                ret);
 		}
 	}
 	websWrite(wp, T("<form action=%s method=POST>"), PAGE_SYSTEM_PARAMETER);
@@ -2199,14 +2214,14 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	char * str_cmd = websGetVar(wp, T("OpType"), T("0"));
 	char * errstr = NULL;
 	int cmd = strtoul(str_cmd, &errstr, 10);
-	if (*errstr != '\0') {
+	if (*errstr!='\0') {
 		erritem |= 0b1;
 	}
 	printf("客户端操作分类:%d\n", cmd);
 	switch (cmd) {
-	case MTR_UPDATE:  //更新所有记录
+	case MTR_UPDATE:     //更新所有记录
 		break;
-	case MTR_ADD:	//增加1条记录
+	case MTR_ADD:     //增加1条记录
 		load_mtrparam(&mtr, CFG_MTR, sysparam.meter_num);
 		sysparam.meter_num += 1;
 		ret = save_sysparam(&sysparam, CFG_SYS);
@@ -2216,7 +2231,7 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 		reflash_this_wp(wp, PAGE_METER_PARAMETER);
 		return;
 		break;
-	case MTR_DEL:	//删除最后一条表参数数据
+	case MTR_DEL:     //删除最后一条表参数数据
 		sysparam.meter_num -= 1;
 		ret = save_sysparam(&sysparam, CFG_SYS);
 		printf("del(the last) one mtr number,ret %d \n", ret);
@@ -2232,10 +2247,10 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	int mtr_num = 0;	///<表计数目
 	mtr_num = getmtrparams(amtr, wp, query, e);
 	printf("get param from clint ret %d \n", mtr_num);
-	if (mtr_num > 0) {  //只有所有输入都合法
-		for (i = 0; i < mtr_num; i++) {
+	if (mtr_num>0) {     //只有所有输入都合法
+		for (i = 0; i<mtr_num; i++) {
 			saveret = save_mtrparam(&amtr[i], CFG_MTR,
-					amtr[i].mtrno);
+			                amtr[i].mtrno);
 			printf("1047 i=%d saveret=%d\n", i, saveret);
 			printf("amtr[i].mtrno=%d\n", amtr[i].mtrno);
 		}
@@ -2246,7 +2261,7 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	return;
 	///@note 是否需要返回给用户信息? 待定
 	//写页面
-	websHeader_GB2312(wp);  //头和尾完成了除head和body标签在内的东西
+	websHeader_GB2312(wp);     //头和尾完成了除head和body标签在内的东西
 	//设置完成自动跳转回原来的页面.
 	websWrite(wp, T("<head>\n"));
 	websWrite(wp, T("<title>"CSTR_RETURN"</title>\n"));
@@ -2254,68 +2269,69 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("<body>\n"));
 	//段落1
 	websWrite(wp, T("<p>\n"));
-	websWrite(wp, T("%s"), (erritem & 0b1) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1) ? Fail : Success);
 	websWrite(wp, T(CSTR_MTR_NO":\"%d\"</br>"), amtr[0].mtrno);
-	websWrite(wp, T("%s"), (erritem & 0b10) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10) ? Fail : Success);
 	websWrite(wp, T(CSTR_LINE_NAME":\"%s\"</br>"), amtr[0].line);
-	websWrite(wp, T("%s"), (erritem & 0b100) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100) ? Fail : Success);
 	websWrite(wp, T(CSTR_MTR_ADDR":\"%s\"</br>"), amtr[0].addr);
-	websWrite(wp, T("%s"), (erritem & 0b1000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1000) ? Fail : Success);
 	websWrite(wp, T(CSTR_MTR_PWD":\"%s\"</br>"), amtr[0].pwd);
-	websWrite(wp, T("%s"), (erritem & 0b10000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10000) ? Fail : Success);
 	websWrite(wp, T(CSTR_IT_DOT":\"%d\"</br>"), amtr[0].it_dot);
-	websWrite(wp, T("%s"), (erritem & 0b100000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100000) ? Fail : Success);
 	websWrite(wp, T(CSTR_V_DOT":\"%d\"</br>"), amtr[0].v_dot);
-	websWrite(wp, T("%s"), (erritem & 0b1000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_P_DOT":\"%d\"</br>"), amtr[0].p_dot);
-	websWrite(wp, T("%s"), (erritem & 0b10000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_Q_DOT":\"%d\"</br>"), amtr[0].q_dot);
-	websWrite(wp, T("%s"), (erritem & 0b100000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_I_DOT":\"%d\"</br>"), amtr[0].i_dot);
-	websWrite(wp, T("%s"), (erritem & 0b1000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_XL_DOT":\"%d\"</br>"), amtr[0].xl_dot);
-	websWrite(wp, T("%s"), (erritem & 0b10000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_UE":\"%d\"</br>"), amtr[0].ue);
-	websWrite(wp, T("%s"), (erritem & 0b100000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_IE":\"%d\"</br>"), amtr[0].ie);
-	websWrite(wp, T("%s"), (erritem & 0b1000000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1000000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_PROT":\"%d\"</br>"), amtr[0].port);
-	websWrite(wp, T("%s"), (erritem & 0b10000000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b10000000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_UART_NO":\"%d\"</br>"), amtr[0].portplan);
-	websWrite(wp, T("%s"), (erritem & 0b100000000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b100000000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_MTR_PROTOL":\"%d\"</br>"), amtr[0].protocol);
-	websWrite(wp, T("%s"), (erritem & 0b1000000000000000) ? Fail : Success);
+	websWrite(wp, T("%s"), (erritem&0b1000000000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_MTR_TYPE":\"%d\"</br>"), amtr[0].p3w4);
 	websWrite(wp, T("%s"),
-			(erritem & 0b10000000000000000) ? Fail : Success);
+	                (erritem&0b10000000000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_FACT":\"%d\"</br>"), amtr[0].fact);
 	websWrite(wp, T("%s"),
-			(erritem & 0b100000000000000000) ? Fail : Success);
+	                (erritem&0b100000000000000000) ? Fail : Success);
 	websWrite(wp, T(CSTR_IV_FLAG":\"%d\"</br>"), amtr[0].iv);
 	websWrite(wp, T("</p>\n"));
 //段落2
 	websWrite(wp, T("<p>\n"));
-	if ((saveret == 0) && (erritem == 0)) {  //只有在全部没有出错的情况下才自动跳回.
+	if ((saveret==0)&&(erritem==0)) {     //只有在全部没有出错的情况下才自动跳回.
 		websWrite(wp, T("<font color=green font-size:120%>"
 				"<b>"CSTR_SET_OK"</b></font>"));
 		websWrite(wp, T("<meta http-equiv=refresh content=\"1;"
 				"url=/um/meterpara1.asp\">\n"));
-	}  //只有在全部没有出错的情况下才自动跳回.
-	if (erritem != 0) {
+	}     //只有在全部没有出错的情况下才自动跳回.
+	if (erritem!=0) {
 		websWrite(wp, T("<font color=red font-size:120%>"
 				"<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
-				erritem);
+		                erritem);
 	}
-	if ((saveret != 0)) {
+	if ((saveret!=0)) {
 		websWrite(wp, T("<font color=red font-size:120%>"
 				"<b>"CSTR_SET_ERR_FILE":%d</b></font>"),
-				saveret);
+		                saveret);
 	}
 	websWrite(wp, T("<form action=/um/meterpara1.asp method=POST>"));
 	websWrite(wp, T("<input type=submit name=return value=Return >"));
 	websWrite(wp, T("</form>\n"));
-	websWrite(wp,
-			T("<input type=text maxlength=12 name=line size=20 value=\""));
+	websWrite(
+	                wp,
+	                T("<input type=text maxlength=12 name=line size=20 value=\""));
 //	for (i = 0; i<LINE_LEN; i++) {
 //		if (mtr.webWrite_line[i]!=0)
 //			websWrite(wp, T("%1d"), mtr.webWrite_line[i]);
@@ -2343,15 +2359,15 @@ static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
 	char *flags = websGetVar(wp, T("flag"), T("null"));
 	char *cycle = websGetVar(wp, T("cycle"), T("null"));
 	//printf(" flag:%s\n cycle:%s\n", flags, cycle);
-	for (i = 0; i < SAVE_CYCLE_ITEM; i++) {
+	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
 		n = sscanf(flags, "%hhu", &sav[i].enable);
-		if (n != 1) {
+		if (n!=1) {
 			//web_err_proc(EL);
 			break;
 		}
 		flags = point2next(&flags, ' ');
 		n = sscanf(cycle, "%hhu", &sav[i].cycle);
-		if (n != 1) {
+		if (n!=1) {
 			web_err_proc(EL);
 			break;
 		}
@@ -2376,12 +2392,13 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 	printf("时间戳范围:%s~%s\n", stime_t, etime_t);
 	TimeRange tr;
 	struct tm stTime;
-	time_t t;  //1970年到目前的秒数 long int
-	int ret;int i=0;
+	time_t t;     //1970年到目前的秒数 long int
+	int ret;
+	int i = 0;
 	//int tou_test=1100;
 	int mtr_no;
 	stTou tou;
-	memset(&tou,0x00,sizeof(stTou));
+	memset(&tou, 0x00, sizeof(stTou));
 	//int ret;
 	sscanf(strmtr_no, "%d", &mtr_no);
 	sscanf(stime_t, "%ld", &tr.s);
@@ -2395,38 +2412,38 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 	//tr.s = time(NULL );
 	//tr.e = tr.s + 60 * 60;  //60分钟,没分钟60秒
 	websHeader_GB2312(wp);
-	ret = load_tou_dat(0, tr, &tou,wp);
-	if (ret == ERR) {
+	ret = load_tou_dat(0, tr, &tou, wp);
+	if (ret==ERR) {
 		web_err_proc(EL);
 	}
 	websFooter(wp);
 	websDone(wp, 200);
-	return ;
+	return;
 
 	//websHeader_GB2312(wp);
-	int cycle=60*15;
+	int cycle = 60*15;
 	//[start,end]两边闭区间
-	for (t = tr.s; t <= tr.e; t +=cycle) {	//测试15分钟为一周期
-		int t_mod=t%cycle;//向上园整至采样周期.
-		if(t_mod!=0){//需要园整
-			t+=(cycle-t_mod);
+	for (t = tr.s; t<=tr.e; t += cycle) {     //测试15分钟为一周期
+		int t_mod = t%cycle;	//向上园整至采样周期.
+		if (t_mod!=0) {     //需要园整
+			t += (cycle-t_mod);
 		}
 #if __i386 == 1
 		localtime_r(&t, &stTime);
 #elif __arm__ == 1
 		gmtime_r(&t, &stTime);
 #endif
-		printf("Time Zone:%s\n",stTime.tm_zone);
+		printf("Time Zone:%s\n", stTime.tm_zone);
 		websWrite(wp, T("<tr>"));
-		websWrite(wp, T("<td%s>%d</td>"), TD_CLASS,mtr_no);
+		websWrite(wp, T("<td%s>%d</td>"), TD_CLASS, mtr_no);
 		websWrite(wp, T("<td%s>%d</td>"), TD_CLASS, i++);
 		websWrite(wp, T("<td%s>%04d-%02d-%02d %02d:%02d:%02d %s</td>"),
-				TD_CLASS, stTime.tm_year+1900,
-				stTime.tm_mon + 1,stTime.tm_mday,
-				stTime.tm_hour, stTime.tm_min,
-				stTime.tm_sec,stTime.tm_zone);
+		                TD_CLASS, stTime.tm_year+1900,
+		                stTime.tm_mon+1, stTime.tm_mday,
+		                stTime.tm_hour, stTime.tm_min,
+		                stTime.tm_sec, stTime.tm_zone);
 
-		webWrite1Tou(wp,tou);
+		webWrite1Tou(wp, tou);
 
 		websWrite(wp, T("</tr>\n"));
 	}
@@ -2435,7 +2452,23 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 
 	return;
 }
-
+/**
+ * 接收客户端的日志文件
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_save_log(webs_t wp, char_t *path, char_t *query)
+{
+	char * txt = query;
+	FILE*fp = fopen(ERR_LOG, "r+");
+	if (fp==NULL) {
+		return;
+	}
+	fwrite(txt,strlen(txt),1,fp);
+	fclose(fp);
+	return;
+}
 /**
  * 以split为分割字符,指向下一个项.
  * 例如空格为分隔符."1 2 3"输入,"2 3"输出.不能排除多个连续的分隔符.
@@ -2445,8 +2478,8 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
  */
 char * point2next(char** s, const char split)
 {
-	while (**s != '\0') {
-		if (*++(*s) == split) {
+	while (**s!='\0') {
+		if (* ++(*s)==split) {
 			(*s)++;
 			break;
 		}
@@ -2459,12 +2492,12 @@ char * point2next(char** s, const char split)
  */
 
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
-		int arg, char_t *url, char_t *path, char_t *query)
+        int arg, char_t *url, char_t *path, char_t *query)
 {
 	/*
 	 *	If the empty or "/" URL is invoked, redirect default URLs to the home page
 	 */
-	if (*url == '\0' || gstrcmp(url, T("/")) == 0) {
+	if (*url=='\0'||gstrcmp(url, T("/"))==0) {
 		websRedirect(wp, WEBS_DEFAULT_HOME);
 		return 1;
 	}
@@ -2474,7 +2507,7 @@ void print_array(const u8 *a, const int len)
 {
 	int i;
 	printf("[%d] ", len);
-	for (i = 0; i < len; i++) {
+	for (i = 0; i<len; i++) {
 		printf("%02X ", a[i]);
 	}
 	printf("\n");

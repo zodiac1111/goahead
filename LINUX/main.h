@@ -119,7 +119,7 @@ int listen_port_str2array(const char* str,u8 a[5]);
 int rtu_addr_str2array(const char* str,u8 a[4]);
 static int reflash_this_wp(webs_t wp,const char *page);
 char * point2next(char** s,const char split);
-
+static void form_save_log(webs_t wp, char_t *path, char_t *query);
 ////设置函数
 static int initWebs(int demo);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
