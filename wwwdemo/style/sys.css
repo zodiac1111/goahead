@@ -1578,6 +1578,10 @@ TD.lb-bkg-w {
 /*µÈ´ýÍ¼±ê*/
 .waiticon {
 	display: none;
+	border:0px;
+	width:16px;
+	height:16px;
+	background:  url('/style/images/ui-anim_basic_16x16.gif') right center no-repeat;
 	/*background:transparent url("./images/ui-anim_basic_16x16.gif") 0 0;*/
 	/*background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat;*/
 }
