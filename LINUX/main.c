@@ -194,6 +194,7 @@ static int initWebs(int demo)
 	} else {
 		sprintf(webdir, "%s/%s", dir, rootWeb);
 	}
+	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
 #if __i386 == 1
 	//本机调试(家里)
 	sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
@@ -236,11 +237,10 @@ static int initWebs(int demo)
 	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
 	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
 	                WEBS_HANDLER_LAST);
-	printf("监视端口文件:%s",MON_PORT_NAME_FILE);
+	printf("监视端口文件:%s", MON_PORT_NAME_FILE);
 	//载入配置文件
-	if (-1
-	                ==init_monparam_port_name(mon_port_name, &mon_port_num,
-	                                MON_PORT_NAME_FILE)) {
+	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
+	                MON_PORT_NAME_FILE)) {
 		web_err_proc(EL);
 	}
 	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
@@ -2373,23 +2373,23 @@ static void form_get_tou(webs_t wp, char_t *path, char_t *query)
 	int ret;
 	int i = 0;
 	//int tou_test=1100;
-	int mtr_no=0;
+	int mtr_no = 0;
 	stTou tou;
 	memset(&tou, 0x00, sizeof(stTou));
-	ret=sscanf(strmtr_no, "%d", &mtr_no);
-	if(ret!=1){
+	ret = sscanf(strmtr_no, "%d", &mtr_no);
+	if (ret!=1) {
 		web_err_proc(EL);
 	}
-	ret=sscanf(stime_t, "%ld", &tr.s);
-	if(ret!=1){
+	ret = sscanf(stime_t, "%ld", &tr.s);
+	if (ret!=1) {
 		web_err_proc(EL);
 	}
-	ret=sscanf(etime_t, "%ld", &tr.e);
-	if(ret!=1){
+	ret = sscanf(etime_t, "%ld", &tr.e);
+	if (ret!=1) {
 		web_err_proc(EL);
 	}
 	//PRINT_HERE
-	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e,mtr_no);
+	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
 #if __arm__ ==2
 //	tr.s+=8*60*60;
 //	tr.e+=8*60*60;
