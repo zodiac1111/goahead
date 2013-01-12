@@ -195,6 +195,7 @@ static int initWebs(int demo)
 		sprintf(webdir, "%s/%s", dir, rootWeb);
 	}
 #if __i386 == 1
+	//本机调试(家里)
 	sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
 #endif
 	printf("change web root dir to \"%s\"\n", webdir);
