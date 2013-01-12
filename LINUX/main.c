@@ -194,6 +194,9 @@ static int initWebs(int demo)
 	} else {
 		sprintf(webdir, "%s/%s", dir, rootWeb);
 	}
+#if __i386 == 1
+	sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
+#endif
 	printf("change web root dir to \"%s\"\n", webdir);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
@@ -232,6 +235,7 @@ static int initWebs(int demo)
 	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
 	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
 	                WEBS_HANDLER_LAST);
+	printf("监视端口文件:%s",MON_PORT_NAME_FILE);
 	//载入配置文件
 	if (-1
 	                ==init_monparam_port_name(mon_port_name, &mon_port_num,
