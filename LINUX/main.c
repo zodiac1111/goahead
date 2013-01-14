@@ -2578,7 +2578,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 		//websTimeoutCancel(wp);
 		//socketSetBlock(wp->sid, 1);
 		//socketFlush(wp->sid);
-		socketCloseConnection(wp->sid);
+		//socketCloseConnection(wp->sid);
 	}
 	websDone(wp, 200);
 	pclose(pf);
