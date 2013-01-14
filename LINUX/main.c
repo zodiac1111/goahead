@@ -2564,13 +2564,15 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	FILE* pf;
 	char line[256]={0};
-	pf=popen("ping 127.0.0.1 -c 4","r");
+	pf=popen(query,"r");
 	if(pf==NULL){
 		perror("open ping:");
 		return;
 	}
 	while(fgets(line, 256-1, pf)){
 		printf("%s",line);
+		websWrite(wp, T("%s"),line);
+		websDone(wp, 200);
 	}
 	websDone(wp, 200);
 }
