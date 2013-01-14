@@ -205,7 +205,7 @@ void websHeader_pure(webs_t wp)
 
 	websWrite(wp, T("Pragma: no-cache\n"));
 	websWrite(wp, T("Cache-control: no-cache\n"));
-	websWrite(wp, T("Content-Type: text/html;charset=gb2312\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=utf8\n"));
 	websWrite(wp, T("\r\n"));
 }
 /******************************************************************************/

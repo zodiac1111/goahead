@@ -2400,12 +2400,12 @@ static void form_history_tou(webs_t wp, char_t *path, char_t *query)
 #endif
 	//tr.s = time(NULL );
 	//tr.e = tr.s + 60 * 60;  //60分钟,没分钟60秒
-	websHeader_GB2312(wp);
+	websHeader_pure(wp);
 	ret = load_tou_dat(mtr_no, tr, &tou, wp);
 	if (ret==ERR) {
 		web_err_proc(EL);
 	}
-	websFooter(wp);
+	//websFooter(wp);
 	websDone(wp, 200);
 	return;
 
@@ -2529,7 +2529,7 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
-	//websHeader_GB2312(wp);
+	websHeader_pure(wp);
 	char buf[1024] = { 0 };
 	int ret;
 	FILE*fp = fopen(file, "r");
@@ -2561,6 +2561,7 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 void form_msg(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
+	websHeader_pure(wp);
 	FILE* pf;
 	char line[256]={0};
 	pf=popen("ping 127.0.0.1 -c 4","r");
