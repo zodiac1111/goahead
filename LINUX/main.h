@@ -55,6 +55,7 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query);
 static void form_set_savecycle(webs_t wp, char_t *path, char_t *query);
 static void form_reset(webs_t wp, char_t *path, char_t *query);
 static void form_history_tou(webs_t wp, char_t *path, char_t *query);
+void form_msg(webs_t wp, char_t *path, char_t *query);
 //
 static int asp_get_meter_num(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_get_sioports_num(int eid, webs_t wp, int argc, char_t **argv);

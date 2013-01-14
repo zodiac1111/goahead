@@ -292,6 +292,7 @@ static int initWebs(int demo)
 	websFormDefine(T("load_log"), form_load_log);
 	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
 	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
+	websFormDefine(T("msg"), form_msg);
 
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
 
@@ -2550,6 +2551,27 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 	//websFooter(wp);
 	websDone(wp, 200);
 	return;
+}
+/**
+ * 报文监视 表单提交处理函数
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_msg(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:%s\n", __FUNCTION__, query);
+	FILE* pf;
+	char line[256]={0};
+	pf=popen("ping 127.0.0.1 -c 4","r");
+	if(pf==NULL){
+		perror("open ping:");
+		return;
+	}
+	while(fgets(line, 256-1, pf)){
+		printf("%s",line);
+	}
+	websDone(wp, 200);
 }
 /**
  * 以split为分割字符,指向下一个项.
