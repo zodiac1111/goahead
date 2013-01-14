@@ -53,7 +53,7 @@ static char *procotol_name[MAX_PROCOTOL_NUM];     ///<规约文件中的规约�
 static int procotol_num = MAX_PROCOTOL_NUM;     ///<规约文件中的实际规约数,初始化为最大
 static char *mon_port_name[MAX_MON_PORT_NUM];     ///<规约文件中的规约名称.
 static int mon_port_num = MAX_MON_PORT_NUM;     ///<规约文件中的实际规约数,初始化为最大
-
+int is_monmsg=1;
 int main(int argc, char** argv)
 {
 	int i, demo = 1;
@@ -293,6 +293,7 @@ static int initWebs(int demo)
 	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
 	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
 	websFormDefine(T("msg"), form_msg);
+	websFormDefine(T("msg"), form_msg_stop);
 
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
 
@@ -2569,12 +2570,16 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 		perror("open ping:");
 		return;
 	}
-	while(fgets(line, 256-1, pf)){
+	while(fgets(line, 256-1, pf) && is_monmsg==1){
 		printf("%s",line);
 		websWrite(wp, T("%s"),line);
-		websDone(wp, 200);
 	}
 	websDone(wp, 200);
+}
+void form_msg_stop(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:%s\n", __FUNCTION__, query);
+	is_monmsg=0;
 }
 /**
  * 以split为分割字符,指向下一个项.
