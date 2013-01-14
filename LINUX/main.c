@@ -197,7 +197,8 @@ static int initWebs(int demo)
 	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
 #if __i386 == 1
 	//本机调试(家里)
-	sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
+	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
+	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
 #endif
 	printf("change web root dir to \"%s\"\n", webdir);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
@@ -2354,7 +2355,7 @@ static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
- * 提交表单,得到历史电量数据.
+ * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
  * @param wp
  * @param path
  * @param query
