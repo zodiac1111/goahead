@@ -285,7 +285,7 @@ static int initWebs(int demo)
 	websFormDefine(T("monparas"), form_set_monparas);
 	websFormDefine(T("savecycle"), form_set_savecycle);
 	websFormDefine(T("reset"), form_reset);
-	websFormDefine(T("get_tou"), form_get_tou);
+	websFormDefine(T("get_tou"), form_history_tou);
 	websFormDefine(T("save_log"), form_save_log);
 	websFormDefine(T("load_log"), form_load_log);
 	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
@@ -2359,7 +2359,7 @@ static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
  * @param path
  * @param query
  */
-static void form_get_tou(webs_t wp, char_t *path, char_t *query)
+static void form_history_tou(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s ***query:%s\n", __FUNCTION__, query);
 	//PRINT_HERE
