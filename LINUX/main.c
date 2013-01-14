@@ -19,6 +19,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
@@ -53,9 +60,28 @@ static char *procotol_name[MAX_PROCOTOL_NUM];     ///<规约文件中的规约�
 static int procotol_num = MAX_PROCOTOL_NUM;     ///<规约文件中的实际规约数,初始化为最大
 static char *mon_port_name[MAX_MON_PORT_NUM];     ///<规约文件中的规约名称.
 static int mon_port_num = MAX_MON_PORT_NUM;     ///<规约文件中的实际规约数,初始化为最大
-static int is_monmsg = 1;
+int is_monmsg = 1;
+union semun
+{
+	int val;
+	struct semid_ds *buf;
+	unsigned short int *array;
+	struct seminfo *__buf;
+};
+struct sembuf sb;     //信号量操作
+union semun sem; ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
+int  semid;///<信号量id
+void init_semun(void)
+{
+	///申请信号量组，包含1个信号量
+	semid = semget(1000, 1, 0666|IPC_CREAT);
+	sem.val = 1;
+	///初始化0号信号量为1默认有一个进程可以使用
+	semctl(semid, 0, SETVAL, sem);
+}
 int main(int argc, char** argv)
 {
+	init_semun();
 	int i, demo = 1;
 	for (i = 1; i<argc; i++) {
 		if (strcmp(argv[i], "-demo")==0) {
@@ -1679,7 +1705,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	//int no;
 	//stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	websHeader_GB2312(wp);
+	websHeader_pure(wp);
 	for (no = 0; no<sysparam.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
@@ -1694,7 +1720,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	websFooter(wp);
+	//websFooter(wp);
 	websDone(wp, 200);
 	//reflash_this_wp(wp, PAGE_COM_PARAMETER);
 }
@@ -2562,31 +2588,63 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 void form_msg(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
+	pid_t pid;
 	is_monmsg = 1;
-	websHeader_pure(wp);
-	FILE* pf;
-	char line[256] = { 0 };
-	pf = popen(query, "r");
-	if (pf==NULL) {
-		perror("open ping:");
-		return;
+	if ((pid = fork())==0) {
+		websHeader_pure(wp);
+		FILE* pf;
+		char line[256] = { 0 };
+		pf = popen(query, "r");
+		if (pf==NULL) {
+			perror("open ping:");
+			return;
+		}
+//		is_monmsg = 0;
+//		sb.sem_num = 0;
+//		sb.sem_op = 0;
+		printf("信号量 s =%d\n", semctl(semid, 0, GETVAL, 0));
+		while (fgets(line, 256-1, pf)
+		                &&(semctl(semid, 0, GETVAL, 0))) {
+//			sb.sem_num = 1;     //将1号信号量
+//			sb.sem_op = -1;     //减1
+//			sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
+//			semop(semid, &sb, 1);
+			printf("%s", line);
+			websWrite(wp, T("%s"), line);
+			//printf("is_monmsg:%d \n", is_monmsg);
+			//websDone(wp, 200);
+			//websTimeoutCancel(wp);
+			//socketSetBlock(wp->sid, 1);
+			//socketFlush(wp->sid);
+			//socketCloseConnection(wp->sid);
+		}
+		///如果是点击停止使之退出的,那么信号量现在是0,
+		///为了下次使用,加1.如果自然结束退出,信号量还是1不变.
+		if (semctl(semid, 0, GETVAL, 0)==0) {
+			printf("点击停止\n");
+			is_monmsg = 0;
+			sb.sem_num = 0;
+			sb.sem_op = 1;
+			sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
+			semop(semid, &sb, 1);
+		}
+		websDone(wp, 200);
+		pclose(pf);
 	}
-	while (fgets(line, 256-1, pf)) {
-		printf("%s", line);
-		websWrite(wp, T("%s"), line);
-		//websDone(wp, 200);
-		//websTimeoutCancel(wp);
-		//socketSetBlock(wp->sid, 1);
-		//socketFlush(wp->sid);
-		//socketCloseConnection(wp->sid);
-	}
-	websDone(wp, 200);
-	pclose(pf);
 }
 void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
-	is_monmsg = 0;
+	sb.sem_num = 0;     //将0号信号量
+	sb.sem_op = -1;     //减1
+	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
+	semop(semid, &sb, 1);     //操作信号量
+//	is_monmsg = 0;
+//	sb.sem_num = 1;
+//	sb.sem_op = 1;
+//	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
+//	semop(semid, &sb, 1);
+	printf("信号量 s :%d \n", semctl(semid, 0, GETVAL, 0));
 }
 /**
  * 以split为分割字符,指向下一个项.
