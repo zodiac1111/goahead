@@ -53,7 +53,7 @@ static char *procotol_name[MAX_PROCOTOL_NUM];     ///<规约文件中的规约�
 static int procotol_num = MAX_PROCOTOL_NUM;     ///<规约文件中的实际规约数,初始化为最大
 static char *mon_port_name[MAX_MON_PORT_NUM];     ///<规约文件中的规约名称.
 static int mon_port_num = MAX_MON_PORT_NUM;     ///<规约文件中的实际规约数,初始化为最大
-static int is_monmsg=1;
+static int is_monmsg = 1;
 int main(int argc, char** argv)
 {
 	int i, demo = 1;
@@ -2562,23 +2562,23 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 void form_msg(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
-	is_monmsg=1;
+	is_monmsg = 1;
 	websHeader_pure(wp);
 	FILE* pf;
-	char line[256]={0};
-	pf=popen(query,"r");
-	if(pf==NULL){
+	char line[256] = { 0 };
+	pf = popen(query, "r");
+	if (pf==NULL) {
 		perror("open ping:");
 		return;
 	}
-	while(fgets(line, 256-1, pf)){
-		printf("%s",line);
-		websWrite(wp, T("%s"),line);
+	while (fgets(line, 256-1, pf)) {
+		printf("%s", line);
+		websWrite(wp, T("%s"), line);
 		//websDone(wp, 200);
-		websTimeoutCancel(wp);
-				socketSetBlock(wp->sid, 1);
-				socketFlush(wp->sid);
-				socketCloseConnection(wp->sid);
+		//websTimeoutCancel(wp);
+		//socketSetBlock(wp->sid, 1);
+		//socketFlush(wp->sid);
+		socketCloseConnection(wp->sid);
 	}
 	websDone(wp, 200);
 	pclose(pf);
@@ -2586,7 +2586,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
-	is_monmsg=0;
+	is_monmsg = 0;
 }
 /**
  * 以split为分割字符,指向下一个项.
