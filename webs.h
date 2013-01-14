@@ -200,6 +200,7 @@ extern char_t 	*websGetVar(webs_t wp, char_t *var, char_t *def);
 extern int 		 websCompareVar(webs_t wp, char_t *var, char_t *value);
 extern void 	 websHeader(webs_t wp);
 extern void websHeader_GB2312(webs_t wp);
+extern void websHeader_pure(webs_t wp);
 extern int		 websOpenListen(int port, int retries);
 extern int 		 websPageOpen(webs_t wp, char_t *lpath, char_t *path,
 					int mode, int perm);

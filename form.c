@@ -181,6 +181,33 @@ void websHeader_GB2312(webs_t wp)
 	websWrite(wp, T("\n"));
 	websWrite(wp, T("<html>\n"));
 }
+/**
+ * 单纯的web头,用于传递不是html格式的数据.
+ * 相对于上面的头,就是少了<html>.所以也不需要webFooter(</html>)了.
+ * @param wp
+ */
+void websHeader_pure(webs_t wp)
+{
+	a_assert(websValid(wp));
+
+	websWrite(wp, T("HTTP/1.0 200 OK\n"));
+
+/*
+ *	The Server HTTP header below must not be modified unless
+ *	explicitly allowed by licensing terms.
+ */
+#ifdef WEBS_SSL_SUPPORT
+	websWrite(wp, T("Server: %s/%s %s/%s\r\n"),
+		WEBS_NAME, WEBS_VERSION, SSL_NAME, SSL_VERSION);
+#else
+	websWrite(wp, T("Server: %s/%s\r\n"), WEBS_NAME, WEBS_VERSION);
+#endif
+
+	websWrite(wp, T("Pragma: no-cache\n"));
+	websWrite(wp, T("Cache-control: no-cache\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=gb2312\n"));
+	websWrite(wp, T("\r\n"));
+}
 /******************************************************************************/
 /*
  *	Write a webs footer

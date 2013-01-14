@@ -2490,7 +2490,7 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
-	//websHeader_GB2312(wp);
+	websHeader_pure(wp);
 	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
 	int ret;
 	FILE*fp = fopen("./err.log", "r");
