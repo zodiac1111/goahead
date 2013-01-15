@@ -318,6 +318,9 @@ static int initWebs(int demo)
 	websFormDefine(T("load_log"), form_load_log);
 	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
 	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
+	websFormDefine(T("load_procotol_cfg"), form_load_procotol_cfgfile);
+	websFormDefine(T("save_procotol_cfg"), form_save_procotol_cfgfile);
+
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
 
@@ -2493,6 +2496,10 @@ static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	save_file(wp, path, query, MON_PORT_NAME_FILE);
 }
+ void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	save_file(wp, path, query, PORC_FILE);
+}
 void save_file(webs_t wp, char_t *path, char_t *query, const char* file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
@@ -2547,7 +2554,10 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
-
+ void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	load_file(wp, path, query, PORC_FILE);
+}
 static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	load_file(wp, path, query, MON_PORT_NAME_FILE);
@@ -2634,6 +2644,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 }
 void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 {
+	websHeader_pure(wp);
 	printf("%s:%s\n", __FUNCTION__, query);
 	sb.sem_num = 0;     //将0号信号量
 	sb.sem_op = -1;     //减1
@@ -2645,6 +2656,8 @@ void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 //	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
 //	semop(semid, &sb, 1);
 	printf("信号量 s :%d \n", semctl(semid, 0, GETVAL, 0));
+	websWrite(wp, T("ok"));
+	websDone(wp, 200);
 }
 /**
  * 以split为分割字符,指向下一个项.
