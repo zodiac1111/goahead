@@ -94,9 +94,9 @@ int read_protocol_file(char *protocol_names[], int *num, const char* file)
 	}
 	*num = i;
 	//查看一下
-	printf("read_protocol_file: num=%d\n", i);
+	//printf("read_protocol_file: num=%d\n", i);
 	for (i = 0; i < *num; i++) {
-		printf("\t[%d]: %s\n", i, protocol_names[i]);
+		//printf("\t[%d]: %s\n", i, protocol_names[i]);
 	}
 	return 0;
 }
@@ -143,9 +143,9 @@ int init_monparam_port_name(char *port_name[], int *num, const char* file)
 		i++;
 	}
 	*num = i;
-	printf("init_monparam_port_name: fact_num=%d\n", i);
+	//printf("init_monparam_port_name: fact_num=%d\n", i);
 	for (i = 0; i < *num; i++) {
-		printf("\t[%d]: %s\n", i, port_name[i]);
+		//printf("\t[%d]: %s\n", i, port_name[i]);
 	}
 	return 0;
 }

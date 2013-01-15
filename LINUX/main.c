@@ -265,14 +265,18 @@ static int initWebs(int demo)
 	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
 	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
 	                WEBS_HANDLER_LAST);
-	printf("监视端口文件:%s", MON_PORT_NAME_FILE);
+	//printf("监视端口文件:%s", MON_PORT_NAME_FILE);
 	//载入配置文件
 	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
 	                MON_PORT_NAME_FILE)) {
 		web_err_proc(EL);
+	}else{
+		printf("init_monparam_port_name:OK\n");
 	}
 	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
 		web_err_proc(EL);
+	}else{
+		printf("read_protocol_file:OK\n");
 	}
 	/*
 	 *	Now define two test procedures. Replace these with your application
@@ -1708,7 +1712,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	//int no;
 	//stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	websHeader_pure(wp);
+	websHeader_GB2312(wp);
 	for (no = 0; no<sysparam.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
@@ -1723,7 +1727,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	//websFooter(wp);
+	websFooter(wp);
 	websDone(wp, 200);
 	//reflash_this_wp(wp, PAGE_COM_PARAMETER);
 }
