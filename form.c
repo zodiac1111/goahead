@@ -139,7 +139,7 @@ void websHeader(webs_t wp)
 {
 	a_assert(websValid(wp));
 
-	websWrite(wp, T("HTTP/1.0 200 OK\n"));
+	websWrite(wp, T("HTTP/1.0 200 OK\r\n"));
 
 /*
  *	The Server HTTP header below must not be modified unless
@@ -152,9 +152,9 @@ void websHeader(webs_t wp)
 	websWrite(wp, T("Server: %s/%s\r\n"), WEBS_NAME, WEBS_VERSION);
 #endif
 
-	websWrite(wp, T("Pragma: no-cache\n"));
-	websWrite(wp, T("Cache-control: no-cache\n"));
-	websWrite(wp, T("Content-Type: text/html;charset=utf-8\n"));
+	websWrite(wp, T("Pragma: no-cache\r\n"));
+	websWrite(wp, T("Cache-control: no-cache\r\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=UTF-8\r\n"));
 	websWrite(wp, T("\r\n"));
 	websWrite(wp, T("<html>\n"));
 }
@@ -175,9 +175,9 @@ void websHeader_GB2312(webs_t wp)
 	websWrite(wp, T("Server: %s/%s\r\n"), WEBS_NAME, WEBS_VERSION);
 #endif
 
-	websWrite(wp, T("Pragma: no-cache\n"));
-	websWrite(wp, T("Cache-control: no-cache\n"));
-	websWrite(wp, T("Content-Type: text/html;charset=gb2312\n"));
+	websWrite(wp, T("Pragma: no-cache\r\n"));
+	websWrite(wp, T("Cache-control: no-cache\r\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=gb2312\r\n"));
 	websWrite(wp, T("\r\n"));
 	websWrite(wp, T("<html>\n"));
 }
@@ -205,7 +205,7 @@ void websHeader_pure(webs_t wp)
 
 	websWrite(wp, T("Pragma: no-cache\r\n"));
 	websWrite(wp, T("Cache-control: no-cache\r\n"));
-	websWrite(wp, T("Content-Type: text/html;charset=utf8\r\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=UTF-8\r\n"));
 	websWrite(wp, T("\r\n"));
 }
 void websHeader_pure_GB2312(webs_t wp)

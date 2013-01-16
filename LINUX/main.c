@@ -1729,7 +1729,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 #endif
 	websWrite(wp, T("Pragma: no-cache\r\n"));
 	websWrite(wp, T("Cache-control: no-cache\r\n"));
-	websWrite(wp, T("Content-Type: text/html;charset=utf8\r\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=UTF-8\r\n"));
 	websWrite(wp, T("\r\n"));
 
 	for (no = 0; no<sysparam.sioplan_num; no++) {
