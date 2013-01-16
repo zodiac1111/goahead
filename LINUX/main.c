@@ -2574,7 +2574,7 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 {
 
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
-	websHeader_pure_GB2312(wp);
+	websHeader_pure(wp);
 	char buf[1024] = { 0 };
 	int ret;
 	FILE*fp = fopen(file, "r");
