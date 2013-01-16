@@ -1712,7 +1712,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	//int no;
 	//stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	websHeader_GB2312(wp);
+	websHeader_pure_GB2312(wp);
 	for (no = 0; no<sysparam.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
@@ -1727,7 +1727,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	websFooter(wp);
+//	websFooter(wp);
 	websDone(wp, 200);
 	//reflash_this_wp(wp, PAGE_COM_PARAMETER);
 }
@@ -2528,7 +2528,8 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
-	websHeader_pure(wp);
+	//websHeader_pure(wp);
+	websHeader_pure_GB2312(wp);
 	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
 	int ret;
 	FILE*fp = fopen("./err.log", "r");
@@ -2570,7 +2571,7 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
-	websHeader_pure(wp);
+	websHeader_pure_GB2312(wp);
 	char buf[1024] = { 0 };
 	int ret;
 	FILE*fp = fopen(file, "r");
@@ -2605,7 +2606,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 	pid_t pid;
 	is_monmsg = 1;
 	if ((pid = fork())==0) {
-		websHeader_pure(wp);
+		websHeader_pure_GB2312(wp);
 		FILE* pf;
 		char line[256] = { 0 };
 		pf = popen(query, "r");
