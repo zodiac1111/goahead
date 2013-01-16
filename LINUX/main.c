@@ -2526,50 +2526,53 @@ void save_file(webs_t wp, char_t *path, char_t *query, const char* file)
  */
 static void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s:%s\n", __FUNCTION__, query);
+	//printf("%s:%s\n", __FUNCTION__, query);
+	load_file(wp, path, query, ERR_LOG);
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
 	//websHeader_pure(wp);
-	websHeader_pure_GB2312(wp);
-	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
-	int ret;
-	FILE*fp = fopen("./err.log", "r");
-	if (fp==NULL) {
-		websWrite(wp, T("No log."));
-		goto WEB_END;
-	}
-	while (1) {
-		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
-		if (ret>0) {
-			websWrite(wp, T("%s"), buf);
-		} else {
-			break;
-		}
-	}
-//	while (ftell(fp) < flen) {
-//		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
-//		//strnum = sscanf(buf, "%255s\n", line);
-//		if (strnum == -1) {  //忽略空行
-//			continue;
-//		}
-//		websWrite(wp, T("%s"), buf);
+//	websHeader_pure_GB2312(wp);
+//	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
+//	int ret;
+//	FILE*fp = fopen("./err.log", "r");
+//	if (fp==NULL) {
+//		websWrite(wp, T("No log."));
+//		goto WEB_END;
 //	}
-	fclose(fp);
-	WEB_END:
-	//websFooter(wp);
-	websDone(wp, 200);
+//	while (1) {
+//		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
+//		if (ret>0) {
+//			websWrite(wp, T("%s"), buf);
+//		} else {
+//			break;
+//		}
+//	}
+////	while (ftell(fp) < flen) {
+////		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
+////		//strnum = sscanf(buf, "%255s\n", line);
+////		if (strnum == -1) {  //忽略空行
+////			continue;
+////		}
+////		websWrite(wp, T("%s"), buf);
+////	}
+//	fclose(fp);
+//	WEB_END:
+//	//websFooter(wp);
+//	websDone(wp, 200);
 	return;
 }
  void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
+	//printf("%s:%s\n", __FUNCTION__, query);
 	load_file(wp, path, query, PORC_FILE);
 }
 static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
+	//printf("%s:%s\n", __FUNCTION__, query);
 	load_file(wp, path, query, MON_PORT_NAME_FILE);
 }
 void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 {
-	printf("%s:%s\n", __FUNCTION__, query);
+
 	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
 	websHeader_pure_GB2312(wp);
 	char buf[1024] = { 0 };
