@@ -1593,7 +1593,7 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, char_t *query,
  */
 static int reflash_this_wp(webs_t wp, const char *page)
 {
-	websHeader_GB2312(wp);
+	websHeader(wp);
 	websWrite(wp, T("<meta http-equiv=refresh content=\"0.01;"
 			"url=%s\">\n"), page);
 	websFooter(wp);
@@ -1712,7 +1712,26 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	//int no;
 	//stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	websHeader_pure_GB2312(wp);
+	//websHeader(wp);
+	/**
+	 * 开始测试http报文格式,头
+	 */
+	websWrite(wp, T("HTTP/1.0 200 OK\r\n"));
+/*
+ *	The Server HTTP header below must not be modified unless
+ *	explicitly allowed by licensing terms.
+ */
+#ifdef WEBS_SSL_SUPPORT
+	websWrite(wp, T("Server: %s/%s %s/%s\r\n"),
+		WEBS_NAME, WEBS_VERSION, SSL_NAME, SSL_VERSION);
+#else
+	websWrite(wp, T("Server: %s/%s\r\n"), WEBS_NAME, WEBS_VERSION);
+#endif
+	websWrite(wp, T("Pragma: no-cache\r\n"));
+	websWrite(wp, T("Cache-control: no-cache\r\n"));
+	websWrite(wp, T("Content-Type: text/html;charset=utf8\r\n"));
+	websWrite(wp, T("\r\n"));
+
 	for (no = 0; no<sysparam.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
@@ -1727,7 +1746,7 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-//	websFooter(wp);
+	//websFooter(wp);
 	websDone(wp, 200);
 	//reflash_this_wp(wp, PAGE_COM_PARAMETER);
 }
@@ -2151,7 +2170,7 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 		sysparam.sioplan_num = sioplan_num;
 		ret = save_sysparam(&sysparam, CFG_SYS);
 	}
-	websHeader_GB2312(wp);     //头和尾完成了除head和body标签在内的东西
+	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
 //设置完成自动跳转回原来的页面.
 	websWrite(wp, T("<head>\n"));
 	websWrite(wp, T("<title>"CSTR_SET_PARAM"</title>\n"));
@@ -2274,7 +2293,7 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	return;
 	///@note 是否需要返回给用户信息? 待定
 	//写页面
-	websHeader_GB2312(wp);     //头和尾完成了除head和body标签在内的东西
+	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
 	//设置完成自动跳转回原来的页面.
 	websWrite(wp, T("<head>\n"));
 	websWrite(wp, T("<title>"CSTR_RETURN"</title>\n"));
@@ -2405,10 +2424,7 @@ static void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
 	printf("时间戳范围:%s~%s\n", stime_t, etime_t);
 	TimeRange tr;
-	struct tm stTime;
-	time_t t;     //1970年到目前的秒数 long int
 	int ret;
-	int i = 0;
 	//int tou_test=1100;
 	int mtr_no = 0;
 	stTou tou;
@@ -2432,8 +2448,6 @@ static void form_history_tou(webs_t wp, char_t *path, char_t *query)
 //	tr.e+=8*60*60;
 //	printf("时间戳校正(数值)范围:%ld~%ld\n", tr.s, tr.e);
 #endif
-	//tr.s = time(NULL );
-	//tr.e = tr.s + 60 * 60;  //60分钟,没分钟60秒
 	websHeader_pure(wp);
 	ret = load_tou_dat(mtr_no, tr, &tou, wp);
 	if (ret==ERR) {
@@ -2441,38 +2455,6 @@ static void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	}
 	//websFooter(wp);
 	websDone(wp, 200);
-	return;
-
-	//websHeader_GB2312(wp);
-	int cycle = 60*15;
-	//[start,end]两边闭区间
-	for (t = tr.s; t<=tr.e; t += cycle) {     //测试15分钟为一周期
-		int t_mod = t%cycle;     //向上园整至采样周期.
-		if (t_mod!=0) {     //需要园整
-			t += (cycle-t_mod);
-		}
-#if __i386 == 1
-		localtime_r(&t, &stTime);
-#elif __arm__ == 1
-		gmtime_r(&t, &stTime);
-#endif
-		printf("Time Zone:%s\n", stTime.tm_zone);
-		websWrite(wp, T("<tr>"));
-		websWrite(wp, T("<td%s>%d</td>"), TD_CLASS, mtr_no);
-		websWrite(wp, T("<td%s>%d</td>"), TD_CLASS, i++);
-		websWrite(wp, T("<td%s>%04d-%02d-%02d %02d:%02d:%02d %s</td>"),
-		                TD_CLASS, stTime.tm_year+1900,
-		                stTime.tm_mon+1, stTime.tm_mday,
-		                stTime.tm_hour, stTime.tm_min,
-		                stTime.tm_sec, stTime.tm_zone);
-
-		webWrite1Tou(wp, tou);
-
-		websWrite(wp, T("</tr>\n"));
-	}
-
-	//reflash_this_wp(wp, PAGE_NET_PARAMETER);
-
 	return;
 }
 /**
@@ -2528,36 +2510,6 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
 	//printf("%s:%s\n", __FUNCTION__, query);
 	load_file(wp, path, query, ERR_LOG);
-	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
-	//websHeader_pure(wp);
-//	websHeader_pure_GB2312(wp);
-//	char buf[MAX_ERR_LOG_LINE_LENTH] = { 0 };
-//	int ret;
-//	FILE*fp = fopen("./err.log", "r");
-//	if (fp==NULL) {
-//		websWrite(wp, T("No log."));
-//		goto WEB_END;
-//	}
-//	while (1) {
-//		ret = fread(&buf, sizeof(char), MAX_ERR_LOG_LINE_LENTH, fp);
-//		if (ret>0) {
-//			websWrite(wp, T("%s"), buf);
-//		} else {
-//			break;
-//		}
-//	}
-////	while (ftell(fp) < flen) {
-////		fgets(buf, MAX_ERR_LOG_LINE_LENTH, fp);
-////		//strnum = sscanf(buf, "%255s\n", line);
-////		if (strnum == -1) {  //忽略空行
-////			continue;
-////		}
-////		websWrite(wp, T("%s"), buf);
-////	}
-//	fclose(fp);
-//	WEB_END:
-//	//websFooter(wp);
-//	websDone(wp, 200);
 	return;
 }
  void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
@@ -2609,7 +2561,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 	pid_t pid;
 	is_monmsg = 1;
 	if ((pid = fork())==0) {
-		websHeader_pure_GB2312(wp);
+		websHeader_pure(wp);
 		FILE* pf;
 		char line[256] = { 0 };
 		pf = popen(query, "r");
