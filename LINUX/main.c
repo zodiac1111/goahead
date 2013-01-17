@@ -615,7 +615,7 @@ static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
 static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-转发表计数目:%d \n", monport.forward_mtr_num);
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input class=ntx type=text size=3 maxlength=3 "
 			" onchange=\"verify_forward_mtr_num(event);\" "
 			" name=forward_mtr_num value=\""));
@@ -626,7 +626,7 @@ static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
 static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-转发标志:%d\n", monport.forward_enable);
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input type=checkbox name=forward_chk "
 			"value=%d %s %s>\n"), monport.forward_enable,
 	                (monport.forward_enable) ? "checked" : "",
@@ -641,7 +641,7 @@ static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-时间同步标志:%d\n", monport.chktime_valid_flag);
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input type=checkbox name=time_syn_chk "
 			" value=%d %s %s>\n "), monport.chktime_valid_flag,
 	                (monport.chktime_valid_flag) ? "checked" : "",
@@ -666,7 +666,7 @@ static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 	                monport.prot_addr[1], monport.prot_addr[2],
 	                monport.prot_addr[3]);
 	int i;
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n") );
 	websWrite(wp, T(" <input class=ntx type=text size=4 maxlength=4 "
 			" onchange=\"verify_rtu_addr(event);\" "
 			" name=rtu_addr value=\""));
@@ -681,7 +681,7 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 {
 	printf("监视参数-端口类型?:%x\n", monport.sioplan);
 	int i;
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=protocol>\n"));
 	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s"
@@ -698,7 +698,7 @@ static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport)
 {
 	printf("监视参数-串口方案:%x\n", monport.sioplan);
 	int i;
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=sioplan>\n"));
 	for (i = 0; i<sioplan_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >"CSTR_PLAN
@@ -718,7 +718,7 @@ static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 		printf("%d", monport.listen_port[i]);
 	}
 	printf("\n");
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input type=text name=listenport %s"
 			" onchange=\"verify_port(event);\" "
 			" size=5  maxlength=5 value="), INPUT_CLASS);
@@ -732,7 +732,7 @@ static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-监视参数序号:%x\n", no);
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input type=text name=mon_no %s"
 			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
 	                no);
@@ -743,7 +743,7 @@ static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-使用端口:%x\n", monport.comm_port);
 	int i;
-	websWrite(wp, T("<td%s>\n"), TD_CLASS);
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=commport >\n"));
 	for (i = 0; i<mon_port_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s"
@@ -950,7 +950,7 @@ static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv)
 ///线路名称
 static int webWrite_line(webs_t wp, stMtr mtr)
 {
-	websWrite(wp, T("<td class=sysTDNcLItemStyle  >\n"
+	websWrite(wp, T("<td>\n"
 			"<input class=ntx type=text size=6 maxlength=6 "
 			"onchange=\"line_changed(event);\""
 			"name=line value=\""));
@@ -966,7 +966,7 @@ static int webWrite_line(webs_t wp, stMtr mtr)
 static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 {
 	int i;
-	websWrite(wp, T("<td class=sysTDNcLItemStyle  >\n"
+	websWrite(wp, T("<td>\n"
 			"<input class=ntx type=text size=12 maxlength=12 "
 			"onchange=\"addr_changed(event);\""
 			"name=addr value=\""));
@@ -981,7 +981,7 @@ static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 static int webWrite_pwd(webs_t wp, stMtr mtr)
 {
 	int i;
-	websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	websWrite(wp, T("<td>\n"
 			"<input class=ntx type=text size=8 maxlength=8 "
 			"onchange=\"pwd_changed(event);\""
 			"name=pwd value=\""));
@@ -995,7 +995,7 @@ static int webWrite_pwd(webs_t wp, stMtr mtr)
 /// 电量小数位数
 static int webWrite_it_dot(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			" <input class=ntx type=text size=1 maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			" name=it_dot value=%u>\n</td>\n "), mtr.it_dot);
@@ -1003,7 +1003,7 @@ static int webWrite_it_dot(webs_t wp, stMtr mtr)
 /// 电压小数位数
 static int webWrite_v_dot(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			" <input class=ntx type=text size=1 maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
 			" name=v_dot value=%u >\n</td>\n "), mtr.v_dot);
@@ -1012,7 +1012,7 @@ static int webWrite_v_dot(webs_t wp, stMtr mtr)
 /// 电流小数位数
 static int webWrite_i_dot(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			"<input class=ntx type=text size=1 maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
 			"name=i_dot value=%u>\n</td>\n "), mtr.i_dot);
@@ -1021,7 +1021,7 @@ static int webWrite_i_dot(webs_t wp, stMtr mtr)
 /// 有功功率小数位数
 static int webWrite_p_dot(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			"<input class=ntx type=text size=1 maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			"name=p_dot value=%u>\n</td>\n "), mtr.p_dot);
@@ -1029,7 +1029,7 @@ static int webWrite_p_dot(webs_t wp, stMtr mtr)
 /// 无功功率小数位数
 static int webWrite_q_dot(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			" <input class=ntx type=text size=1 maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			" name=q_dot value=%u>\n</td>\n "), mtr.q_dot);
@@ -1037,7 +1037,7 @@ static int webWrite_q_dot(webs_t wp, stMtr mtr)
 /// 需量小数位数
 static int webWrite_xl_dot(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			" <input class=ntx type=text size=1 maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			" name=xl_dot value=%u>\n</td>\n "), mtr.xl_dot);
@@ -1046,7 +1046,7 @@ static int webWrite_xl_dot(webs_t wp, stMtr mtr)
 /// 额定电压
 static int webWrite_ue(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			" <input class=ntx type=text size=4 "
 			" onchange=\"ue_changed(event);\" "
 			" name=ue value=%u>\n</td>\n "), mtr.ue);
@@ -1054,7 +1054,7 @@ static int webWrite_ue(webs_t wp, stMtr mtr)
 /// 额定电流
 static int webWrite_ie(webs_t wp, stMtr mtr)
 {
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle >\n"
+	return websWrite(wp, T("<td>\n"
 			" <input class=ntx type=text size=4 "
 			" onchange=\"ie_changed(event);\" "
 			" name=ie value=%u>\n</td>\n "), mtr.ie);
@@ -1064,7 +1064,7 @@ static int webWrite_uartport(webs_t wp, stMtr mtr)
 {
 	int i;
 	printf("表计参数-使用串口号:%d\n", mtr.port);
-	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
+	websWrite(wp, T("<td>\n"
 			"<select name=port >\n"));
 	for (i = 0; i<sysparam.sioports_num; i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >com%d</option>\n"), i,
@@ -1079,7 +1079,7 @@ static int webWrite_uartPlan(webs_t wp, stMtr mtr)
 {
 	int i;
 	printf("表计参数-串口方案号:%d 串口数 %d\n", mtr.portplan, sysparam.sioplan_num);
-	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
+	websWrite(wp, T("<td>\n"
 			"<select name=portplan >\n"));
 	for (i = 0; i<sysparam.sioplan_num; i++) {
 		websWrite(
@@ -1099,7 +1099,7 @@ static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
 {
 	int i;
 	printf("表计参数-表计规约:%d\n", mtr.protocol);
-	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
+	websWrite(wp, T("<td>\n"
 			"<select name=protocol >\n"));
 	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
@@ -1206,7 +1206,7 @@ static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 	printf("表计参数-几相几线:%d\n", mtr.p3w4);
 
 	int i;
-	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
+	websWrite(wp, T("<td>\n"
 			"<select name=ph_wire >\n"));
 	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
@@ -1223,7 +1223,7 @@ static int webWrite_factory(webs_t wp, stMtr mtr)
 	int i;
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
 	printf("表计参数-生产厂家:%d\n", mtr.fact);
-	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
+	websWrite(wp, T("<td>\n"
 			"<select name=factory >\n"));
 	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
@@ -1238,7 +1238,7 @@ static int webWrite_iv(webs_t wp, stMtr mtr)
 {
 	//PRINT_HERE;
 	printf("表计参数-有效标志:%x\n", mtr.iv);
-	websWrite(wp, T("<td class=sysTDNcLItemStyle>\n"
+	websWrite(wp, T("<td>\n"
 			"<input type=checkbox  name=iv_check value=\"%d\" %s "
 			" id=ivchk onclick=\"chk_change(event);\" >"
 			"\n"), mtr.iv&0x01, (mtr.iv&0x01) ? "checked" : "");
@@ -1257,7 +1257,7 @@ static int webWrite_iv(webs_t wp, stMtr mtr)
 static int webWrite_mtrno(webs_t wp, int no)
 {
 	printf("表计参数-表号:%d\n", no);
-	return websWrite(wp, T("<td class=sysTDNcLItemStyle align=center>"
+	return websWrite(wp, T("<td>"
 			"<input type=text class=ntx name=mtrno align=center "
 			" readonly=readonly size=1 value=%d>"
 			"</td>\n"), no);
