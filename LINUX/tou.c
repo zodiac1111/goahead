@@ -188,7 +188,7 @@ char * float2string(u8 const float_array[4], char * strval)
 //	vfloat[0] = float_array[0];
 //	float val;
 //	val = *(float*) (&float_array[0]);
-	sprintf(strval, "%.3f", *(float*) (&float_array[0]));
+	sprintf(strval, "%g", *(float*) (&float_array[0]));
 	return strval;
 }
 //写一条电量Tou数据
