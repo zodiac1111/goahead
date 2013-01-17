@@ -69,8 +69,8 @@ union semun
 	struct seminfo *__buf;
 };
 struct sembuf sb;     //信号量操作
-union semun sem; ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
-int  semid;///<信号量id
+union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
+int semid;     ///<信号量id
 void init_semun(void)
 {
 	///申请信号量组，包含1个信号量
@@ -270,12 +270,12 @@ static int initWebs(int demo)
 	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
 	                MON_PORT_NAME_FILE)) {
 		web_err_proc(EL);
-	}else{
+	} else {
 		printf("init_monparam_port_name:OK\n");
 	}
 	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
 		web_err_proc(EL);
-	}else{
+	} else {
 		printf("read_protocol_file:OK\n");
 	}
 	/*
@@ -1717,13 +1717,13 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 	 * 开始测试http报文格式,头
 	 */
 	websWrite(wp, T("HTTP/1.0 200 OK\r\n"));
-/*
- *	The Server HTTP header below must not be modified unless
- *	explicitly allowed by licensing terms.
- */
+	/*
+	 *	The Server HTTP header below must not be modified unless
+	 *	explicitly allowed by licensing terms.
+	 */
 #ifdef WEBS_SSL_SUPPORT
 	websWrite(wp, T("Server: %s/%s %s/%s\r\n"),
-		WEBS_NAME, WEBS_VERSION, SSL_NAME, SSL_VERSION);
+			WEBS_NAME, WEBS_VERSION, SSL_NAME, SSL_VERSION);
 #else
 	websWrite(wp, T("Server: %s/%s\r\n"), WEBS_NAME, WEBS_VERSION);
 #endif
@@ -2289,6 +2289,44 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	} else {
 		saveret = mtr_num;
 	}
+	/**
+	 * TODO post 返回 测试等待确定
+	 */
+	websHeader_pure( wp);
+	int no;
+	//stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
+	printf("%s\n", __FUNCTION__);
+	for (no = 0; no<sysparam.meter_num; no++) {
+		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		websWrite(wp, T("<tr>\n"));     //一行
+		(void) webWrite_mtrno(wp, no);
+		(void) webWrite_iv(wp, mtr);
+		(void) webWrite_line(wp, mtr);
+		(void) webWrite_mtraddr(wp, mtr);
+		(void) webWrite_pwd(wp, mtr);
+		(void) webWrite_uartport(wp, mtr);
+		(void) webWrite_uartPlan(wp, mtr);
+		(void) webWrite_mtr_protocol(wp, mtr);
+		(void) webWrite_factory(wp, mtr);
+		(void) webWrite_ph_wire(wp, mtr);
+		(void) webWrite_it_dot(wp, mtr);
+		(void) webWrite_xl_dot(wp, mtr);
+		(void) webWrite_v_dot(wp, mtr);
+		(void) webWrite_i_dot(wp, mtr);
+		(void) webWrite_p_dot(wp, mtr);
+		(void) webWrite_q_dot(wp, mtr);
+		(void) webWrite_ue(wp, mtr);
+		(void) webWrite_ie(wp, mtr);
+		websWrite(wp, T("</tr>\n"));
+	}
+	websDone(wp, 200);
+	return;
+	/**
+	 * 测试,等待删除 TODO
+	 */
 	reflash_this_wp(wp, PAGE_METER_PARAMETER);
 	return;
 	///@note 是否需要返回给用户信息? 待定
@@ -2482,7 +2520,7 @@ static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	save_file(wp, path, query, MON_PORT_NAME_FILE);
 }
- void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	save_file(wp, path, query, PORC_FILE);
 }
@@ -2512,7 +2550,7 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 	load_file(wp, path, query, ERR_LOG);
 	return;
 }
- void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	//printf("%s:%s\n", __FUNCTION__, query);
 	load_file(wp, path, query, PORC_FILE);
