@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <errno.h>
 #include "../uemf.h"
 #include "../wsIntrn.h"
@@ -43,6 +44,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 	time_t t2;     //时刻
 	u32 mincycle = 0;
 	stTou tou;
+	memset(&tou, 0x0, sizeof(stTou));
 	//time_t t_cur = range.s;
 	FILE*fp;
 	int flen;
@@ -91,6 +93,10 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			return ERR;
 		}
 		///@todo 检查文件头中是否和请求的日期相一致.
+		if (isRightDate(filehead, t)==0) {
+			printf("日期不对.\n");
+			continue;
+		}
 		int cycle = (filehead.save_cycle_hi*256)
 		                +filehead.save_cycle_lo;
 		mincycle = cycle;
@@ -128,6 +134,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			continue;
 		}
 		while (ftell(fp)<flen&&t2<=etime) {
+			memset(&tou, 0x0, sizeof(stTou));
 			//t_cur += cycle * 60;
 			int n = fread(&tou, sizeof(stTou), 1, fp);
 			if (n!=1) {
@@ -135,7 +142,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 				return ERR;
 			}
 			//成功
-			write2web( t2,  wp,   tou, i, mtr_no);
+			write2web(t2, wp, tou, i, mtr_no);
 			i++;
 			t2 += (mincycle*60);
 		}
@@ -152,7 +159,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
  * @param mtr_no
  * @return
  */
-int write2web(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no)
+int write2web(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
 {
 	struct tm t;
 #if __arm__ ==2
@@ -172,54 +179,101 @@ int write2web(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no)
 	websWrite(wp, T("</tr>\n"));
 	return 0;
 }
+char * float2string(u8 const float_array[4], char * strval)
+{
+//	char vfloat[4];
+//	vfloat[3] = float_array[3];
+//	vfloat[2] = float_array[2];
+//	vfloat[1] = float_array[1];
+//	vfloat[0] = float_array[0];
+//	float val;
+//	val = *(float*) (&float_array[0]);
+	sprintf(strval, "%.3f", *(float*) (&float_array[0]));
+	return strval;
+}
 //写一条电量Tou数据
 int webWrite1Tou(webs_t wp, const stTou tou)
 {
+	char strval[32];
 	///用于显示无效的样式,有效的使用默认的
 	const char *iv = " style=\"color: gray;\" ";
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FA.total.iv ? "" : iv, tou.FA.total.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FA.tip.iv ? "" : iv, tou.FA.tip.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FA.peak.iv ? "" : iv, tou.FA.peak.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FA.flat.iv ? "" : iv, tou.FA.flat.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FA.valley.iv ? iv : "", tou.FA.valley.val);
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FA.total.iv ? iv:"" ,
+	                float2string(tou.FA.total.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FA.tip.iv ? iv:"" ,
+	                float2string(tou.FA.tip.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FA.peak.iv ? iv:"" ,
+	                float2string(tou.FA.peak.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FA.flat.iv ? iv:"" ,
+	                float2string(tou.FA.flat.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FA.valley.iv ? iv : "",
+	                float2string(tou.FA.valley.byte0, strval));
 
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RA.total.iv ? "" : iv, tou.RA.total.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RA.tip.iv ? "" : iv, tou.RA.tip.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RA.peak.iv ? "" : iv, tou.RA.peak.val);
-	websWrite(wp, T("<td %s>%d</td>") ,
-	                tou.RA.flat.iv ? "" : iv, tou.RA.flat.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RA.valley.iv ? iv : "", tou.RA.valley.val);
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RA.total.iv ? iv:"" ,
+	                float2string(tou.RA.total.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RA.tip.iv ? iv:"" ,
+	                float2string(tou.RA.tip.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RA.peak.iv ? iv:"" ,
+	                float2string(tou.RA.peak.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RA.flat.iv ? iv:"" ,
+	                float2string(tou.RA.flat.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RA.valley.iv ? iv : "",
+	                float2string(tou.RA.valley.byte0, strval));
 
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FR.total.iv ? "" : iv, tou.FR.total.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FR.tip.iv ? "" : iv, tou.FR.tip.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FR.peak.iv ? "" : iv, tou.FR.peak.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FR.flat.iv ? "" : iv, tou.FR.flat.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.FR.valley.iv ? iv : "", tou.FR.valley.val);
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FR.total.iv ? iv:"" ,
+	                float2string(
+	                               tou.FR.total.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FR.tip.iv ? iv:"" ,
+	                float2string(tou.FR.tip.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FR.peak.iv ? iv:"" ,
+	                float2string(tou.FR.peak.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FR.flat.iv ? iv:"" ,
+	                float2string(tou.FR.flat.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.FR.valley.iv ? iv : "",
+	                float2string(tou.FR.valley.byte0, strval));
 
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RR.total.iv ? "" : iv, tou.RR.total.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RR.tip.iv ? "" : iv, tou.RR.tip.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RR.peak.iv ? "" : iv, tou.RR.peak.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RR.flat.iv ? "" : iv, tou.RR.flat.val);
-	websWrite(wp, T("<td %s>%d</td>"),
-	                tou.RR.valley.iv ? iv : "", tou.RR.valley.val);
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RR.total.iv ? iv:"" ,
+	                float2string(tou.RR.total.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RR.tip.iv ? iv:"" ,
+	                float2string(tou.RR.tip.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RR.peak.iv ? iv:"",
+	                float2string(tou.RR.peak.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RR.flat.iv ?  iv:"",
+	                float2string(tou.RR.flat.byte0, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                tou.RR.valley.iv ? iv : "",
+	                float2string(tou.RR.valley.byte0, strval));
 
 	return 0;
+}
+/**
+ * 比较文件头中的
+ * @param filehead
+ * @param t
+ * @return
+ */
+int isRightDate(const stTouFilehead filehead, struct tm t)
+{
+	if (filehead.month!=t.tm_mon+1) {
+		return 0;
+	}
+	return 1;
 }

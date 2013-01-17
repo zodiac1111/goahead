@@ -28,7 +28,8 @@ typedef struct {
 }stTouFilehead;
 ///某单独电量结构,如 总电量 或者 谷电量
 typedef struct {
-	int val;///<数值
+	//float val;///<数值
+	u8 byte0[4];
 	union{
 		u8 byte;
 		struct{
@@ -61,5 +62,6 @@ typedef struct{
 int load_tou_dat(u32 mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
 int webWrite1Tou(webs_t wp,const stTou tou);
 int write2web(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
+int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
 #pragma pack()
 #endif
