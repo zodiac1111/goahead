@@ -312,7 +312,7 @@ static int initWebs(int demo)
 	websFormDefine(T("formTest"), form_set_mtrparams);
 	websFormDefine(T("sysparam"), form_set_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
-	websFormDefine(T("netpara"), form_set_netparas);
+	websFormDefine(T("netpara"), form_netparas);
 	websFormDefine(T("monparas"), form_set_monparas);
 	websFormDefine(T("savecycle"), form_set_savecycle);
 	websFormDefine(T("reset"), form_reset);
@@ -1613,12 +1613,14 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
+	websHeader(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init!='0') {
-		webWrite_sioplans(wp, sysparam);
+	if (*init=='1') {
+		webSet_sioplans(wp, sysparam);
 	} else {
-		webRead_sioplans(wp);
+		webGet_sioplans(wp);
 	}
+	websDone(wp, 200);
 	return;
 }
 /**
@@ -1626,7 +1628,7 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
  * @param wp
  * @return
  */
-int webRead_sioplans(webs_t wp)
+int webGet_sioplans(webs_t wp)
 {
 	int n = 0;
 	unsigned char no;
@@ -1703,12 +1705,11 @@ int webRead_sioplans(webs_t wp)
  * @param plan 串口方案
  * @param sp 系统参数
  */
-int webWrite_sioplans(webs_t wp, stSysParam sp)
+int webSet_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
 	stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	websHeader(wp);
 	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
@@ -1723,7 +1724,6 @@ int webWrite_sioplans(webs_t wp, stSysParam sp)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	websDone(wp, 200);
 	return 0;
 }
 /**
@@ -2003,11 +2003,16 @@ int portstr2u8(const char * str, u8* val)
 	*val = tmp;
 	return i+1;
 }
+/**
+ * 网口参数(所有): 文件->页面
+ * @param wp
+ * @param sysparam
+ * @return
+ */
 int webWrite_netparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stNetparam netparam;
-	websHeader(wp);
 	for (no = 0; no<sysparam.netports_num; no++) {
 		if (-1==load_netparam(&netparam, CFG_NET, no)) {
 			web_err_proc(EL);
@@ -2021,7 +2026,7 @@ int webWrite_netparas(webs_t wp, stSysParam sysparam)
 		(void) webWrite_gateway(wp, no, netparam);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	websDone(wp, 200);
+
 	return 0;
 }
 /**
@@ -2073,16 +2078,18 @@ int webGet_netparas(webs_t  wp)
  * @param path
  * @param query
  */
-static void form_set_netparas(webs_t wp, char_t *path, char_t *query)
+static void form_netparas(webs_t wp, char_t *path, char_t *query)
 {
 	printf("form_set_netparas :");
 	printf("query:%s\n", query);
+	websHeader(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init!='0') {
+	if (*init=='1') {
 		webWrite_netparas(wp, sysparam);
 	} else {
-		//webRead_sioplans(wp);
+		webGet_netparas(wp);
 	}
+	websDone(wp, 200);
 	return;
 
 //	int offset = 0;

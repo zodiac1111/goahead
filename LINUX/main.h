@@ -91,8 +91,8 @@ static int webWrite_iv( webs_t wp,stMtr mtr);
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp,
                         char_t *query,u32 e[MAX_MTR_NUM]);
 //串口方案项目
-int webWrite_sioplans(webs_t wp,stSysParam sp);
-int webRead_sioplans(webs_t wp);
+int webSet_sioplans(webs_t wp,stSysParam sp);
+int webGet_sioplans(webs_t wp);
 static int webWrite_plan_no(webs_t wp,int no,stUart_plan plan);
 static int webWrite_parity(webs_t wp,int no,stUart_plan plan);
 static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan);
