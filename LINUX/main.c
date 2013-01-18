@@ -303,7 +303,7 @@ static int initWebs(int demo)
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
 	websFormDefine(T("monparas"), form_monparas);
-	websFormDefine(T("savecycle"), form_set_savecycle);
+	websFormDefine(T("savecycle"), form_savecycle);
 	websFormDefine(T("reset"), form_reset);
 	websFormDefine(T("get_tou"), form_history_tou);
 	websFormDefine(T("save_log"), form_save_log);
@@ -353,7 +353,8 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 {
-	stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
+	stMtr mtr;
+	memset(&mtr, 0x00, sizeof(stMtr));
 	int ret = load_mtrparam(&mtr, CFG_MTR, g_cur_mtr_no);
 	if (ret==-1) {
 		PRINT_HERE
@@ -375,7 +376,8 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int no;
-	stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
+	stMtr mtr;
+	memset(&mtr, 0x00, sizeof(stMtr));
 	printf("%s\n", __FUNCTION__);
 	for (no = 0; no<sysparam.meter_num; no++) {
 		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
@@ -657,7 +659,7 @@ static int webWrite_parity(webs_t wp, int no, stUart_plan plan)
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <select name=parity >\n"));
-	for (i = 0; i<sizeof(UART_P)/sizeof(UART_P[0]); i++) {
+	for (i = 0; i<(int) (sizeof(UART_P)/sizeof(UART_P[0])); i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
 		                (i==plan.parity) ?
 		                                   "selected=\"selected\"" :
@@ -674,7 +676,8 @@ static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan)
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <select name=data >\n"));
-	for (i = 0; i<sizeof(UART_DAT_BIT)/sizeof(UART_DAT_BIT[0]); i++) {
+	for (i = 0; i<(int) (sizeof(UART_DAT_BIT)/sizeof(UART_DAT_BIT[0]));
+	                i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
 		                (i+7==plan.data) ?
 		                                   "selected=\"selected\"" :
@@ -688,7 +691,7 @@ static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan)
 static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan)
 {
 	//printf("串口方案-停止位:%x\n", plan.stop);
-	int i;
+	u32 i;
 	websWrite(wp, T("<td>\n"
 			" <select name=stop >\n"));
 	for (i = 0; i<sizeof(UART_STOP)/sizeof(UART_STOP[0]); i++) {
@@ -703,7 +706,7 @@ static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan)
 static int webWrite_baud(webs_t wp, int no, stUart_plan plan)
 {
 	//printf("串口方案-波特率(300*2^BaudByte=Baud):%x  \n", plan.baud);
-	int i;
+	u32 i;
 	websWrite(wp, T("<td>\n"
 			" <select name=baud >\n"));
 	for (i = 0; i<sizeof(UART_BAUD)/sizeof(UART_BAUD[0]); i++) {
@@ -718,7 +721,7 @@ static int webWrite_baud(webs_t wp, int no, stUart_plan plan)
 static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
 {
 	//printf("串口方案-通讯方式(0-异步,1同步): %x \n", plan.Commtype);
-	int i;
+	u32 i;
 	websWrite(wp, T("<td>\n<select name=comm_type >\n"));
 	for (i = 0; i<sizeof(UART_COMM_TYPE)/sizeof(UART_COMM_TYPE[0]);
 	                i++) {
@@ -968,7 +971,7 @@ static int asp_list_sioplan(int eid, webs_t wp, int argc, char_t **argv)
 static int asp_factory(int eid, webs_t wp, int argc, char_t **argv)
 {
 //PRINT_HERE;
-	int i;
+	u32 i;
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
 	printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
 	websWrite(wp, T("<select name=all_factory "));
@@ -989,7 +992,7 @@ static int asp_factory(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int ph_wire2(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int i;
+	u32 i;
 	//就一个选择列表框.
 	websWrite(wp, T("<select name=ph_wire_all "
 			"onchange=\"type_all_changed(event);\">\n"));
@@ -1002,10 +1005,8 @@ static int ph_wire2(int eid, webs_t wp, int argc, char_t **argv)
 /// 几相几线制,就两种情况 0-3相3线 1-3相4线
 static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 {
-//PRINT_HERE;
 	printf("表计参数-几相几线:%d\n", mtr.p3w4);
-
-	int i;
+	u32 i;
 	websWrite(wp, T("<td>\n"
 			"<select name=ph_wire >\n"));
 	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
@@ -1019,8 +1020,7 @@ static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 /// 生产厂家
 static int webWrite_factory(webs_t wp, stMtr mtr)
 {
-//PRINT_HERE;
-	int i;
+	u32 i;
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
 	printf("表计参数-生产厂家:%d\n", mtr.fact);
 	websWrite(wp, T("<td>\n"
@@ -2084,7 +2084,8 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	mtr_param_print_item(wp);	///<debug
 	int ret = -1;
 	int i;
-	stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
+	stMtr mtr;
+	memset(&mtr, 0x00, sizeof(stMtr));
 	int saveret = -1;
 	u32 erritem = 0b000000000000000000;	//一共十八项
 //操作
@@ -2254,7 +2255,6 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("\">"));
 	websWrite(wp, T("</p>\n"));
 	websWrite(wp, T("</body>\n"));
-//页脚
 	websFooter(wp);
 	websDone(wp, 200);
 	return;
@@ -2330,7 +2330,7 @@ int webSet_savecycle(webs_t wp)
 	websWrite(wp, T("%s"), CSTR_SAVECYCLE_CYCLE);
 	websWrite(wp, T("</td>\n"));
 	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
-		int j;
+		u32 j;
 		websWrite(wp, T("<td>\n"));
 		websWrite(wp, T("<select name=cycle >\n"));
 		for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);
@@ -2349,7 +2349,7 @@ int webSet_savecycle(webs_t wp)
  * @param path
  * @param query
  */
-static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
+void form_savecycle(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);

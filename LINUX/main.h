@@ -50,7 +50,7 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query);
 void form_sioplans(webs_t wp, char_t *path, char_t *query);
 void form_netparas(webs_t wp, char_t *path, char_t *query);
 void form_monparas(webs_t wp, char_t *path, char_t *query);
-static void form_set_savecycle(webs_t wp, char_t *path, char_t *query);
+ void form_savecycle(webs_t wp, char_t *path, char_t *query);
 static void form_reset(webs_t wp, char_t *path, char_t *query);
 static void form_history_tou(webs_t wp, char_t *path, char_t *query);
 void form_msg(webs_t wp, char_t *path, char_t *query);
