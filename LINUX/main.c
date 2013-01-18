@@ -299,7 +299,6 @@ static int initWebs(int demo)
 	///asp define
 	websAspDefine(T("init_sysparam"), asp_load_sysparam);
 	websAspDefine(T("load_all_mtr_param"), asp_load_all_mtr_param);
-	websAspDefine(T("load_all_sioplan"), asp_load_all_sioplan);
 	websAspDefine(T("get_netparams"), asp_load_netparams);
 	websAspDefine(T("load_monparams"), asp_load_monparams);
 	websAspDefine(T("mtr_protocol"), asp_list_mtr_protocol);
@@ -522,28 +521,6 @@ static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 		(void) webWrite_ue(wp, mtr);
 		(void) webWrite_ie(wp, mtr);
 		websWrite(wp, T("</tr>\n"));
-	}
-	return 0;
-}
-///加载所有串口方案
-static int asp_load_all_sioplan(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int no;
-	stUart_plan plan;
-	printf("%s\n", __FUNCTION__);
-	for (no = 0; no<sysparam.sioplan_num; no++) {
-		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		(void) websWrite(wp, T("<tr>\n"));
-		(void) webWrite_plan_no(wp, no, plan);
-		(void) webWrite_parity(wp, no, plan);
-		(void) webWrite_dat_bit(wp, no, plan);
-		(void) webWrite_stop_bit(wp, no, plan);
-		(void) webWrite_baud(wp, no, plan);
-		(void) webWrite_commtype(wp, no, plan);
-		(void) websWrite(wp, T("</tr>\n"));
 	}
 	return 0;
 }
@@ -1638,18 +1615,34 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
-	stUart_plan plan;
+
 	//int i=0;
+
+
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if(*init!='0'){
+		//printf("页面初始化\n");
+		webWrite_sioplans( wp,sysparam);
+		//return;
+	}else{
+		webRead_sioplans(wp);
+	}
+
+	//printf("save sioplan to file and show to page\n");
+	//webWrite_sioplans( wp, plan,sysparam);
+	return;
+}
+int webRead_sioplans(webs_t wp)
+{
 	int n = 0;
 	unsigned char no;
+	stUart_plan plan;
 	char * sioplanno = websGetVar(wp, T("sioplanno"), T("null"));
 	char * parity = websGetVar(wp, T("parity"), T("null"));
 	char * data = websGetVar(wp, T("data"), T("null"));
 	char * stop = websGetVar(wp, T("stop"), T("null"));
 	char * baud = websGetVar(wp, T("baud"), T("null"));
 	char * comm_type = websGetVar(wp, T("comm_type"), T("null"));
-	//printf("val: \n%s\n%s\n%s\n%s\n%s\n%s\n", sioplanno, parity, data, stop,
-	//		baud, comm_type);
 	/**
 	 * 得到的数组字符串,类似如下:都是一个字节大小的
 	 * 方方方方
@@ -1708,31 +1701,21 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		//最后:保存
 		save_sioplan(&plan, CFG_SIOPALN, no);
 	}
-
-	//int no;
-	//stUart_plan plan;
+	return 0;
+}
+/**
+ * 从文件中读取串口方案,向页面写串口方案.
+ * @param wp
+ * @param plan 串口方案
+ * @param sp 系统参数
+ */
+int webWrite_sioplans(webs_t wp,stSysParam sp)
+{
+	int no;
+	stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
-	//websHeader(wp);
-	/**
-	 * 开始测试http报文格式,头
-	 */
-	websWrite(wp, T("HTTP/1.0 200 OK\r\n"));
-	/*
-	 *	The Server HTTP header below must not be modified unless
-	 *	explicitly allowed by licensing terms.
-	 */
-#ifdef WEBS_SSL_SUPPORT
-	websWrite(wp, T("Server: %s/%s %s/%s\r\n"),
-			WEBS_NAME, WEBS_VERSION, SSL_NAME, SSL_VERSION);
-#else
-	websWrite(wp, T("Server: %s/%s\r\n"), WEBS_NAME, WEBS_VERSION);
-#endif
-	websWrite(wp, T("Pragma: no-cache\r\n"));
-	websWrite(wp, T("Cache-control: no-cache\r\n"));
-	websWrite(wp, T("Content-Type: text/html;charset=UTF-8\r\n"));
-	websWrite(wp, T("\r\n"));
-
-	for (no = 0; no<sysparam.sioplan_num; no++) {
+	websHeader(wp);
+	for (no = 0; no<sp.sioplan_num ; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
 			continue;
@@ -1746,9 +1729,8 @@ static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-	//websFooter(wp);
 	websDone(wp, 200);
-	//reflash_this_wp(wp, PAGE_COM_PARAMETER);
+	return 0;
 }
 /**
  * 把ip地址字符串如"192.168.0.1"转化成为"192.168.000.001"的12字节文件标准格式.

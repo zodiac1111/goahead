@@ -34,7 +34,6 @@
 //系统参数页面(file sysspara.cfg)
 static int asp_load_sysparam(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_load_all_sioplan(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **arg);
@@ -92,6 +91,8 @@ static int webWrite_iv( webs_t wp,stMtr mtr);
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp,
                         char_t *query,u32 e[MAX_MTR_NUM]);
 //串口方案项目
+int webWrite_sioplans(webs_t wp,stSysParam sp);
+int webRead_sioplans(webs_t wp);
 static int webWrite_plan_no(webs_t wp,int no,stUart_plan plan);
 static int webWrite_parity(webs_t wp,int no,stUart_plan plan);
 static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan);
@@ -115,6 +116,7 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport);
 static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport);
 static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport);
 ///其他
+
 static int split(char **ret, char* in);
 static int is_all_equ(int n[],int num);
 int portstr2u8(const char * str,u8* val);
