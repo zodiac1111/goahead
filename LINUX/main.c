@@ -2188,7 +2188,7 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s\n:", __FUNCTION__);
 	printf("query:%s\n", query);
-	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
+	websHeader_pure(wp);     //头和尾完成了除head和body标签在内的东西
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
 		webSet_syspara(wp);
