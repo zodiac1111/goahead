@@ -34,7 +34,6 @@
 //系统参数页面(file sysspara.cfg)
 static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **arg);
 //小项目
 static int asp_list_mtr_protocol(int eid, webs_t wp, int argc, char_t **argv);
@@ -102,6 +101,8 @@ static int webWrite_ip(webs_t wp, int no,stNetparam netparam);
 static int webWrite_mask(webs_t wp, int no,stNetparam netparam);
 static int webWrite_gateway(webs_t wp, int no,stNetparam netparam);
 //监视端口参数
+int webSet_monparas(webs_t wp, stSysParam sysparam);
+int webGet_monparas(webs_t wp,stSysParam sysparam);
 static int webWrite_mon_no(webs_t wp, int no, stMonparam monport);
 static int webWrite_commport(webs_t wp, int no, stMonparam monport);
 static int webWrite_listen_port(webs_t wp, int no, stMonparam monport);

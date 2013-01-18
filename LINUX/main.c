@@ -291,8 +291,7 @@ static int initWebs(int demo)
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///asp define
 	websAspDefine(T("load_all_mtr_param"), asp_load_all_mtr_param);
-	websAspDefine(T("get_netparams"), asp_load_netparams);
-	websAspDefine(T("load_monparams"), asp_load_monparams);
+	//websAspDefine(T("get_netparams"), asp_load_netparams);
 	websAspDefine(T("mtr_protocol"), asp_list_mtr_protocol);
 	websAspDefine(T("savecycle"), asp_load_savecycle);
 	websAspDefine(T("server_time"), asp_server_time);
@@ -481,37 +480,6 @@ static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv)
 		(void) webWrite_ip(wp, no, netparam);
 		(void) webWrite_mask(wp, no, netparam);
 		(void) webWrite_gateway(wp, no, netparam);
-		(void) websWrite(wp, T("</tr>\n"));
-	}
-	return 0;
-}
-/**
- * asp调用 加载所有监视端口参数
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int no;
-	stMonparam monpara;
-	for (no = 0; no<sysparam.monitor_ports; no++) {
-		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		(void) websWrite(wp, T("<tr>\n"));
-		(void) webWrite_mon_no(wp, no, monpara);
-		(void) webWrite_commport(wp, no, monpara);
-		(void) webWrite_listen_port(wp, no, monpara);
-		(void) webWrite_portplan(wp, sysparam.sioplan_num, monpara);
-		(void) webWrite_porttype(wp, monpara);
-		(void) webWrite_rtu_addr(wp, no, monpara);
-		(void) webWrite_timesyn(wp, no, monpara);
-		(void) webWrite_forward_enable(wp, no, monpara);
-		(void) webWrite_forward_mtr_num(wp, no, monpara);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
 	return 0;
@@ -1781,15 +1749,42 @@ static void form_reset(webs_t wp, char_t *path, char_t *query)
 	reflash_this_wp(wp, PAGE_RESET);
 }
 /**
- * 监视端口 表单提交触发函数
+ * 从文件读取监视参数,显示到页面
  * @param wp
- * @param path
- * @param query
+ * @param sysparam
+ * @return
  */
-static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
+int webSet_monparas(webs_t wp, stSysParam sysparam)
 {
-	printf("form_set_monparas :");
-	printf("query:%s\n", query);
+	int no;
+	stMonparam monpara;
+	for (no = 0; no<sysparam.monitor_ports; no++) {
+		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		(void) websWrite(wp, T("<tr>\n"));
+		(void) webWrite_mon_no(wp, no, monpara);
+		(void) webWrite_commport(wp, no, monpara);
+		(void) webWrite_listen_port(wp, no, monpara);
+		(void) webWrite_portplan(wp, sysparam.sioplan_num, monpara);
+		(void) webWrite_porttype(wp, monpara);
+		(void) webWrite_rtu_addr(wp, no, monpara);
+		(void) webWrite_timesyn(wp, no, monpara);
+		(void) webWrite_forward_enable(wp, no, monpara);
+		(void) webWrite_forward_mtr_num(wp, no, monpara);
+		(void) websWrite(wp, T("</tr>\n"));
+	}
+	return 0;
+}
+/**
+ * 从页面获取监视参数,保存到文件
+ * @param wp
+ * @param sysparam
+ * @return
+ */
+int webGet_monparas(webs_t wp,stSysParam sysparam)
+{
 	stMonparam monparam;
 	int n;
 	memset(&monparam, 0x0, sizeof(stMonparam));
@@ -1803,10 +1798,6 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
 	char * forward = websGetVar(wp, T("forward"), T("null"));
 	char * forward_mtr_num = websGetVar(wp, T("forward_mtr_num"),
 	                T("null"));
-	printf("val: \n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", mon_no, commport,
-	                listenport, sioplan, protocol, rtu_addr, time_syn,
-	                forward, forward_mtr_num);
-
 	int param_no = 0;		///参数序号,即数据库的主键,base 0.没有物理意义
 	while (1) {
 		//监视参数序号
@@ -1865,8 +1856,30 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
 		forward_mtr_num = point2next(&forward_mtr_num, ' ');
 		save_monparam(&monparam, CFG_MON_PARAM, param_no);
 	}
+	return 0;
+}
+/**
+ * 监视端口 表单提交触发函数
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
+{
+	printf("form_set_monparas :");
+	printf("query:%s\n", query);
+	websHeader(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSet_monparas(wp, sysparam);
+	} else {
+		webGet_monparas(wp,sysparam);
+	}
+	websDone(wp, 200);
+	return;
+
 	//回复(刷新)网页
-	reflash_this_wp(wp, PAGE_MONITOR_PARAMETER);
+	//reflash_this_wp(wp, PAGE_MONITOR_PARAMETER);
 }
 /**
  * 将"255","1"这样的字符串转化成 "0255","0001"这样的字符数组.终端地址.
@@ -2090,7 +2103,7 @@ int webGet_syspara(webs_t wp)
 		sysparam.control_ports = control_ports;
 		sysparam.sioplan_num = sioplan_num;
 		ret = save_sysparam(&sysparam, CFG_SYS);
-		if(ret==-1){
+		if (ret==-1) {
 			web_err_proc(EL);
 		}
 	}
