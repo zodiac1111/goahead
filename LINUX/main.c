@@ -2169,12 +2169,12 @@ int webSet_syspara(webs_t wp)
 		web_err_proc(EL);
 		return -1;
 	}
-	websWrite(wp, T("mtrnum=%u&"), sysparam.meter_num);
-	websWrite(wp, T("sioports_num=%u&"), sysparam.sioports_num);
-	websWrite(wp, T("monitor_ports=%u&"), sysparam.monitor_ports);
-	websWrite(wp, T("netports_num=%u&"), sysparam.netports_num);
-	websWrite(wp, T("sioports_num=%u&"), sysparam.sioports_num);
-	websWrite(wp, T("control_ports=%u"), sysparam.control_ports);
+	websWrite(wp, T("%u,"), sysparam.meter_num);
+	websWrite(wp, T("%u,"), sysparam.sioports_num);
+	websWrite(wp, T("%u,"), sysparam.monitor_ports);
+	websWrite(wp, T("%u,"), sysparam.netports_num);
+	websWrite(wp, T("%u,"), sysparam.sioports_num);
+	websWrite(wp, T("%u"), sysparam.control_ports);
 	return 0;
 }
 /**
