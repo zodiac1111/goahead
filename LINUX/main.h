@@ -49,7 +49,7 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv);
 //系统参数
 int webGet_syspara(webs_t wp);
 int webSet_syspara(webs_t wp);
-static void form_set_sysparam(webs_t wp, char_t *path, char_t *query);
+void form_sysparam(webs_t wp, char_t *path, char_t *query);
 static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query);
 void form_sioplans(webs_t wp, char_t *path, char_t *query);
  void form_netparas(webs_t wp, char_t *path, char_t *query);
@@ -61,14 +61,6 @@ void form_msg(webs_t wp, char_t *path, char_t *query);
 void form_msg_stop(webs_t wp, char_t *path, char_t *query);
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
-//
-static int asp_get_meter_num(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_get_sioports_num(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_netports_num(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_pulse_num(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_monitor_ports(int eid, webs_t wp, int argc, char_t **argv);
-static int control_ports(int eid, webs_t wp, int argc, char_t **argv);
-static int sioplan_num(int eid, webs_t wp, int argc, char_t **argv);
 
 //表计参数页面的.(file mtrspara.cfg)
 

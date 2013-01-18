@@ -286,13 +286,6 @@ static int initWebs(int demo)
 	 * 注册asp函数,给予asp调用
 	 */
 	///系统参数
-	websAspDefine(T("meter_num"), asp_get_meter_num);
-	websAspDefine(T("sioports_num"), asp_get_sioports_num);
-	websAspDefine(T("netports_num"), asp_netports_num);
-	websAspDefine(T("pulse_num"), asp_pulse_num);
-	websAspDefine(T("monitor_ports"), asp_monitor_ports);
-	websAspDefine(T("control_ports"), control_ports);
-	websAspDefine(T("sioplan_num"), sioplan_num);
 	///表计参数
 	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
@@ -310,7 +303,7 @@ static int initWebs(int demo)
 	websAspDefine(T("factory"), asp_factory);
 	///form define
 	websFormDefine(T("formTest"), form_set_mtrparams);
-	websFormDefine(T("sysparam"), form_set_sysparam);
+	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
 	websFormDefine(T("monparas"), form_set_monparas);
@@ -326,18 +319,18 @@ static int initWebs(int demo)
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
-
-	/*
-	 *	Create the Form handlers for the User Management pages
-	 */
 #ifdef USER_MANAGEMENT_SUPPORT
+	//Create the Form handlers for the User Management pages
 	formDefineUserMgmt();
 #endif
-
-	/*
-	 *	Create a handler for the default home page
-	 */
+	//Create a handler for the default home page
 	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
+	///加载系统参数
+	int ret = load_sysparam(&sysparam, CFG_SYS);
+	if (ret==-1) {
+		web_err_proc(EL);
+		return -1;
+	}
 	return 0;
 }
 ///加载系统参数
@@ -405,36 +398,6 @@ static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-/// 表计数目(个)
-static int asp_get_meter_num(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 表计数目:%d \n", sysparam.meter_num);
-	return websWrite(wp, T("%u"), sysparam.meter_num);
-}
-/// 串口数目
-static int asp_get_sioports_num(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 串口数目:%d \n", sysparam.sioports_num);
-	return websWrite(wp, T("%u"), sysparam.sioports_num);
-}
-///网口数目
-static int asp_netports_num(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 网口数目:%d \n", sysparam.netports_num);
-	return websWrite(wp, T("%u"), sysparam.netports_num);
-}
-///脉冲数目
-static int asp_pulse_num(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 脉冲数目:%d \n", sysparam.pulse_num);
-	return websWrite(wp, T("%u"), sysparam.pulse_num);
-}
-///监视端口数目
-static int asp_monitor_ports(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 监视端口数目:%d \n", sysparam.monitor_ports);
-	return websWrite(wp, T("%u"), sysparam.monitor_ports);
-}
 ///服务端时间
 static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv)
 {
@@ -447,18 +410,7 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv)
 	                t->tm_sec);
 	return websWrite(wp, T("%s"), strtime);
 }
-///控制端口数目
-static int control_ports(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 控制端口数目:%d \n", sysparam.control_ports);
-	return websWrite(wp, T("%u"), sysparam.control_ports);
-}
-///串口方案数目
-static int sioplan_num(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("read 串口方案数目:%d \n", sysparam.sioplan_num);
-	return websWrite(wp, T("%u"), sysparam.sioplan_num);
-}
+
 /**
  * asp:调用:根据全局表号变量,加载这一个表的各种参数.
  * 页面刷新加载一次.保存在内存mtr结构体中,暂时无用.
@@ -2154,6 +2106,9 @@ int webGet_syspara(webs_t wp)
 		sysparam.control_ports = control_ports;
 		sysparam.sioplan_num = sioplan_num;
 		ret = save_sysparam(&sysparam, CFG_SYS);
+		if(ret==-1){
+			web_err_proc(EL);
+		}
 	}
 	return 0;
 }
@@ -2184,7 +2139,7 @@ int webSet_syspara(webs_t wp)
  * @param path
  * @param query
  */
-static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
+void form_sysparam(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s\n:", __FUNCTION__);
 	printf("query:%s\n", query);
@@ -2196,58 +2151,6 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 		webGet_syspara(wp);
 	}
 	websDone(wp, 200);
-	return;
-//	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
-////设置完成自动跳转回原来的页面.
-//	websWrite(wp, T("<head>\n"));
-//	websWrite(wp, T("<title>"CSTR_SET_PARAM"</title>\n"));
-//	//websWrite(wp, T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=GB18030\" />"));
-//
-//	websWrite(wp, T("</head>\n"));
-////body start
-//	websWrite(wp, T("<body>\n"));
-//	websWrite(wp, T("<p>\n"));
-//	websWrite(wp, T("%s"), (erritem&0b1) ? Fail : Success);
-//	websWrite(wp, T(CSTR_MTR_NUM":\"%s\"</br>"), str_meter_num);
-//	websWrite(wp, T("%s"), (erritem&0b10) ? Fail : Success);
-//	websWrite(wp, T(CSTR_UART_PORT_NUM":\"%s\"</br>"), str_sioports_num);
-//	websWrite(wp, T("%s"), (erritem&0b100) ? Fail : Success);
-//	websWrite(wp, T(CSTR_NET_NUM":\"%s\"</br>"), str_netports_num);
-//	websWrite(wp, T("%s"), (erritem&0b1000) ? Fail : Success);
-//	websWrite(wp, T(CSTR_MONPORT_NUM":\"%s\"</br>"), str_monitor_ports);
-//	websWrite(wp, T("%s"), (erritem&0b10000) ? Fail : Success);
-//	websWrite(wp, T(CSTR_CTRLPORT_NUM":\"%s\"</br>"), str_control_ports);
-//	websWrite(wp, T("%s"), (erritem&0b100000) ? Fail : Success);
-//	websWrite(wp, T(CSTR_UART_PLAN_NUM":\"%s\"</br>"), str_sioplan_num);
-//	websWrite(wp, T("</p>\n"));
-//	websWrite(wp, T("<p>\n"));
-//	if (ret==0&&erritem==0) {     //只有在全部没有出错的情况下才自动跳回.
-//		websWrite(wp, T("<font color=green font-size:120%><b>"
-//				CSTR_SET_OK"</b></font>"));
-//		websWrite(wp, T("<meta http-equiv=refresh content=\"2;"
-//				"url=%s\">\n"), PAGE_SYSTEM_PARAMETER);
-//	} else {	//只有在全部没有出错的情况下才自动跳回.
-//		if (erritem!=0) {
-//			websWrite(
-//			                wp,
-//			                T("<font color=red font-size:120%>"
-//					                "<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
-//			                erritem);
-//		} else {
-//			websWrite(wp, T("<font color=red font-size:120%>"
-//					"<b>"CSTR_SET_ERR_FILE":%d</b></font>"),
-//			                ret);
-//		}
-//	}
-//	websWrite(wp, T("<form action=%s method=POST>"), PAGE_SYSTEM_PARAMETER);
-//	websWrite(wp, T("<input type=submit name=return value=Return >"));
-//	websWrite(wp, T("</form>\n"));
-//	websWrite(wp, T("</p>\n"));
-////body end
-//	websWrite(wp, T("</body>\n"));
-////页脚
-//	websFooter(wp);
-//	websDone(wp, 200);
 	return;
 }
 /**
