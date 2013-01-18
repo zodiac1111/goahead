@@ -291,9 +291,7 @@ static int initWebs(int demo)
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///asp define
 	websAspDefine(T("load_all_mtr_param"), asp_load_all_mtr_param);
-	//websAspDefine(T("get_netparams"), asp_load_netparams);
 	websAspDefine(T("mtr_protocol"), asp_list_mtr_protocol);
-	websAspDefine(T("savecycle"), asp_load_savecycle);
 	websAspDefine(T("server_time"), asp_server_time);
 	//websAspDefine(T("web_show_log"),asp_show_log);
 	websAspDefine(T("ph_wire2"), ph_wire2);
@@ -304,7 +302,7 @@ static int initWebs(int demo)
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
-	websFormDefine(T("monparas"), form_set_monparas);
+	websFormDefine(T("monparas"), form_monparas);
 	websFormDefine(T("savecycle"), form_set_savecycle);
 	websFormDefine(T("reset"), form_reset);
 	websFormDefine(T("get_tou"), form_history_tou);
@@ -328,56 +326,6 @@ static int initWebs(int demo)
 	if (ret==-1) {
 		web_err_proc(EL);
 		return -1;
-	}
-	return 0;
-}
-///加载储存周期
-static int asp_load_savecycle(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("读取存储周期.\n");
-	stSave_cycle sav[SAVE_CYCLE_ITEM];
-	int i = 0;
-	int ret = load_savecycle(sav, CFG_SAVE_CYCLE);
-	if (ret==-1) {
-		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
-		                __LINE__, __FUNCTION__);
-		web_err_proc(EL);
-		return 0;
-	}
-	//第一行:有效标识
-	websWrite(wp, T("<tr>\n"));
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("%s"), CSTR_SAVECYCLE_FLAG);
-	websWrite(wp, T("</td>\n"));
-	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
-		websWrite(wp, T("<td>\n"));
-		websWrite(wp, T("<input type=checkbox "
-				"name=chk_save_enable value=%d %s %s>\n"),
-		                sav[i].enable&0x01,
-		                (sav[i].enable==1) ? "checked" : "",
-		                CHKBOX_ONCLICK);
-		///post不能传递没有被选中的复选框的值,通过text传递 class=hideinp
-		websWrite(wp, T("<input %s type=text "
-				"size=1 name=flag value=%d >\n"), HIDE_CLASS,
-		                sav[i].enable);
-		websWrite(wp, T("</td>\n"));
-	}
-	//第二行:储存周期
-	websWrite(wp, T("<tr>\n"));
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("%s"), CSTR_SAVECYCLE_CYCLE);
-	websWrite(wp, T("</td>\n"));
-	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
-		int j;
-		websWrite(wp, T("<td>\n"));
-		websWrite(wp, T("<select name=cycle >\n"));
-		for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);
-		                j++) {
-			websWrite(wp, T("<option value=%d %s>%s</option>\n"), j,
-			                (j==sav[i].cycle) ? "selected" : "",
-			                SAVE_CYCLE[j]);
-		}
-		websWrite(wp, T("</td>\n"));
 	}
 	return 0;
 }
@@ -454,33 +402,6 @@ static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 		(void) webWrite_ue(wp, mtr);
 		(void) webWrite_ie(wp, mtr);
 		websWrite(wp, T("</tr>\n"));
-	}
-	return 0;
-}
-/**
- * asp调用 加载所有网络端口参数
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @retval 0:正确
- */
-static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int no;
-	stNetparam netparam;
-	for (no = 0; no<sysparam.netports_num; no++) {
-		if (-1==load_netparam(&netparam, CFG_NET, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		(void) websWrite(wp, T("<tr>\n"));
-		(void) webWrite_net_no(wp, no, netparam);
-		(void) webWrite_eth(wp, sysparam.netports_num, netparam);
-		(void) webWrite_ip(wp, no, netparam);
-		(void) webWrite_mask(wp, no, netparam);
-		(void) webWrite_gateway(wp, no, netparam);
-		(void) websWrite(wp, T("</tr>\n"));
 	}
 	return 0;
 }
@@ -1783,7 +1704,7 @@ int webSet_monparas(webs_t wp, stSysParam sysparam)
  * @param sysparam
  * @return
  */
-int webGet_monparas(webs_t wp,stSysParam sysparam)
+int webGet_monparas(webs_t wp, stSysParam sysparam)
 {
 	stMonparam monparam;
 	int n;
@@ -1864,7 +1785,7 @@ int webGet_monparas(webs_t wp,stSysParam sysparam)
  * @param path
  * @param query
  */
-static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
+void form_monparas(webs_t wp, char_t *path, char_t *query)
 {
 	printf("form_set_monparas :");
 	printf("query:%s\n", query);
@@ -1873,13 +1794,10 @@ static void form_set_monparas(webs_t wp, char_t *path, char_t *query)
 	if (*init=='1') {
 		webSet_monparas(wp, sysparam);
 	} else {
-		webGet_monparas(wp,sysparam);
+		webGet_monparas(wp, sysparam);
 	}
 	websDone(wp, 200);
 	return;
-
-	//回复(刷新)网页
-	//reflash_this_wp(wp, PAGE_MONITOR_PARAMETER);
 }
 /**
  * 将"255","1"这样的字符串转化成 "0255","0001"这样的字符数组.终端地址.
@@ -2342,14 +2260,12 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
- *
+ * 从页面获取储存周期参数,保存到本地文件中
  * @param wp
- * @param path
- * @param query
+ * @return
  */
-static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
+int webGet_savecycle(webs_t wp)
 {
-	//printf("query:%s\n", query);
 	int i;
 	int n;
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
@@ -2371,7 +2287,80 @@ static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
 		cycle = point2next(&cycle, ' ');
 	}
 	save_savecycle(sav, CFG_SAVE_CYCLE);
-	reflash_this_wp(wp, PAGE_SAVECYCLE_PARAMETER);
+	return 0;
+}
+/**
+ * 从文件读取储存周期,设置(写)到页面.
+ * @param wp
+ * @return
+ */
+int webSet_savecycle(webs_t wp)
+{
+	printf("读取存储周期.\n");
+	stSave_cycle sav[SAVE_CYCLE_ITEM];
+	int i = 0;
+	int ret = load_savecycle(sav, CFG_SAVE_CYCLE);
+	if (ret==-1) {
+		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
+		                __LINE__, __FUNCTION__);
+		web_err_proc(EL);
+		return 0;
+	}
+	//第一行:有效标识
+	websWrite(wp, T("<tr>\n"));
+	websWrite(wp, T("<td>\n"));
+	websWrite(wp, T("%s"), CSTR_SAVECYCLE_FLAG);
+	websWrite(wp, T("</td>\n"));
+	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
+		websWrite(wp, T("<td>\n"));
+		websWrite(wp, T("<input type=checkbox "
+				"name=chk_save_enable value=%d %s %s>\n"),
+		                sav[i].enable&0x01,
+		                (sav[i].enable==1) ? "checked" : "",
+		                CHKBOX_ONCLICK);
+		///post不能传递没有被选中的复选框的值,通过text传递 class=hideinp
+		websWrite(wp, T("<input %s type=text "
+				"size=1 name=flag value=%d >\n"), HIDE_CLASS,
+		                sav[i].enable);
+		websWrite(wp, T("</td>\n"));
+	}
+	//第二行:储存周期
+	websWrite(wp, T("<tr>\n"));
+	websWrite(wp, T("<td>\n"));
+	websWrite(wp, T("%s"), CSTR_SAVECYCLE_CYCLE);
+	websWrite(wp, T("</td>\n"));
+	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
+		int j;
+		websWrite(wp, T("<td>\n"));
+		websWrite(wp, T("<select name=cycle >\n"));
+		for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);
+		                j++) {
+			websWrite(wp, T("<option value=%d %s>%s</option>\n"), j,
+			                (j==sav[i].cycle) ? "selected" : "",
+			                SAVE_CYCLE[j]);
+		}
+		websWrite(wp, T("</td>\n"));
+	}
+	return 0;
+}
+/**
+ * 表单提交函数,储存周期.
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_set_savecycle(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSet_savecycle(wp);
+	} else {
+		webGet_savecycle(wp);
+	}
+	websDone(wp, 200);
 	return;
 }
 /**
@@ -2430,28 +2419,44 @@ static void form_history_tou(webs_t wp, char_t *path, char_t *query)
  */
 static void form_save_log(webs_t wp, char_t *path, char_t *query)
 {
-//	printf("%s:%s\n", __FUNCTION__, query);
-//	websWrite(wp, T("HTTP/1.0 200 OK\n"));
-//	char * txt = query;
-//	FILE*fp = fopen(ERR_LOG, "w");
-//	if (fp==NULL) {
-//		return;
-//	}
-//	fwrite(txt, strlen(txt), 1, fp);
-//	fclose(fp);
-//	websDone(wp, 200);
-//	return;
-	save_file(wp, path, query, ERR_LOG);
+	webGet_txtfile(wp, path, query, ERR_LOG);
 }
 static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
-	save_file(wp, path, query, MON_PORT_NAME_FILE);
+	webGet_txtfile(wp, path, query, MON_PORT_NAME_FILE);
 }
 void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
-	save_file(wp, path, query, PORC_FILE);
+	webGet_txtfile(wp, path, query, PORC_FILE);
 }
-void save_file(webs_t wp, char_t *path, char_t *query, const char* file)
+/**
+ * 加载日志文件到客户端
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_load_log(webs_t wp, char_t *path, char_t *query)
+{
+	webSet_txtfile(wp, path, query, ERR_LOG);
+	return;
+}
+void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	;
+	webSet_txtfile(wp, path, query, PORC_FILE);
+}
+static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	webSet_txtfile(wp, path, query, MON_PORT_NAME_FILE);
+}
+/**
+ * 从页面中获取文本,保存到本地文本文件中.
+ * @param wp
+ * @param path
+ * @param query
+ * @param file
+ */
+void webGet_txtfile(webs_t wp, char_t *path, char_t *query, const char* file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	websWrite(wp, T("HTTP/1.0 200 OK\n"));
@@ -2466,31 +2471,14 @@ void save_file(webs_t wp, char_t *path, char_t *query, const char* file)
 	return;
 }
 /**
- * 加载日志文件到客户端
+ * 读取文本文件,写道页面中
  * @param wp
  * @param path
  * @param query
+ * @param file
  */
-static void form_load_log(webs_t wp, char_t *path, char_t *query)
+void webSet_txtfile(webs_t wp, char_t *path, char_t *query, const char*file)
 {
-	//printf("%s:%s\n", __FUNCTION__, query);
-	load_file(wp, path, query, ERR_LOG);
-	return;
-}
-void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
-{
-	//printf("%s:%s\n", __FUNCTION__, query);
-	load_file(wp, path, query, PORC_FILE);
-}
-static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
-{
-	//printf("%s:%s\n", __FUNCTION__, query);
-	load_file(wp, path, query, MON_PORT_NAME_FILE);
-}
-void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
-{
-
-	//websWrite(wp, T("HTTP/1.0 200 OK\n"));
 	websHeader_pure(wp);
 	char buf[1024] = { 0 };
 	int ret;
@@ -2507,10 +2495,9 @@ void load_file(webs_t wp, char_t *path, char_t *query, const char*file)
 			break;
 		}
 	}
-//	while (ftell(fp) < flen) {
+
 	fclose(fp);
 	WEB_END:
-	//websFooter(wp);
 	websDone(wp, 200);
 	return;
 }
