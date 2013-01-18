@@ -2004,12 +2004,12 @@ int portstr2u8(const char * str, u8* val)
 	return i+1;
 }
 /**
- * 网口参数(所有): 文件->页面
+ * 显示网口参数(所有): 文件->页面
  * @param wp
  * @param sysparam
  * @return
  */
-int webWrite_netparas(webs_t wp, stSysParam sysparam)
+int webSet_netparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stNetparam netparam;
@@ -2078,49 +2078,19 @@ int webGet_netparas(webs_t  wp)
  * @param path
  * @param query
  */
-static void form_netparas(webs_t wp, char_t *path, char_t *query)
+ void form_netparas(webs_t wp, char_t *path, char_t *query)
 {
 	printf("form_set_netparas :");
 	printf("query:%s\n", query);
 	websHeader(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
-		webWrite_netparas(wp, sysparam);
+		webSet_netparas(wp, sysparam);
 	} else {
 		webGet_netparas(wp);
 	}
 	websDone(wp, 200);
 	return;
-
-//	int offset = 0;
-//	int ipoff = 0;		///<ip strings offset
-//	int maskoff = 0;		///<mask address string offset
-//	int gwoff = 0;		///< gateway address strings offset
-//
-//	///一条一条的获得并且写入到网口参数配置文件
-//	///@bug 只能是各位数
-//	while (*(net_no + offset) != '\0') {
-//		if (*(net_no + offset) == ' ') {		//略过空格
-//			offset++;
-//			continue;
-//		}
-//		param_no = *(net_no + offset) - '0';
-//		//网口号是一个字节长度固定的.
-//		netparam.no = *(eth + offset) - '0';
-//		ipoff += ipstr2ipfile(ip + ipoff, netparam.ip);
-//		maskoff += ipstr2ipfile(mask + maskoff, netparam.mask);
-//		gwoff += ipstr2ipfile(gateway + gwoff, netparam.gateway);
-//		save_netport(&netparam, CFG_NET, param_no);
-////		plan.parity = *(parity + offset) - '0';
-////		plan.data = *(data + offset) - '0' + 7;
-////		plan.stop = *(stop + offset) - '0';
-////		plan.baud = *(baud + offset) - '0';
-////		plan.Commtype = *(comm_type + offset) - '0';
-////		save_sioplan(&plan, CFG_SIOPALN, *(sioplanno + offset) - '0');
-//		printf("one net param\n");
-//		offset++;		//向后偏移1
-//	}
-	//reflash_this_wp(wp, PAGE_NET_PARAMETER);
 }
 /**
  * 系统参数设置表单提交触发的函数.

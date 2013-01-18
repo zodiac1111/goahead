@@ -49,7 +49,7 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv);
 static void form_set_sysparam(webs_t wp, char_t *path, char_t *query);
 static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query);
 void form_sioplans(webs_t wp, char_t *path, char_t *query);
-static void form_set_netparas(webs_t wp, char_t *path, char_t *query);
+ void form_netparas(webs_t wp, char_t *path, char_t *query);
 static void form_set_monparas(webs_t wp, char_t *path, char_t *query);
 static void form_set_savecycle(webs_t wp, char_t *path, char_t *query);
 static void form_reset(webs_t wp, char_t *path, char_t *query);
@@ -100,7 +100,7 @@ static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan);
 static int webWrite_baud(webs_t wp, int no, stUart_plan plan);
 static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
 //网口参数
-int webWrite_netparas(webs_t wp,stSysParam sysparam);
+int webSet_netparas(webs_t wp,stSysParam sysparam);
 int webGet_netparas(webs_t  wp);
 static int webWrite_net_no(webs_t wp, int no,stNetparam netparam);
 static int webWrite_eth(webs_t wp, int net_num,stNetparam netparam);
