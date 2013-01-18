@@ -100,6 +100,8 @@ static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan);
 static int webWrite_baud(webs_t wp, int no, stUart_plan plan);
 static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
 //网口参数
+int webWrite_netparas(webs_t wp,stSysParam sysparam);
+int webGet_netparas(webs_t  wp);
 static int webWrite_net_no(webs_t wp, int no,stNetparam netparam);
 static int webWrite_eth(webs_t wp, int net_num,stNetparam netparam);
 static int webWrite_ip(webs_t wp, int no,stNetparam netparam);

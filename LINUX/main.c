@@ -323,10 +323,8 @@ static int initWebs(int demo)
 	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
 	websFormDefine(T("load_procotol_cfg"), form_load_procotol_cfgfile);
 	websFormDefine(T("save_procotol_cfg"), form_save_procotol_cfgfile);
-
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
-
 	//websFormDefine(T("form_set_mtrparam"), myformTest);
 
 	/*
@@ -643,7 +641,7 @@ static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 	                monport.prot_addr[1], monport.prot_addr[2],
 	                monport.prot_addr[3]);
 	int i;
-	websWrite(wp, T("<td>\n") );
+	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input class=ntx type=text size=4 maxlength=4 "
 			" onchange=\"verify_rtu_addr(event);\" "
 			" name=rtu_addr value=\""));
@@ -1611,14 +1609,14 @@ int mtr_param_print_item(webs_t wp)
  * @param path
  * @param query
  */
- void form_sioplans(webs_t wp, char_t *path, char_t *query)
+void form_sioplans(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
 	char * init = websGetVar(wp, T("init"), T("null"));
-	if(*init!='0'){
-		webWrite_sioplans(wp,sysparam);
-	}else{
+	if (*init!='0') {
+		webWrite_sioplans(wp, sysparam);
+	} else {
 		webRead_sioplans(wp);
 	}
 	return;
@@ -1705,13 +1703,13 @@ int webRead_sioplans(webs_t wp)
  * @param plan 串口方案
  * @param sp 系统参数
  */
-int webWrite_sioplans(webs_t wp,stSysParam sp)
+int webWrite_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
 	stUart_plan plan;
 	printf("%s\n", __FUNCTION__);
 	websHeader(wp);
-	for (no = 0; no<sp.sioplan_num ; no++) {
+	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
 			continue;
@@ -2005,16 +2003,34 @@ int portstr2u8(const char * str, u8* val)
 	*val = tmp;
 	return i+1;
 }
-/**
- * 网口参数(多个)表单提交处理函数
- * @param wp
- * @param path
- * @param query
- */
-static void form_set_netparas(webs_t wp, char_t *path, char_t *query)
+int webWrite_netparas(webs_t wp, stSysParam sysparam)
 {
-	printf("form_set_netparas :");
-	printf("query:%s\n", query);
+	int no;
+	stNetparam netparam;
+	websHeader(wp);
+	for (no = 0; no<sysparam.netports_num; no++) {
+		if (-1==load_netparam(&netparam, CFG_NET, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		(void) websWrite(wp, T("<tr>\n"));
+		(void) webWrite_net_no(wp, no, netparam);
+		(void) webWrite_eth(wp, sysparam.netports_num, netparam);
+		(void) webWrite_ip(wp, no, netparam);
+		(void) webWrite_mask(wp, no, netparam);
+		(void) webWrite_gateway(wp, no, netparam);
+		(void) websWrite(wp, T("</tr>\n"));
+	}
+	websDone(wp, 200);
+	return 0;
+}
+/**
+ * 从页面获取所有网络参数,保存到文件中.
+ * @param wp
+ * @return
+ */
+int webGet_netparas(webs_t  wp)
+{
 	stNetparam netparam;
 	int n;
 	int param_no = 0;		///参数序号,即数据库的主键,base 0.没有物理意义
@@ -2049,6 +2065,25 @@ static void form_set_netparas(webs_t wp, char_t *path, char_t *query)
 		gateway = point2next(&gateway, ' ');
 		save_netport(&netparam, CFG_NET, param_no);
 	}
+	return 0;
+}
+/**
+ * 网口参数(多个)表单提交处理函数
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_set_netparas(webs_t wp, char_t *path, char_t *query)
+{
+	printf("form_set_netparas :");
+	printf("query:%s\n", query);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init!='0') {
+		webWrite_netparas(wp, sysparam);
+	} else {
+		//webRead_sioplans(wp);
+	}
+	return;
 
 //	int offset = 0;
 //	int ipoff = 0;		///<ip strings offset
@@ -2078,7 +2113,7 @@ static void form_set_netparas(webs_t wp, char_t *path, char_t *query)
 //		printf("one net param\n");
 //		offset++;		//向后偏移1
 //	}
-	reflash_this_wp(wp, PAGE_NET_PARAMETER);
+	//reflash_this_wp(wp, PAGE_NET_PARAMETER);
 }
 /**
  * 系统参数设置表单提交触发的函数.
@@ -2270,7 +2305,7 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	/**
 	 * TODO post 返回 测试等待确定
 	 */
-	websHeader_pure( wp);
+	websHeader_pure(wp);
 	int no;
 	//stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
 	printf("%s\n", __FUNCTION__);
