@@ -290,7 +290,6 @@ static int initWebs(int demo)
 	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///asp define
-	websAspDefine(T("init_sysparam"), asp_load_sysparam);
 	websAspDefine(T("load_all_mtr_param"), asp_load_all_mtr_param);
 	websAspDefine(T("get_netparams"), asp_load_netparams);
 	websAspDefine(T("load_monparams"), asp_load_monparams);
@@ -331,21 +330,6 @@ static int initWebs(int demo)
 		web_err_proc(EL);
 		return -1;
 	}
-	return 0;
-}
-///加载系统参数
-static int asp_load_sysparam(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int ret = load_sysparam(&sysparam, CFG_SYS);
-	if (ret==-1) {
-		PRINT_HERE
-		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
-		                __LINE__, __FUNCTION__);
-		g_cur_mtr_no = -1;
-		web_err_proc(EL);
-		return 0;
-	}
-	printf("读取 系统参数 表计个数 %d\n", sysparam.meter_num);
 	return 0;
 }
 ///加载储存周期

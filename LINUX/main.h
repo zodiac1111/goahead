@@ -32,7 +32,6 @@
 #define HIDE_CLASS "" //" class=hideinp " //隐藏的用于POST的text类,
 //读取函数
 //系统参数页面(file sysspara.cfg)
-static int asp_load_sysparam(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_netparams(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_monparams(int eid, webs_t wp, int argc, char_t **argv);
