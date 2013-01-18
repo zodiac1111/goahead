@@ -46,6 +46,9 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv);
 //
 ///提交表单
+//系统参数
+int webGet_syspara(webs_t wp);
+int webSet_syspara(webs_t wp);
 static void form_set_sysparam(webs_t wp, char_t *path, char_t *query);
 static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query);
 void form_sioplans(webs_t wp, char_t *path, char_t *query);

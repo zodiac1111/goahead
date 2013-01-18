@@ -2034,7 +2034,7 @@ int webSet_netparas(webs_t wp, stSysParam sysparam)
  * @param wp
  * @return
  */
-int webGet_netparas(webs_t  wp)
+int webGet_netparas(webs_t wp)
 {
 	stNetparam netparam;
 	int n;
@@ -2078,7 +2078,7 @@ int webGet_netparas(webs_t  wp)
  * @param path
  * @param query
  */
- void form_netparas(webs_t wp, char_t *path, char_t *query)
+void form_netparas(webs_t wp, char_t *path, char_t *query)
 {
 	printf("form_set_netparas :");
 	printf("query:%s\n", query);
@@ -2093,17 +2093,12 @@ int webGet_netparas(webs_t  wp)
 	return;
 }
 /**
- * 系统参数设置表单提交触发的函数.
- * 判断数据合法,写入到sysspara.cfg文件中.一共一项,大小7字节,脉冲数目已经废弃.
+ * 从页面获取系统参数，保存到文件．同时更新全局变量．
  * @param wp
- * @param path
- * @param query
+ * @return
  */
-static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
+int webGet_syspara(webs_t wp)
 {
-	printf("form_set_sysparam :");
-	printf("path:%s\n", path);
-	printf("query:%s\n", query);
 	int ret = -1;
 	/** 错误的项目,每一位表示一个项目,1表示此项错误,0表示此项正确.初始全部正确.
 	 共8位表示6个项目,位[6,7]保留为0,位0至位5分别对应:
@@ -2118,7 +2113,7 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 	char * str_control_ports = websGetVar(wp, T("control_ports"),
 	                T("null"));
 	char * str_sioplan_num = websGetVar(wp, T("sioplan_num"), T("null"));
-///检查输入合法性
+	///检查输入合法性
 	char * errstr = NULL;
 	int meter_num = strtol(str_meter_num, &errstr, 10);
 	if (*errstr!='\0'||meter_num<=0||meter_num>=256) {
@@ -2160,57 +2155,99 @@ static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
 		sysparam.sioplan_num = sioplan_num;
 		ret = save_sysparam(&sysparam, CFG_SYS);
 	}
-	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
-//设置完成自动跳转回原来的页面.
-	websWrite(wp, T("<head>\n"));
-	websWrite(wp, T("<title>"CSTR_SET_PARAM"</title>\n"));
-	//websWrite(wp, T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=GB18030\" />"));
-
-	websWrite(wp, T("</head>\n"));
-//body start
-	websWrite(wp, T("<body>\n"));
-	websWrite(wp, T("<p>\n"));
-	websWrite(wp, T("%s"), (erritem&0b1) ? Fail : Success);
-	websWrite(wp, T(CSTR_MTR_NUM":\"%s\"</br>"), str_meter_num);
-	websWrite(wp, T("%s"), (erritem&0b10) ? Fail : Success);
-	websWrite(wp, T(CSTR_UART_PORT_NUM":\"%s\"</br>"), str_sioports_num);
-	websWrite(wp, T("%s"), (erritem&0b100) ? Fail : Success);
-	websWrite(wp, T(CSTR_NET_NUM":\"%s\"</br>"), str_netports_num);
-	websWrite(wp, T("%s"), (erritem&0b1000) ? Fail : Success);
-	websWrite(wp, T(CSTR_MONPORT_NUM":\"%s\"</br>"), str_monitor_ports);
-	websWrite(wp, T("%s"), (erritem&0b10000) ? Fail : Success);
-	websWrite(wp, T(CSTR_CTRLPORT_NUM":\"%s\"</br>"), str_control_ports);
-	websWrite(wp, T("%s"), (erritem&0b100000) ? Fail : Success);
-	websWrite(wp, T(CSTR_UART_PLAN_NUM":\"%s\"</br>"), str_sioplan_num);
-	websWrite(wp, T("</p>\n"));
-	websWrite(wp, T("<p>\n"));
-	if (ret==0&&erritem==0) {     //只有在全部没有出错的情况下才自动跳回.
-		websWrite(wp, T("<font color=green font-size:120%><b>"
-				CSTR_SET_OK"</b></font>"));
-		websWrite(wp, T("<meta http-equiv=refresh content=\"2;"
-				"url=%s\">\n"), PAGE_SYSTEM_PARAMETER);
-	} else {	//只有在全部没有出错的情况下才自动跳回.
-		if (erritem!=0) {
-			websWrite(
-			                wp,
-			                T("<font color=red font-size:120%>"
-					                "<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
-			                erritem);
-		} else {
-			websWrite(wp, T("<font color=red font-size:120%>"
-					"<b>"CSTR_SET_ERR_FILE":%d</b></font>"),
-			                ret);
-		}
+	return 0;
+}
+/**
+ * 向页面写系统参数
+ * @param wp
+ * @return
+ */
+int webSet_syspara(webs_t wp)
+{
+	int ret = load_sysparam(&sysparam, CFG_SYS);
+	if (ret==-1) {
+		web_err_proc(EL);
+		return -1;
 	}
-	websWrite(wp, T("<form action=%s method=POST>"), PAGE_SYSTEM_PARAMETER);
-	websWrite(wp, T("<input type=submit name=return value=Return >"));
-	websWrite(wp, T("</form>\n"));
-	websWrite(wp, T("</p>\n"));
-//body end
-	websWrite(wp, T("</body>\n"));
-//页脚
-	websFooter(wp);
+	websWrite(wp, T("mtrnum=%u&"), sysparam.meter_num);
+	websWrite(wp, T("sioports_num=%u&"), sysparam.sioports_num);
+	websWrite(wp, T("monitor_ports=%u&"), sysparam.monitor_ports);
+	websWrite(wp, T("netports_num=%u&"), sysparam.netports_num);
+	websWrite(wp, T("sioports_num=%u&"), sysparam.sioports_num);
+	websWrite(wp, T("control_ports=%u"), sysparam.control_ports);
+	return 0;
+}
+/**
+ * 系统参数设置表单提交触发的函数.
+ * 判断数据合法,写入到sysspara.cfg文件中.一共一项,大小7字节,脉冲数目已经废弃.
+ * @param wp
+ * @param path
+ * @param query
+ */
+static void form_set_sysparam(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s\n:", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSet_syspara(wp);
+	} else {
+		webGet_syspara(wp);
+	}
 	websDone(wp, 200);
+	return;
+//	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
+////设置完成自动跳转回原来的页面.
+//	websWrite(wp, T("<head>\n"));
+//	websWrite(wp, T("<title>"CSTR_SET_PARAM"</title>\n"));
+//	//websWrite(wp, T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=GB18030\" />"));
+//
+//	websWrite(wp, T("</head>\n"));
+////body start
+//	websWrite(wp, T("<body>\n"));
+//	websWrite(wp, T("<p>\n"));
+//	websWrite(wp, T("%s"), (erritem&0b1) ? Fail : Success);
+//	websWrite(wp, T(CSTR_MTR_NUM":\"%s\"</br>"), str_meter_num);
+//	websWrite(wp, T("%s"), (erritem&0b10) ? Fail : Success);
+//	websWrite(wp, T(CSTR_UART_PORT_NUM":\"%s\"</br>"), str_sioports_num);
+//	websWrite(wp, T("%s"), (erritem&0b100) ? Fail : Success);
+//	websWrite(wp, T(CSTR_NET_NUM":\"%s\"</br>"), str_netports_num);
+//	websWrite(wp, T("%s"), (erritem&0b1000) ? Fail : Success);
+//	websWrite(wp, T(CSTR_MONPORT_NUM":\"%s\"</br>"), str_monitor_ports);
+//	websWrite(wp, T("%s"), (erritem&0b10000) ? Fail : Success);
+//	websWrite(wp, T(CSTR_CTRLPORT_NUM":\"%s\"</br>"), str_control_ports);
+//	websWrite(wp, T("%s"), (erritem&0b100000) ? Fail : Success);
+//	websWrite(wp, T(CSTR_UART_PLAN_NUM":\"%s\"</br>"), str_sioplan_num);
+//	websWrite(wp, T("</p>\n"));
+//	websWrite(wp, T("<p>\n"));
+//	if (ret==0&&erritem==0) {     //只有在全部没有出错的情况下才自动跳回.
+//		websWrite(wp, T("<font color=green font-size:120%><b>"
+//				CSTR_SET_OK"</b></font>"));
+//		websWrite(wp, T("<meta http-equiv=refresh content=\"2;"
+//				"url=%s\">\n"), PAGE_SYSTEM_PARAMETER);
+//	} else {	//只有在全部没有出错的情况下才自动跳回.
+//		if (erritem!=0) {
+//			websWrite(
+//			                wp,
+//			                T("<font color=red font-size:120%>"
+//					                "<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
+//			                erritem);
+//		} else {
+//			websWrite(wp, T("<font color=red font-size:120%>"
+//					"<b>"CSTR_SET_ERR_FILE":%d</b></font>"),
+//			                ret);
+//		}
+//	}
+//	websWrite(wp, T("<form action=%s method=POST>"), PAGE_SYSTEM_PARAMETER);
+//	websWrite(wp, T("<input type=submit name=return value=Return >"));
+//	websWrite(wp, T("</form>\n"));
+//	websWrite(wp, T("</p>\n"));
+////body end
+//	websWrite(wp, T("</body>\n"));
+////页脚
+//	websFooter(wp);
+//	websDone(wp, 200);
 	return;
 }
 /**
