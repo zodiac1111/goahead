@@ -48,7 +48,7 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv);
 ///提交表单
 static void form_set_sysparam(webs_t wp, char_t *path, char_t *query);
 static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query);
-static void form_set_sioplans(webs_t wp, char_t *path, char_t *query);
+void form_sioplans(webs_t wp, char_t *path, char_t *query);
 static void form_set_netparas(webs_t wp, char_t *path, char_t *query);
 static void form_set_monparas(webs_t wp, char_t *path, char_t *query);
 static void form_set_savecycle(webs_t wp, char_t *path, char_t *query);

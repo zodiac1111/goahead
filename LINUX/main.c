@@ -311,7 +311,7 @@ static int initWebs(int demo)
 	///form define
 	websFormDefine(T("formTest"), form_set_mtrparams);
 	websFormDefine(T("sysparam"), form_set_sysparam);
-	websFormDefine(T("sioplan"), form_set_sioplans);
+	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_set_netparas);
 	websFormDefine(T("monparas"), form_set_monparas);
 	websFormDefine(T("savecycle"), form_set_savecycle);
@@ -1611,27 +1611,23 @@ int mtr_param_print_item(webs_t wp)
  * @param path
  * @param query
  */
-static void form_set_sioplans(webs_t wp, char_t *path, char_t *query)
+ void form_sioplans(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
-
-	//int i=0;
-
-
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if(*init!='0'){
-		//printf("页面初始化\n");
-		webWrite_sioplans( wp,sysparam);
-		//return;
+		webWrite_sioplans(wp,sysparam);
 	}else{
 		webRead_sioplans(wp);
 	}
-
-	//printf("save sioplan to file and show to page\n");
-	//webWrite_sioplans( wp, plan,sysparam);
 	return;
 }
+/**
+ * 串口方案:页面->文件
+ * @param wp
+ * @return
+ */
 int webRead_sioplans(webs_t wp)
 {
 	int n = 0;
