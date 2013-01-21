@@ -79,8 +79,7 @@ static int webWrite_mtr_protocol(webs_t wp, stMtr mtr);
 static int webWrite_ph_wire(webs_t wp, stMtr mtr);
 static int webWrite_factory(webs_t wp, stMtr mtr);
 static int webWrite_iv(webs_t wp, stMtr mtr);
-static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp,
-        char_t *query, u32 e[MAX_MTR_NUM]);
+static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
 //串口方案项目
 int webSet_sioplans(webs_t wp, stSysParam sp);
 int webGet_sioplans(webs_t wp);

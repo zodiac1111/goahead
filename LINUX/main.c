@@ -103,7 +103,7 @@ int main(int argc, char** argv)
 	 */
 	if (initWebs(demo)<0) {
 		return -1;
-	}else{
+	} else {
 		printf("init Webs:\tOK\n");
 	}
 
@@ -301,7 +301,7 @@ static int initWebs(int demo)
 	websAspDefine(T("sioplan"), asp_list_sioplan);
 	websAspDefine(T("factory"), asp_factory);
 	///form define
-	websFormDefine(T("formTest"), form_set_mtrparams);
+	websFormDefine(T("mtrparams"), form_set_mtrparams);
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
@@ -377,37 +377,7 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int no;
-	stMtr mtr;
-	memset(&mtr, 0x00, sizeof(stMtr));
-	printf("%s\n", __FUNCTION__);
-	for (no = 0; no<sysparam.meter_num; no++) {
-		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		websWrite(wp, T("<tr>\n"));     //一行
-		(void) webWrite_mtrno(wp, no);
-		(void) webWrite_iv(wp, mtr);
-		(void) webWrite_line(wp, mtr);
-		(void) webWrite_mtraddr(wp, mtr);
-		(void) webWrite_pwd(wp, mtr);
-		(void) webWrite_uartport(wp, mtr);
-		(void) webWrite_uartPlan(wp, mtr);
-		(void) webWrite_mtr_protocol(wp, mtr);
-		(void) webWrite_factory(wp, mtr);
-		(void) webWrite_ph_wire(wp, mtr);
-		(void) webWrite_it_dot(wp, mtr);
-		(void) webWrite_xl_dot(wp, mtr);
-		(void) webWrite_v_dot(wp, mtr);
-		(void) webWrite_i_dot(wp, mtr);
-		(void) webWrite_p_dot(wp, mtr);
-		(void) webWrite_q_dot(wp, mtr);
-		(void) webWrite_ue(wp, mtr);
-		(void) webWrite_ie(wp, mtr);
-		websWrite(wp, T("</tr>\n"));
-	}
-	return 0;
+
 }
 /**
  * 向页面写转发表个数单元格
@@ -1118,8 +1088,7 @@ static int is_all_equ(int n[], int num)
  * @retval 大于0整数:参数数组个数
  * @retval 小于0 :错误代码
  */
-static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, char_t *query,
-        u32 e[MAX_MTR_NUM])
+static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp,u32 e[MAX_MTR_NUM])
 {
 	int n[20] = { 0 };     //一共的记录条数
 	int i = 0;
@@ -2071,80 +2040,18 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
- * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
+ * 将所有表计参数发送到页面.
  * @param wp 页面
- * @param path 路径
- * @param query 提交POST的字符串值
+ * @param mtrnum 一共有的表计个数
+ * @return
  */
-static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
+int webSet_mtrparams(webs_t wp,int mtrnum)
 {
-//printf("formTest\n");
-//printf("path:%s\n", path);
-	printf("query:%s\n", query);
-	///表计结构体参数数组
-	stMtr amtr[256];
-	mtr_param_print_item(wp);	///<debug
-	int ret = -1;
-	int i;
+	int no;
 	stMtr mtr;
 	memset(&mtr, 0x00, sizeof(stMtr));
-	int saveret = -1;
-	u32 erritem = 0b000000000000000000;	//一共十八项
-//操作
-	char * str_cmd = websGetVar(wp, T("OpType"), T("0"));
-	char * errstr = NULL;
-	int cmd = strtoul(str_cmd, &errstr, 10);
-	if (*errstr!='\0') {
-		erritem |= 0b1;
-	}
-	printf("客户端操作分类:%d\n", cmd);
-	switch (cmd) {
-	case MTR_UPDATE:     //更新所有记录
-		break;
-	case MTR_ADD:     //增加1条记录
-		load_mtrparam(&mtr, CFG_MTR, sysparam.meter_num);
-		sysparam.meter_num += 1;
-		ret = save_sysparam(&sysparam, CFG_SYS);
-		printf("add one mtr number,ret %d \n", ret);
-		ret = save_mtrparam(&mtr, CFG_MTR, sysparam.meter_num);
-		printf("add a new mtr param record,ret= %d \n", ret);
-		reflash_this_wp(wp, PAGE_METER_PARAMETER);
-		return;
-		break;
-	case MTR_DEL:     //删除最后一条表参数数据
-		sysparam.meter_num -= 1;
-		ret = save_sysparam(&sysparam, CFG_SYS);
-		printf("del(the last) one mtr number,ret %d \n", ret);
-		reflash_this_wp(wp, PAGE_METER_PARAMETER);
-		return;
-		break;
-	default:
-		PRINT_RET(cmd)
-		break;
-	}
-	//字符串获取完毕m,开始检查和转换成数值
-	u32 e[MAX_MTR_NUM] = { 0 };	///<错误项
-	int mtr_num = 0;	///<表计数目
-	mtr_num = getmtrparams(amtr, wp, query, e);
-	printf("get param from clint ret %d \n", mtr_num);
-	if (mtr_num>0) {     //只有所有输入都合法
-		for (i = 0; i<mtr_num; i++) {
-			saveret = save_mtrparam(&amtr[i], CFG_MTR,
-			                amtr[i].mtrno);
-			printf("1047 i=%d saveret=%d\n", i, saveret);
-			printf("amtr[i].mtrno=%d\n", amtr[i].mtrno);
-		}
-	} else {
-		saveret = mtr_num;
-	}
-	/**
-	 * TODO post 返回 测试等待确定
-	 */
-	websHeader_pure(wp);
-	int no;
-	//stMtr mtr = { 0, { 0 }, { 0 }, { 0 }, 0 };
 	printf("%s\n", __FUNCTION__);
-	for (no = 0; no<sysparam.meter_num; no++) {
+	for (no = 0; no<mtrnum; no++) {
 		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
 			web_err_proc(EL);
 			continue;
@@ -2170,96 +2077,59 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 		(void) webWrite_ie(wp, mtr);
 		websWrite(wp, T("</tr>\n"));
 	}
+	return 0;
+}
+/**
+ * 从页面接收所有表计参数,保存到服务器端文件中
+ * @param wp
+ * @param mtrnum
+ * @return
+ */
+int webGet_mtrparams(webs_t wp,int mtrnum)
+{
+	stMtr amtr[256];
+	memset(amtr, 0x00, sizeof(stMtr));
+	int saveret = -1;
+	int i=0;
+	u32 e[MAX_MTR_NUM] = { 0 };	///<错误项
+	int mtr_num = 0;	///<表计数目
+	mtr_num = getmtrparams(amtr, wp, e);
+	printf("get param from clint ret %d \n", mtr_num);
+	if (mtr_num>0) {     //只有所有输入都合法
+		for (i = 0; i<mtr_num; i++) {
+			saveret = save_mtrparam(&amtr[i], CFG_MTR,
+			                amtr[i].mtrno);
+			printf("1047 i=%d saveret=%d\n", i, saveret);
+			printf("amtr[i].mtrno=%d\n", amtr[i].mtrno);
+		}
+	} else {
+		saveret = mtr_num;
+	}
+	return 0;
+}
+/**
+ * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
+ * @param wp 页面
+ * @param path 路径
+ * @param query 提交POST的字符串值
+ */
+static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
+{
+
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSet_mtrparams(wp, sysparam.meter_num);
+	} else {
+		webGet_sioplans(wp);
+	}
 	websDone(wp, 200);
 	return;
-	/**
-	 * 测试,等待删除 TODO
-	 */
-	reflash_this_wp(wp, PAGE_METER_PARAMETER);
-	return;
-	///@note 是否需要返回给用户信息? 待定
-	//写页面
-	websHeader(wp);     //头和尾完成了除head和body标签在内的东西
-	//设置完成自动跳转回原来的页面.
-	websWrite(wp, T("<head>\n"));
-	websWrite(wp, T("<title>"CSTR_RETURN"</title>\n"));
-	websWrite(wp, T("</head>\n"));
-	websWrite(wp, T("<body>\n"));
-	//段落1
-	websWrite(wp, T("<p>\n"));
-	websWrite(wp, T("%s"), (erritem&0b1) ? Fail : Success);
-	websWrite(wp, T(CSTR_MTR_NO":\"%d\"</br>"), amtr[0].mtrno);
-	websWrite(wp, T("%s"), (erritem&0b10) ? Fail : Success);
-	websWrite(wp, T(CSTR_LINE_NAME":\"%s\"</br>"), amtr[0].line);
-	websWrite(wp, T("%s"), (erritem&0b100) ? Fail : Success);
-	websWrite(wp, T(CSTR_MTR_ADDR":\"%s\"</br>"), amtr[0].addr);
-	websWrite(wp, T("%s"), (erritem&0b1000) ? Fail : Success);
-	websWrite(wp, T(CSTR_MTR_PWD":\"%s\"</br>"), amtr[0].pwd);
-	websWrite(wp, T("%s"), (erritem&0b10000) ? Fail : Success);
-	websWrite(wp, T(CSTR_IT_DOT":\"%d\"</br>"), amtr[0].it_dot);
-	websWrite(wp, T("%s"), (erritem&0b100000) ? Fail : Success);
-	websWrite(wp, T(CSTR_V_DOT":\"%d\"</br>"), amtr[0].v_dot);
-	websWrite(wp, T("%s"), (erritem&0b1000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_P_DOT":\"%d\"</br>"), amtr[0].p_dot);
-	websWrite(wp, T("%s"), (erritem&0b10000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_Q_DOT":\"%d\"</br>"), amtr[0].q_dot);
-	websWrite(wp, T("%s"), (erritem&0b100000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_I_DOT":\"%d\"</br>"), amtr[0].i_dot);
-	websWrite(wp, T("%s"), (erritem&0b1000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_XL_DOT":\"%d\"</br>"), amtr[0].xl_dot);
-	websWrite(wp, T("%s"), (erritem&0b10000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_UE":\"%d\"</br>"), amtr[0].ue);
-	websWrite(wp, T("%s"), (erritem&0b100000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_IE":\"%d\"</br>"), amtr[0].ie);
-	websWrite(wp, T("%s"), (erritem&0b1000000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_PROT":\"%d\"</br>"), amtr[0].port);
-	websWrite(wp, T("%s"), (erritem&0b10000000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_UART_NO":\"%d\"</br>"), amtr[0].portplan);
-	websWrite(wp, T("%s"), (erritem&0b100000000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_MTR_PROTOL":\"%d\"</br>"), amtr[0].protocol);
-	websWrite(wp, T("%s"), (erritem&0b1000000000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_MTR_TYPE":\"%d\"</br>"), amtr[0].p3w4);
-	websWrite(wp, T("%s"),
-	                (erritem&0b10000000000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_FACT":\"%d\"</br>"), amtr[0].fact);
-	websWrite(wp, T("%s"),
-	                (erritem&0b100000000000000000) ? Fail : Success);
-	websWrite(wp, T(CSTR_IV_FLAG":\"%d\"</br>"), amtr[0].iv);
-	websWrite(wp, T("</p>\n"));
-//段落2
-	websWrite(wp, T("<p>\n"));
-	if ((saveret==0)&&(erritem==0)) {     //只有在全部没有出错的情况下才自动跳回.
-		websWrite(wp, T("<font color=green font-size:120%>"
-				"<b>"CSTR_SET_OK"</b></font>"));
-		websWrite(wp, T("<meta http-equiv=refresh content=\"1;"
-				"url=/um/meterpara1.asp\">\n"));
-	}     //只有在全部没有出错的情况下才自动跳回.
-	if (erritem!=0) {
-		websWrite(wp, T("<font color=red font-size:120%>"
-				"<b>"CSTR_SET_ERR_FEILD":0x%X</b></font>"),
-		                erritem);
-	}
-	if ((saveret!=0)) {
-		websWrite(wp, T("<font color=red font-size:120%>"
-				"<b>"CSTR_SET_ERR_FILE":%d</b></font>"),
-		                saveret);
-	}
-	websWrite(wp, T("<form action=/um/meterpara1.asp method=POST>"));
-	websWrite(wp, T("<input type=submit name=return value=Return >"));
-	websWrite(wp, T("</form>\n"));
-	websWrite(
-	                wp,
-	                T("<input type=text maxlength=12 name=line size=20 value=\""));
-//	for (i = 0; i<LINE_LEN; i++) {
-//		if (mtr.webWrite_line[i]!=0)
-//			websWrite(wp, T("%1d"), mtr.webWrite_line[i]);
-//	}
-	websWrite(wp, T("\">"));
-	websWrite(wp, T("</p>\n"));
-	websWrite(wp, T("</body>\n"));
-	websFooter(wp);
-	websDone(wp, 200);
-	return;
+
+
+
 }
 /**
  * 从页面获取储存周期参数,保存到本地文件中
