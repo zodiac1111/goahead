@@ -3,7 +3,7 @@
  * NOTE: this file encode is  UTF-8, not GB2312
  * just for insert UTF-8 Chinese string in the Utf8 C code file
  * CSTR = Chinese String.
- * zhuangzai woda UTF8
+ * F*** the GB2312.
  * Created on: 2012-12-21
  * Author: lee
  */
