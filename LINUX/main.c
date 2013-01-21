@@ -1397,7 +1397,7 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
-	websHeader(wp);
+	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
 		webSet_sioplans(wp, sysparam);
@@ -1748,7 +1748,7 @@ void form_monparas(webs_t wp, char_t *path, char_t *query)
 {
 	printf("form_set_monparas :");
 	printf("query:%s\n", query);
-	websHeader(wp);
+	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
 		webSet_monparas(wp, sysparam);
@@ -1908,7 +1908,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 {
 	printf("form_set_netparas :");
 	printf("query:%s\n", query);
-	websHeader(wp);
+	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
 		webSet_netparas(wp, sysparam);
@@ -2106,12 +2106,12 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
-	websHeader(wp);
+	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
 		webSet_mtrparams(wp, sysparam.meter_num);
 	} else {
-		webGet_sioplans(wp);
+		webGet_mtrparams(wp);
 	}
 	websDone(wp, 200);
 	return;
@@ -2213,7 +2213,7 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
-	websHeader(wp);
+	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
 		webSet_savecycle(wp);
@@ -2302,7 +2302,6 @@ static void form_load_log(webs_t wp, char_t *path, char_t *query)
 }
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
-	;
 	webSet_txtfile(wp, path, query, PORC_FILE);
 }
 static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
