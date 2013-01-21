@@ -293,7 +293,6 @@ static int initWebs(int demo)
 	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///asp define
-	websAspDefine(T("mtr_protocol"), asp_list_mtr_protocol);
 	websAspDefine(T("server_time"), asp_server_time);
 	//websAspDefine(T("web_show_log"),asp_show_log);
 	websAspDefine(T("ph_wire2"), ph_wire2);
@@ -869,27 +868,6 @@ static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
 		                (i==mtr.protocol) ?
 		                                    "selected=\"selected\"" :
 		                                    "",
-		                procotol_name[i]);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/**
- * asp 调用函数,仅列出所有的规约.供选择,不是针对某一个表的那个规约.
- * 用户设置所有的表计的表计规约列表框.
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_list_mtr_protocol(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int i;
-	websWrite(wp, T("<select name=all_protocol "
-			"onchange=\"changeall_mtr_protocol(event);\">\n"));
-	for (i = 0; i<procotol_num; i++) {
-		websWrite(wp, T(" <option value=\"%d\" >%s</option>"), i,
 		                procotol_name[i]);
 	}
 	websWrite(wp, T("</td>\n"));
@@ -2088,7 +2066,7 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 		webSend_mtr_sioplan(wp);
 	} else if (strcmp(item, "procotol")==0) {
 		webSend_mtr_procotol(wp);
-	} else if (strcmp(item, "procotol")==0) {
+	} else if (strcmp(item, "factory")==0) {
 
 	}
 	websDone(wp, 200);
