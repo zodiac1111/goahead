@@ -2087,10 +2087,24 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(item, "sioplan")==0) {
 		webSend_mtr_sioplan(wp);
 	} else if (strcmp(item, "procotol")==0) {
+		webSend_mtr_procotol(wp);
+	} else if (strcmp(item, "procotol")==0) {
 
 	}
 	websDone(wp, 200);
 	return;
+}
+int webSend_mtr_procotol(webs_t wp)
+{
+	int i;
+	websWrite(wp, T("<select name=all_protocol "
+			"onchange=\"changeall_mtr_protocol(event);\">\n"));
+	for (i = 0; i<procotol_num; i++) {
+		websWrite(wp, T(" <option value=\"%d\" >%s</option>"), i,
+		                procotol_name[i]);
+	}
+	websWrite(wp, T("</td>\n"));
+	return 0;
 }
 int webSend_mtr_sioplan(webs_t wp)
 {
