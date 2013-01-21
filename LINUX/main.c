@@ -293,7 +293,6 @@ static int initWebs(int demo)
 	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///asp define
-	websAspDefine(T("load_all_mtr_param"), asp_load_all_mtr_param);
 	websAspDefine(T("mtr_protocol"), asp_list_mtr_protocol);
 	websAspDefine(T("server_time"), asp_server_time);
 	//websAspDefine(T("web_show_log"),asp_show_log);
@@ -367,18 +366,7 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-/**
- * asp调用:加载所有表计的表计参数.表格的N行.
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_load_all_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
-{
 
-}
 /**
  * 向页面写转发表个数单元格
  * @param wp
