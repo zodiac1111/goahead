@@ -179,15 +179,15 @@ int write2web(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
 	websWrite(wp, T("</tr>\n"));
 	return 0;
 }
+/**
+ * 将由4个字节型数组组成的浮点型转化为最短的字符输出.
+ * 应为websWrite仅实现了%d和%s,所以必须转化成字符串.
+ * @param float_array
+ * @param strval
+ * @return
+ */
 char * float2string(u8 const float_array[4], char * strval)
 {
-//	char vfloat[4];
-//	vfloat[3] = float_array[3];
-//	vfloat[2] = float_array[2];
-//	vfloat[1] = float_array[1];
-//	vfloat[0] = float_array[0];
-//	float val;
-//	val = *(float*) (&float_array[0]);
 	sprintf(strval, "%g", *(float*) (&float_array[0]));
 	return strval;
 }
@@ -199,68 +199,68 @@ int webWrite1Tou(webs_t wp, const stTou tou)
 	const char *iv = " style=\"color: gray;\" ";
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FA.total.iv ? iv:"" ,
-	                float2string(tou.FA.total.byte0, strval));
+	                float2string(tou.FA.total.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FA.tip.iv ? iv:"" ,
-	                float2string(tou.FA.tip.byte0, strval));
+	                float2string(tou.FA.tip.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FA.peak.iv ? iv:"" ,
-	                float2string(tou.FA.peak.byte0, strval));
+	                float2string(tou.FA.peak.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FA.flat.iv ? iv:"" ,
-	                float2string(tou.FA.flat.byte0, strval));
+	                float2string(tou.FA.flat.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FA.valley.iv ? iv : "",
-	                float2string(tou.FA.valley.byte0, strval));
+	                float2string(tou.FA.valley.fake_float_val, strval));
 
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RA.total.iv ? iv:"" ,
-	                float2string(tou.RA.total.byte0, strval));
+	                float2string(tou.RA.total.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RA.tip.iv ? iv:"" ,
-	                float2string(tou.RA.tip.byte0, strval));
+	                float2string(tou.RA.tip.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RA.peak.iv ? iv:"" ,
-	                float2string(tou.RA.peak.byte0, strval));
+	                float2string(tou.RA.peak.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RA.flat.iv ? iv:"" ,
-	                float2string(tou.RA.flat.byte0, strval));
+	                float2string(tou.RA.flat.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RA.valley.iv ? iv : "",
-	                float2string(tou.RA.valley.byte0, strval));
+	                float2string(tou.RA.valley.fake_float_val, strval));
 
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FR.total.iv ? iv:"" ,
 	                float2string(
-	                               tou.FR.total.byte0, strval));
+	                               tou.FR.total.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FR.tip.iv ? iv:"" ,
-	                float2string(tou.FR.tip.byte0, strval));
+	                float2string(tou.FR.tip.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FR.peak.iv ? iv:"" ,
-	                float2string(tou.FR.peak.byte0, strval));
+	                float2string(tou.FR.peak.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FR.flat.iv ? iv:"" ,
-	                float2string(tou.FR.flat.byte0, strval));
+	                float2string(tou.FR.flat.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.FR.valley.iv ? iv : "",
-	                float2string(tou.FR.valley.byte0, strval));
+	                float2string(tou.FR.valley.fake_float_val, strval));
 
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RR.total.iv ? iv:"" ,
-	                float2string(tou.RR.total.byte0, strval));
+	                float2string(tou.RR.total.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RR.tip.iv ? iv:"" ,
-	                float2string(tou.RR.tip.byte0, strval));
+	                float2string(tou.RR.tip.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RR.peak.iv ? iv:"",
-	                float2string(tou.RR.peak.byte0, strval));
+	                float2string(tou.RR.peak.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RR.flat.iv ?  iv:"",
-	                float2string(tou.RR.flat.byte0, strval));
+	                float2string(tou.RR.flat.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
 	                tou.RR.valley.iv ? iv : "",
-	                float2string(tou.RR.valley.byte0, strval));
+	                float2string(tou.RR.valley.fake_float_val, strval));
 
 	return 0;
 }

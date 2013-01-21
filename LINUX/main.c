@@ -118,6 +118,7 @@ int main(int argc, char** argv)
 	 * will actually do the servicing.
 	 */
 	finished = 0;
+	printf("Now listening ... \n");
 	while (!finished) {
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);

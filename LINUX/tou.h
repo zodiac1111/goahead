@@ -28,8 +28,8 @@ typedef struct {
 }stTouFilehead;
 ///某单独电量结构,如 总电量 或者 谷电量
 typedef struct {
-	//float val;///<数值
-	u8 byte0[4];
+	///以4个字节型组织的假装的浮点型,注意读取时顺序
+	u8 fake_float_val[4];
 	union{
 		u8 byte;
 		struct{
