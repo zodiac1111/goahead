@@ -103,6 +103,8 @@ int main(int argc, char** argv)
 	 */
 	if (initWebs(demo)<0) {
 		return -1;
+	}else{
+		printf("init Webs:\tOK\n");
 	}
 
 #ifdef WEBS_SSL_SUPPORT
@@ -208,7 +210,7 @@ static int initWebs(int demo)
 		PRINT_RET(count);
 		web_err_proc(EL);
 	}
-	printf("app dir is %s\n", dir);
+	printf("App dir is:\t\"%s\"\n", dir);
 	if ((cp = strrchr(dir, '/'))) {     ///向上回2级父目录
 		*cp = '\0';
 	}
@@ -227,7 +229,7 @@ static int initWebs(int demo)
 	//host上调试
 	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
 #endif
-	printf("change web root dir to \"%s\"\n", webdir);
+	printf("Web root dir is:\t\"%s\"\n", webdir);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
@@ -271,12 +273,12 @@ static int initWebs(int demo)
 	                MON_PORT_NAME_FILE)) {
 		web_err_proc(EL);
 	} else {
-		printf("init_monparam_port_name:OK\n");
+		printf("Init monparam port name:\tOK\n");
 	}
 	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
 		web_err_proc(EL);
 	} else {
-		printf("read_protocol_file:OK\n");
+		printf("Read protocol file:\tOK\n");
 	}
 	/*
 	 *	Now define two test procedures. Replace these with your application
