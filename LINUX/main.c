@@ -297,10 +297,10 @@ static int initWebs(int demo)
 	websAspDefine(T("server_time"), asp_server_time);
 	//websAspDefine(T("web_show_log"),asp_show_log);
 	websAspDefine(T("ph_wire2"), ph_wire2);
-	websAspDefine(T("sioplan"), asp_list_sioplan);
 	websAspDefine(T("factory"), asp_factory);
 	///form define
-	websFormDefine(T("mtrparams"), form_set_mtrparams);
+	websFormDefine(T("mtrparams"), form_mtrparams);
+	websFormDefine(T("mtr_items"), form_mtr_items);
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
@@ -895,30 +895,6 @@ static int asp_list_mtr_protocol(int eid, webs_t wp, int argc, char_t **argv)
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
-/**
- * 列表框:列举出所有的串口方案.
- * 以串口方案号作为列举内容.用于配置所有表的串口方案选择列表框.
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_list_sioplan(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("加载所有串口方案,共%d个\n", sysparam.sioplan_num);
-	int i;
-	websWrite(wp, T("<select name=all_portplan "
-			"onchange=\"changeall_sioplan(event);\">\n"));
-	for (i = 0; i<sysparam.sioplan_num; i++) {
-		websWrite(
-		                wp,
-		                T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
-		                i,
-		                i);
-	}
-	return 0;
-}
 ///@todo 表计厂家使用配置文件
 /**
  * asp调用:加载所有电表厂家字符串
@@ -1076,7 +1052,7 @@ static int is_all_equ(int n[], int num)
  * @retval 大于0整数:参数数组个数
  * @retval 小于0 :错误代码
  */
-static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp,u32 e[MAX_MTR_NUM])
+static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 {
 	int n[20] = { 0 };     //一共的记录条数
 	int i = 0;
@@ -2033,12 +2009,13 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
  * @param mtrnum 一共有的表计个数
  * @return
  */
-int webSet_mtrparams(webs_t wp,int mtrnum)
+int webSet_mtrparams(webs_t wp, int mtrnum)
 {
 	int no;
 	stMtr mtr;
 	memset(&mtr, 0x00, sizeof(stMtr));
 	printf("%s\n", __FUNCTION__);
+	//printf("个数:%d\n",mtrnum);
 	for (no = 0; no<mtrnum; no++) {
 		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
 			web_err_proc(EL);
@@ -2073,12 +2050,12 @@ int webSet_mtrparams(webs_t wp,int mtrnum)
  * @param mtrnum
  * @return
  */
-int webGet_mtrparams(webs_t wp,int mtrnum)
+int webGet_mtrparams(webs_t wp)
 {
 	stMtr amtr[256];
 	memset(amtr, 0x00, sizeof(stMtr));
 	int saveret = -1;
-	int i=0;
+	int i = 0;
 	u32 e[MAX_MTR_NUM] = { 0 };	///<错误项
 	int mtr_num = 0;	///<表计数目
 	mtr_num = getmtrparams(amtr, wp, e);
@@ -2096,14 +2073,47 @@ int webGet_mtrparams(webs_t wp,int mtrnum)
 	return 0;
 }
 /**
+ * 表计参数项目表头表单提交函数.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_mtr_items(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * item = websGetVar(wp, T("item"), T("null"));
+	if (strcmp(item, "sioplan")==0) {
+		webSend_mtr_sioplan(wp);
+	} else if (strcmp(item, "procotol")==0) {
+
+	}
+	websDone(wp, 200);
+	return;
+}
+int webSend_mtr_sioplan(webs_t wp)
+{
+	int i;
+	websWrite(wp, T("<select name=all_portplan "
+			"onchange=\"changeall_sioplan(event);\">\n"));
+	for (i = 0; i<sysparam.sioplan_num; i++) {
+		websWrite(
+		                wp,
+		                T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
+		                i,
+		                i);
+	}
+	return 0;
+}
+/**
  * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
  * @param wp 页面
  * @param path 路径
  * @param query 提交POST的字符串值
  */
-static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
+void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 {
-
 	printf("%s:\n", __FUNCTION__);
 	printf("query:%s\n", query);
 	websHeader_pure(wp);
@@ -2115,9 +2125,6 @@ static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query)
 	}
 	websDone(wp, 200);
 	return;
-
-
-
 }
 /**
  * 从页面获取储存周期参数,保存到本地文件中

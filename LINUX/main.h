@@ -34,7 +34,6 @@
 //系统参数页面(file sysspara.cfg)
 //小项目
 static int asp_list_mtr_protocol(int eid, webs_t wp, int argc, char_t **argv);
-static int asp_list_sioplan(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_factory(int eid, webs_t wp, int argc, char_t **argv);
 static int ph_wire2(int eid, webs_t wp, int argc, char_t **argv);
 static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
@@ -45,7 +44,8 @@ static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv);
 void form_sysparam(webs_t wp, char_t *path, char_t *query);
 int webGet_syspara(webs_t wp);
 int webSet_syspara(webs_t wp);
-static void form_set_mtrparams(webs_t wp, char_t *path, char_t *query);
+void form_mtrparams(webs_t wp, char_t *path, char_t *query);
+void form_mtr_items(webs_t wp, char_t *path, char_t *query);
 void form_sioplans(webs_t wp, char_t *path, char_t *query);
 void form_netparas(webs_t wp, char_t *path, char_t *query);
 void form_monparas(webs_t wp, char_t *path, char_t *query);
@@ -58,7 +58,7 @@ void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
 
 //表计参数页面的.(file mtrspara.cfg)
-
+int webSend_mtr_sioplan(webs_t wp);
 static int webWrite_mtrno(webs_t wp, int no);
 static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv);
 static int webWrite_line(webs_t wp, stMtr mtr);
