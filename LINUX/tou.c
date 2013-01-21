@@ -47,7 +47,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 	memset(&tou, 0x0, sizeof(stTou));
 	//time_t t_cur = range.s;
 	FILE*fp;
-	int flen;
+	u32 flen;
 	int i = 0;
 	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
 	for (t2 = stime; t2<=etime; /*t2 += (mincycle * 60)*/) {
