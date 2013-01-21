@@ -191,77 +191,36 @@ char * float2string(u8 const float_array[4], char * strval)
 	sprintf(strval, "%g", *(float*) (&float_array[0]));
 	return strval;
 }
+int webWriteOneTI(webs_t wp, Ti_Category ti)
+{
+	char strval[32];
+	const char *iv = " class=\"iv\" ";
+	const char *valid = " class=\"valid\" ";
+	//总 尖 峰 平 谷
+	websWrite(wp, T("<td %s>%s</td>"),
+	                ti.total.iv ? iv : valid,
+	                float2string(ti.total.fake_float_val, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                ti.tip.iv ? iv : valid,
+	                float2string(ti.tip.fake_float_val, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                ti.peak.iv ? iv : valid,
+	                float2string(ti.peak.fake_float_val, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                ti.flat.iv ? iv : valid,
+	                float2string(ti.flat.fake_float_val, strval));
+	websWrite(wp, T("<td %s>%s</td>"),
+	                ti.valley.iv ? iv : valid,
+	                float2string(ti.valley.fake_float_val, strval));
+	return 0;
+}
 //写一条电量Tou数据
 int webWrite1Tou(webs_t wp, const stTou tou)
 {
-	char strval[32];
-	///用于显示无效的样式,有效的使用默认的
-	const char *iv = " style=\"color: gray;\" ";
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FA.total.iv ? iv:"" ,
-	                float2string(tou.FA.total.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FA.tip.iv ? iv:"" ,
-	                float2string(tou.FA.tip.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FA.peak.iv ? iv:"" ,
-	                float2string(tou.FA.peak.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FA.flat.iv ? iv:"" ,
-	                float2string(tou.FA.flat.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FA.valley.iv ? iv : "",
-	                float2string(tou.FA.valley.fake_float_val, strval));
-
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RA.total.iv ? iv:"" ,
-	                float2string(tou.RA.total.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RA.tip.iv ? iv:"" ,
-	                float2string(tou.RA.tip.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RA.peak.iv ? iv:"" ,
-	                float2string(tou.RA.peak.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RA.flat.iv ? iv:"" ,
-	                float2string(tou.RA.flat.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RA.valley.iv ? iv : "",
-	                float2string(tou.RA.valley.fake_float_val, strval));
-
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FR.total.iv ? iv:"" ,
-	                float2string(
-	                               tou.FR.total.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FR.tip.iv ? iv:"" ,
-	                float2string(tou.FR.tip.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FR.peak.iv ? iv:"" ,
-	                float2string(tou.FR.peak.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FR.flat.iv ? iv:"" ,
-	                float2string(tou.FR.flat.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.FR.valley.iv ? iv : "",
-	                float2string(tou.FR.valley.fake_float_val, strval));
-
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RR.total.iv ? iv:"" ,
-	                float2string(tou.RR.total.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RR.tip.iv ? iv:"" ,
-	                float2string(tou.RR.tip.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RR.peak.iv ? iv:"",
-	                float2string(tou.RR.peak.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RR.flat.iv ?  iv:"",
-	                float2string(tou.RR.flat.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                tou.RR.valley.iv ? iv : "",
-	                float2string(tou.RR.valley.fake_float_val, strval));
-
+	webWriteOneTI(wp, tou.FA);///正向有功
+	webWriteOneTI(wp, tou.RA);///正向有功
+	webWriteOneTI(wp, tou.FR);///正向有功
+	webWriteOneTI(wp, tou.RR);///正向有功
 	return 0;
 }
 /**
