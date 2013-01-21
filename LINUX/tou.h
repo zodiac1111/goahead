@@ -61,7 +61,8 @@ typedef struct{
 //
 int load_tou_dat(u32 mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
 int webWrite1Tou(webs_t wp,const stTou tou);
-int write2web(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
+int webWrite_toudata(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
 int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
+int webWriteOneTI(webs_t wp, Ti_Category ti);
 #pragma pack()
 #endif

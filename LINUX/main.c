@@ -325,8 +325,7 @@ static int initWebs(int demo)
 	//Create a handler for the default home page
 	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
 	///加载系统参数
-	int ret = load_sysparam(&sysparam, CFG_SYS);
-	if (ret==-1) {
+	if (-1==load_sysparam(&sysparam, CFG_SYS)) {
 		web_err_proc(EL);
 		return -1;
 	}
@@ -2031,7 +2030,7 @@ int webGet_syspara(webs_t wp)
 	return 0;
 }
 /**
- * 向页面写系统参数
+ * 向页面写系统参数,各项数据以逗号分割开,客户端解析并添加到指定的框中
  * @param wp
  * @return
  */
@@ -2061,8 +2060,8 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s\n:", __FUNCTION__);
 	printf("query:%s\n", query);
-	websHeader_pure(wp);     //头和尾完成了除head和body标签在内的东西
 	char * init = websGetVar(wp, T("init"), T("null"));
+	websHeader_pure(wp);
 	if (*init=='1') {
 		webSet_syspara(wp);
 	} else {

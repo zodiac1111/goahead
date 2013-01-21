@@ -51,8 +51,6 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 	int i = 0;
 	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
 	for (t2 = stime; t2<=etime; /*t2 += (mincycle * 60)*/) {
-		//int count;
-		//for(count=0;count<2;count++){
 		Start:
 		#if __arm__ ==2
 		gmtime_r(&t2,&t);
@@ -142,11 +140,16 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 				return ERR;
 			}
 			//成功
-			write2web(t2, wp, tou, i, mtr_no);
+			webWrite_toudata(t2, wp, tou, i, mtr_no);
 			i++;
 			t2 += (mincycle*60);
 		}
 		//t2 += ((i-1)*(mincycle * 60));
+	}
+	if (i==0) {
+		websWrite(wp, T("<tr>"));
+		websWrite(wp, T("<td colspan=\"99\">%s</td>"), "没有数据");
+		websWrite(wp, T("</tr>"));
 	}
 	return 0;
 }
@@ -159,7 +162,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
  * @param mtr_no
  * @return
  */
-int write2web(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
+int webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
 {
 	struct tm t;
 #if __arm__ ==2
@@ -168,8 +171,8 @@ int write2web(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
 	localtime_r(&t2, &t);
 #endif
 	websWrite(wp, T("<tr>"));
-	websWrite(wp, T("<td>%d</td>"), mtr_no);
-	websWrite(wp, T("<td>%d</td>"), i);
+	websWrite(wp, T("<td>%d</td>"), i);     //记录序号
+	websWrite(wp, T("<td>%d</td>"), mtr_no);     //表号
 	websWrite(wp,
 	                T("<td>%04d-%02d-%02d %02d:%02d:%02d %s</td>"),
 	                t.tm_year+1900,
@@ -191,36 +194,47 @@ char * float2string(u8 const float_array[4], char * strval)
 	sprintf(strval, "%g", *(float*) (&float_array[0]));
 	return strval;
 }
+/**
+ * 写一条正向有功或者正向无功之类的电量的"总尖峰平谷"5个数值
+ * @param wp
+ * @param ti
+ * @return
+ */
 int webWriteOneTI(webs_t wp, Ti_Category ti)
 {
 	char strval[32];
 	const char *iv = " class=\"iv\" ";
 	const char *valid = " class=\"valid\" ";
+	///保存是否无效字串的数组
+	const char *isInvalid[2] = {
+	                [0]=valid,     ///<有效
+	                [1]=iv,     ///<无效
+	                };
 	//总 尖 峰 平 谷
 	websWrite(wp, T("<td %s>%s</td>"),
-	                ti.total.iv ? iv : valid,
+	                isInvalid[ti.total.iv],
 	                float2string(ti.total.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
-	                ti.tip.iv ? iv : valid,
+	                isInvalid[ti.tip.iv],
 	                float2string(ti.tip.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
-	                ti.peak.iv ? iv : valid,
+	                isInvalid[ti.peak.iv],
 	                float2string(ti.peak.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
-	                ti.flat.iv ? iv : valid,
+	                isInvalid[ti.flat.iv],
 	                float2string(ti.flat.fake_float_val, strval));
 	websWrite(wp, T("<td %s>%s</td>"),
-	                ti.valley.iv ? iv : valid,
+	                isInvalid[ti.valley.iv],
 	                float2string(ti.valley.fake_float_val, strval));
 	return 0;
 }
 //写一条电量Tou数据
 int webWrite1Tou(webs_t wp, const stTou tou)
 {
-	webWriteOneTI(wp, tou.FA);///正向有功
-	webWriteOneTI(wp, tou.RA);///正向有功
-	webWriteOneTI(wp, tou.FR);///正向有功
-	webWriteOneTI(wp, tou.RR);///正向有功
+	webWriteOneTI(wp, tou.FA);     ///正向有功
+	webWriteOneTI(wp, tou.RA);     ///正向无功
+	webWriteOneTI(wp, tou.FR);     ///反向有功
+	webWriteOneTI(wp, tou.RR);     ///反向无功
 	return 0;
 }
 /**
