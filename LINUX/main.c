@@ -1286,17 +1286,20 @@ int mtr_param_print_item(webs_t wp)
 }
 /**
  * 客户端请求获取服务端时间.
+ * 只要是post发送到这个函数就同步时间,不管query
  * @param wp
  * @param path
  * @param query
  */
 void  form_server_time(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
+	//printf("%s:\n", __FUNCTION__);
+	//printf("query:%s\n", query);
+	printf("Synchronization server time(query=%s)...",query);
 	websHeader_pure(wp);
 	websWrite(wp, T("%d"), time(NULL));
 	websDone(wp, 200);
+	printf("\tOK\n");
 	return;
 }
 /**
