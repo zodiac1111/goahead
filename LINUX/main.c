@@ -292,12 +292,9 @@ static int initWebs(int demo)
 	///表计参数
 	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
-	///asp define
-	websAspDefine(T("server_time"), asp_server_time);
-	//websAspDefine(T("web_show_log"),asp_show_log);
-	websAspDefine(T("ph_wire2"), ph_wire2);
-	websAspDefine(T("factory"), asp_factory);
 	///form define
+
+	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
 	websFormDefine(T("mtr_items"), form_mtr_items);
 	websFormDefine(T("sysparam"), form_sysparam);
@@ -329,18 +326,7 @@ static int initWebs(int demo)
 	}
 	return 0;
 }
-///服务端时间
-static int asp_server_time(int eid, webs_t wp, int argc, char_t **argv)
-{
-	printf("读取服务器时间\n");
-	char strtime[128] = { 0 };
-	time_t timer = time(NULL);
-	struct tm * t = localtime(&timer);
-	sprintf(strtime, "%04d-%02d-%02d %02d:%02d:%02d", t->tm_year+1900,
-	                t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min,
-	                t->tm_sec);
-	return websWrite(wp, T("%s"), strtime);
-}
+
 
 /**
  * asp:调用:根据全局表号变量,加载这一个表的各种参数.
@@ -873,49 +859,6 @@ static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
-///@todo 表计厂家使用配置文件
-/**
- * asp调用:加载所有电表厂家字符串
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_factory(int eid, webs_t wp, int argc, char_t **argv)
-{
-//PRINT_HERE;
-	u32 i;
-	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-	printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
-	websWrite(wp, T("<select name=all_factory "));
-	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
-	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
-		websWrite(wp, T("<option value=\"%d\">%s</option>"), i,
-		                fact[i]);
-	}
-	return 0;
-}
-/**
- * asp调用函数 列举出所有的几相几线制类型,不针对具体的哪块表.
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int ph_wire2(int eid, webs_t wp, int argc, char_t **argv)
-{
-	u32 i;
-	//就一个选择列表框.
-	websWrite(wp, T("<select name=ph_wire_all "
-			"onchange=\"type_all_changed(event);\">\n"));
-	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
-		websWrite(wp, T("<option value=\"%d\" >%s</option>"), i,
-		                PW[i]);
-	}
-	return 0;
-}
 /// 几相几线制,就两种情况 0-3相3线 1-3相4线
 static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 {
@@ -1340,6 +1283,21 @@ int mtr_param_print_item(webs_t wp)
 	printf("factory=%s\n", websGetVar(wp, T("factory"), T("null")));
 	printf("iv= %s\n", websGetVar(wp, T("iv"), T("0")));
 	return 0;
+}
+/**
+ * 客户端请求获取服务端时间.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void  form_server_time(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	websWrite(wp, T("%d"), time(NULL));
+	websDone(wp, 200);
+	return;
 }
 /**
  * 串口方案表单提交触发函数
@@ -2067,10 +2025,36 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(item, "procotol")==0) {
 		webSend_mtr_procotol(wp);
 	} else if (strcmp(item, "factory")==0) {
-
-	}
+		webSend_mtr_factory(wp);
+	}else if(strcmp(item, "type")==0) {
+		webSend_mtr_type(wp);
+	}/* 在这里添加其他需要的项目类型 */
 	websDone(wp, 200);
 	return;
+}
+int webSend_mtr_type(webs_t wp)
+{
+	u32 i;//就一个选择列表框.
+	websWrite(wp, T("<select name=ph_wire_all "
+			"onchange=\"type_all_changed(event);\">\n"));
+	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
+		websWrite(wp, T("<option value=\"%d\" >%s</option>"), i,
+		                PW[i]);
+	}
+	return 0;
+}
+int webSend_mtr_factory(webs_t wp)
+{
+	u32 i;
+	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
+	printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
+	websWrite(wp, T("<select name=all_factory "));
+	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
+	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
+		websWrite(wp, T("<option value=\"%d\">%s</option>"), i,
+		                fact[i]);
+	}
+	return 0;
 }
 int webSend_mtr_procotol(webs_t wp)
 {
