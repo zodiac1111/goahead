@@ -146,11 +146,6 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		}
 		//t2 += ((i-1)*(mincycle * 60));
 	}
-	if (i==0) {
-		websWrite(wp, T("<tr>"));
-		websWrite(wp, T("<td colspan=\"99\">%s</td>"), "没有数据");
-		websWrite(wp, T("</tr>"));
-	}
 	return 0;
 }
 /**

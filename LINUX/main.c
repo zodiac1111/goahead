@@ -1295,11 +1295,12 @@ void  form_server_time(webs_t wp, char_t *path, char_t *query)
 {
 	//printf("%s:\n", __FUNCTION__);
 	//printf("query:%s\n", query);
-	printf("Synchronization server time(query=%s)...",query);
+	time_t t=time(NULL);
+	printf("Synchronization server time(query:\"%s\")...",query);
 	websHeader_pure(wp);
-	websWrite(wp, T("%d"), time(NULL));
+	websWrite(wp, T("%d"), t);
 	websDone(wp, 200);
-	printf("\tOK\n");
+	printf(",%s",ctime(&t));
 	return;
 }
 /**
