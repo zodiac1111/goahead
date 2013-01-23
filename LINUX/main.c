@@ -474,6 +474,7 @@ static void sigintHandler(int unused)
  * Initialize the web server.
  * #
  * # 注册asp和form函数
+ * @todo:分解成较短的函数
  * # 改变程序当前目录.
  * @param demo
  * @param argv
@@ -539,10 +540,8 @@ static int initWebs(int demo)
 		sprintf(webdir, "%s/%s", dir, rootWeb);
 	}
 	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
-#if __i386 == 1
-	//本机调试(家里)
+#if __i386 == 1//host上调试
 	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
-	//host上调试
 	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
 #endif
 	printf("Web root dir is:\t\"%s\"\n", webdir);
@@ -588,27 +587,16 @@ static int initWebs(int demo)
 	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
 	                MON_PORT_NAME_FILE)) {
 		web_err_proc(EL);
-	} else {
-		printf("Init monparam port name:\tOK\n");
 	}
 	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
 		web_err_proc(EL);
-	} else {
-		printf("Read protocol file:\tOK\n");
 	}
-	/*
-	 *	Now define two test procedures. Replace these with your application
-	 *	relevant ASP script procedures and form functions.
-	 */
 	/**
 	 * 注册asp函数,给予asp调用
 	 */
-	///系统参数
-	///表计参数
-	websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
+	//websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
 	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
-	///form define
-
+	///form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
 	websFormDefine(T("mtr_items"), form_mtr_items);

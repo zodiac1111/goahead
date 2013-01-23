@@ -39,7 +39,6 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
 //系统参数
 void form_server_time(webs_t wp, char_t *path, char_t *query);
 void form_sysparam(webs_t wp, char_t *path, char_t *query);
-
 void form_mtrparams(webs_t wp, char_t *path, char_t *query);
 void form_mtr_items(webs_t wp, char_t *path, char_t *query);
 void form_sioplans(webs_t wp, char_t *path, char_t *query);
@@ -52,10 +51,10 @@ void form_msg(webs_t wp, char_t *path, char_t *query);
 void form_msg_stop(webs_t wp, char_t *path, char_t *query);
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
- void form_save_log(webs_t wp, char_t *path, char_t *query);
- void form_load_log(webs_t wp, char_t *path, char_t *query);
- void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
- void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
+void form_save_log(webs_t wp, char_t *path, char_t *query);
+void form_load_log(webs_t wp, char_t *path, char_t *query);
+void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
+void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 //表计参数页面的.(file mtrspara.cfg)
 int webRece_syspara(webs_t wp);
 int webSend_syspara(webs_t wp);
