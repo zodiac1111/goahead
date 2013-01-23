@@ -146,7 +146,322 @@ int main(int argc, char** argv)
 	bclose();
 	return 0;
 }
+/**
+ * 系统参数设置表单提交触发的函数.
+ * 判断数据合法,写入到sysspara.cfg文件中.一共一项,大小7字节,脉冲数目已经废弃.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_sysparam(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s\n:", __FUNCTION__);
+	printf("query:%s\n", query);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	websHeader_pure(wp);
+	if (*init=='1') {
+		webSend_syspara(wp);
+	} else {
+		webRece_syspara(wp);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 客户端请求获取服务端时间.
+ * 只要是post发送到这个函数就同步时间,不管query
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_server_time(webs_t wp, char_t *path, char_t *query)
+{
+	//printf("%s:\n", __FUNCTION__);
+	//printf("query:%s\n", query);
+	time_t t = time(NULL);
+	printf("Synchronization server time(query:\"%s\")...", query);
+	websHeader_pure(wp);
+	websWrite(wp, T("%d"), t);
+	websDone(wp, 200);
+	printf(",%s", ctime(&t));
+	return;
+}
+/**
+ * 串口方案表单提交触发函数
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_sioplans(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSend_sioplans(wp, sysparam);
+	} else {
+		webRece_sioplans(wp);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 网口参数(多个)表单提交处理函数
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_netparas(webs_t wp, char_t *path, char_t *query)
+{
+	printf("form_set_netparas :");
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSend_netparas(wp, sysparam);
+	} else {
+		webRece_netparas(wp);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 表计参数项目表头表单提交函数.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_mtr_items(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * item = websGetVar(wp, T("item"), T("null"));
+	if (strcmp(item, "sioplan")==0) {
+		webSend_mtr_sioplan(wp);
+	} else if (strcmp(item, "procotol")==0) {
+		webSend_mtr_procotol(wp);
+	} else if (strcmp(item, "factory")==0) {
+		webSend_mtr_factory(wp);
+	} else if (strcmp(item, "type")==0) {
+		webSend_mtr_type(wp);
+	}/* 在这里添加其他需要的项目类型 */
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
+ * @param wp 页面
+ * @param path 路径
+ * @param query 提交POST的字符串值
+ */
+void form_mtrparams(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSend_mtrparams(wp, sysparam.meter_num);
+	} else {
+		webRece_mtrparams(wp);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 监视端口 表单提交触发函数
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_monparas(webs_t wp, char_t *path, char_t *query)
+{
+	printf("form_set_monparas :");
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSend_monparas(wp, sysparam);
+	} else {
+		webRece_monparas(wp, sysparam);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 表单提交函数,储存周期.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_savecycle(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s:\n", __FUNCTION__);
+	printf("query:%s\n", query);
+	websHeader_pure(wp);
+	char * init = websGetVar(wp, T("init"), T("null"));
+	if (*init=='1') {
+		webSend_savecycle(wp);
+	} else {
+		webRece_savecycle(wp);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 客户端发送重启表单,分类重启.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_reset(webs_t wp, char_t *path, char_t *query)
+{
+#define REINIT_PROTOCOL_FILE 1
+#define RET_WEB 2
+#define RET_SAMPLE_PROC 3
+#define RET_RTU 4
+#define RET_TEST 10
+	printf("form_reset :");
+	printf("query:%s\n", query);
+	char app[128] = { 0 };
+	int typ = 0;
+	int ret = -1;
+	pid_t pid;
+	char * str_typ = websGetVar(wp, T("OpType"), T("null"));
+	typ = atoi(str_typ);
+	printf("type=%d\n", typ);
+	switch (typ) {
+	case REINIT_PROTOCOL_FILE:
+		ret = read_protocol_file(procotol_name, &procotol_num,
+		                PORC_FILE);
+		if (ret!=0) {
+			fprintf(stderr, "%s", myweberrstr[ret]);
+			PRINT_HERE
+		}
+		break;
+	case RET_WEB:
+		readlink("/proc/self/exe", app, 128);
+		pid = fork();
+		if (pid==-1) {
+			fprintf(stderr, "fork() error.errno:%d error:%s\n",
+			                errno, strerror(errno));
+			break;
+		}
+		if (pid==0) {		//子进程.
+			system("killall webs");
+			execl(app, app, NULL);
+			exit(0);
+		}
 
+		if (pid>0) {
+
+		}
+		break;
+	case RET_SAMPLE_PROC:
+		system("killall hl3104_com ");
+		break;
+	case RET_RTU:
+		reflash_this_wp(wp, PAGE_RESET);
+#if __i386 == 1
+		system("ls");
+#else
+		system("reboot");
+#endif
+
+		return;
+		break;
+	case RET_TEST:
+		system("ls");
+		break;
+	default:
+		reflash_this_wp(wp, PAGE_RESET);
+		return;
+		break;
+	}
+	reflash_this_wp(wp, PAGE_RESET);
+}
+/**
+ * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_history_tou(webs_t wp, char_t *path, char_t *query)
+{
+	printf("%s ***query:%s\n", __FUNCTION__, query);
+	//PRINT_HERE
+	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
+	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
+	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
+	printf("时间戳范围:%s~%s\n", stime_t, etime_t);
+	TimeRange tr;
+	int ret;
+	//int tou_test=1100;
+	int mtr_no = 0;
+	stTou tou;
+	memset(&tou, 0x00, sizeof(stTou));
+	ret = sscanf(strmtr_no, "%d", &mtr_no);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(stime_t, "%ld", &tr.s);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(etime_t, "%ld", &tr.e);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	//PRINT_HERE
+	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
+	websHeader_pure(wp);
+	ret = load_tou_dat(mtr_no, tr, &tou, wp);
+	if (ret==ERR) {
+		web_err_proc(EL);
+	}
+	//websFooter(wp);
+	websDone(wp, 200);
+	return;
+}
+/**
+ * 接收客户端的日志文件
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_save_log(webs_t wp, char_t *path, char_t *query)
+{
+	webRece_txtfile(wp, query, ERR_LOG);
+}
+void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	webRece_txtfile(wp, query, MON_PORT_NAME_FILE);
+}
+void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	webRece_txtfile(wp, query, PORC_FILE);
+}
+/**
+ * 加载日志文件到客户端
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_load_log(webs_t wp, char_t *path, char_t *query)
+{
+	webSend_txtfile(wp, ERR_LOG);
+	return;
+}
+void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	webSend_txtfile(wp, PORC_FILE);
+}
+void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
+{
+	webSend_txtfile(wp, MON_PORT_NAME_FILE);
+}
 /**
  * Exit cleanly on interrupt
  */
@@ -326,7 +641,6 @@ static int initWebs(int demo)
 	}
 	return 0;
 }
-
 
 /**
  * asp:调用:根据全局表号变量,加载这一个表的各种参数.
@@ -1284,51 +1598,13 @@ int mtr_param_print_item(webs_t wp)
 	printf("iv= %s\n", websGetVar(wp, T("iv"), T("0")));
 	return 0;
 }
-/**
- * 客户端请求获取服务端时间.
- * 只要是post发送到这个函数就同步时间,不管query
- * @param wp
- * @param path
- * @param query
- */
-void  form_server_time(webs_t wp, char_t *path, char_t *query)
-{
-	//printf("%s:\n", __FUNCTION__);
-	//printf("query:%s\n", query);
-	time_t t=time(NULL);
-	printf("Synchronization server time(query:\"%s\")...",query);
-	websHeader_pure(wp);
-	websWrite(wp, T("%d"), t);
-	websDone(wp, 200);
-	printf(",%s",ctime(&t));
-	return;
-}
-/**
- * 串口方案表单提交触发函数
- * @param wp
- * @param path
- * @param query
- */
-void form_sioplans(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
-	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
-		webSet_sioplans(wp, sysparam);
-	} else {
-		webGet_sioplans(wp);
-	}
-	websDone(wp, 200);
-	return;
-}
+
 /**
  * 串口方案:页面->文件
  * @param wp
  * @return
  */
-int webGet_sioplans(webs_t wp)
+int webRece_sioplans(webs_t wp)
 {
 	int n = 0;
 	unsigned char no;
@@ -1405,7 +1681,7 @@ int webGet_sioplans(webs_t wp)
  * @param plan 串口方案
  * @param sp 系统参数
  */
-int webSet_sioplans(webs_t wp, stSysParam sp)
+int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
 	stUart_plan plan;
@@ -1472,85 +1748,14 @@ int ipstr2ipfile(char *ipstr, u8 ipfile[12])
 	ipfile[11] = (val[3]/1)%10;
 	return j+1;
 }
-/**
- * 客户端发送重启表单,分类重启.
- * @param wp
- * @param path
- * @param query
- */
-static void form_reset(webs_t wp, char_t *path, char_t *query)
-{
-#define REINIT_PROTOCOL_FILE 1
-#define RET_WEB 2
-#define RET_SAMPLE_PROC 3
-#define RET_RTU 4
-#define RET_TEST 10
-	printf("form_reset :");
-	printf("query:%s\n", query);
-	char app[128] = { 0 };
-	int typ = 0;
-	int ret = -1;
-	pid_t pid;
-	char * str_typ = websGetVar(wp, T("OpType"), T("null"));
-	typ = atoi(str_typ);
-	printf("type=%d\n", typ);
-	switch (typ) {
-	case REINIT_PROTOCOL_FILE:
-		ret = read_protocol_file(procotol_name, &procotol_num,
-		                PORC_FILE);
-		if (ret!=0) {
-			fprintf(stderr, "%s", myweberrstr[ret]);
-			PRINT_HERE
-		}
-		break;
-	case RET_WEB:
-		readlink("/proc/self/exe", app, 128);
-		pid = fork();
-		if (pid==-1) {
-			fprintf(stderr, "fork() error.errno:%d error:%s\n",
-			                errno, strerror(errno));
-			break;
-		}
-		if (pid==0) {		//子进程.
-			system("killall webs");
-			execl(app, app, NULL);
-			exit(0);
-		}
 
-		if (pid>0) {
-
-		}
-		break;
-	case RET_SAMPLE_PROC:
-		system("killall hl3104_com ");
-		break;
-	case RET_RTU:
-		reflash_this_wp(wp, PAGE_RESET);
-#if __i386 == 1
-		system("ls");
-#else
-		system("reboot");
-#endif
-
-		return;
-		break;
-	case RET_TEST:
-		system("ls");
-		break;
-	default:
-		reflash_this_wp(wp, PAGE_RESET);
-		return;
-		break;
-	}
-	reflash_this_wp(wp, PAGE_RESET);
-}
 /**
  * 从文件读取监视参数,显示到页面
  * @param wp
  * @param sysparam
  * @return
  */
-int webSet_monparas(webs_t wp, stSysParam sysparam)
+int webSend_monparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stMonparam monpara;
@@ -1579,7 +1784,7 @@ int webSet_monparas(webs_t wp, stSysParam sysparam)
  * @param sysparam
  * @return
  */
-int webGet_monparas(webs_t wp, stSysParam sysparam)
+int webRece_monparas(webs_t wp, stSysParam sysparam)
 {
 	stMonparam monparam;
 	int n;
@@ -1654,26 +1859,7 @@ int webGet_monparas(webs_t wp, stSysParam sysparam)
 	}
 	return 0;
 }
-/**
- * 监视端口 表单提交触发函数
- * @param wp
- * @param path
- * @param query
- */
-void form_monparas(webs_t wp, char_t *path, char_t *query)
-{
-	printf("form_set_monparas :");
-	printf("query:%s\n", query);
-	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
-		webSet_monparas(wp, sysparam);
-	} else {
-		webGet_monparas(wp, sysparam);
-	}
-	websDone(wp, 200);
-	return;
-}
+
 /**
  * 将"255","1"这样的字符串转化成 "0255","0001"这样的字符数组.终端地址.
  * @param str
@@ -1751,7 +1937,7 @@ int portstr2u8(const char * str, u8* val)
  * @param sysparam
  * @return
  */
-int webSet_netparas(webs_t wp, stSysParam sysparam)
+int webSend_netparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stNetparam netparam;
@@ -1776,7 +1962,7 @@ int webSet_netparas(webs_t wp, stSysParam sysparam)
  * @param wp
  * @return
  */
-int webGet_netparas(webs_t wp)
+int webRece_netparas(webs_t wp)
 {
 	stNetparam netparam;
 	int n;
@@ -1814,32 +2000,13 @@ int webGet_netparas(webs_t wp)
 	}
 	return 0;
 }
-/**
- * 网口参数(多个)表单提交处理函数
- * @param wp
- * @param path
- * @param query
- */
-void form_netparas(webs_t wp, char_t *path, char_t *query)
-{
-	printf("form_set_netparas :");
-	printf("query:%s\n", query);
-	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
-		webSet_netparas(wp, sysparam);
-	} else {
-		webGet_netparas(wp);
-	}
-	websDone(wp, 200);
-	return;
-}
+
 /**
  * 从页面获取系统参数，保存到文件．同时更新全局变量．
  * @param wp
  * @return
  */
-int webGet_syspara(webs_t wp)
+int webRece_syspara(webs_t wp)
 {
 	int ret = -1;
 	/** 错误的项目,每一位表示一个项目,1表示此项错误,0表示此项正确.初始全部正确.
@@ -1907,7 +2074,7 @@ int webGet_syspara(webs_t wp)
  * @param wp
  * @return
  */
-int webSet_syspara(webs_t wp)
+int webSend_syspara(webs_t wp)
 {
 	int ret = load_sysparam(&sysparam, CFG_SYS);
 	if (ret==-1) {
@@ -1915,41 +2082,21 @@ int webSet_syspara(webs_t wp)
 		return -1;
 	}
 	websWrite(wp, T("%u,"), sysparam.meter_num);
-	websWrite(wp, T("%u,"), sysparam.sioplan_num);
+	websWrite(wp, T("%u,"), sysparam.sioports_num);
 	websWrite(wp, T("%u,"), sysparam.monitor_ports);
 	websWrite(wp, T("%u,"), sysparam.netports_num);
 	websWrite(wp, T("%u,"), sysparam.sioports_num);
 	websWrite(wp, T("%u"), sysparam.control_ports);
 	return 0;
 }
-/**
- * 系统参数设置表单提交触发的函数.
- * 判断数据合法,写入到sysspara.cfg文件中.一共一项,大小7字节,脉冲数目已经废弃.
- * @param wp
- * @param path
- * @param query
- */
-void form_sysparam(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s\n:", __FUNCTION__);
-	printf("query:%s\n", query);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	websHeader_pure(wp);
-	if (*init=='1') {
-		webSet_syspara(wp);
-	} else {
-		webGet_syspara(wp);
-	}
-	websDone(wp, 200);
-	return;
-}
+
 /**
  * 将所有表计参数发送到页面.
  * @param wp 页面
  * @param mtrnum 一共有的表计个数
  * @return
  */
-int webSet_mtrparams(webs_t wp, int mtrnum)
+int webSend_mtrparams(webs_t wp, int mtrnum)
 {
 	int no;
 	stMtr mtr;
@@ -1990,7 +2137,7 @@ int webSet_mtrparams(webs_t wp, int mtrnum)
  * @param mtrnum
  * @return
  */
-int webGet_mtrparams(webs_t wp)
+int webRece_mtrparams(webs_t wp)
 {
 	stMtr amtr[256];
 	memset(amtr, 0x00, sizeof(stMtr));
@@ -2012,33 +2159,10 @@ int webGet_mtrparams(webs_t wp)
 	}
 	return 0;
 }
-/**
- * 表计参数项目表头表单提交函数.
- * @param wp
- * @param path
- * @param query
- */
-void form_mtr_items(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
-	websHeader_pure(wp);
-	char * item = websGetVar(wp, T("item"), T("null"));
-	if (strcmp(item, "sioplan")==0) {
-		webSend_mtr_sioplan(wp);
-	} else if (strcmp(item, "procotol")==0) {
-		webSend_mtr_procotol(wp);
-	} else if (strcmp(item, "factory")==0) {
-		webSend_mtr_factory(wp);
-	}else if(strcmp(item, "type")==0) {
-		webSend_mtr_type(wp);
-	}/* 在这里添加其他需要的项目类型 */
-	websDone(wp, 200);
-	return;
-}
+
 int webSend_mtr_type(webs_t wp)
 {
-	u32 i;//就一个选择列表框.
+	u32 i;     //就一个选择列表框.
 	websWrite(wp, T("<select name=ph_wire_all "
 			"onchange=\"type_all_changed(event);\">\n"));
 	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
@@ -2086,32 +2210,13 @@ int webSend_mtr_sioplan(webs_t wp)
 	}
 	return 0;
 }
-/**
- * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
- * @param wp 页面
- * @param path 路径
- * @param query 提交POST的字符串值
- */
-void form_mtrparams(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
-	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
-		webSet_mtrparams(wp, sysparam.meter_num);
-	} else {
-		webGet_mtrparams(wp);
-	}
-	websDone(wp, 200);
-	return;
-}
+
 /**
  * 从页面获取储存周期参数,保存到本地文件中
  * @param wp
  * @return
  */
-int webGet_savecycle(webs_t wp)
+int webRece_savecycle(webs_t wp)
 {
 	int i;
 	int n;
@@ -2141,7 +2246,7 @@ int webGet_savecycle(webs_t wp)
  * @param wp
  * @return
  */
-int webSet_savecycle(webs_t wp)
+int webSend_savecycle(webs_t wp)
 {
 	printf("读取存储周期.\n");
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
@@ -2190,111 +2295,7 @@ int webSet_savecycle(webs_t wp)
 	}
 	return 0;
 }
-/**
- * 表单提交函数,储存周期.
- * @param wp
- * @param path
- * @param query
- */
-void form_savecycle(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
-	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
-		webSet_savecycle(wp);
-	} else {
-		webGet_savecycle(wp);
-	}
-	websDone(wp, 200);
-	return;
-}
-/**
- * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
- * @param wp
- * @param path
- * @param query
- */
-static void form_history_tou(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s ***query:%s\n", __FUNCTION__, query);
-	//PRINT_HERE
-	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
-	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
-	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
-	printf("时间戳范围:%s~%s\n", stime_t, etime_t);
-	TimeRange tr;
-	int ret;
-	//int tou_test=1100;
-	int mtr_no = 0;
-	stTou tou;
-	memset(&tou, 0x00, sizeof(stTou));
-	ret = sscanf(strmtr_no, "%d", &mtr_no);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	ret = sscanf(stime_t, "%ld", &tr.s);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	ret = sscanf(etime_t, "%ld", &tr.e);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	//PRINT_HERE
-	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
-#if __arm__ ==2
-//	tr.s+=8*60*60;
-//	tr.e+=8*60*60;
-//	printf("时间戳校正(数值)范围:%ld~%ld\n", tr.s, tr.e);
-#endif
-	websHeader_pure(wp);
-	ret = load_tou_dat(mtr_no, tr, &tou, wp);
-	if (ret==ERR) {
-		web_err_proc(EL);
-	}
-	//websFooter(wp);
-	websDone(wp, 200);
-	return;
-}
-/**
- * 接收客户端的日志文件
- * @param wp
- * @param path
- * @param query
- */
-static void form_save_log(webs_t wp, char_t *path, char_t *query)
-{
-	webGet_txtfile(wp, path, query, ERR_LOG);
-}
-static void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
-{
-	webGet_txtfile(wp, path, query, MON_PORT_NAME_FILE);
-}
-void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
-{
-	webGet_txtfile(wp, path, query, PORC_FILE);
-}
-/**
- * 加载日志文件到客户端
- * @param wp
- * @param path
- * @param query
- */
-static void form_load_log(webs_t wp, char_t *path, char_t *query)
-{
-	webSet_txtfile(wp, path, query, ERR_LOG);
-	return;
-}
-void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
-{
-	webSet_txtfile(wp, path, query, PORC_FILE);
-}
-static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
-{
-	webSet_txtfile(wp, path, query, MON_PORT_NAME_FILE);
-}
+
 /**
  * 从页面中获取文本,保存到本地文本文件中.
  * @param wp
@@ -2302,7 +2303,7 @@ static void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
  * @param query
  * @param file
  */
-void webGet_txtfile(webs_t wp, char_t *path, char_t *query, const char* file)
+void webRece_txtfile(webs_t wp, char_t *query, const char* file)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	websWrite(wp, T("HTTP/1.0 200 OK\n"));
@@ -2323,7 +2324,7 @@ void webGet_txtfile(webs_t wp, char_t *path, char_t *query, const char* file)
  * @param query
  * @param file
  */
-void webSet_txtfile(webs_t wp, char_t *path, char_t *query, const char*file)
+void webSend_txtfile(webs_t wp, const char*file)
 {
 	websHeader_pure(wp);
 	char buf[1024] = { 0 };
@@ -2341,7 +2342,6 @@ void webSet_txtfile(webs_t wp, char_t *path, char_t *query, const char*file)
 			break;
 		}
 	}
-
 	fclose(fp);
 	WEB_END:
 	websDone(wp, 200);
@@ -2367,24 +2367,12 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 			perror("open ping:");
 			return;
 		}
-//		is_monmsg = 0;
-//		sb.sem_num = 0;
-//		sb.sem_op = 0;
 		printf("信号量 s =%d\n", semctl(semid, 0, GETVAL, 0));
 		while (fgets(line, 256-1, pf)
 		                &&(semctl(semid, 0, GETVAL, 0))) {
-//			sb.sem_num = 1;     //将1号信号量
-//			sb.sem_op = -1;     //减1
-//			sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
-//			semop(semid, &sb, 1);
+
 			printf("%s", line);
 			websWrite(wp, T("%s"), line);
-			//printf("is_monmsg:%d \n", is_monmsg);
-			//websDone(wp, 200);
-			//websTimeoutCancel(wp);
-			//socketSetBlock(wp->sid, 1);
-			//socketFlush(wp->sid);
-			//socketCloseConnection(wp->sid);
 		}
 		///如果是点击停止使之退出的,那么信号量现在是0,
 		///为了下次使用,加1.如果自然结束退出,信号量还是1不变.
@@ -2408,11 +2396,6 @@ void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 	sb.sem_op = -1;     //减1
 	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
 	semop(semid, &sb, 1);     //操作信号量
-//	is_monmsg = 0;
-//	sb.sem_num = 1;
-//	sb.sem_op = 1;
-//	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
-//	semop(semid, &sb, 1);
 	printf("信号量 s :%d \n", semctl(semid, 0, GETVAL, 0));
 	websWrite(wp, T("ok"));
 	websDone(wp, 200);
