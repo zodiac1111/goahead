@@ -615,7 +615,6 @@ static int initWebs(int demo)
 	websFormDefine(T("save_procotol_cfg"), form_save_procotol_cfgfile);
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
-	//websFormDefine(T("form_set_mtrparam"), myformTest);
 #ifdef USER_MANAGEMENT_SUPPORT
 	//Create the Form handlers for the User Management pages
 	formDefineUserMgmt();
@@ -629,7 +628,6 @@ static int initWebs(int demo)
 	}
 	return 0;
 }
-
 /**
  * asp:调用:根据全局表号变量,加载这一个表的各种参数.
  * 页面刷新加载一次.保存在内存mtr结构体中,暂时无用.
@@ -653,7 +651,6 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	return 0;
 }
-
 /**
  * 向页面写转发表个数单元格
  * @param wp
@@ -663,7 +660,7 @@ static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
 {
-	printf("监视参数-转发表计数目:%d \n", monport.forward_mtr_num);
+	//printf("监视参数-转发表计数目:%d \n", monport.forward_mtr_num);
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input class=inp type=text size=3 maxlength=3 "
 			" onchange=\"verify_forward_mtr_num(event);\" "
@@ -674,7 +671,7 @@ static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
 }
 static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 {
-	printf("监视参数-转发标志:%d\n", monport.forward_enable);
+	//printf("监视参数-转发标志:%d\n", monport.forward_enable);
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input type=checkbox name=forward_chk "
 			"value=%d %s %s>\n"), monport.forward_enable,
@@ -689,7 +686,7 @@ static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 }
 static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 {
-	printf("监视参数-时间同步标志:%d\n", monport.chktime_valid_flag);
+	//printf("监视参数-时间同步标志:%d\n", monport.chktime_valid_flag);
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input type=checkbox name=time_syn_chk "
 			" value=%d %s %s>\n "), monport.chktime_valid_flag,
@@ -711,9 +708,9 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
  */
 static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 {
-	printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
+	/* printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
 	                monport.prot_addr[1], monport.prot_addr[2],
-	                monport.prot_addr[3]);
+	                monport.prot_addr[3]); */
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input type=text size=4 maxlength=4 "
@@ -728,7 +725,7 @@ static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 ///主站规约类型
 static int webWrite_porttype(webs_t wp, stMonparam monport)
 {
-	printf("监视参数-端口类型?:%x\n", monport.sioplan);
+	//printf("监视参数-端口类型?:%x\n", monport.sioplan);
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=protocol>\n"));
@@ -745,7 +742,7 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 }
 static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport)
 {
-	printf("监视参数-串口方案:%x\n", monport.sioplan);
+	//printf("监视参数-串口方案:%x\n", monport.sioplan);
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=sioplan>\n"));
@@ -761,8 +758,8 @@ static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport)
 }
 static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 {
+	//printf("监视参数-监听端口:");
 	int i;
-	printf("监视参数-监听端口:");
 	for (i = 0; i<5; i++) {
 		printf("%d", monport.listen_port[i]);
 	}
@@ -780,7 +777,7 @@ static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 }
 static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
 {
-	printf("监视参数-监视参数序号:%x\n", no);
+	//printf("监视参数-监视参数序号:%x\n", no);
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input type=text name=mon_no %s"
 			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
@@ -790,7 +787,7 @@ static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
 }
 static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 {
-	printf("监视参数-使用端口:%x\n", monport.comm_port);
+	//printf("监视参数-使用端口:%x\n", monport.comm_port);
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=commport >\n"));
@@ -807,7 +804,7 @@ static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 }
 static int webWrite_net_no(webs_t wp, int no, stNetparam netparam)
 {
-	printf("网口参数-序号:%x\n", no);
+	//printf("网口参数-序号:%x\n", no);
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input %s type=text name=net_no "
 			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
@@ -825,7 +822,7 @@ static int webWrite_net_no(webs_t wp, int no, stNetparam netparam)
  */
 static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam)
 {
-	printf("网口参数-网口:%x\n", netparam.no);
+	//printf("网口参数-网口:%x\n", netparam.no);
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=eth >\n"));
@@ -838,7 +835,7 @@ static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam)
 }
 static int webWrite_ip(webs_t wp, int no, stNetparam netparam)
 {
-	printf("网口参数-IP\n");
+	//printf("网口参数-IP\n");
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <input %s type=text size=15 maxlength=15 "
@@ -856,7 +853,7 @@ static int webWrite_ip(webs_t wp, int no, stNetparam netparam)
 }
 static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
 {
-	printf("网口参数-掩码(mask)\n");
+	//printf("网口参数-掩码(mask)\n");
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <input %s type=text size=15 maxlength=15 "
@@ -874,7 +871,7 @@ static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
 }
 static int webWrite_gateway(webs_t wp, int no, stNetparam netparam)
 {
-	printf("网口参数-网关(gateway)\n");
+	//printf("网口参数-网关(gateway)\n");
 	int i;
 	websWrite(wp, T("<td>\n"
 			" <input %s type=text size=15 maxlength=15 "
