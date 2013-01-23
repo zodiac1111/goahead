@@ -363,7 +363,7 @@ static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
 {
 	printf("监视参数-转发表计数目:%d \n", monport.forward_mtr_num);
 	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("<input class=ntx type=text size=3 maxlength=3 "
+	websWrite(wp, T("<input class=inp type=text size=3 maxlength=3 "
 			" onchange=\"verify_forward_mtr_num(event);\" "
 			" name=forward_mtr_num value=\""));
 	websWrite(wp, T("%d\"> "), monport.forward_mtr_num);
@@ -414,7 +414,7 @@ static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 	                monport.prot_addr[3]);
 	int i;
 	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <input class=ntx type=text size=4 maxlength=4 "
+	websWrite(wp, T(" <input type=text size=4 maxlength=4 "
 			" onchange=\"verify_rtu_addr(event);\" "
 			" name=rtu_addr value=\""));
 	for (i = 0; i<4; i++) {
@@ -699,7 +699,7 @@ static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv)
 static int webWrite_line(webs_t wp, stMtr mtr)
 {
 	websWrite(wp, T("<td>\n"
-			"<input class=ntx type=text size=6 maxlength=6 "
+			"<input type=text  maxlength=6 "
 			"onchange=\"line_changed(event);\""
 			"name=line value=\""));
 	int i;
@@ -715,7 +715,7 @@ static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 {
 	int i;
 	websWrite(wp, T("<td>\n"
-			"<input class=ntx type=text size=12 maxlength=12 "
+			"<input type=text  maxlength=12 "
 			"onchange=\"addr_changed(event);\""
 			"name=addr value=\""));
 	for (i = 0; i<ADDR_LEN; i++) {
@@ -730,7 +730,7 @@ static int webWrite_pwd(webs_t wp, stMtr mtr)
 {
 	int i;
 	websWrite(wp, T("<td>\n"
-			"<input class=ntx type=text size=8 maxlength=8 "
+			"<input type=text maxlength=8 "
 			"onchange=\"pwd_changed(event);\""
 			"name=pwd value=\""));
 	for (i = 0; i<PWD_LEN; i++) {
@@ -744,7 +744,7 @@ static int webWrite_pwd(webs_t wp, stMtr mtr)
 static int webWrite_it_dot(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			" <input class=ntx type=text size=1 maxlength=1 "
+			" <input type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			" name=it_dot value=%u>\n</td>\n "), mtr.it_dot);
 }
@@ -752,7 +752,7 @@ static int webWrite_it_dot(webs_t wp, stMtr mtr)
 static int webWrite_v_dot(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			" <input class=ntx type=text size=1 maxlength=1  "
+			" <input type=text  maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
 			" name=v_dot value=%u >\n</td>\n "), mtr.v_dot);
 
@@ -761,7 +761,7 @@ static int webWrite_v_dot(webs_t wp, stMtr mtr)
 static int webWrite_i_dot(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			"<input class=ntx type=text size=1 maxlength=1  "
+			"<input type=text maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
 			"name=i_dot value=%u>\n</td>\n "), mtr.i_dot);
 
@@ -770,7 +770,7 @@ static int webWrite_i_dot(webs_t wp, stMtr mtr)
 static int webWrite_p_dot(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			"<input class=ntx type=text size=1 maxlength=1 "
+			"<input  type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			"name=p_dot value=%u>\n</td>\n "), mtr.p_dot);
 }
@@ -778,7 +778,7 @@ static int webWrite_p_dot(webs_t wp, stMtr mtr)
 static int webWrite_q_dot(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			" <input class=ntx type=text size=1 maxlength=1 "
+			" <input  type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			" name=q_dot value=%u>\n</td>\n "), mtr.q_dot);
 }
@@ -786,7 +786,7 @@ static int webWrite_q_dot(webs_t wp, stMtr mtr)
 static int webWrite_xl_dot(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			" <input class=ntx type=text size=1 maxlength=1 "
+			" <input type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
 			" name=xl_dot value=%u>\n</td>\n "), mtr.xl_dot);
 
@@ -795,7 +795,7 @@ static int webWrite_xl_dot(webs_t wp, stMtr mtr)
 static int webWrite_ue(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			" <input class=ntx type=text size=4 "
+			" <input type=text  "
 			" onchange=\"ue_changed(event);\" "
 			" name=ue value=%u>\n</td>\n "), mtr.ue);
 }
@@ -803,7 +803,7 @@ static int webWrite_ue(webs_t wp, stMtr mtr)
 static int webWrite_ie(webs_t wp, stMtr mtr)
 {
 	return websWrite(wp, T("<td>\n"
-			" <input class=ntx type=text size=4 "
+			" <input type=text size=4 "
 			" onchange=\"ie_changed(event);\" "
 			" name=ie value=%u>\n</td>\n "), mtr.ie);
 }
@@ -915,8 +915,8 @@ static int webWrite_mtrno(webs_t wp, int no)
 {
 	printf("表计参数-表号:%d\n", no);
 	return websWrite(wp, T("<td>"
-			"<input type=text class=ntx name=mtrno align=center "
-			" readonly=readonly size=1 value=%d>"
+			"<input type=text name=mtrno "
+			" readonly=readonly  value=%d>"
 			"</td>\n"), no);
 }
 
