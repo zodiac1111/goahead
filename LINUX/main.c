@@ -1915,7 +1915,7 @@ int webSet_syspara(webs_t wp)
 		return -1;
 	}
 	websWrite(wp, T("%u,"), sysparam.meter_num);
-	websWrite(wp, T("%u,"), sysparam.sioports_num);
+	websWrite(wp, T("%u,"), sysparam.sioplan_num);
 	websWrite(wp, T("%u,"), sysparam.monitor_ports);
 	websWrite(wp, T("%u,"), sysparam.netports_num);
 	websWrite(wp, T("%u,"), sysparam.sioports_num);
