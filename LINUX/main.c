@@ -303,9 +303,9 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
-		webSend_savecycle(wp);
+		(void)webSend_savecycle(wp);
 	} else {
-		webRece_savecycle(wp);
+		(void)webRece_savecycle(wp);
 	}
 	websDone(wp, 200);
 	return;
@@ -1063,7 +1063,6 @@ static int webWrite_i_dot(webs_t wp, stMtr mtr)
 			"<input type=text maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
 			"name=i_dot value=%u>\n</td>\n "), mtr.i_dot);
-
 }
 /// 有功功率小数位数
 static int webWrite_p_dot(webs_t wp, stMtr mtr)
@@ -1229,13 +1228,8 @@ static int split(char **ret, char* in)
 {
 //PRINT_HERE
 	int i = 0;
-//printf("in %s \n", in);
 	char* token = strtok(in, " ");
-//PRINT_HERE
 	while (token!=NULL) {
-		//PRINT_HERE
-		//printf("%s ", token);
-		//PRINT_HERE
 		ret[i] = token;
 		//printf("%p \n", ret[i]);
 		token = strtok(NULL, " ");
@@ -1264,7 +1258,6 @@ static int is_all_equ(int n[], int num)
 /**
  * 从客户端post来的字符串 分解出n组表计参数.
  * 返回值表示有多少组.小于0 错误.
- *
  * @param[out] amtr 表计参数数组.下标即序号(表号)
  * @param[in] wp 页面
  * @param[in] query post来的表计参数值字符串,(所有)
@@ -1585,7 +1578,7 @@ int mtr_param_print_item(webs_t wp)
 }
 
 /**
- * 串口方案:页面->文件
+ * 串口方案:从页面接收串口方案,保存到服务器文件中
  * @param wp
  * @return
  */
@@ -2208,11 +2201,10 @@ int webRece_savecycle(webs_t wp)
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
 	char *flags = websGetVar(wp, T("flag"), T("null"));
 	char *cycle = websGetVar(wp, T("cycle"), T("null"));
-	//printf(" flag:%s\n cycle:%s\n", flags, cycle);
 	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
 		n = sscanf(flags, "%hhu", &sav[i].enable);
 		if (n!=1) {
-			//web_err_proc(EL);
+			web_err_proc(EL);
 			break;
 		}
 		flags = point2next(&flags, ' ');
