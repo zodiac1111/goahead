@@ -391,6 +391,7 @@ static void websSocketEvent(int sid, int mask, void* iwp)
 	}
 }
 
+/******************************************************************************/
 /*
  *	The webs read handler. This is the primary read event loop. It uses a
  *	state machine to track progress while parsing the HTTP request.
@@ -472,7 +473,13 @@ void websReadEvent(webs_t wp)
 			if (wp->flags&WEBS_CGI_REQUEST) {
 				if (fd==-1) {
 #if !defined(WIN32)
-					fd =  wp->cgiStdin,O_CREAT |O_WRONLY|O_BINARY,0666);
+					fd =
+					                gopen(
+					                                wp->cgiStdin,
+					                                O_CREAT
+					                                                |O_WRONLY
+					                                                |O_BINARY,
+					                                0666);
 #else
 					_sopen_s(&fd, wp->cgiStdin, O_CREAT | O_WRONLY | O_BINARY, _SH_DENYNO, 0666);
 #endif
@@ -697,8 +704,8 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
 
 		} else { /* Valid data */
 			/*
-			 *			Convert to UNICODE if necessary.  First be sure the string
-			 *			is NULL terminated.
+			 *Convert to UNICODE if necessary.  First be sure the string
+			 *is NULL terminated.
 			 */
 			buf[nbytes] = '\0';
 			if ((text = ballocAscToUni(buf, nbytes))==NULL) {
@@ -721,7 +728,7 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
 		if (nbytes<0) {
 			int eof;
 			/*
-			 *			Error, EOF or incomplete
+			 *Error, EOF or incomplete
 			 */
 #ifdef WEBS_SSL_SUPPORT
 			if (wp->flags & WEBS_SECURE) {
@@ -743,9 +750,9 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
 
 			if (eof) {
 				/*
-				 *				If this is a post request without content length, process
-				 *				the request as we now have all the data. Otherwise just
-				 *				close the connection.
+				 *If this is a post request without content length, process
+				 *the request as we now have all the data. Otherwise just
+				 *close the connection.
 				 */
 				if (wp->state==WEBS_POST) {
 					websUrlHandlerRequest(wp);
@@ -754,7 +761,7 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
 				}
 			} else {
 				/*
-				 *				If an error occurred and it wasn't an eof, close the connection
+				 *If an error occurred and it wasn't an eof, close the connection
 				 */
 #ifdef HP_FIX
 				websDone(wp, 0);
@@ -762,23 +769,23 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
 
 			}
 			/*
-			 *			If state is WEBS_HEADER and the ringq is empty, then this is a
-			 *			simple request with no additional header fields to process and
-			 *			no empty line terminator.
+			 *If state is WEBS_HEADER and the ringq is empty, then this is a
+			 *simple request with no additional header fields to process and
+			 *no empty line terminator.
 			 */
 			/*
-			 *			NOTE: this fix for earlier versions of browsers is troublesome
-			 *			because if we don't receive the entire header in the first pass
-			 *			this code assumes we were only expecting a one line header, which
-			 *			is not necessarily the case. So we weren't processing the whole
-			 *			header and weren't fufilling requests properly.
+			 *NOTE: this fix for earlier versions of browsers is troublesome
+			 *because if we don't receive the entire header in the first pass
+			 *this code assumes we were only expecting a one line header, which
+			 *is not necessarily the case. So we weren't processing the whole
+			 *header and weren't fufilling requests properly.
 			 */
 			return -1;
 
 		} else if (nbytes==0) {
 			if (wp->state==WEBS_HEADER) {
 				/*
-				 *				Valid empty line, now finished with header
+				 *Valid empty line, now finished with header
 				 */
 				websParseRequest(wp);
 				if (wp->flags&WEBS_POST_REQUEST) {
@@ -798,7 +805,7 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
 					return 1;
 				}
 				/*
-				 *				We've read the header so go and handle the request
+				 *We've read the header so go and handle the request
 				 */
 				websUrlHandlerRequest(wp);
 			}
