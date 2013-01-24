@@ -68,7 +68,6 @@ int webSend_txtfile(webs_t wp, const char*file);
 int webRece_txtfile(webs_t wp, char_t *query, const char* file);
 //表计参数页面 小相
 static int webWrite_mtrno(webs_t wp, int no);
-static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv);
 static int webWrite_line(webs_t wp, stMtr mtr);
 static int webWrite_mtraddr(webs_t wp, stMtr mtr);
 static int webWrite_pwd(webs_t wp, stMtr mtr);

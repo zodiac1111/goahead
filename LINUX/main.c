@@ -41,8 +41,6 @@ void formDefineUserMgmt(void);
 /*
  *	Change configuration here
  */
-static char_t *rootWeb = T("www"); /* Root web directory */
-static char_t *demoWeb = T("wwwdemo");/* Root web directory */
 static char_t *password = T(""); /* Security password */
 static int port = WEBS_DEFAULT_PORT;/* Server port */
 static int retries = 5; /* Server port retries */
@@ -476,34 +474,7 @@ int printf_webs_app_dir(void)
 	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
 	return 0;
 }
-/**
- * 去除输入数组中的前导空白符和后导空白符
- * @param[in] in 待修改的数组,会被修改
- * @param[in] len 数组构成的字符串长度.
- * @return 指向修改好的字符串首地址指针
- */
-char *trim(char in[], int len)
-{
-	int i = 0;
-	int tail = len-1;
-	//找到倒数第一个不为空白符的字符,截断之.
-	while (tail>=0) {
-		if (strchr(" \t\r\n\\/", in[tail])==NULL) {
-			break;
-		}
-		tail--;
-	}
-	in[tail+1] = '\0';
-	//找到第一个不为空白符的字符,字符串头指向它.
-	while (i<=len) {
-		if (strchr(" \t\r\n", in[i])==NULL) {
-			break;
-		}
-		i++;
-	}
-	in += i;
-	return in;
-}
+
 /**
  * 服务器配置文件读取,设置.
  * @param webdir
@@ -518,7 +489,9 @@ int load_web_root_dir(char* webdir)
 	char *pval = NULL;
 	char val[256] = { 0 };
 	int strnum = 0;
+#if DEBUG_PARSE_CONF_FILE
 	int i = 0;
+#endif
 	FILE* fp = fopen(CONF_FILE, "r");
 	if (fp==NULL) {
 		printf(PREFIX_ERR"open file goahead.conf\n");
@@ -528,25 +501,30 @@ int load_web_root_dir(char* webdir)
 		memset(&var, 0x00, 256);
 		memset(&val, 0x00, 256);
 		fgets(line, 255, fp);     //得到一行
-		//得到这一行的字符串
+		//得到这一行的字符串,根据表达式截断
 		strnum = sscanf(line, "%[^#=]=%[^#\r\n]", var, val);
+#if DEBUG_PARSE_CONF_FILE
 		i++;
+#endif
 		if (strnum!=2) {
 			continue;
 		}
 		pvar = trim(var, strlen(var));
 		pval = trim(val, strlen(val));
 		//printf("\"%s\"\n",line);
+#if DEBUG_PARSE_CONF_FILE
 		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
+#endif
 		if (strcmp(pvar, "wwwroot")==0) {
 			strcpy(webdir, pval);
+#if DEBUG_PARSE_CONF_FILE
 			printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
+#endif
 		}
 	}
-	//得到这一行的字符串
 	fclose(fp);
 	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
-#if __i386 == 1//host上调试
+#if __i386 //host上调试
 	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
 	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
 #endif
@@ -1014,22 +992,6 @@ static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
 	}
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
-}
-/**
- * 读取表号,表号只能设定,根据设定的表号读取参数
- */
-static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int i;
-	for (i = 0; i<sysparam.meter_num; i++) {
-		websWrite(wp, T("<option value=\"%d\" %s >%d</option>\n"), i,
-		                (i==g_cur_mtr_no) ?
-		                                    "selected=\"selected\"" :
-		                                    "",
-		                i);
-	}
-	//printf("asp read_mtr_no:%d \n", g_cur_mtr_no);
-	return websWrite(wp, T("%d"), g_cur_mtr_no);
 }
 ///线路名称
 static int webWrite_line(webs_t wp, stMtr mtr)
@@ -2463,4 +2425,32 @@ void print_array(const u8 *a, const int len)
 static void sigintHandler(int unused)
 {
 	finished = 1;
+}
+/**
+ * 去除输入数组中的前导空白符和后导空白符
+ * @param[in] in 待修改的数组,会被修改
+ * @param[in] len 数组构成的字符串长度.
+ * @return 指向修改好的字符串首地址指针
+ */
+char *trim(char in[], int len)
+{
+	int i = 0;
+	int tail = len-1;
+	//找到倒数第一个不为空白符的字符,截断之.
+	while (tail>=0) {
+		if (strchr(" \t\r\n\\/", in[tail])==NULL) {
+			break;
+		}
+		tail--;
+	}
+	in[tail+1] = '\0';
+	//找到第一个不为空白符的字符,字符串头指向它.
+	while (i<=len) {
+		if (strchr(" \t\r\n", in[i])==NULL) {
+			break;
+		}
+		i++;
+	}
+	in += i;
+	return in;
 }

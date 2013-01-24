@@ -8,23 +8,12 @@
 #define PARAM_H_
 #include "type.h"
 #pragma pack(1)
-//所有路径都是相对web root目录(www/wwwdemo)的相对路径.
-#define CFG_DIR "../para/"///<参数路径
-#define CFG_SYS CFG_DIR"sysspara.cfg"///<系统参数文件,关系到下面的其他参数
-#define CFG_MTR CFG_DIR"mtrspara.cfg"///<表计参数配置文件
-#define CFG_SIOPALN CFG_DIR"sioplan.cfg"///<串口方案配置文件
-#define CFG_NET CFG_DIR"netpara.cfg"///<網路參數配置文件
-#define CFG_MON_PARAM CFG_DIR"monpara.cfg"///<监视参数数配置文件
-#define CFG_FORWARD_TABLE CFG_DIR"retranTable.cfg"///<转发表信息文件
-#define CFG_SAVE_CYCLE CFG_DIR"stspara.cfg"///<采集保存周期和项目配置文件
-
-#define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
-#define PORC_FILE PROC_CFG_DIR"protocol_config.txt"///<主站规约配置文件
-#define MAX_PROCOTOL_NUM 128 ///<规约文件中最大规约条目开始时分配这么多
-#define MON_PORT_NAME_FILE PROC_CFG_DIR"monprarm_config.txt"///<监视端口描述文件
-
+#include "conf.h"
 #define MAX_MON_PORT_NUM 64 ///<监视参数端口描述字符串最大数量.如COM1 ETH1 等
 #define IPV4_LEN 12 ///<ipv4占用4个字节,表示成12个字符
+#define LINE_LEN 6 //线路号长度
+#define ADDR_LEN 12
+#define PWD_LEN 8
 ///<储存周期项目,目前(6项):
 ///1. 总电量 2. 分时电量	3.相线无功电能 4.最大需量 5.实时遥测量 6.失压断相
 #define SAVE_CYCLE_ITEM 6
@@ -36,10 +25,6 @@ extern const char *UART_STOP[2];
 extern const char *UART_BAUD[6];
 extern const char *UART_COMM_TYPE[2];
 extern const char* SAVE_CYCLE[12];
-
-#define LINE_LEN 6 //线路号长度
-#define ADDR_LEN 12
-#define PWD_LEN 8
 /**
  *  打印输出当前位置的文件,函数,代码行数
  */

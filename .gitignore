@@ -10,6 +10,7 @@ log.txt
 #astyle代码格式化备份文件
 *.orig
 *.a
+
 /LINUX/webs
 /LINUX/log.txt
 /LINUX/html/*
