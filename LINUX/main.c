@@ -2057,7 +2057,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	int no;
 	stMtr mtr;
 	memset(&mtr, 0x00, sizeof(stMtr));
-	printf("%s\n", __FUNCTION__);
+	//printf("%s\n", __FUNCTION__);
 	//printf("个数:%d\n",mtrnum);
 	for (no = 0; no<mtrnum; no++) {
 		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
@@ -2099,8 +2099,10 @@ int webRece_mtrparams(webs_t wp)
 	memset(amtr, 0x00, sizeof(stMtr));
 	int saveret = -1;
 	int i = 0;
-	u32 e[MAX_MTR_NUM] = { 0 };	///<错误项
-	int mtr_num = 0;	///<表计数目
+	///错误项
+	u32 e[MAX_MTR_NUM] = { 0 };
+	///表计数目
+	int mtr_num = 0;
 	mtr_num = getmtrparams(amtr, wp, e);
 	printf("get param from clint ret %d \n", mtr_num);
 	if (mtr_num>0) {     //只有所有输入都合法
@@ -2131,7 +2133,7 @@ int webSend_mtr_factory(webs_t wp)
 {
 	u32 i;
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-	printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
+	//printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
 	websWrite(wp, T("<select name=all_factory "));
 	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
 	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
@@ -2197,13 +2199,13 @@ int webRece_savecycle(webs_t wp)
 	return 0;
 }
 /**
- * 从文件读取储存周期,设置(写)到页面.
+ * 从文件读取储存周期,发送(写)到页面.
  * @param wp
  * @return
  */
 int webSend_savecycle(webs_t wp)
 {
-	printf("读取存储周期.\n");
+	//printf("读取存储周期.\n");
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
 	int i = 0;
 	int ret = load_savecycle(sav, CFG_SAVE_CYCLE);

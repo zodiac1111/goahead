@@ -21,7 +21,10 @@ DASW	= -DDIGEST_ACCESS_SUPPORT
 # This is set by the debug target below
 #
 ifdef WEBS_DEBUG
-DFLAGS  = -g -Wall -Winline -Wdisabled-optimization -DDEBUG -Wextra -Wno-unused-parameter# -Wshadow
+DFLAGS  = -g -Wall -Wextra \
+	-Winline -Wdisabled-optimization -DDEBUG \
+	 -Wno-unused-parameter \
+	# -Wshadow
 else
 DFLAGS  = -Os
 endif
