@@ -38,7 +38,6 @@
 #include	"../um.h"
 void formDefineUserMgmt(void);
 #endif
-
 /*
  *	Change configuration here
  */
@@ -519,7 +518,7 @@ static int initWebs(int demo)
 		PRINT_RET(count);
 		web_err_proc(EL);
 	}
-	printf("App dir is:\t\"%s\"\n", dir);
+	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
 	if ((cp = strrchr(dir, '/'))) {     ///向上回2级父目录
 		*cp = '\0';
 	}
@@ -536,7 +535,7 @@ static int initWebs(int demo)
 	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
 	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
 #endif
-	printf("Web root dir is:\t\"%s\"\n", webdir);
+	printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
@@ -670,8 +669,8 @@ static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 	                (monport.forward_enable) ? "checked" : "",
 	                CHKBOX_ONCLICK);
 	///post不能传递没有被选中的复选框的值,通过text传递
-	websWrite(wp, T("<input %s type=\"text\""
-			"size=1 readonly name=forward value=%d>\n"), HIDE_CLASS,
+	websWrite(wp, T("<input type=\"text\""
+			"size=1 readonly name=forward value=%d>\n"),
 	                monport.forward_enable);
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -685,9 +684,9 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 	                (monport.chktime_valid_flag) ? "checked" : "",
 	                CHKBOX_ONCLICK);
 	///post不能传递没有被选中的复选框的值,通过text传递
-	websWrite(wp, T("<input %s type=text "
-			" size=1 readonly name=time_syn value=%d>\n"),
-	                HIDE_CLASS, monport.chktime_valid_flag);
+	websWrite(wp, T("<input type=text "
+			" size=1 readonly name=time_syn value=%d>\n")
+	                , monport.chktime_valid_flag);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -2240,8 +2239,8 @@ int webSend_savecycle(webs_t wp)
 		                (sav[i].enable==1) ? "checked" : "",
 		                CHKBOX_ONCLICK);
 		///post不能传递没有被选中的复选框的值,通过text传递 class=hideinp
-		websWrite(wp, T("<input %s type=text "
-				"size=1 name=flag value=%d >\n"), HIDE_CLASS,
+		websWrite(wp, T("<input type=text "
+				"size=1 name=flag value=%d >\n"),
 		                sav[i].enable);
 		websWrite(wp, T("</td>\n"));
 	}

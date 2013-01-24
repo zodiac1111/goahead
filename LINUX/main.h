@@ -17,8 +17,8 @@
 #define PREFIX_INF PREFIX"info:" ///<一般信息
 #define PREFIX_WAR PREFIX"warning:" ///<警告信息
 #define PREFIX_ERR PREFIX"error:" ///<错误信息
-///打印form表单提交函数的入口信息
 #if DEBUG_INFO_FORM==1
+///打印form表单提交函数的入口信息:函数名,传递进来的队列
 #define PRINT_FORM_INFO printf(PREFIX_INF"%s:%s\n", __FUNCTION__,query)
 #else
 #define PRINT_FORM_INFO
@@ -31,7 +31,6 @@
 #define PAGE_RESET "/um/Reset.asp"///重启页面
 #define INPUT_CLASS " class=ntx "
 #define CHKBOX_ONCLICK " onclick=\"chk_change(event);\" "
-#define HIDE_CLASS "" //" class=hideinp " //隐藏的用于POST的text类,
 //读取函数
 //系统参数页面(file sysspara.cfg)
 //小项目

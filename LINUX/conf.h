@@ -8,5 +8,12 @@
 #define CONF_H_
 ///打印表单提交函数的信息
 #define DEBUG_INFO_FORM 1
-
+///webs服务器应用程序配置文件
+#if __arm__  //运行在终端平台arm上.
+#define CONF_FILE "/mnt/nor/conf/goahead.conf"
+#else //运行在i368,host调试平台上.
+#define CONF_FILE "/home/lee/workspace/goahead/conf/goahead.conf"
+#endif
+///默认web服务器页面根目录
+#define DEFAULT_WEB_ROOT_DIR "/mnt/nor/wwwdemo"
 #endif /* CONF_H_ */
