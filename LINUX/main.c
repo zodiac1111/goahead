@@ -3,10 +3,8 @@
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
  * Copyright (c) GoAhead Software Inc., 1995-2010. All Rights Reserved.
  * See the file "license.txt" for usage and redistribution license requirements
- */
-
-/**
- *	Main program for for the GoAhead WebServer.
+ * @todo:尽量只操作处理数据,样式和行为应该交给前端控制.
+ * 后端仅进行一些必要的数值合法性验证.
  */
 #include "../uemf.h"
 #include "../wsIntrn.h"
@@ -80,12 +78,6 @@ void init_semun(void)
 int main(int argc, char** argv)
 {
 	init_semun();
-	int i, demo = 1;
-	for (i = 1; i<argc; i++) {
-		if (strcmp(argv[i], "-demo")==0) {
-			demo++;
-		}
-	}
 	/*
 	 * Initialize the memory allocator. Allow use of malloc and start
 	 * with a 60K heap.  For each page request approx 8KB is allocated.
@@ -99,7 +91,7 @@ int main(int argc, char** argv)
 	/*
 	 * Initialize the web server
 	 */
-	if (initWebs(demo)<0) {
+	if (initWebs()<0) {
 		printf(PREFIX_ERR"init Webs.\n");
 		return -1;
 	}
@@ -540,7 +532,7 @@ int load_web_root_dir(char* webdir)
  * @param argv
  * @return
  */
-static int initWebs(int demo)
+static int initWebs(void)
 {
 	struct hostent *hp;
 	struct in_addr intaddr;

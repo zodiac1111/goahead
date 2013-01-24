@@ -11,9 +11,9 @@
 #define DEBUG_PARSE_CONF_FILE 0 ///<打印配置文件调式信息
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
-#define PREFIX_INF PREFIX"info:" ///<一般信息
-#define PREFIX_WAR PREFIX"warning:" ///<警告信息
-#define PREFIX_ERR PREFIX"error:" ///<错误信息
+#define PREFIX_INF PREFIX"info>" ///<一般信息
+#define PREFIX_WAR PREFIX"warning>" ///<警告信息
+#define PREFIX_ERR PREFIX"error>" ///<错误信息
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件
