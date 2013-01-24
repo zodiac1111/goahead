@@ -1204,9 +1204,7 @@ void websSetEnv(webs_t wp)
 {
 	char_t	portBuf[8];
 	char_t	*keyword, *value, *valCheck, *valNew;
-
 	a_assert(websValid(wp));
-
 	websSetVar(wp, T("QUERY_STRING"), wp->query);
 	websSetVar(wp, T("GATEWAY_INTERFACE"), T("CGI/1.1"));
 	websSetVar(wp, T("SERVER_HOST"), websHost);

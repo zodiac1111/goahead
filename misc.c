@@ -10,10 +10,10 @@
 /********************************* Includes ***********************************/
 
 #include	"uemf.h"
-
+#include <limits.h> //最大限制
 /*
  * 16 Sep 03 -- added option to use memcpy() instead of strncpy() in the
- * ascToUni and uniToAsc functions. 
+ * ascToUni and uniToAsc functions.
  */
 #define kUseMemcopy
 
@@ -105,7 +105,7 @@ char_t *dirname(char_t *buf, char_t *name, int bufsize)
 	a_assert(bufsize > 0);
 
 #if (defined (WIN) || defined (NW))
-	if ((cp = gstrrchr(name, '/')) == NULL && 
+	if ((cp = gstrrchr(name, '/')) == NULL &&
 		(cp = gstrrchr(name, '\\')) == NULL)
 #else
 	if ((cp = gstrrchr(name, '/')) == NULL)
@@ -259,16 +259,16 @@ static int dsnprintf(char_t **s, int size, char_t *fmt, va_list arg, int msize)
 			int width = 0;
 			int prec = -1;
 			for ( ; c != '\0'; c = *fmt++) {
-				if (c == '-') { 
-					f |= flag_minus; 
-				} else if (c == '+') { 
-					f |= flag_plus; 
-				} else if (c == ' ') { 
-					f |= flag_space; 
-				} else if (c == '#') { 
-					f |= flag_hash; 
-				} else if (c == '0') { 
-					f |= flag_zero; 
+				if (c == '-') {
+					f |= flag_minus;
+				} else if (c == '+') {
+					f |= flag_plus;
+				} else if (c == ' ') {
+					f |= flag_space;
+				} else if (c == '#') {
+					f |= flag_hash;
+				} else if (c == '0') {
+					f |= flag_zero;
 				} else {
 					break;
 				}
@@ -341,10 +341,10 @@ static int dsnprintf(char_t **s, int size, char_t *fmt, va_list arg, int msize)
 				} else {
 					if (f & flag_hash && value != 0) {
 						if (c == 'x') {
-							put_ulong(&buf, value, 16, 0, T("0x"), width, 
+							put_ulong(&buf, value, 16, 0, T("0x"), width,
 								prec, f);
 						} else {
-							put_ulong(&buf, value, 16, 1, T("0X"), width, 
+							put_ulong(&buf, value, 16, 1, T("0X"), width,
 								prec, f);
 						}
 					} else {
@@ -468,22 +468,22 @@ static void put_string(strbuf_t *buf, char_t *s, int len, int width,
 {
 	int		i;
 
-	if (len < 0) { 
-		len = gstrnlen(s, prec >= 0 ? prec : ULONG_MAX); 
-	} else if (prec >= 0 && prec < len) { 
-		len = prec; 
+	if (len < 0) {
+		len = gstrnlen(s, prec >= 0 ? (unsigned int)prec : ULONG_MAX);
+	} else if (prec >= 0 && prec < len) {
+		len = prec;
 	}
 	if (width > len && !(f & flag_minus)) {
-		for (i = len; i < width; ++i) { 
-			put_char(buf, ' '); 
+		for (i = len; i < width; ++i) {
+			put_char(buf, ' ');
 		}
 	}
-	for (i = 0; i < len; ++i) { 
-		put_char(buf, s[i]); 
+	for (i = 0; i < len; ++i) {
+		put_char(buf, s[i]);
 	}
-	if (width > len && f & flag_minus) {
-		for (i = len; i < width; ++i) { 
-			put_char(buf, ' '); 
+	if (width > len && ( f & flag_minus)) {
+		for (i = len; i < width; ++i) {
+			put_char(buf, ' ');
 		}
 	}
 }
@@ -501,31 +501,31 @@ static void put_ulong(strbuf_t *buf, unsigned long int value, int base,
 
 	for (len = 1, x = 1; x < ULONG_MAX / base; ++len, x = x2) {
 		x2 = x * base;
-		if (x2 > value) { 
-			break; 
+		if (x2 > value) {
+			break;
 		}
 	}
 	zeros = (prec > len) ? prec - len : 0;
 	width -= zeros + len;
-	if (prefix != NULL) { 
-		width -= gstrnlen(prefix, ULONG_MAX); 
+	if (prefix != NULL) {
+		width -= gstrnlen(prefix, ULONG_MAX);
 	}
 	if (!(f & flag_minus)) {
 		if (f & flag_zero) {
-			for (i = 0; i < width; ++i) { 
-				put_char(buf, '0'); 
+			for (i = 0; i < width; ++i) {
+				put_char(buf, '0');
 			}
 		} else {
-			for (i = 0; i < width; ++i) { 
-				put_char(buf, ' '); 
+			for (i = 0; i < width; ++i) {
+				put_char(buf, ' ');
 			}
 		}
 	}
-	if (prefix != NULL) { 
-		put_string(buf, prefix, -1, 0, -1, flag_none); 
+	if (prefix != NULL) {
+		put_string(buf, prefix, -1, 0, -1, flag_none);
 	}
-	for (i = 0; i < zeros; ++i) { 
-		put_char(buf, '0'); 
+	for (i = 0; i < zeros; ++i) {
+		put_char(buf, '0');
 	}
 	for ( ; x > 0; x /= base) {
 		int digit = (value / x) % base;
@@ -533,8 +533,8 @@ static void put_ulong(strbuf_t *buf, unsigned long int value, int base,
 			digit));
 	}
 	if (f & flag_minus) {
-		for (i = 0; i < width; ++i) { 
-			put_char(buf, ' '); 
+		for (i = 0; i < width; ++i) {
+			put_char(buf, ' ');
 		}
 	}
 }
@@ -574,8 +574,8 @@ char_t *ascToUni(char_t *ubuf, char *str, int nBytes)
 char *uniToAsc(char *buf, char_t *ustr, int nBytes)
 {
 #ifdef UNICODE
-   if (WideCharToMultiByte(CP_ACP, 0, ustr, nBytes, buf, nBytes, 
-    NULL, NULL) < 0) 
+   if (WideCharToMultiByte(CP_ACP, 0, ustr, nBytes, buf, nBytes,
+    NULL, NULL) < 0)
    {
       return (char*) ustr;
    }

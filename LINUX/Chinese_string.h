@@ -4,7 +4,6 @@
  * Created on: 2012-12-21
  * Author: lee
  */
-
 #ifndef CHINESE_STRING_H_
 #define CHINESE_STRING_H_
 #define HOLLEY "华立"

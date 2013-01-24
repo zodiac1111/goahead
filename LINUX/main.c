@@ -100,12 +100,10 @@ int main(int argc, char** argv)
 		printf(PREFIX_ERR"init Webs.\n");
 		return -1;
 	}
-
 #ifdef WEBS_SSL_SUPPORT
 	websSSLOpen();
 	/* websRequireSSL("/"); *//* Require all files be served via https */
 #endif
-
 	/*
 	 * Basic event loop. SocketReady returns true when a socket is ready for
 	 * service. SocketSelect will block until an event occurs. SocketProcess
@@ -119,11 +117,9 @@ int main(int argc, char** argv)
 		websCgiCleanup();
 		emfSchedProcess();
 	}
-
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
 #endif
-
 #ifdef USER_MANAGEMENT_SUPPORT
 	umClose();
 #endif
