@@ -2199,7 +2199,7 @@ int webRece_savecycle(webs_t wp)
 	return 0;
 }
 /**
- * 从文件读取储存周期,发送(写)到页面.
+ * 从文件读取储存周期,发送(写)到页面 .
  * @param wp
  * @return
  */

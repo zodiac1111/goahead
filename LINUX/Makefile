@@ -24,6 +24,7 @@ ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
 	-Winline -Wdisabled-optimization -DDEBUG \
 	 -Wno-unused-parameter \
+	 -Wunreachable-code \
 	# -Wshadow
 else
 DFLAGS  = -Os
