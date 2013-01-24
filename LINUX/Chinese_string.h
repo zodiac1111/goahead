@@ -41,9 +41,6 @@
 #define CSTR_MTR_TYPE "电表类型"
 #define CSTR_FACT "生产厂家"
 #define CSTR_IV_FLAG "有效标识"
-#define CSTR_SET_OK "设置成功..."
-#define CSTR_SET_ERR_FILE "设置失败:文件"
-#define CSTR_RETURN "返回"
 //串口方案
 #define CSTR_NO_PARITY "无校验"
 #define CSTR_EVEN_PARITY "偶校验"
