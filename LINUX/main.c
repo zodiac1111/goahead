@@ -290,6 +290,7 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 客户端发送重启表单,分类重启.
+ * @todo 配合的更好一些,参考路由器的页面行为设计.前端一个更舒适的行为反馈.
  * @param wp
  * @param path
  * @param query
