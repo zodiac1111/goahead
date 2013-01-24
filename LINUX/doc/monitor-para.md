@@ -1,4 +1,4 @@
-# 监视端口参数文件
+# 监视端口参数文件格式
 
 默认路径 /mnt/nor/para/monpara.cfg
 

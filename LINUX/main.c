@@ -318,8 +318,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		ret = read_protocol_file(procotol_name, &procotol_num,
 		                PORC_FILE);
 		if (ret!=0) {
-			fprintf(stderr, "%s", myweberrstr[ret]);
-			PRINT_HERE
+			web_err_proc(EL);
 		}
 		break;
 	case RET_WEB:
@@ -335,7 +334,6 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 			execl(app, app, NULL);
 			exit(0);
 		}
-
 		if (pid>0) {
 
 		}
@@ -350,7 +348,6 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 #else
 		system("reboot");
 #endif
-
 		return;
 		break;
 	case RET_TEST:
@@ -379,7 +376,6 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	printf("时间戳范围:%s~%s\n", stime_t, etime_t);
 	TimeRange tr;
 	int ret;
-	//int tou_test=1100;
 	int mtr_no = 0;
 	stTou tou;
 	memset(&tou, 0x00, sizeof(stTou));
@@ -395,14 +391,12 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	if (ret!=1) {
 		web_err_proc(EL);
 	}
-	//PRINT_HERE
 	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
 	websHeader_pure(wp);
 	ret = load_tou_dat(mtr_no, tr, &tou, wp);
 	if (ret==ERR) {
 		web_err_proc(EL);
 	}
-	//websFooter(wp);
 	websDone(wp, 200);
 	return;
 }
