@@ -12,11 +12,9 @@
 #define LAN_JI_ER "兰吉尔"
 #define HONG_XIANG "红相"
 #define CSTR_PLAN "方案"
-
+//
 #define CSTR_3P4W "3相4线"
 #define CSTR_3P3W "3相3线"
-#define Success  "<font color=green>[成功]</font>"
-#define Fail  "<font color=red font-size:120%><b>[失败]</b></font>"
 #define CSTR_SET_PARAM "参数设置"
 #define CSTR_MTR_NUM "表计总数目"
 #define CSTR_UART_PORT_NUM "串口数目"
@@ -24,7 +22,7 @@
 #define CSTR_MONPORT_NUM "监视端口数"
 #define CSTR_CTRLPORT_NUM "控制端口数"
 #define CSTR_UART_PLAN_NUM "串口方案数"
-
+//表计参数页面
 #define CSTR_MTR_NO "表号"
 #define CSTR_LINE_NAME "线路名称"
 #define CSTR_MTR_ADDR "表计地址"
@@ -44,7 +42,6 @@
 #define CSTR_FACT "生产厂家"
 #define CSTR_IV_FLAG "有效标识"
 #define CSTR_SET_OK "设置成功..."
-#define CSTR_SET_ERR_FEILD "设置失败:项目"
 #define CSTR_SET_ERR_FILE "设置失败:文件"
 #define CSTR_RETURN "返回"
 //串口方案
