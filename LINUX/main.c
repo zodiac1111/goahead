@@ -523,7 +523,7 @@ int load_web_root_dir(char* webdir)
 		pvar = trim(var, 256);
 		pval = trim(val, 256);
 		//printf("\"%s\"\n",line);
-		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
+		//printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
 		if(strcmp(pvar,"wwwroot")==0 ){
 			strcpy(webdir,pval);
 			//printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);

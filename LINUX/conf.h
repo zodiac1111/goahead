@@ -15,5 +15,8 @@
 #else 		//运行在i368,host调试平台上.
 #define CONF_FILE "/home/lee/workspace/goahead/conf/goahead.conf"
 #endif
-
+#define PREFIX "[webs]" ///<应用程序信息前缀
+#define PREFIX_INF PREFIX"info:" ///<一般信息
+#define PREFIX_WAR PREFIX"warning:" ///<警告信息
+#define PREFIX_ERR PREFIX"error:" ///<错误信息
 #endif /* CONF_H_ */

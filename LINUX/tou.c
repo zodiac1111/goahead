@@ -21,6 +21,7 @@
 #include "tou.h"
 #include "web_err.h"
 #include "type.h"
+#include "conf.h"
 /**
  * 读取一个电表的一段时间段的电量数据.
  * @param start
@@ -31,7 +32,7 @@
 int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 {
 	stTouFilehead filehead;
-	if (range.e<range.s) {
+	if (range.e<range.s ||range.e==0 ||range.s==0) {
 		web_errno = tou_timerange_err;
 		return ERR;
 	}
@@ -47,7 +48,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 	memset(&tou, 0x0, sizeof(stTou));
 	//time_t t_cur = range.s;
 	FILE*fp;
-	u32 flen;
+	int flen;
 	int i = 0;
 	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
 	for (t2 = stime; t2<=etime; /*t2 += (mincycle * 60)*/) {
@@ -69,7 +70,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		                t.tm_mday, TOU_DAT_SUFFIX);
 		fp = fopen(file, "r");
 		if (fp==NULL) {		//这一天没有数据,直接跳到次日零点
-			printf("%d:%04d-%02d-%02d没有数据文件\n",
+			printf(PREFIX_INF"%d:%04d-%02d-%02d没有数据文件\n",
 			                mtr_no, t.tm_year+1900, t.tm_mon+1
 			                                , t.tm_mday);
 			web_errno = open_tou_file;
@@ -92,7 +93,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		}
 		///@todo 检查文件头中是否和请求的日期相一致.
 		if (isRightDate(filehead, t)==0) {
-			printf("日期不对.\n");
+			printf(PREFIX_INF"日期不对.\n");
 			continue;
 		}
 		int cycle = (filehead.save_cycle_hi*256)
@@ -241,6 +242,9 @@ int webWrite1Tou(webs_t wp, const stTou tou)
 int isRightDate(const stTouFilehead filehead, struct tm t)
 {
 	if (filehead.month!=t.tm_mon+1) {
+		return 0;
+	}
+	if(filehead.year+2000!=t.tm_year+1900){
 		return 0;
 	}
 	return 1;

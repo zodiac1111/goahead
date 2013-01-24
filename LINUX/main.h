@@ -13,10 +13,7 @@
 #include "type.h"
 #include "tou.h"
 #include "conf.h"
-#define PREFIX "[webs]" ///<应用程序信息前缀
-#define PREFIX_INF PREFIX"info:" ///<一般信息
-#define PREFIX_WAR PREFIX"warning:" ///<警告信息
-#define PREFIX_ERR PREFIX"error:" ///<错误信息
+
 #if DEBUG_INFO_FORM==1
 ///打印form表单提交函数的入口信息:函数名,传递进来的队列
 #define PRINT_FORM_INFO printf(PREFIX_INF"%s:%s\n", __FUNCTION__,query)
@@ -134,6 +131,9 @@ char * point2next(char** s, const char split);
 //
 
 ////设置函数
+int printf_webs_app_dir(void);
+int load_web_root_dir(char* webdir);
+char *trim(char in[], int len);
 int printf_webs_app_dir(void);
 int load_web_root_dir(char* webdir);
 static int initWebs(int demo);

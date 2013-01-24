@@ -5,6 +5,7 @@
 #include "../wsIntrn.h"
 #include "type.h"
 #pragma pack(1)
+
 #define DATA_DIR "../../nand" //数据目录
 #if __i386 == 1
 #define TOU_DAT_DIR DATA_DIR"/tou" //电量Tou数据目录
@@ -14,7 +15,7 @@
 #define TOU_DAT_SUFFIX "tou" //电量数据文件后缀名
 ///tou 文件头
 typedef struct {
-	u8 year;
+	u8 year; //+2000
 	u8 month;
 	u8 day;
 	u8 save_cycle_lo;///<存储周期[分钟]
