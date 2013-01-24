@@ -46,23 +46,18 @@ const char* SAVE_CYCLE[]={
  * 传入num最大限制规约数,判断是否超限,传出实际文件中有多少条规约.
  * @param[out] protocol_names char*型数组,每个元素指向一个规约字符串
  * @param[in] file 规约文件
- * @param[out] num 最大规约数目[输入]/实际规约数目[输出]
+ * @param[out] max 最大规约数目[输入]/实际规约数目[输出]
  * @retval 0 成功,其他错误.
  */
-int read_protocol_file(char *protocol_names[], int *num, const char* file)
+int read_protocol_file(char *protocol_names[], int *max, const char* file)
 {
 	FILE* fp;
-	//char c;
-	int i = 0; //int j=0;
+	int i = 0;
 	int len = 0;
 	int strnum = 0;
 	char protocolname[256];
-//	char bused[5];
-//	char unknow_name[255];
-//	char source_code_name[255];
 	char line[256];
 	fp = fopen(file, "rb");
-
 	if (fp == NULL ) {
 		perror("open");
 		PRINT_HERE
@@ -73,8 +68,8 @@ int read_protocol_file(char *protocol_names[], int *num, const char* file)
 	int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	while (ftell(fp) < flen) {
-		//最多多少个规约,如果比预计的多了,反或错误.
-		if (i >= (*num)) {
+		//最多多少个规约,如果比预计的多了,返回错误.
+		if (i >= (*max)) {
 			web_errno = toomany_protocol_err;
 			return -1;
 		}
@@ -92,10 +87,10 @@ int read_protocol_file(char *protocol_names[], int *num, const char* file)
 		memcpy(protocol_names[i], protocolname, len);
 		i++;
 	}
-	*num = i;
+	*max = i;
 	//查看一下
 	//printf("read_protocol_file: num=%d\n", i);
-	for (i = 0; i < *num; i++) {
+	for (i = 0; i < *max; i++) {
 		//printf("\t[%d]: %s\n", i, protocol_names[i]);
 	}
 	return 0;

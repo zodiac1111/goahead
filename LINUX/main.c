@@ -156,9 +156,9 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	char * init = websGetVar(wp, T("init"), T("null"));
 	websHeader_pure(wp);
 	if (*init=='1') {
-		webSend_syspara(wp);
+		webSend_syspara(wp, sysparam);
 	} else {
-		webRece_syspara(wp);
+		webRece_syspara(wp, sysparam);
 	}
 	websDone(wp, 200);
 	return;
@@ -174,7 +174,7 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	time_t t = time(NULL);
-	printf("@%s\n", ctime(&t));
+	printf("\t\t@%s", ctime(&t));
 	websHeader_pure(wp);
 	websWrite(wp, T("%d"), t);
 	websDone(wp, 200);
@@ -230,7 +230,7 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * item = websGetVar(wp, T("item"), T("null"));
 	if (strcmp(item, "sioplan")==0) {
-		webSend_mtr_sioplan(wp);
+		webSend_mtr_sioplan(wp, sysparam);
 	} else if (strcmp(item, "procotol")==0) {
 		webSend_mtr_procotol(wp);
 	} else if (strcmp(item, "factory")==0) {
@@ -476,18 +476,32 @@ int printf_webs_app_dir(void)
 	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
 	return 0;
 }
+/**
+ * 去除输入数组中的前导空白符和后导空白符
+ * @param[in] in 待修改的数组,会被修改
+ * @param[in] len 数组构成的字符串长度.
+ * @return 指向修改好的字符串首地址指针
+ */
 char *trim(char in[], int len)
 {
-	while (len-- ) {
-		if (in[len]<'0'||in[len]>'z') {
-			in[len] = '\0';
-		} else {
+	int i = 0;
+	int tail = len-1;
+	//找到倒数第一个不为空白符的字符,截断之.
+	while (tail>=0) {
+		if (strchr(" \t\r\n\\/", in[tail])==NULL) {
 			break;
 		}
+		tail--;
 	}
-	while (*in==' ') {
-		in++;
+	in[tail+1] = '\0';
+	//找到第一个不为空白符的字符,字符串头指向它.
+	while (i<=len) {
+		if (strchr(" \t\r\n", in[i])==NULL) {
+			break;
+		}
+		i++;
 	}
+	in += i;
 	return in;
 }
 /**
@@ -517,16 +531,16 @@ int load_web_root_dir(char* webdir)
 		//得到这一行的字符串
 		strnum = sscanf(line, "%[^#=]=%[^#\r\n]", var, val);
 		i++;
-		if(strnum!=2){
+		if (strnum!=2) {
 			continue;
 		}
-		pvar = trim(var, 256);
-		pval = trim(val, 256);
+		pvar = trim(var, strlen(var));
+		pval = trim(val, strlen(val));
 		//printf("\"%s\"\n",line);
-		//printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
-		if(strcmp(pvar,"wwwroot")==0 ){
-			strcpy(webdir,pval);
-			//printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
+		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
+		if (strcmp(pvar, "wwwroot")==0) {
+			strcpy(webdir, pval);
+			printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
 		}
 	}
 	//得到这一行的字符串
@@ -641,7 +655,7 @@ static int initWebs(int demo)
 	 * 注册asp函数,给予asp调用
 	 */
 	//websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
-	websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
+	//websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
@@ -671,29 +685,6 @@ static int initWebs(int demo)
 	if (-1==load_sysparam(&sysparam, CFG_SYS)) {
 		web_err_proc(EL);
 		return -1;
-	}
-	return 0;
-}
-/**
- * asp:调用:根据全局表号变量,加载这一个表的各种参数.
- * 页面刷新加载一次.保存在内存mtr结构体中,暂时无用.
- * @param eid
- * @param wp
- * @param argc
- * @param argv
- * @return
- */
-static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv)
-{
-	stMtr mtr;
-	memset(&mtr, 0x00, sizeof(stMtr));
-	int ret = load_mtrparam(&mtr, CFG_MTR, g_cur_mtr_no);
-	if (ret==-1) {
-		PRINT_HERE
-		return websWrite(wp, T("<font color=red font-size:120%>"
-				"<b>ERR %s,l:%d,fn:%s:%s</b></font>"), __FILE__,
-		                __LINE__, __FUNCTION__, myweberrstr[ret]);
-		web_err_proc(EL);
 	}
 	return 0;
 }
@@ -2030,7 +2021,7 @@ int webRece_netparas(webs_t wp)
  * @param wp
  * @return
  */
-int webRece_syspara(webs_t wp)
+int webRece_syspara(webs_t wp, stSysParam sysparam)
 {
 	int ret = -1;
 	/** 错误的项目,每一位表示一个项目,1表示此项错误,0表示此项正确.初始全部正确.
@@ -2098,7 +2089,7 @@ int webRece_syspara(webs_t wp)
  * @param wp
  * @return
  */
-int webSend_syspara(webs_t wp)
+int webSend_syspara(webs_t wp, stSysParam sysparam)
 {
 	int ret = load_sysparam(&sysparam, CFG_SYS);
 	if (ret==-1) {
@@ -2220,7 +2211,7 @@ int webSend_mtr_procotol(webs_t wp)
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
-int webSend_mtr_sioplan(webs_t wp)
+int webSend_mtr_sioplan(webs_t wp, stSysParam sysparam)
 {
 	int i;
 	websWrite(wp, T("<select name=all_portplan "
@@ -2326,18 +2317,18 @@ int webSend_savecycle(webs_t wp)
  * @param query
  * @param file
  */
-void webRece_txtfile(webs_t wp, char_t *query, const char* file)
+int webRece_txtfile(webs_t wp, char_t *query, const char* file)
 {
 	websHeader_pure(wp);
 	char * txt = query;
 	FILE*fp = fopen(file, "w");
 	if (fp==NULL) {
-		return;
+		return -1;
 	}
 	fwrite(txt, strlen(txt), 1, fp);
 	fclose(fp);
 	websDone(wp, 200);
-	return;
+	return 0;
 }
 /**
  * 读取文本文件,写道页面中
@@ -2346,7 +2337,7 @@ void webRece_txtfile(webs_t wp, char_t *query, const char* file)
  * @param query
  * @param file
  */
-void webSend_txtfile(webs_t wp, const char*file)
+int webSend_txtfile(webs_t wp, const char*file)
 {
 	websHeader_pure(wp);
 	char buf[1024] = { 0 };
@@ -2367,7 +2358,7 @@ void webSend_txtfile(webs_t wp, const char*file)
 	fclose(fp);
 	WEB_END:
 	websDone(wp, 200);
-	return;
+	return 0;
 }
 /**
  * 报文监视 表单提交处理函数

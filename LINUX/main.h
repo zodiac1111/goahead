@@ -28,13 +28,7 @@
 #define PAGE_RESET "/um/Reset.asp"///重启页面
 #define INPUT_CLASS " class=ntx "
 #define CHKBOX_ONCLICK " onclick=\"chk_change(event);\" "
-//读取函数
-//系统参数页面(file sysspara.cfg)
-//小项目
-static int asp_load_mtr_param(int eid, webs_t wp, int argc, char_t **argv);
-//
-///提交表单
-//系统参数
+//提交表单函数定义
 void form_server_time(webs_t wp, char_t *path, char_t *query);
 void form_sysparam(webs_t wp, char_t *path, char_t *query);
 void form_mtrparams(webs_t wp, char_t *path, char_t *query);
@@ -53,10 +47,10 @@ void form_save_log(webs_t wp, char_t *path, char_t *query);
 void form_load_log(webs_t wp, char_t *path, char_t *query);
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
-//表计参数页面的.(file mtrspara.cfg)
-int webRece_syspara(webs_t wp);
-int webSend_syspara(webs_t wp);
-int webSend_mtr_sioplan(webs_t wp);
+//各类大相
+int webRece_syspara(webs_t wp,stSysParam sysparam);
+int webSend_syspara(webs_t wp, stSysParam sysparam);
+int webSend_mtr_sioplan(webs_t wp,stSysParam sysparam);
 int webSend_mtr_procotol(webs_t wp);
 int webSend_mtr_factory(webs_t wp);
 int webSend_mtr_type(webs_t wp);
@@ -70,9 +64,9 @@ int webSend_netparas(webs_t wp, stSysParam sysparam);
 int webRece_netparas(webs_t wp);
 int webSend_monparas(webs_t wp, stSysParam sysparam);
 int webRece_monparas(webs_t wp, stSysParam sysparam);
-void webSend_txtfile(webs_t wp, const char*file);
-void webRece_txtfile(webs_t wp, char_t *query, const char* file);
-//
+int webSend_txtfile(webs_t wp, const char*file);
+int webRece_txtfile(webs_t wp, char_t *query, const char* file);
+//表计参数页面 小相
 static int webWrite_mtrno(webs_t wp, int no);
 static int read_mtr_no(int eid, webs_t wp, int argc, char_t **argv);
 static int webWrite_line(webs_t wp, stMtr mtr);
@@ -94,7 +88,6 @@ static int webWrite_factory(webs_t wp, stMtr mtr);
 static int webWrite_iv(webs_t wp, stMtr mtr);
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
 //串口方案项目
-
 static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan);
 static int webWrite_parity(webs_t wp, int no, stUart_plan plan);
 static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan);
@@ -102,7 +95,6 @@ static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan);
 static int webWrite_baud(webs_t wp, int no, stUart_plan plan);
 static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
 //网口参数
-
 static int webWrite_net_no(webs_t wp, int no, stNetparam netparam);
 static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam);
 static int webWrite_ip(webs_t wp, int no, stNetparam netparam);

@@ -48,10 +48,10 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 	struct tm t;
 	struct tm st_today_0;
 	time_t t_today_0;
-	u32 stime = range.s;     //开始时刻
-	u32 etime = range.e;     //结束时刻
+	time_t stime = range.s;     //开始时刻
+	time_t etime = range.e;     //结束时刻
 	time_t t2;     //时刻
-	u32 mincycle = 0;
+	time_t mincycle = 0;
 	stTou tou;
 	memset(&tou, 0x0, sizeof(stTou));
 	FILE*fp;
@@ -63,15 +63,15 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		#if __arm__ ==2
 		gmtime_r(&t2,&t);
 		gmtime_r(&t2,&st_today_0);
-		printf("gmtime_r %02d-%02d %02d:%02d %s t.tm_gmtoff=%d \n",
-				t.tm_mon+1,t.tm_mday,t.tm_hour,t.tm_min,
-				t.tm_zone,t.tm_gmtoff);
+//		printf("gmtime_r %02d-%02d %02d:%02d %s t.tm_gmtoff=%d \n",
+//				t.tm_mon+1,t.tm_mday,t.tm_hour,t.tm_min,
+//				t.tm_zone,t.tm_gmtoff);
 #else
 		localtime_r(&t2, &t);
 		localtime_r(&t2, &st_today_0);
-		printf("localtime_r %02d-%02d %02d:%02d %s t.tm_gmtoff=%ld \n",
-		                t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min,
-		                t.tm_zone, t.tm_gmtoff);
+//		printf("localtime_r %02d-%02d %02d:%02d %s t.tm_gmtoff=%ld \n",
+//		                t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min,
+//		                t.tm_zone, t.tm_gmtoff);
 #endif
 		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
 		                t.tm_mday, TOU_DAT_SUFFIX);
@@ -87,7 +87,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			t2 = mktime(&t);
 			t2 += (60*60*24);
 			continue;
-			return ERR;
+			//return ERR;
 		}
 		fseek(fp, 0, SEEK_END);
 		flen = ftell(fp);
@@ -95,12 +95,12 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		int n = fread(&filehead, sizeof(stTouFilehead), 1, fp);
 		if (n!=1) {
 			web_errno = read_tou_file_filehead;
-			//continue;
-			return ERR;
+			continue;
+			//return ERR;
 		}
 		///@todo 检查文件头中是否和请求的日期相一致.
 		if (isRightDate(filehead, t)==0) {
-			printf(PREFIX_INF"日期不对.\n");
+			//printf(PREFIX_INF"日期不对.\n");
 			continue;
 		}
 		int cycle = (filehead.save_cycle_hi*256)
@@ -134,7 +134,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
 
 		if (ftell(fp)>=flen) {
-			printf("本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
+			printf(PREFIX_INF"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
 			                ftell(fp), file);
 			t2 += (mincycle*60);
 			continue;
