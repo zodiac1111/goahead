@@ -1,9 +1,6 @@
 /**
  * @file Chinese_string.h
- * NOTE: this file encode is  UTF-8, not GB2312
- * just for insert UTF-8 Chinese string in the Utf8 C code file
- * CSTR = Chinese String.
- * F*** the GB2312.
+ * 中文字符串.本文件以utf8编码.
  * Created on: 2012-12-21
  * Author: lee
  */

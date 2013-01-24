@@ -1,4 +1,5 @@
 /**
+ * @file main.c
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
  * Copyright (c) GoAhead Software Inc., 1995-2010. All Rights Reserved.
  * See the file "license.txt" for usage and redistribution license requirements
@@ -533,10 +534,8 @@ int load_web_root_dir(char* webdir)
 }
 /**
  * Initialize the web server.
- * #
- * # 注册asp和form函数
- * @todo:分解成较短的函数
- * # 改变程序当前目录.
+ * 注册asp和form函数
+ * @todo:(doing)分解成较短的函数
  * @param demo
  * @param argv
  * @return
@@ -572,34 +571,19 @@ static int initWebs(int demo)
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
 	                (size_t) hp->h_length);
 	(void) printf_webs_app_dir();
-	(void) load_web_root_dir(webdir);
-	/*
-	 *	Set ../web as the root web. Modify this to suit your needs
-	 *	A "-demo" option to the command webWrite_line will set a webdemo root
-	 */
-	//getcwd(dir, sizeof(dir));///当前路径作为应用程序目录,终端不适合
-	/*
-	 * -----/XXX/webs   <-服务器程序所在路径,即argv[0]=/..../XXX/webs
-	 *     `/www(demo)  <-网站根目录
-	 */
-	//读取程序自身路径,用于计算www root,(依赖 webs和www的相对位置.不健壮)
+	(void) load_web_root_dir(webdir);//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
 	chdir(webdir);
-	/*
-	 *	Configure the web server options before opening the web server
-	 */
+	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
 	ascToUni(wbuf, host, min(strlen(host) + 1, sizeof(wbuf)));
 	websSetHost(wbuf);
-
-	/*
-	 * Configure the web server options before opening the web server
-	 */
+	//Configure the web server options before opening the web server
 	websSetDefaultPage(T("default.asp"));
 	websSetPassword(password);
 
@@ -2275,7 +2259,6 @@ int webSend_savecycle(webs_t wp)
 /**
  * 从页面中获取文本,保存到本地文本文件中.
  * @param wp
- * @param path
  * @param query
  * @param file
  */
@@ -2293,11 +2276,9 @@ int webRece_txtfile(webs_t wp, char_t *query, const char* file)
 	return 0;
 }
 /**
- * 读取文本文件,写道页面中
- * @param wp
- * @param path
- * @param query
- * @param file
+ * 读取文本文件,写到页面中.
+ * @param[out] wp
+ * @param[in] file
  */
 int webSend_txtfile(webs_t wp, const char*file)
 {
@@ -2323,7 +2304,8 @@ int webSend_txtfile(webs_t wp, const char*file)
 	return 0;
 }
 /**
- * 报文监视 表单提交处理函数
+ * 报文监视(执行指令) 表单提交处理函数.
+ * @todo:未实现,执行命令的输出还不能读取.前后端可能需要频繁交互.
  * @param wp
  * @param path
  * @param query
@@ -2363,6 +2345,13 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 		pclose(pf);
 	}
 }
+/**
+ * 监控报文(执行指令)停止函数.使用信号量控制.
+ * @todo: 未实现,中止进程的方法待考虑.
+ * @param wp
+ * @param path
+ * @param query
+ */
 void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 {
 	websHeader_pure(wp);
@@ -2392,23 +2381,20 @@ char * point2next(char** s, const char split)
 	}
 	return *s;
 }
-/******************************************************************************/
-/*
- *	Home page handler
- */
-
+///Home page handler,首页句柄
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query)
 {
-	/*
-	 *	If the empty or "/" URL is invoked, redirect default URLs to the home page
-	 */
+	/** If the empty or "/" URL is invoked,
+	 * 例如 "http:192.168.1.189:8080" 或者 "http:192.168.1.189:8080/"
+	 * redirect default URLs to the home page */
 	if (*url=='\0'||gstrcmp(url, T("/"))==0) {
 		websRedirect(wp, WEBS_DEFAULT_HOME);
 		return 1;
 	}
 	return 0;
 }
+///打印数组
 void print_array(const u8 *a, const int len)
 {
 	int i;
