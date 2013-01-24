@@ -89,27 +89,26 @@ int main(int argc, char** argv)
 		}
 	}
 	/*
-	 *	Initialize the memory allocator. Allow use of malloc and start
-	 *	with a 60K heap.  For each page request approx 8KB is allocated.
-	 *	60KB allows for several concurrent page requests.  If more space
-	 *	is required, malloc will be used for the overflow.
+	 * Initialize the memory allocator. Allow use of malloc and start
+	 * with a 60K heap.  For each page request approx 8KB is allocated.
+	 * 60KB allows for several concurrent page requests.  If more space
+	 * is required, malloc will be used for the overflow.
 	 */
 	bopen(NULL, (60*1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
 	/*
-	 *	Initialize the web server
+	 * Initialize the web server
 	 */
 	if (initWebs(demo)<0) {
+		printf(PREFIX_ERR"init Webs.\n");
 		return -1;
-	} else {
-		printf("init Webs:\tOK\n");
 	}
 
 #ifdef WEBS_SSL_SUPPORT
 	websSSLOpen();
-	/*	websRequireSSL("/"); *//* Require all files be served via https */
+	/* websRequireSSL("/"); *//* Require all files be served via https */
 #endif
 
 	/*
@@ -118,7 +117,6 @@ int main(int argc, char** argv)
 	 * will actually do the servicing.
 	 */
 	finished = 0;
-	printf("Now listening ... \n");
 	while (!finished) {
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);
@@ -155,8 +153,7 @@ int main(int argc, char** argv)
  */
 void form_sysparam(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s\n:", __FUNCTION__);
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	char * init = websGetVar(wp, T("init"), T("null"));
 	websHeader_pure(wp);
 	if (*init=='1') {
@@ -176,14 +173,12 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
  */
 void form_server_time(webs_t wp, char_t *path, char_t *query)
 {
-	//printf("%s:\n", __FUNCTION__);
-	//printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	time_t t = time(NULL);
-	printf("Synchronization server time(query:\"%s\")...", query);
+	printf("@%s\n", ctime(&t));
 	websHeader_pure(wp);
 	websWrite(wp, T("%d"), t);
 	websDone(wp, 200);
-	printf(",%s", ctime(&t));
 	return;
 }
 /**
@@ -194,8 +189,7 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
  */
 void form_sioplans(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
@@ -214,8 +208,7 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
  */
 void form_netparas(webs_t wp, char_t *path, char_t *query)
 {
-	printf("form_set_netparas :");
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
@@ -234,8 +227,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
  */
 void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * item = websGetVar(wp, T("item"), T("null"));
 	if (strcmp(item, "sioplan")==0) {
@@ -258,8 +250,7 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
  */
 void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
@@ -278,8 +269,7 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
  */
 void form_monparas(webs_t wp, char_t *path, char_t *query)
 {
-	printf("form_set_monparas :");
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
@@ -298,8 +288,7 @@ void form_monparas(webs_t wp, char_t *path, char_t *query)
  */
 void form_savecycle(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s:\n", __FUNCTION__);
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
@@ -323,8 +312,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 #define RET_SAMPLE_PROC 3
 #define RET_RTU 4
 #define RET_TEST 10
-	printf("form_reset :");
-	printf("query:%s\n", query);
+	PRINT_FORM_INFO;
 	char app[128] = { 0 };
 	int typ = 0;
 	int ret = -1;
@@ -390,7 +378,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
  */
 void form_history_tou(webs_t wp, char_t *path, char_t *query)
 {
-	printf("%s ***query:%s\n", __FUNCTION__, query);
+	PRINT_FORM_INFO;
 	//PRINT_HERE
 	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
 	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
@@ -433,15 +421,21 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
  */
 void form_save_log(webs_t wp, char_t *path, char_t *query)
 {
+	PRINT_FORM_INFO;
 	webRece_txtfile(wp, query, ERR_LOG);
+	return;
 }
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
+	PRINT_FORM_INFO;
 	webRece_txtfile(wp, query, MON_PORT_NAME_FILE);
+	return;
 }
 void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
+	PRINT_FORM_INFO;
 	webRece_txtfile(wp, query, PORC_FILE);
+	return;
 }
 /**
  * 加载日志文件到客户端
@@ -451,23 +445,21 @@ void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
  */
 void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
+	PRINT_FORM_INFO;
 	webSend_txtfile(wp, ERR_LOG);
 	return;
 }
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
+	PRINT_FORM_INFO;
 	webSend_txtfile(wp, PORC_FILE);
+	return;
 }
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
+	PRINT_FORM_INFO;
 	webSend_txtfile(wp, MON_PORT_NAME_FILE);
-}
-/**
- * Exit cleanly on interrupt
- */
-static void sigintHandler(int unused)
-{
-	finished = 1;
+	return;
 }
 
 /**
@@ -2282,8 +2274,7 @@ int webSend_savecycle(webs_t wp)
  */
 void webRece_txtfile(webs_t wp, char_t *query, const char* file)
 {
-	printf("%s:%s\n", __FUNCTION__, query);
-	websWrite(wp, T("HTTP/1.0 200 OK\n"));
+	websHeader_pure(wp);
 	char * txt = query;
 	FILE*fp = fopen(file, "w");
 	if (fp==NULL) {
@@ -2420,4 +2411,11 @@ void print_array(const u8 *a, const int len)
 	}
 	printf("\n");
 	return;
+}
+/**
+ * Exit cleanly on interrupt
+ */
+static void sigintHandler(int unused)
+{
+	finished = 1;
 }

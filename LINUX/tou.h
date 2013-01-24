@@ -5,7 +5,6 @@
 #include "../wsIntrn.h"
 #include "type.h"
 #pragma pack(1)
-#define TD_CLASS " class=sysTDNcLItemStyle "
 #define DATA_DIR "../../nand" //数据目录
 #if __i386 == 1
 #define TOU_DAT_DIR DATA_DIR"/tou" //电量Tou数据目录

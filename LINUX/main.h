@@ -12,21 +12,23 @@
 #include <sys/types.h>
 #include "type.h"
 #include "tou.h"
+#include "conf.h"
+#define PREFIX "[webs]" ///<应用程序信息前缀
+#define PREFIX_INF PREFIX"info:" ///<一般信息
+#define PREFIX_WAR PREFIX"warning:" ///<警告信息
+#define PREFIX_ERR PREFIX"error:" ///<错误信息
+///打印form表单提交函数的入口信息
+#if DEBUG_INFO_FORM==1
+#define PRINT_FORM_INFO printf(PREFIX_INF"%s:%s\n", __FUNCTION__,query)
+#else
+#define PRINT_FORM_INFO
+#endif
 #define MTR_ADD 1 //增删查改?...
 #define MTR_DEL  2
 #define MTR_SEARCH  3
 #define MTR_UPDATE  4
 #define MAX_MTR_NUM 256 ///<最大表计个数
-#define PAGE_SYSTEM_PARAMETER "/um/syspara1.asp"///<系统参数页面
-#define PAGE_METER_PARAMETER "/um/meterpara1.asp" ///<表计参数页面
-#define PAGE_MONITOR_PARAMETER "/um/monpara1.asp"///<监视端口参数页面
-#define PAGE_NET_PARAMETER "/um/netpara1.asp"///<网络参数页面
-#define PAGE_COM_PARAMETER "/um/compara1.asp"///<串口方案参数页面
-#define PAGE_SAVECYCLE_PARAMETER "/um/savcirc0.asp"///<储存周期页面
-#define PAGE_HISTORY_TOU "/um/data1.asp"///<储存周期页面
 #define PAGE_RESET "/um/Reset.asp"///重启页面
-#define TH_CLASS " class= "
-#define TD_CLASS " class=sysTDNcLItemStyle "
 #define INPUT_CLASS " class=ntx "
 #define CHKBOX_ONCLICK " onclick=\"chk_change(event);\" "
 #define HIDE_CLASS "" //" class=hideinp " //隐藏的用于POST的text类,
