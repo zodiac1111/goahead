@@ -476,6 +476,20 @@ int printf_webs_app_dir(void)
 	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
 	return 0;
 }
+char *trim(char in[], int len)
+{
+	while (len-- ) {
+		if (in[len]<'0'||in[len]>'z') {
+			in[len] = '\0';
+		} else {
+			break;
+		}
+	}
+	while (*in==' ') {
+		in++;
+	}
+	return in;
+}
 /**
  * 服务器配置文件读取,设置.
  * @param webdir
@@ -484,21 +498,39 @@ int printf_webs_app_dir(void)
 int load_web_root_dir(char* webdir)
 {
 	//配置文件定义为 一行一条, 以 变量名=变量值的形式
-	char *line[256];
-	char *var[256];
-	char *val[256];
-	int strnum=0;
+	char line[256] = { 0 };
+	char var[256] = { 0 };
+	char *pvar = NULL;
+	char *pval = NULL;
+	char val[256] = { 0 };
+	int strnum = 0;
+	int i = 0;
 	FILE* fp = fopen(CONF_FILE, "r");
 	if (fp==NULL) {
 		printf(PREFIX_ERR"open file goahead.conf\n");
 	}
-	fgets(line, 255, fp);     //得到一行
-	strnum = sscanf(line, "%255s=%255s\n",var, val);     //得到这一行的字符串
-	if (strnum==-1) {     //忽略空行
-		continue;
+	while (!feof(fp)) {
+		memset(&line, 0x00, 256);
+		memset(&var, 0x00, 256);
+		memset(&val, 0x00, 256);
+		fgets(line, 255, fp);     //得到一行
+		//得到这一行的字符串
+		strnum = sscanf(line, "%[^#=]=%[^#\r\n]", var, val);
+		i++;
+		if(strnum!=2){
+			continue;
+		}
+		pvar = trim(var, 256);
+		pval = trim(val, 256);
+		//printf("\"%s\"\n",line);
+		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
+		if(strcmp(pvar,"wwwroot")==0 ){
+			strcpy(webdir,pval);
+			//printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
+		}
 	}
+	//得到这一行的字符串
 	fclose(fp);
-	strcpy(val,webdir);
 	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
 #if __i386 == 1//host上调试
 	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
