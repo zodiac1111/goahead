@@ -291,9 +291,9 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
-		(void)webSend_savecycle(wp);
+		(void) webSend_savecycle(wp);
 	} else {
-		(void)webRece_savecycle(wp);
+		(void) webRece_savecycle(wp);
 	}
 	websDone(wp, 200);
 	return;
@@ -460,7 +460,53 @@ void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 	webSend_txtfile(wp, MON_PORT_NAME_FILE);
 	return;
 }
-
+/**
+ * 打印服务器应用程序运行路径,依赖proc文件系统.
+ * @return
+ */
+int printf_webs_app_dir(void)
+{
+	char dir[128] = { 0 };
+	///@todo 像其他服务器一样使用配置文件配置web服务器的根目录.
+	int count = readlink("/proc/self/exe", dir, 128);
+	if (count<0||count>128) {
+		PRINT_RET(count);
+		printf(PREFIX_ERR"%s\n", __FUNCTION__);
+	}
+	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
+	return 0;
+}
+/**
+ * 服务器配置文件读取,设置.
+ * @param webdir
+ * @return
+ */
+int load_web_root_dir(char* webdir)
+{
+	//配置文件定义为 一行一条, 以 变量名=变量值的形式
+	char *line[256];
+	char *var[256];
+	char *val[256];
+	int strnum=0;
+	FILE* fp = fopen(CONF_FILE, "r");
+	if (fp==NULL) {
+		printf(PREFIX_ERR"open file goahead.conf\n");
+	}
+	fgets(line, 255, fp);     //得到一行
+	strnum = sscanf(line, "%255s=%255s\n",var, val);     //得到这一行的字符串
+	if (strnum==-1) {     //忽略空行
+		continue;
+	}
+	fclose(fp);
+	strcpy(val,webdir);
+	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
+#if __i386 == 1//host上调试
+	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
+	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
+#endif
+	printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
+	return 0;
+}
 /**
  * Initialize the web server.
  * #
@@ -475,7 +521,7 @@ static int initWebs(int demo)
 {
 	struct hostent *hp;
 	struct in_addr intaddr;
-	char host[128], dir[128] = { 0 }, webdir[128];
+	char host[128], webdir[128];
 	char *cp;
 	char_t wbuf[128];
 	//Initialize the socket subsystem
@@ -501,7 +547,8 @@ static int initWebs(int demo)
 	}
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
 	                (size_t) hp->h_length);
-
+	(void) printf_webs_app_dir();
+	(void) load_web_root_dir(webdir);
 	/*
 	 *	Set ../web as the root web. Modify this to suit your needs
 	 *	A "-demo" option to the command webWrite_line will set a webdemo root
@@ -512,30 +559,6 @@ static int initWebs(int demo)
 	 *     `/www(demo)  <-网站根目录
 	 */
 	//读取程序自身路径,用于计算www root,(依赖 webs和www的相对位置.不健壮)
-	///@todo 像其他服务器一样使用配置文件配置web服务器的根目录.
-	int count = readlink("/proc/self/exe", dir, 128);
-	if (count<0||count>128) {
-		PRINT_RET(count);
-		web_err_proc(EL);
-	}
-	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
-	if ((cp = strrchr(dir, '/'))) {     ///向上回2级父目录
-		*cp = '\0';
-	}
-	if ((cp = strrchr(dir, '/'))) {
-		*cp = '\0';
-	}
-	if (demo) {
-		sprintf(webdir, "%s/%s", dir, demoWeb);
-	} else {
-		sprintf(webdir, "%s/%s", dir, rootWeb);
-	}
-	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
-#if __i386 == 1//host上调试
-	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
-	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
-#endif
-	printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
@@ -700,8 +723,8 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 {
 	/* printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
-	                monport.prot_addr[1], monport.prot_addr[2],
-	                monport.prot_addr[3]); */
+	 monport.prot_addr[1], monport.prot_addr[2],
+	 monport.prot_addr[3]); */
 	int i;
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <input type=text size=4 maxlength=4 "

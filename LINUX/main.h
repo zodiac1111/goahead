@@ -134,6 +134,8 @@ char * point2next(char** s, const char split);
 //
 
 ////设置函数
+int printf_webs_app_dir(void);
+int load_web_root_dir(char* webdir);
 static int initWebs(int demo);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
