@@ -32,8 +32,16 @@
 int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 {
 	stTouFilehead filehead;
-	if (range.e<range.s ||range.e==0 ||range.s==0) {
+	if (range.e<range.s) {
 		web_errno = tou_timerange_err;
+		return ERR;
+	}
+	if(range.e==0){
+		web_errno = tou_stime_err;
+		return ERR;
+	}
+	if(range.e==0){
+		web_errno = tou_etime_err;
 		return ERR;
 	}
 	char file[256] = { 0 };
