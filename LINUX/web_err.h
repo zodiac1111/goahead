@@ -4,12 +4,10 @@
  */
 #ifndef _WEB_ERR_H_
 #define _WEB_ERR_H_
+#include "conf.h"
 #define ERR (-1) ///<错误
 #define EL T(__FILE__),T(__FUNCTION__),__LINE__
 #define EL_ARGS	const char* file,const char* func,int line
-#define ERR_LOG "./err.log" ///错误日志文件
-#define MAX_ERR_LOG_LINE_LENTH 1024 ///<日志文件单行最大长度(字节)
-#define MAX_ERR_LOG_FILE_SIZE (100*1024) ///<错误日志文件最大尺寸(字节)
 extern void web_err_proc(EL_ARGS);
 ///错误号
 extern int web_errno;
@@ -61,6 +59,8 @@ enum e_errno {
 	open_monitor_name_file_err,
 	//历史数据
 	tou_timerange_err,
+	tou_stime_err,
+	tou_etime_err,
 	open_tou_file,
 	read_tou_file_filehead,
 	read_tou_file_dat,

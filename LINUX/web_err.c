@@ -65,6 +65,8 @@ const char *myweberrstr[] =
         		MON_PORT_NAME_FILE" err.",
         //历史数据操作
         [tou_timerange_err]="Data end time is less than start time.",
+        [tou_stime_err]="Start time is 1970.",
+        [tou_etime_err]="End time is 1970.",
         [open_tou_file]="Open history Tou data err.",
         [read_tou_file_filehead]="Read history Tou file(file head) err.",
         [read_tou_file_dat]="Read history Tou file(data) err.",
@@ -86,7 +88,7 @@ void web_err_proc(EL_ARGS)
 	sprintf(strtime,"%04d-%02d-%02d %02d:%02d:%02d",
 			t->tm_year+1900,t->tm_mon+1,t->tm_mday,
 			t->tm_hour,t->tm_min,t->tm_sec);
-	sprintf(errstring,"[%s]ErrCode[%d]:%s (%s,%s:%d)%s\n",
+	sprintf(errstring,PREFIX_ERR"[%s]ErrCode[%d]:%s (%s,%s:%d)%s\n",
 		strtime,web_errno,myweberrstr[web_errno],
 		file,func,line,strerror(errno));
 	if(myweberrstr[web_errno]!=NULL){
@@ -100,7 +102,7 @@ void web_err_proc(EL_ARGS)
 	if(fp==NULL){
 		FILE*fp=fopen(ERR_LOG,"w");
 		if(fp==NULL){
-			perror("create errlog file err:");
+			perror(PREFIX_ERR"create errlog file err:");
 			goto END;
 		}
 	}

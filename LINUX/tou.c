@@ -46,7 +46,6 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 	u32 mincycle = 0;
 	stTou tou;
 	memset(&tou, 0x0, sizeof(stTou));
-	//time_t t_cur = range.s;
 	FILE*fp;
 	int flen;
 	int i = 0;
@@ -145,7 +144,6 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			i++;
 			t2 += (mincycle*60);
 		}
-		//t2 += ((i-1)*(mincycle * 60));
 	}
 	return 0;
 }

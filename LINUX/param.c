@@ -170,7 +170,7 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
+	long unsigned int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stMtr_File) * (no + 1)) {
@@ -219,11 +219,11 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
-	printf("save_mtrparam 文件长度:%d \n", flen);
+	long  int flen = ftell(fp);
+	printf("save_mtrparam 文件长度:%ld \n", flen);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
-	if (flen < sizeof(stMtr_File) * (no + 1)) {
+	if (flen < (long int)sizeof(stMtr_File) * (no + 1)) {
 		int fd = fileno(fp);
 		///确保文件的大小,大了截断,小了添0,这个文件应该是正好sizeof(stSysParam)大小,
 		///不应该小一个字节或者大一个字节.
@@ -325,10 +325,10 @@ int load_sysparam(stSysParam * param, const char * file)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	long int flen = ftell(fp);
+	long  int  flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
-	if (flen < sizeof(stSysParam)) {
+	if (flen < (long int)sizeof(stSysParam)) {
 		PRINT_HERE
 		web_errno = sysfile_size_err;
 		return -1;
@@ -363,7 +363,7 @@ int load_stsparam(stSysParam * param, const char * file)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	long int flen = ftell(fp);
+	long unsigned int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stSysParam)) {
@@ -463,7 +463,7 @@ int load_sioplan(stUart_plan * plan, const char * file, int no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
+	long int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	if (flen < sizeof(stUart_plan) * (no + 1)) {
 		PRINT_HERE
@@ -502,8 +502,8 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no)
 		return(-1);
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
-	printf("save_sioplan 文件长度:%d \n", flen);
+	long  int  flen = ftell(fp);
+	printf("save_sioplan 文件长度:%lu \n", flen);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stUart_plan) * (no + 1)) {
@@ -543,8 +543,8 @@ int save_monparam(const stMonparam * mon, const char * file, int no)
 		return(-1);
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
-	printf("save_monparam 文件长度:%d \n", flen);
+	long unsigned int  flen = ftell(fp);
+	printf("save_monparam 文件长度:%lu \n", flen);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stMonparam) * (no + 1)) {
@@ -584,8 +584,8 @@ int save_netport(const stNetparam * net, const char * file, int no)
 		return (-1);
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
-	printf("save_netprot 文件长度:%d \n", flen);
+	long unsigned int  flen = ftell(fp);
+	printf("save_netprot 文件长度:%lu \n", flen);
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stNetparam) * (no + 1)) {
@@ -625,7 +625,7 @@ int load_netparam(stNetparam * netparam, const char * file, int no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
+	u32 flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	if (flen < sizeof(stNetparam) * (no + 1)) {
 		PRINT_HERE
@@ -664,7 +664,7 @@ int load_monparam(stMonparam * monparam, const char * file, int no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	int flen = ftell(fp);
+	long unsigned int  flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	if (flen < sizeof(stMonparam) * (no + 1)) {
 		PRINT_HERE
