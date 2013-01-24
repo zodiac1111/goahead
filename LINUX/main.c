@@ -1155,7 +1155,7 @@ static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
-/// 生产厂家
+/// 生产厂家 @todo: 现在是硬编码,期待使用文件配置.
 static int webWrite_factory(webs_t wp, stMtr mtr)
 {
 	u32 i;

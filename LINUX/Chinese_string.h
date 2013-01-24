@@ -7,7 +7,6 @@
 
 #ifndef CHINESE_STRING_H_
 #define CHINESE_STRING_H_
-#define ENABLE "有效"
 #define HOLLEY "华立"
 #define WEI_SHENG "威盛"
 #define LAN_JI_ER "兰吉尔"
