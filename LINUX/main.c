@@ -37,9 +37,7 @@
 #include	"../um.h"
 void formDefineUserMgmt(void);
 #endif
-/*
- *	Change configuration here
- */
+//Change configuration here
 static char_t *password = T(""); /* Security password */
 static int port = WEBS_DEFAULT_PORT;/* Server port */
 static int retries = 5; /* Server port retries */
@@ -48,15 +46,16 @@ static int finished = 0; /* Finished flag */
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
-///保存当前操作的表在内存中,方便修改表参数的操作.当前表号不存文件,仅仅运行时有用
-int g_cur_mtr_no = 0;
-long maddr = 0;
+///内存中的系统参数结构体.全局使用.
 stSysParam sysparam = { 0 };
-static char *procotol_name[MAX_PROCOTOL_NUM];     ///<规约文件中的规约名称.
-static int procotol_num = MAX_PROCOTOL_NUM;     ///<规约文件中的实际规约数,初始化为最大
-static char *mon_port_name[MAX_MON_PORT_NUM];     ///<规约文件中的规约名称.
-static int mon_port_num = MAX_MON_PORT_NUM;     ///<规约文件中的实际规约数,初始化为最大
-int is_monmsg = 1;
+///规约文件中的规约名称.
+static char *procotol_name[MAX_PROCOTOL_NUM];
+///规约文件中的实际规约数,初始化为最大
+static int procotol_num = MAX_PROCOTOL_NUM;
+///规约文件中的规约名称.
+static char *mon_port_name[MAX_MON_PORT_NUM];
+///规约文件中的实际规约数,初始化为最大
+static int mon_port_num = MAX_MON_PORT_NUM;
 union semun
 {
 	int val;
@@ -64,17 +63,23 @@ union semun
 	unsigned short int *array;
 	struct seminfo *__buf;
 };
-struct sembuf sb;     //信号量操作
+struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
+/**
+ * 初始化信号量,用于进程间的控制,目前用于监视报文的启动和停止.
+ */
 void init_semun(void)
 {
 	///申请信号量组，包含1个信号量
 	semid = semget(1000, 1, 0666|IPC_CREAT);
 	sem.val = 1;
-	///初始化0号信号量为1默认有一个进程可以使用
+	///初始化0号信号量为1,起始便有一个进程可以使用.
 	semctl(semid, 0, SETVAL, sem);
 }
+/**
+ * webs主函数,所有业务逻辑在此实现.
+ */
 int main(int argc, char** argv)
 {
 	init_semun();
@@ -122,10 +127,8 @@ int main(int argc, char** argv)
 #ifdef USER_MANAGEMENT_SUPPORT
 	umClose();
 #endif
-
-	/*
-	 *	Close the socket module, report memory leaks and close the memory allocator
-	 */
+	//Close the socket module,
+	//report memory leaks and close the memory allocator
 	websCloseServer();
 	socketClose();
 #ifdef B_STATS
@@ -2306,7 +2309,6 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 {
 	printf("%s:%s\n", __FUNCTION__, query);
 	pid_t pid;
-	is_monmsg = 1;
 	if ((pid = fork())==0) {
 		websHeader_pure(wp);
 		FILE* pf;
@@ -2327,7 +2329,6 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 		///为了下次使用,加1.如果自然结束退出,信号量还是1不变.
 		if (semctl(semid, 0, GETVAL, 0)==0) {
 			printf("点击停止\n");
-			is_monmsg = 0;
 			sb.sem_num = 0;
 			sb.sem_op = 1;
 			sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
