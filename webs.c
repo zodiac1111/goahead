@@ -391,6 +391,7 @@ static void websSocketEvent(int sid, int mask, void* iwp)
 	}
 }
 
+/******************************************************************************/
 /*
  *	The webs read handler. This is the primary read event loop. It uses a
  *	state machine to track progress while parsing the HTTP request.
@@ -472,7 +473,13 @@ void websReadEvent(webs_t wp)
 			if (wp->flags&WEBS_CGI_REQUEST) {
 				if (fd==-1) {
 #if !defined(WIN32)
-					fd =  wp->cgiStdin,O_CREAT |O_WRONLY|O_BINARY,0666);
+					fd =
+					                gopen(
+					                                wp->cgiStdin,
+					                                O_CREAT
+					                                                |O_WRONLY
+					                                                |O_BINARY,
+					                                0666);
 #else
 					_sopen_s(&fd, wp->cgiStdin, O_CREAT | O_WRONLY | O_BINARY, _SH_DENYNO, 0666);
 #endif
