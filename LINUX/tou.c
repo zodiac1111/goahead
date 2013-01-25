@@ -98,7 +98,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			continue;
 			//return ERR;
 		}
-		///@todo 检查文件头中是否和请求的日期相一致.
+		///@note 检查文件头中是否和请求的日期相一致.
 		if (isRightDate(filehead, t)==0) {
 			//printf(PREFIX_INF"日期不对.\n");
 			continue;
@@ -113,13 +113,9 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			t2 += (mincycle*60-t_mod);
 		}
 		//}
-		/**@todo 判断开始时间+周期是否跨度到了第二天,如果跨度到第二天则需要
+		/**@note 判断开始时间+周期是否跨度到了第二天,如果跨度到第二天则需要
 		 打开另一个数据文件.
 		 */
-//		t_cur=t_cur/60*60;
-//		gmtime_r(&t_cur,&t);//本日凌晨
-//		t_cur+=(t_cur%(cycle*60));
-//		gmtime_r(&t_cur,&t);//向上元整后的开始时刻.
 		st_today_0.tm_hour = 0;
 		st_today_0.tm_min = 0;
 		st_today_0.tm_sec = 0;
