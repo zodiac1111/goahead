@@ -1439,9 +1439,11 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		return ret;
 	}
 //PRINT_HERE
+#if DEBUG_PRINT_MTRPARAM
 	printf("record num[0]=%d\n", n[0]);
+#endif
 	for (i = 0; i<n[0]; i++) {
-		printf("接收循环[%d]\n", i);
+		//printf("接收循环[%d]\n", i);
 		amtr[i].mtrno = strtoul(no[i], &errstr, 10);
 		if (*errstr!='\0') {
 			e[i] |= 0b1;
@@ -1518,7 +1520,6 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		if (*errstr!='\0') {
 			e[i] |= 0b100000000000000000;
 		}
-		//PRINT_HERE
 		memset(amtr[i].line, '0', LINE_LEN);
 		memset(amtr[i].addr, '0', ADDR_LEN);
 		memset(amtr[i].pwd, '0', PWD_LEN);

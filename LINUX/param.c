@@ -201,8 +201,12 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
  */
 int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 {
-	printf("save_mtrparam %x %x %x %x %x %x\n", mtr->line[0], mtr->line[1],
-			mtr->line[2], mtr->line[3], mtr->line[4], mtr->line[5]);
+#if DEBUG_PRINT_MTRPARAM
+	printf("save_mtrparam:line= %x %x %x %x %x %x\n",
+			mtr->line[0], mtr->line[1],
+			mtr->line[2], mtr->line[3],
+			mtr->line[4], mtr->line[5]);
+#endif
 	stMtr_File mtr_file;
 	FILE* fp;
 	int ret = 0;
@@ -215,7 +219,9 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 	}
 	fseek(fp, 0, SEEK_END);
 	long  int flen = ftell(fp);
+#if DEBUG_PRINT_MTRPARAM
 	printf("save_mtrparam 文件长度:%ld \n", flen);
+#endif
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < (long int)sizeof(stMtr_File) * (no + 1)) {
@@ -276,9 +282,11 @@ int mtr_file2men(stMtr* pmtr, const stMtr_File * pmtr_file)
 int mtr_men2file(stMtr_File * pmtr_file, const stMtr* pmtr)
 {
 	memcpy(pmtr_file->line, pmtr->line, LINE_LEN);
-	printf("save_mtrparam[%d] %x %x %x %x %x %x\n", pmtr->mtrno,
+#if DEBUG_PRINT_MTRPARAM
+	printf("save_mtrparam:line[%d] %x %x %x %x %x %x\n", pmtr->mtrno,
 			pmtr->line[0], pmtr->line[1], pmtr->line[2],
 			pmtr->line[3], pmtr->line[4], pmtr->line[5]);
+#endif
 	memcpy(pmtr_file->addr, pmtr->addr, ADDR_LEN);
 	memcpy(pmtr_file->pwd, pmtr->pwd, PWD_LEN);
 	pmtr_file->port = pmtr->port;
