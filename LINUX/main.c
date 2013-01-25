@@ -3,7 +3,8 @@
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
  * Copyright (c) GoAhead Software Inc., 1995-2010. All Rights Reserved.
  * See the file "license.txt" for usage and redistribution license requirements
- * @todo:尽量只操作处理数据,样式和行为应该交给前端控制.
+ * @todo 尽量只操作处理数据,样式和行为应该交给前端控制.
+ * @todo 给前端发送的数据可以使用JSON.接收前端的数据就还是使用goahead的getVal吧.
  * 后端仅进行一些必要的数值合法性验证.
  */
 #include "../uemf.h"
