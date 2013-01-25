@@ -6,7 +6,7 @@
  */
 #ifndef CONF_H_
 #define CONF_H_
-//调试开关
+//调试开关.用于打印一些信息.
 #define DEBUG_INFO_FORM 1///<打印表单提交函数的信息
 #define DEBUG_PARSE_CONF_FILE 0 ///<打印配置文件调式信息
 #define DEBUG_SIOPLAN_INFO 0 ///<打印串口方案相关调试信息
