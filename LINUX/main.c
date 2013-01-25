@@ -2040,24 +2040,22 @@ int webSend_syspara(webs_t wp, stSysParam sysparam)
 	//JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
 	//前端使用eval 或者JSON.parse即可解析
 	/*
-	 * {"sysparam": {
-	 * 		"meter_num":1 ,
-	 * 		"sioplan_num": 2 ,
-	 * 		"monitor_ports":3,
-	 * 		"netports_num":4,
-	 * 		"sioports_num":5,
-	 * 		"control_ports":6
-	 * 		}
+	 *{
+	 * 	"meter_num":1 ,
+	 * 	"sioplan_num": 2 ,
+	 * 	"monitor_ports":3,
+	 * 	"netports_num":4,
+	 * 	"sioports_num":5,
+	 * 	"control_ports":6
 	 * }
 	 */
-	websWrite(wp, T("{\"sysparam\":{"
+	websWrite(wp, T("{"
 			"\"meter_num\":%u,"
 			"\"sioplan_num\":%u,"
 			"\"monitor_ports\":%u,"
 			"\"netports_num\":%u,"
 			"\"sioports_num\":%u,"
-			"\"control_ports\":%u,"
-			"}"
+			"\"control_ports\":%u"
 			"}"),
 			sysparam.meter_num,
 			sysparam.sioplan_num,
