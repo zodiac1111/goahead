@@ -10,30 +10,32 @@
 #include "web_err.h"
 #include "param.h"
 #include <time.h>
-
-
-int web_errno=0;
+static int save_log(const char * errstring);
+int web_errno = 0;
 const char *myweberrstr[] =
-{
-	[no_error]="No Error.",
-	///系统参数相关
-	[open_sysparam_file]="Open system confingure file "CFG_SYS" err.",
-	[sysfile_size_err]="System parameter file size err.",
-	[write_sysfile_size_err]="Save system parameter err,size is error.",
-	[read_sysfile_err]="读取系统参数文件"CFG_SYS"时出错",
-	[write_sysfile_err]="写入系统参数文件"CFG_SYS"时出错",
-	[update_mtr_file_err]="更新表计参数数量"CFG_MTR"时出错",
-	///表计参数相关
-	[open_mtrcfgfile_err]="打开表计参数文件"CFG_MTR"时出错",
-	[no_this_mtrparam]=CFG_MTR"中没有这个表计参数",
-	[read_mtrcfgfile_err]="读取表计参数文件"CFG_MTR"时出错",
-	[write_mtrcfgfile_err]="Write Meter cfg file Err."
-			"写入表计参数文件"CFG_MTR"时出错",
-	[mtr_file2men_err]="Err when change the Meter Parameter from "
-			"File struct to Data struct. "
-			"从表计参数文件结构转化为数据结构时出错",
-	///串口方案参数相关
-	[open_sioplan_cfgfile_err]="Open uartplan cfg file "CFG_SIOPALN" err.",
+                {[no_error]="No Error.",
+                                ///系统参数相关
+                                [open_sysparam_file
+                                                ]="Open system confingure file "CFG_SYS" err.",
+                                [sysfile_size_err
+                                                ]="System parameter file size err.",
+                                [write_sysfile_size_err
+                                                ]="Save system parameter err,size is error.",
+                                [read_sysfile_err]="读取系统参数文件"CFG_SYS"时出错",
+                                [write_sysfile_err]="写入系统参数文件"CFG_SYS"时出错",
+                                [update_mtr_file_err]="更新表计参数数量"CFG_MTR"时出错",
+                                ///表计参数相关
+                                [open_mtrcfgfile_err]="打开表计参数文件"CFG_MTR"时出错",
+                                [no_this_mtrparam
+]                =CFG_MTR"中没有这个表计参数",
+                [read_mtrcfgfile_err]="读取表计参数文件"CFG_MTR"时出错",
+                [write_mtrcfgfile_err]="Write Meter cfg file Err."
+                "写入表计参数文件"CFG_MTR"时出错",
+                [mtr_file2men_err]="Err when change the Meter Parameter from "
+                "File struct to Data struct. "
+                "从表计参数文件结构转化为数据结构时出错",
+                ///串口方案参数相关
+                [open_sioplan_cfgfile_err]="Open uartplan cfg file "CFG_SIOPALN" err.",
         [no_this_sioplan]="No such com plan record.",
         [read_sioplan_cfgfile_err]="Read uartplan cfg file"CFG_SIOPALN" err.",
         [write_sioplan_cfgfile_err]="Update the uartplan config file "
@@ -78,44 +80,52 @@ const char *myweberrstr[] =
  */
 void web_err_proc(EL_ARGS)
 {
-	time_t  timer = time(NULL);
-	struct tm * t=localtime(&timer);
-	char strtime[25]={0};
-	char errstring[MAX_ERR_LOG_LINE_LENTH]={0};
+	time_t timer = time(NULL);
+	struct tm * t = localtime(&timer);
+	char strtime[25] = { 0 };
+	char errstring[MAX_ERR_LOG_LINE_LENTH] = { 0 };
 	if (web_errno<0) {
-		goto END;
+		web_errno = 0;
+		return;
 	}
-	sprintf(strtime,"%04d-%02d-%02d %02d:%02d:%02d",
-			t->tm_year+1900,t->tm_mon+1,t->tm_mday,
-			t->tm_hour,t->tm_min,t->tm_sec);
-	sprintf(errstring,PREFIX_ERR"[%s]ErrCode[%d]:%s (%s,%s:%d)%s\n",
-		strtime,web_errno,myweberrstr[web_errno],
-		file,func,line,strerror(errno));
-	if(myweberrstr[web_errno]!=NULL){
-		printf("%s",errstring);
+	sprintf(strtime, "%04d-%02d-%02d %02d:%02d:%02d",
+	                t->tm_year+1900, t->tm_mon+1, t->tm_mday,
+	                t->tm_hour, t->tm_min, t->tm_sec);
+	sprintf(errstring, PREFIX_ERR"[%s]ErrCode[%d]:%s (%s,%s:%d)%s\n",
+	                strtime, web_errno, myweberrstr[web_errno],
+	                file, func, line, strerror(errno));
+	if (myweberrstr[web_errno]!=NULL) {
+		printf("%s", errstring);
 	}
-	/**
-	 * 2. 写入文件
-	 */
+	// 写入文件
+	save_log(errstring);
+	web_errno = 0;
+	return;
+}
+/**
+ * 保存服务器错误日志.
+ * @param errstring
+ * @return
+ */
+static int save_log(const char * errstring)
+{
 	FILE*fp;
-	fp=fopen(ERR_LOG,"r+");
-	if(fp==NULL){
-		FILE*fp=fopen(ERR_LOG,"w");
-		if(fp==NULL){
+	fp = fopen(ERR_LOG, "a");
+	if (fp==NULL) {
+		FILE*fp = fopen(ERR_LOG, "w");
+		if (fp==NULL) {
 			perror(PREFIX_ERR"create errlog file err:");
-			goto END;
+			return -1;
 		}
 	}
 	fseek(fp, 0, SEEK_END);
 	int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-	if (flen>=MAX_ERR_LOG_FILE_SIZE ){//文件过长,简单的截断为0
+	if (flen>=MAX_ERR_LOG_FILE_SIZE) {     //文件过长,简单的截断为0
 		int fd = fileno(fp);
-		ftruncate(fd,MAX_ERR_LOG_FILE_SIZE/2);
+		ftruncate(fd, 0);
 	}
-	fprintf(fp,"%s",errstring);
+	fprintf(fp, "%s", errstring);
 	fclose(fp);
-END:
-	web_errno=0;
-	return;
+	return 0;
 }
