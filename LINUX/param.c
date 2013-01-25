@@ -498,7 +498,9 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no)
 	}
 	fseek(fp, 0, SEEK_END);
 	long  int  flen = ftell(fp);
+#if DEBUG_SIOPLAN_INFO
 	printf("save_sioplan 文件长度:%lu \n", flen);
+#endif
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stUart_plan) * (no + 1)) {
@@ -539,7 +541,9 @@ int save_monparam(const stMonparam * mon, const char * file, int no)
 	}
 	fseek(fp, 0, SEEK_END);
 	long unsigned int  flen = ftell(fp);
+#if DEBUG_PRINT_MONPARAM
 	printf("save_monparam 文件长度:%lu \n", flen);
+#endif
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stMonparam) * (no + 1)) {
@@ -552,7 +556,7 @@ int save_monparam(const stMonparam * mon, const char * file, int no)
 	fseek(fp, sizeof(stMonparam) * no, SEEK_SET);		//指向特定的表参数
 	ret = fwrite(mon, sizeof(stMonparam), 1, fp);		//写入
 	if (ret != 1) {
-		perror("write");
+		perror(PREFIX_ERR"write");
 		PRINT_HERE
 		web_errno= write_monparam_cfgfile_err;
 		return(-1);
@@ -580,7 +584,9 @@ int save_netport(const stNetparam * net, const char * file, int no)
 	}
 	fseek(fp, 0, SEEK_END);
 	long unsigned int  flen = ftell(fp);
+#if DEBUG_PRINT_NETPARAM
 	printf("save_netprot 文件长度:%lu \n", flen);
+#endif
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen < sizeof(stNetparam) * (no + 1)) {

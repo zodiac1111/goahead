@@ -9,6 +9,10 @@
 //调试开关
 #define DEBUG_INFO_FORM 1///<打印表单提交函数的信息
 #define DEBUG_PARSE_CONF_FILE 0 ///<打印配置文件调式信息
+#define DEBUG_SIOPLAN_INFO 0 ///<打印串口方案相关调试信息
+#define DEBUG_PRINT_NETPARAM 0 ///<打印网口参数相关调试信息
+#define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
+#define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
 #define PREFIX_INF PREFIX"info>" ///<一般信息
