@@ -558,7 +558,7 @@ static int initWebs(void)
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
 	                (size_t) hp->h_length);
 	(void) printf_webs_app_dir();
-	(void) load_web_root_dir(webdir);//获取根目录
+	(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
@@ -2029,12 +2029,43 @@ int webSend_syspara(webs_t wp, stSysParam sysparam)
 		web_err_proc(EL);
 		return -1;
 	}
-	websWrite(wp, T("%u,"), sysparam.meter_num);
-	websWrite(wp, T("%u,"), sysparam.sioports_num);
-	websWrite(wp, T("%u,"), sysparam.monitor_ports);
-	websWrite(wp, T("%u,"), sysparam.netports_num);
-	websWrite(wp, T("%u,"), sysparam.sioports_num);
-	websWrite(wp, T("%u"), sysparam.control_ports);
+	/*
+	 websWrite(wp, T("%u,"), sysparam.meter_num);
+	 websWrite(wp, T("%u,"), sysparam.sioplan_num);
+	 websWrite(wp, T("%u,"), sysparam.monitor_ports);
+	 websWrite(wp, T("%u,"), sysparam.netports_num);
+	 websWrite(wp, T("%u,"), sysparam.sioports_num);
+	 websWrite(wp, T("%u"), sysparam.control_ports);
+	 */
+	//JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
+	//前端使用eval 或者JSON.parse即可解析
+	/*
+	 * {"sysparam": {
+	 * 		"meter_num":1 ,
+	 * 		"sioplan_num": 2 ,
+	 * 		"monitor_ports":3,
+	 * 		"netports_num":4,
+	 * 		"sioports_num":5,
+	 * 		"control_ports":6
+	 * 		}
+	 * }
+	 */
+	websWrite(wp, T("{\"sysparam\":{"
+			"\"meter_num\":%u,"
+			"\"sioplan_num\":%u,"
+			"\"monitor_ports\":%u,"
+			"\"netports_num\":%u,"
+			"\"sioports_num\":%u,"
+			"\"control_ports\":%u,"
+			"}"
+			"}"),
+			sysparam.meter_num,
+			sysparam.sioplan_num,
+			sysparam.monitor_ports,
+			sysparam.netports_num,
+			sysparam.sioports_num,
+			sysparam.control_ports
+			);
 	return 0;
 }
 
