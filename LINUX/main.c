@@ -149,7 +149,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	if (*init=='1') {
 		webSend_syspara(wp, sysparam);
 	} else {
-		webRece_syspara(wp, sysparam);
+		webRece_syspara(wp, &sysparam);
 	}
 	websDone(wp, 200);
 	return;
@@ -985,6 +985,9 @@ static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
 ///线路名称
 static int webWrite_line(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t线路名称\n");
+#endif
 	websWrite(wp, T("<td>\n"
 			"<input type=text  maxlength=6 "
 			"onchange=\"line_changed(event);\""
@@ -1000,6 +1003,9 @@ static int webWrite_line(webs_t wp, stMtr mtr)
 /// 表计地址
 static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t表计地址\n");
+#endif
 	int i;
 	websWrite(wp, T("<td>\n"
 			"<input type=text  maxlength=12 "
@@ -1015,6 +1021,9 @@ static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 /// 表计口令
 static int webWrite_pwd(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t表计口令\n");
+#endif
 	int i;
 	websWrite(wp, T("<td>\n"
 			"<input type=text maxlength=8 "
@@ -1030,6 +1039,9 @@ static int webWrite_pwd(webs_t wp, stMtr mtr)
 /// 电量小数位数
 static int webWrite_it_dot(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t电量小数位数:%u\n", mtr.it_dot);
+#endif
 	return websWrite(wp, T("<td>\n"
 			" <input type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
@@ -1038,6 +1050,9 @@ static int webWrite_it_dot(webs_t wp, stMtr mtr)
 /// 电压小数位数
 static int webWrite_v_dot(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t电压小数位数:%u\n", mtr.v_dot);
+#endif
 	return websWrite(wp, T("<td>\n"
 			" <input type=text  maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
@@ -1047,6 +1062,9 @@ static int webWrite_v_dot(webs_t wp, stMtr mtr)
 /// 电流小数位数
 static int webWrite_i_dot(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t电流小数位数:%u\n", mtr.i_dot);
+#endif
 	return websWrite(wp, T("<td>\n"
 			"<input type=text maxlength=1  "
 			" onchange=\"dot_changed(event);\" "
@@ -1055,6 +1073,9 @@ static int webWrite_i_dot(webs_t wp, stMtr mtr)
 /// 有功功率小数位数
 static int webWrite_p_dot(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t有功功率小数:%u\n", mtr.p_dot);
+#endif
 	return websWrite(wp, T("<td>\n"
 			"<input  type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
@@ -1063,6 +1084,9 @@ static int webWrite_p_dot(webs_t wp, stMtr mtr)
 /// 无功功率小数位数
 static int webWrite_q_dot(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t无功功率小数:%u\n", mtr.q_dot);
+#endif
 	return websWrite(wp, T("<td>\n"
 			" <input  type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
@@ -1071,6 +1095,9 @@ static int webWrite_q_dot(webs_t wp, stMtr mtr)
 /// 需量小数位数
 static int webWrite_xl_dot(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t需量小数:%u\n", mtr.xl_dot);
+#endif
 	return websWrite(wp, T("<td>\n"
 			" <input type=text  maxlength=1 "
 			" onchange=\"dot_changed(event);\" "
@@ -1080,6 +1107,9 @@ static int webWrite_xl_dot(webs_t wp, stMtr mtr)
 /// 额定电压
 static int webWrite_ue(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t额定电压:%u\n", mtr.ue);
+#endif
 	return websWrite(wp, T("<td>\n"
 			" <input type=text  "
 			" onchange=\"ue_changed(event);\" "
@@ -1088,6 +1118,9 @@ static int webWrite_ue(webs_t wp, stMtr mtr)
 /// 额定电流
 static int webWrite_ie(webs_t wp, stMtr mtr)
 {
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t额定电压:%u\n", mtr.ie);
+#endif
 	return websWrite(wp, T("<td>\n"
 			" <input type=text size=4 "
 			" onchange=\"ie_changed(event);\" "
@@ -1097,7 +1130,9 @@ static int webWrite_ie(webs_t wp, stMtr mtr)
 static int webWrite_uartport(webs_t wp, stMtr mtr)
 {
 	int i;
-	printf("表计参数-使用串口号:%d\n", mtr.port);
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t使用串口号:%d\n", mtr.port);
+#endif
 	websWrite(wp, T("<td>\n"
 			"<select name=port >\n"));
 	for (i = 0; i<sysparam.sioports_num; i++) {
@@ -1112,7 +1147,9 @@ static int webWrite_uartport(webs_t wp, stMtr mtr)
 static int webWrite_uartPlan(webs_t wp, stMtr mtr)
 {
 	int i;
-	printf("表计参数-串口方案号:%d 串口数 %d\n", mtr.portplan, sysparam.sioplan_num);
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t串口方案号:%d,总串口个数%d个\n", mtr.portplan, sysparam.sioplan_num);
+#endif
 	websWrite(wp, T("<td>\n"
 			"<select name=portplan >\n"));
 	for (i = 0; i<sysparam.sioplan_num; i++) {
@@ -1132,7 +1169,9 @@ static int webWrite_uartPlan(webs_t wp, stMtr mtr)
 static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
 {
 	int i;
-	printf("表计参数-表计规约:%d\n", mtr.protocol);
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t表计规约:%d\n", mtr.protocol);
+#endif
 	websWrite(wp, T("<td>\n"
 			"<select name=protocol >\n"));
 	for (i = 0; i<procotol_num; i++) {
@@ -1148,7 +1187,9 @@ static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
 /// 几相几线制,就两种情况 0-3相3线 1-3相4线
 static int webWrite_ph_wire(webs_t wp, stMtr mtr)
 {
-	printf("表计参数-几相几线:%d\n", mtr.p3w4);
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t几相几线:%d\n", mtr.p3w4);
+#endif
 	u32 i;
 	websWrite(wp, T("<td>\n"
 			"<select name=ph_wire >\n"));
@@ -1165,7 +1206,9 @@ static int webWrite_factory(webs_t wp, stMtr mtr)
 {
 	u32 i;
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-	printf("表计参数-生产厂家:%d\n", mtr.fact);
+#if DEBUG_PRINT_MTRPARAM
+	printf("\t生产厂家:%d\n", mtr.fact);
+#endif
 	websWrite(wp, T("<td>\n"
 			"<select name=factory >\n"));
 	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
@@ -1976,7 +2019,7 @@ int webRece_netparas(webs_t wp)
  * @param wp
  * @return
  */
-int webRece_syspara(webs_t wp, stSysParam sysparam)
+int webRece_syspara(webs_t wp, stSysParam * sysparam)
 {
 	int ret = -1;
 	/** 错误的项目,每一位表示一个项目,1表示此项错误,0表示此项正确.初始全部正确.
@@ -2025,14 +2068,14 @@ int webRece_syspara(webs_t wp, stSysParam sysparam)
 		erritem |= 0b100000;
 	}
 	if (erritem==0) {     //只有所有输入都合法
-		sysparam.meter_num = meter_num;
-		sysparam.sioports_num = sioports_num;
-		sysparam.netports_num = netports_num;
+		sysparam->meter_num = meter_num;
+		sysparam->sioports_num = sioports_num;
+		sysparam->netports_num = netports_num;
 		//脉冲已经废弃
-		sysparam.monitor_ports = monitor_ports;
-		sysparam.control_ports = control_ports;
-		sysparam.sioplan_num = sioplan_num;
-		ret = save_sysparam(&sysparam, CFG_SYS);
+		sysparam->monitor_ports = monitor_ports;
+		sysparam->control_ports = control_ports;
+		sysparam->sioplan_num = sioplan_num;
+		ret = save_sysparam(sysparam, CFG_SYS);
 		if (ret==-1) {
 			web_err_proc(EL);
 		}
@@ -2100,8 +2143,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	int no;
 	stMtr mtr;
 	memset(&mtr, 0x00, sizeof(stMtr));
-	//printf("%s\n", __FUNCTION__);
-	//printf("个数:%d\n",mtrnum);
+	///@todo 使用JSON传递数据可以使格式更明确,前端处理字符串不难.
 	for (no = 0; no<mtrnum; no++) {
 		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
 			web_err_proc(EL);

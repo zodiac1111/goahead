@@ -15,7 +15,7 @@
 #include "tou.h"
 #include "conf.h"
 
-#if DEBUG_INFO_FORM==1
+#if DEBUG_INFO_FORM
 ///打印form表单提交函数的入口信息:函数名,传递进来的队列
 #define PRINT_FORM_INFO printf(PREFIX_INF"%s:%s\n", __FUNCTION__,query)
 #else
@@ -49,7 +49,7 @@ void form_load_log(webs_t wp, char_t *path, char_t *query);
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 //各类大相
-int webRece_syspara(webs_t wp,stSysParam sysparam);
+int webRece_syspara(webs_t wp,stSysParam* sysparam);
 int webSend_syspara(webs_t wp, stSysParam sysparam);
 int webSend_mtr_sioplan(webs_t wp,stSysParam sysparam);
 int webSend_mtr_procotol(webs_t wp);

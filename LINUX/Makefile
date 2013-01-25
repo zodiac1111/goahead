@@ -160,11 +160,11 @@ clean:
 
 main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h
 
-param.o: param.c param.h web_err.h
+param.o: param.c param.h web_err.h conf.h
 
-web_err.o: web_err.c web_err.h
+web_err.o: web_err.c web_err.h conf.h
 
-tou.o:tou.c tou.h
+tou.o:tou.c tou.h conf.h
 #
 #	Transition rules (add -o to put object in right directory)
 #
