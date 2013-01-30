@@ -157,6 +157,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 /**
  * 客户端请求获取服务端时间.
  * 只要是post发送到这个函数就同步时间,不管query
+ * @bug arm32处理器 t最大32位,将于2038年01月19日03时14分07秒 溢出
  * @param wp
  * @param path
  * @param query
