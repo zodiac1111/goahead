@@ -6,10 +6,7 @@
 # Copyright (c) PeerSec Networks, Inc. 2010
 #
 #
-#CC=arm-linux-gcc
-#all:	compile 
-
-#默认目标:开发版本
+#默认目标:开发版本/发布版本
 default: debug
 
 #所有,包括发布版本和文档
@@ -35,7 +32,7 @@ NAME	= webs
 DASW	= -DDIGEST_ACCESS_SUPPORT
 
 #
-# This is set by the debug target below
+# This is set by the debug target below 设置发布版和开发版区别
 #
 ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
