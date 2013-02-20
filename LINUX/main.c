@@ -31,6 +31,7 @@
 #include "Chinese_string.h"
 #include "web_err.h"
 #include "tou.h"
+#include "conf.h"
 #ifdef WEBS_SSL_SUPPORT
 #include	"../websSSL.h"
 #endif

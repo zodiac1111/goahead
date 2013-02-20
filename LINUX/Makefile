@@ -169,7 +169,7 @@ $(NAME): Makefile $(ARCH)
 
 ../matrixSSLSocket.o:  ../matrixSSLSocket.c ../matrixSSLSocket.h
 
-main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h
+main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h conf.h
 
 param.o: param.c param.h web_err.h conf.h
 
