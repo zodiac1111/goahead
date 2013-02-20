@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 	websSSLOpen();
 	/* websRequireSSL("/"); *//* Require all files be served via https */
 #endif
-	/*
+	/* 基本事件循环.
 	 * Basic event loop. SocketReady returns true when a socket is ready for
 	 * service. SocketSelect will block until an event occurs. SocketProcess
 	 * will actually do the servicing.

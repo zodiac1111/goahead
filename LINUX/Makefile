@@ -8,7 +8,24 @@
 #
 #CC=arm-linux-gcc
 #all:	compile 
-all:	debug
+
+#默认目标:开发版本
+default: debug
+
+#所有,包括发布版本和文档
+all:gold doc
+
+#清除
+clean:
+	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
+
+#文档	
+doc:UPDATE-EVERY-TIME
+	doxygen Doxyfile
+	
+#"伪"目标,每次都强制更新
+UPDATE-EVERY-TIME:
+
 ARCH	= libwebs.a
 NAME	= webs
 # User Management switch
@@ -27,6 +44,7 @@ DFLAGS  = -g -Wall -Wextra \
 	 -Wunreachable-code \
 	# -Wshadow
 else
+CC=arm-linux-gcc
 DFLAGS  = -Os
 endif
 
@@ -35,8 +53,6 @@ debug:
 
 gold:
 	@$(MAKE) compile
-
-default: gold
 
 
 
@@ -88,8 +104,6 @@ $(NAME): Makefile $(ARCH)
 		$(CFLAGS) $(IFLAGS) \
 		main.o  param.o $(ARCH) $(LDFLAGS) 
 
-clean:
-	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
 
 #
 #	Dependencies
