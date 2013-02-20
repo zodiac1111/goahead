@@ -1950,11 +1950,13 @@ int portstr2u8(const char * str, u8* val)
  * @param wp
  * @param sysparam
  * @return
+ * @todo 使用json格式传输数据,使数据和样式无关
  */
 int webSend_netparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stNetparam netparam;
+	/* 直接传输html传递数据,数据不纯净,且不易于扩展,属于硬编码. */
 	for (no = 0; no<sysparam.netports_num; no++) {
 		if (-1==load_netparam(&netparam, CFG_NET, no)) {
 			web_err_proc(EL);
@@ -1968,7 +1970,29 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 		(void) webWrite_gateway(wp, no, netparam);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
-
+	// todo 使用json,仅传输数据.样式和行为交由前端控制,易于扩展
+	/*websWrite(wp,T("{\"eth_num\":\"%d\",\n"),sysparam.netports_num);
+	websWrite(wp,T("\"item\":[\n"));
+	for (no = 0; no<sysparam.netports_num; no++) {
+		if (-1==load_netparam(&netparam, CFG_NET, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		websWrite(wp,T("\t{\n"));
+		websWrite(wp,T("\t\t\"no\":\"%d\",\n"),no);
+		websWrite(wp,T("\t\t\"eth\":\"%d\",\n"),"1");
+		websWrite(wp,T("\t\t\"ip\":\"s\",\n"),"2");
+		websWrite(wp,T("\t\t\"mask\":\"s\",\n"),"3");
+		websWrite(wp,T("\t\t\"gateway\":\"s\"\n"),"4");
+		websWrite(wp,T("\t}"));
+		if(no!=sysparam.netports_num-1){
+			websWrite(wp,T(",\n"));
+		}else{
+			websWrite(wp,T("\n"));
+		}
+	}
+	websWrite(wp,T("]}"));
+	*/
 	return 0;
 }
 /**
