@@ -23,12 +23,26 @@
 #include "type.h"
 #include "conf.h"
 /**
+ * 将时间推至次日凌晨0点,用于检索到下一个文件
+ * @param t
+ * @param t2
+ */
+void timeToNextDayMorning(struct tm *t,time_t *t2)
+{
+	t->tm_hour = 0;
+	t->tm_min = 0;
+	t->tm_sec = 0;
+	*t2 = mktime(t);
+	*t2 += (60*60*24);
+}
+/**
  * 读取一个电表的一段时间段的电量数据.
  * 这个函数思路十分难以理解.
  * @param start
  * @param end
  * @param mtr_no
  * @return
+ * @todo 分解
  */
 int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 {
@@ -70,27 +84,18 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 #else
 		localtime_r(&t2, &t);
 		localtime_r(&t2, &st_today_0);
-//		printf("localtime_r %02d-%02d %02d:%02d %s t.tm_gmtoff=%ld \n",
-//		                t.tm_mon+1, t.tm_mday, t.tm_hour, t.tm_min,
-//		                t.tm_zone, t.tm_gmtoff);
 #endif
 		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
 		                t.tm_mday, TOU_DAT_SUFFIX);
 		fp = fopen(file, "r");
-		if (fp==NULL) {		//这一天没有数据,直接跳到次日零点
-			//web_err_proc(EL);
+		if (fp==NULL) {	//这一天没有数据,直接跳到次日零点,这不是错误
 			printf(PREFIX_INF"%d:%04d-%02d-%02d没有数据文件\n",
 			                mtr_no, t.tm_year+1900, t.tm_mon+1
 			                                , t.tm_mday);
 			web_errno = open_tou_file;
 			//到下一天的凌晨,即下一个文件.
-			t.tm_hour = 0;
-			t.tm_min = 0;
-			t.tm_sec = 0;
-			t2 = mktime(&t);
-			t2 += (60*60*24);
+			timeToNextDayMorning(&t,&t2);
 			continue;
-			//return ERR;
 		}
 		fseek(fp, 0, SEEK_END);
 		flen = ftell(fp);
@@ -99,23 +104,13 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		if (n!=1) {
 			web_errno = read_tou_file_filehead;
 			fclose(fp);
-			t.tm_hour = 0;
-			t.tm_min = 0;
-			t.tm_sec = 0;
-			t2 = mktime(&t);
-			t2 += (60*60*24);
+			timeToNextDayMorning(&t,&t2);
 			continue;
-			//return ERR;
 		}
 		///@note 检查文件头中是否和请求的日期相一致.
 		if (isRightDate(filehead, t)==0) {
-			//printf(PREFIX_INF"日期不对.\n");
 			fclose(fp);
-			t.tm_hour = 0;
-			t.tm_min = 0;
-			t.tm_sec = 0;
-			t2 = mktime(&t);
-			t2 += (60*60*24);
+			timeToNextDayMorning(&t,&t2);
 			continue;
 		}
 		int cycle = (filehead.save_cycle_hi*256)
