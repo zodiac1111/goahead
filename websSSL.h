@@ -26,8 +26,8 @@
 
 /********************************** Defines ***********************************/
 
-#define DEFAULT_CERT_FILE   "./ssl.csr"		/* Public key certificate */
-#define DEFAULT_KEY_FILE    "./ssl.key"	/* Private key file */
+#define DEFAULT_CERT_FILE   "./certSrv.pem"		/* Public key certificate */
+#define DEFAULT_KEY_FILE    "./privkeySrv.pem"	/* Private key file */
 
 typedef struct {
 	sslConn_t* sslConn;

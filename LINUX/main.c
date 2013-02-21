@@ -84,25 +84,26 @@ void init_semun(void)
  */
 int main(int argc, char** argv)
 {
-	init_semun();
+	init_semun();//初始化信号量,用于控制,未完善.
 	/*
 	 * Initialize the memory allocator. Allow use of malloc and start
 	 * with a 60K heap.  For each page request approx 8KB is allocated.
 	 * 60KB allows for several concurrent page requests.  If more space
 	 * is required, malloc will be used for the overflow.
+	 * 初始化并分配内存,如果内存不足可以在这里多分配一些.
 	 */
-	bopen(NULL, (60*1024), B_USE_MALLOC);
+	bopen(NULL, (600*1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
-	/*
-	 * Initialize the web server
-	 */
+
+	//Initialize the web server 初始化web服务器
 	if (initWebs()<0) {
 		printf(PREFIX_ERR"init Webs.\n");
 		return -1;
 	}
 #ifdef WEBS_SSL_SUPPORT
+	printf(PREFIX_INF"ssl support\n");
 	websSSLOpen();
 	/* websRequireSSL("/"); *//* Require all files be served via https */
 #endif
@@ -369,11 +370,10 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 void form_history_tou(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	//PRINT_HERE
 	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
 	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
 	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
-	printf("时间戳范围:%s~%s\n", stime_t, etime_t);
+	//printf("时间戳范围:%s~%s\n", stime_t, etime_t);
 	TimeRange tr;
 	int ret;
 	int mtr_no = 0;
@@ -391,7 +391,7 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	if (ret!=1) {
 		web_err_proc(EL);
 	}
-	printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
+	//printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
 	websHeader_pure(wp);
 	ret = load_tou_dat(mtr_no, tr, &tou, wp);
 	if (ret==ERR) {
@@ -516,7 +516,7 @@ int load_web_root_dir(char* webdir)
 	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
 #if __i386 //host上调试
 	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
-	sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
+	//sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
 #endif
 	printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
 	return 0;
@@ -635,7 +635,7 @@ static int initWebs(void)
 	///加载系统参数
 	if (-1==load_sysparam(&sysparam, CFG_SYS)) {
 		web_err_proc(EL);
-		return -1;
+		//return -1;
 	}
 	return 0;
 }

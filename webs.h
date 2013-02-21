@@ -26,8 +26,8 @@
 
 /*************************** User Configurable Defines ************************/
 
-#define WEBS_DEFAULT_HOME		T("home.htm") /* Default home page */
-#define WEBS_DEFAULT_PORT		8080		/* Default HTTP port */
+#define WEBS_DEFAULT_HOME	T("home.htm") /* Default home page */
+#define WEBS_DEFAULT_PORT	8080 //8080	/* Default HTTP port */
 #define WEBS_DEFAULT_SSL_PORT	4433		/* Default HTTPS port */
 
 /* Enable Whitelist access to files */
@@ -64,16 +64,16 @@
 /********************************** Defines ***********************************/
 
 #define WEBS_HEADER_BUFINC 		512			/* Header buffer size */
-#define WEBS_ASP_BUFINC			512*4			/* Asp expansion increment */
+#define WEBS_ASP_BUFINC			512			/* Asp expansion increment */
 #define WEBS_MAX_PASS			32			/* Size of password */
 #define WEBS_BUFSIZE			960		/* websWrite max output string */
 #define WEBS_MAX_HEADER			(5 * 1024)	/* Sanity check header */
 #define WEBS_MAX_URL			2048		/* Maximum URL size for sanity */
-#define WEBS_SOCKET_BUFSIZ		512			/* Bytes read from socket */
-#define WEBS_MAXLEN_PER_POST_VALUE	4096	/*没个post相的值的字符串最大长度,默认256*/
+#define WEBS_SOCKET_BUFSIZ		256 			/* Bytes read from socket */
+#define WEBS_MAXLEN_PER_POST_VALUE	4096	/*每个post相的值的字符串最大长度,默认256*/
 
 #define WEBS_HTTP_PORT			T("httpPort")
-#define CGI_BIN					T("cgi-bin")
+#define CGI_BIN				T("cgi-bin")
 
 /*
  *	Request flags. Also returned by websGetRequestFlags().
@@ -81,7 +81,7 @@
 #define WEBS_LOCAL_PAGE			0x1			/* Request for local webs page */
 #define WEBS_KEEP_ALIVE			0x2			/* HTTP/1.1 keep alive */
 #define WEBS_DONT_USE_CACHE		0x4			/* Not implemented cache support */
-#define WEBS_COOKIE				0x8			/* Cookie supplied in request */
+#define WEBS_COOKIE			0x8			/* Cookie supplied in request */
 #define WEBS_IF_MODIFIED		0x10		/* If-modified-since in request */
 #define WEBS_POST_REQUEST		0x20		/* Post request operation */
 #define WEBS_LOCAL_REQUEST		0x40		/* Request from this system */

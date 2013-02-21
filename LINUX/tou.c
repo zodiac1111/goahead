@@ -24,6 +24,7 @@
 #include "conf.h"
 /**
  * 读取一个电表的一段时间段的电量数据.
+ * 这个函数思路十分难以理解.
  * @param start
  * @param end
  * @param mtr_no
@@ -77,10 +78,12 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		                t.tm_mday, TOU_DAT_SUFFIX);
 		fp = fopen(file, "r");
 		if (fp==NULL) {		//这一天没有数据,直接跳到次日零点
+			//web_err_proc(EL);
 			printf(PREFIX_INF"%d:%04d-%02d-%02d没有数据文件\n",
 			                mtr_no, t.tm_year+1900, t.tm_mon+1
 			                                , t.tm_mday);
 			web_errno = open_tou_file;
+			//到下一天的凌晨,即下一个文件.
 			t.tm_hour = 0;
 			t.tm_min = 0;
 			t.tm_sec = 0;
@@ -95,19 +98,30 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		int n = fread(&filehead, sizeof(stTouFilehead), 1, fp);
 		if (n!=1) {
 			web_errno = read_tou_file_filehead;
+			fclose(fp);
+			t.tm_hour = 0;
+			t.tm_min = 0;
+			t.tm_sec = 0;
+			t2 = mktime(&t);
+			t2 += (60*60*24);
 			continue;
 			//return ERR;
 		}
 		///@note 检查文件头中是否和请求的日期相一致.
 		if (isRightDate(filehead, t)==0) {
 			//printf(PREFIX_INF"日期不对.\n");
+			fclose(fp);
+			t.tm_hour = 0;
+			t.tm_min = 0;
+			t.tm_sec = 0;
+			t2 = mktime(&t);
+			t2 += (60*60*24);
 			continue;
 		}
 		int cycle = (filehead.save_cycle_hi*256)
 		                +filehead.save_cycle_lo;
 		mincycle = cycle;
 		//stTou at[24 * 60 / cycle];
-
 		int t_mod = t2%(mincycle*60);     //向上园整至采样周期.
 		if (t_mod!=0) {     //需要园整
 			t2 += (mincycle*60-t_mod);
@@ -121,6 +135,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		st_today_0.tm_sec = 0;
 		t_today_0 = mktime(&st_today_0);
 		if (t2-t_today_0>=(60*60*24)) {     //t2已经时间跨过本日了.次日则文件等等需要重新打开.
+			fclose(fp);
 			goto Start;
 		}
 		///移动文件指针,指向开始的数据结构.
@@ -133,6 +148,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			printf(PREFIX_INF"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
 			                ftell(fp), file);
 			t2 += (mincycle*60);
+			fclose(fp);
 			continue;
 		}
 		while (ftell(fp)<flen&&t2<=etime) {
@@ -147,8 +163,9 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			webWrite_toudata(t2, wp, tou, i, mtr_no);
 			i++;
 			t2 += (mincycle*60);
-		}
-	}
+		}// end while 在一个文件中
+		fclose(fp);
+	}// end for
 	return 0;
 }
 /**
