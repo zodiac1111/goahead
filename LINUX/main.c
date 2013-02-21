@@ -68,6 +68,8 @@ union semun
 struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
+#define JSON 1
+
 /**
  * 初始化信号量,用于进程间的控制,目前用于监视报文的启动和停止.
  */
@@ -839,22 +841,33 @@ static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam)
 	websWrite(wp, T(" <select>\n</td>\n"));
 	return 0;
 }
-static int webWrite_ip(webs_t wp, int no, stNetparam netparam)
+static int webWrite_ip(webs_t wp, char *item, u8* val)
 {
 	//printf("网口参数-IP\n");
 	int i;
+#if JSON == 0
 	websWrite(wp, T("<td>\n"
 			" <input %s type=text size=15 maxlength=15 "
 			" onchange=\"isIPv4(event);\" "
 			" name=ip value=\""), INPUT_CLASS);
 
 	for (i = 0; i<IPV4_LEN; i++) {
-		websWrite(wp, T("%1d"), netparam.ip[i]);
+		websWrite(wp, T("%1d"), val[i]);
 		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
 			websWrite(wp, T("."));
 		}
 	}
 	websWrite(wp, T("\"> </td>\n"));
+#else
+	websWrite(wp, T("\"%s\":\""),item);
+	for (i = 0; i<IPV4_LEN; i++) {
+		websWrite(wp, T("%1d"), val[i]);
+		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
+			websWrite(wp, T("."));
+		}
+	}
+	websWrite(wp, T("\""));
+#endif
 	return 0;
 }
 static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
@@ -1956,6 +1969,7 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stNetparam netparam;
+#if JSON == 0
 	/* 直接传输html传递数据,数据不纯净,且不易于扩展,属于硬编码. */
 	for (no = 0; no<sysparam.netports_num; no++) {
 		if (-1==load_netparam(&netparam, CFG_NET, no)) {
@@ -1970,29 +1984,31 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 		(void) webWrite_gateway(wp, no, netparam);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
+#else
 	// todo 使用json,仅传输数据.样式和行为交由前端控制,易于扩展
-	/*websWrite(wp,T("{\"eth_num\":\"%d\",\n"),sysparam.netports_num);
-	websWrite(wp,T("\"item\":[\n"));
+	websWrite(wp,T("{\"eth_num\":\"%d\","),sysparam.netports_num);
+	websWrite(wp,T("\"item\":["));
 	for (no = 0; no<sysparam.netports_num; no++) {
 		if (-1==load_netparam(&netparam, CFG_NET, no)) {
 			web_err_proc(EL);
 			continue;
 		}
-		websWrite(wp,T("\t{\n"));
-		websWrite(wp,T("\t\t\"no\":\"%d\",\n"),no);
-		websWrite(wp,T("\t\t\"eth\":\"%d\",\n"),"1");
-		websWrite(wp,T("\t\t\"ip\":\"s\",\n"),"2");
-		websWrite(wp,T("\t\t\"mask\":\"s\",\n"),"3");
-		websWrite(wp,T("\t\t\"gateway\":\"s\"\n"),"4");
-		websWrite(wp,T("\t}"));
+		websWrite(wp,T("{"));
+		websWrite(wp,T("\"no\":\"%d\","),no);
+		websWrite(wp,T("\"eth\":\"%d\","),netparam.no);
+		(void) webWrite_ip(wp, "ip", netparam.ip);
+		websWrite(wp, T(","));
+		(void) webWrite_ip(wp, "mask", netparam.mask);
+		websWrite(wp, T(","));
+		(void) webWrite_ip(wp, "gateway", netparam.gateway);
+		websWrite(wp,T("}"));
 		if(no!=sysparam.netports_num-1){
-			websWrite(wp,T(",\n"));
-		}else{
-			websWrite(wp,T("\n"));
+			websWrite(wp,T(","));
 		}
 	}
+
 	websWrite(wp,T("]}"));
-	*/
+#endif
 	return 0;
 }
 /**
@@ -2110,7 +2126,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	return 0;
 }
 /**
- * 向页面写系统参数,各项数据以逗号分割开,客户端解析并添加到指定的框中
+ * 向页面写系统参数,各项数据以json对象形式,客户端解析并添加到指定的框中
  * @param wp
  * @return
  */
@@ -2129,18 +2145,18 @@ int webSend_syspara(webs_t wp, stSysParam sysparam)
 	 websWrite(wp, T("%u,"), sysparam.sioports_num);
 	 websWrite(wp, T("%u"), sysparam.control_ports);
 	 */
-	//JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
-	//前端使用eval 或者JSON.parse即可解析
-	/*
-	 *{
-	 * 	"meter_num":1 ,
-	 * 	"sioplan_num": 2 ,
-	 * 	"monitor_ports":3,
-	 * 	"netports_num":4,
-	 * 	"sioports_num":5,
-	 * 	"control_ports":6
-	 * }
-	 */
+	/*JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
+	在线解析网站: http://jsoneditoronline.org/
+	前端使用eval 或者JSON.parse即可解析.传递类似下面的文本
+		{
+		    "meter_num": 1 ,
+		    "sioplan_num": 2 ,
+		    "monitor_ports": 3 ,
+		    "netports_num": 4 ,
+		    "sioports_num": 5 ,
+		    "control_ports": 6
+		}
+	*/
 	websWrite(wp, T("{"
 			"\"meter_num\":%u,"
 			"\"sioplan_num\":%u,"

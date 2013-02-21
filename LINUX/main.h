@@ -97,7 +97,7 @@ static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
 //网口参数
 static int webWrite_net_no(webs_t wp, int no, stNetparam netparam);
 static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam);
-static int webWrite_ip(webs_t wp, int no, stNetparam netparam);
+static int webWrite_ip(webs_t wp, char *item, u8* val);
 static int webWrite_mask(webs_t wp, int no, stNetparam netparam);
 static int webWrite_gateway(webs_t wp, int no, stNetparam netparam);
 //监视端口参数
