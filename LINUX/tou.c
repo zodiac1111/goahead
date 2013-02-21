@@ -24,16 +24,16 @@
 #include "conf.h"
 /**
  * 将时间推至次日凌晨0点,用于检索到下一个文件
- * @param t
- * @param t2
+ * @param stTime 时间结构体
+ * @param time_t 时间戳(32位!bug Y2038)
  */
-void timeToNextDayMorning(struct tm *t,time_t *t2)
+void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
 {
-	t->tm_hour = 0;
-	t->tm_min = 0;
-	t->tm_sec = 0;
-	*t2 = mktime(t);
-	*t2 += (60*60*24);
+	stTime->tm_hour = 0;
+	stTime->tm_min = 0;
+	stTime->tm_sec = 0;
+	*time_t = mktime(stTime);
+	*time_t += (60*60*24);
 }
 /**
  * 读取一个电表的一段时间段的电量数据.
@@ -108,7 +108,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			continue;
 		}
 		///@note 检查文件头中是否和请求的日期相一致.
-		if (isRightDate(filehead, t)==0) {
+		if (isRightDate(filehead, t)==0) { //这也不算错误,最多算信息.
 			fclose(fp);
 			timeToNextDayMorning(&t,&t2);
 			continue;
