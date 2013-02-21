@@ -26,6 +26,7 @@
 #else 		//运行在i368,host调试平台上.
 #define CONF_FILE "/home/lee/workspace/goahead/conf/goahead.conf"
 #endif
+///@todo 这些项目可以放到配置文件中.程序中需要一些修改
 //webs服务器错误文件相关
 #define ERR_LOG "./err.log" ///<错误日志文件
 #define MAX_ERR_LOG_LINE_LENTH 1024 ///<日志文件单行最大长度(字节)
@@ -35,7 +36,7 @@
 #define CFG_SYS CFG_DIR"sysspara.cfg"///<系统参数文件,关系到下面的其他参数
 #define CFG_MTR CFG_DIR"mtrspara.cfg"///<表计参数配置文件
 #define CFG_SIOPALN CFG_DIR"sioplan.cfg"///<串口方案配置文件
-#define CFG_NET CFG_DIR"netpara.cfg"///<網路參數配置文件
+#define CFG_NET CFG_DIR"netpara.cfg"///<网络參數配置文件
 #define CFG_MON_PARAM CFG_DIR"monpara.cfg"///<监视参数数配置文件
 #define CFG_FORWARD_TABLE CFG_DIR"retranTable.cfg"///<转发表信息文件
 #define CFG_SAVE_CYCLE CFG_DIR"stspara.cfg"///<采集保存周期和项目配置文件
