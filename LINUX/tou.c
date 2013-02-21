@@ -38,6 +38,21 @@ void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
 /**
  * 读取一个电表的一段时间段的电量数据.
  * 这个函数思路十分难以理解.
+ * 主要是按照时间戳,以一分钟为最小刻度依次从开始时刻到结束时刻遍历一遍.
+ * 获取采样周期,如5分钟,则可以以5分钟为最小刻度遍历,速度更快.
+ * 遍历过程中有一种比较特殊的情况:
+ * 1. 开始时刻不是周期的整数倍.
+ * 	如01月01日00时01分开始,读取文件mtr0010101之后发现周期是5分钟.
+ * 	那个需要将起始时刻向上园整到5分钟的整数倍,即从01月01日00时05分这个时刻开始.
+ * 	之后就可以按照5分钟递增了.
+ * 2. 开始时刻为一日较晚时刻,采样跨天.
+ * 	如01月01日23时59分开始,读取文件mtr0010101之后得到采样周期5分钟.
+ * 	那么23:59加5分钟就到了次日.所以应该返回打开下一个文件mtr0010102.
+ * 	然后从01月02日00时00分开始,以5分钟为一个周期开始读取.
+ * 3. 在不同的天中采样周期有所变更.
+ * 	程序始终以min{当前周期,文件中读取的周期}为步距递增.所以不同天不同周期没问题.
+ * 4. 在同一天中变更采样周期. @bug
+ * 	无法判断,因为一天就保存一个周期到文件头中.而且文件的程度计算必然出错.
  * @param start
  * @param end
  * @param mtr_no
@@ -60,41 +75,41 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		return ERR;
 	}
 	char file[256] = { 0 };
-	struct tm t;
-	struct tm st_today_0;
-	time_t t_today_0;
-	time_t stime = range.s;     //开始时刻
-	time_t etime = range.e;     //结束时刻
+	struct tm stTime;
+	struct tm stToday_0;//今日凌晨00点00分
+	time_t today_0_t;
+	time_t start_t = range.s;     //开始时刻
+	time_t end_t = range.e;     //结束时刻
 	time_t t2;     //时刻
-	time_t mincycle = 0;
+	time_t minCycle_t = 0;
 	stTou tou;
 	memset(&tou, 0x0, sizeof(stTou));
 	FILE*fp;
 	int flen;
 	int i = 0;
 	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
-	for (t2 = stime; t2<=etime; /*t2 += (mincycle * 60)*/) {
+	for (t2 = start_t; t2<=end_t; /*t2 += (mincycle * 60)*/) {
 		Start:
 		#if __arm__ ==2
-		gmtime_r(&t2,&t);
-		gmtime_r(&t2,&st_today_0);
-//		printf("gmtime_r %02d-%02d %02d:%02d %s t.tm_gmtoff=%d \n",
-//				t.tm_mon+1,t.tm_mday,t.tm_hour,t.tm_min,
-//				t.tm_zone,t.tm_gmtoff);
+		gmtime_r(&t2,&stTime);
+		gmtime_r(&t2,&stToday_0);
+//		printf("gmtime_r %02d-%02d %02d:%02d %s stTime.tm_gmtoff=%d \n",
+//				t.tm_mon+1,stTime.tm_mday,stTime.tm_hour,stTime.tm_min,
+//				stTime.tm_zone,stTime.tm_gmtoff);
 #else
-		localtime_r(&t2, &t);
-		localtime_r(&t2, &st_today_0);
+		localtime_r(&t2, &stTime);
+		localtime_r(&t2, &stToday_0);
 #endif
 		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
-		                t.tm_mday, TOU_DAT_SUFFIX);
+		                stTime.tm_mday, TOU_DAT_SUFFIX);
 		fp = fopen(file, "r");
 		if (fp==NULL) {	//这一天没有数据,直接跳到次日零点,这不是错误
 			printf(PREFIX_INF"%d:%04d-%02d-%02d没有数据文件\n",
-			                mtr_no, t.tm_year+1900, t.tm_mon+1
-			                                , t.tm_mday);
+			                mtr_no, stTime.tm_year+1900, stTime.tm_mon+1
+			                                , stTime.tm_mday);
 			web_errno = open_tou_file;
 			//到下一天的凌晨,即下一个文件.
-			timeToNextDayMorning(&t,&t2);
+			timeToNextDayMorning(&stTime,&t2);
 			continue;
 		}
 		fseek(fp, 0, SEEK_END);
@@ -104,49 +119,49 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		if (n!=1) {
 			web_errno = read_tou_file_filehead;
 			fclose(fp);
-			timeToNextDayMorning(&t,&t2);
+			timeToNextDayMorning(&stTime,&t2);
 			continue;
 		}
 		///@note 检查文件头中是否和请求的日期相一致.
-		if (isRightDate(filehead, t)==0) { //这也不算错误,最多算信息.
+		if (isRightDate(filehead, stTime)==0) { //这也不算错误,最多算信息.
 			fclose(fp);
-			timeToNextDayMorning(&t,&t2);
+			timeToNextDayMorning(&stTime,&t2);
 			continue;
 		}
 		int cycle = (filehead.save_cycle_hi*256)
 		                +filehead.save_cycle_lo;
-		mincycle = cycle;
+		minCycle_t = cycle;
 		//stTou at[24 * 60 / cycle];
-		int t_mod = t2%(mincycle*60);     //向上园整至采样周期.
+		int t_mod = t2%(minCycle_t*60);     //向上园整至采样周期.
 		if (t_mod!=0) {     //需要园整
-			t2 += (mincycle*60-t_mod);
+			t2 += (minCycle_t*60-t_mod);
 		}
 		//}
 		/**@note 判断开始时间+周期是否跨度到了第二天,如果跨度到第二天则需要
-		 打开另一个数据文件.
+		 打开另一个(下一天)数据文件.
 		 */
-		st_today_0.tm_hour = 0;
-		st_today_0.tm_min = 0;
-		st_today_0.tm_sec = 0;
-		t_today_0 = mktime(&st_today_0);
-		if (t2-t_today_0>=(60*60*24)) {     //t2已经时间跨过本日了.次日则文件等等需要重新打开.
+		stToday_0.tm_hour = 0;
+		stToday_0.tm_min = 0;
+		stToday_0.tm_sec = 0;
+		today_0_t = mktime(&stToday_0);
+		if (t2-today_0_t>=(60*60*24)) {     //t2已经时间跨过本日了.次日则文件等等需要重新打开.
 			fclose(fp);
 			goto Start;
 		}
 		///移动文件指针,指向开始的数据结构.
-		int DeltaSec = t2-t_today_0;     //本采样时刻举今日凌晨几秒
-		int NumCycle = DeltaSec/(mincycle*60);     //从凌晨开始向后偏移几个采样周期
+		int DeltaSec = t2-today_0_t;     //本采样时刻举今日凌晨几秒
+		int NumCycle = DeltaSec/(minCycle_t*60);     //从凌晨开始向后偏移几个采样周期
 		int offset = sizeof(stTou)*NumCycle;     //每个样本长度*采样个数
 		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
 
 		if (ftell(fp)>=flen) {
 			printf(PREFIX_INF"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
 			                ftell(fp), file);
-			t2 += (mincycle*60);
+			t2 += (minCycle_t*60);
 			fclose(fp);
 			continue;
 		}
-		while (ftell(fp)<flen&&t2<=etime) {
+		while (ftell(fp)<flen&&t2<=end_t) {
 			memset(&tou, 0x0, sizeof(stTou));
 			//t_cur += cycle * 60;
 			int n = fread(&tou, sizeof(stTou), 1, fp);
@@ -157,7 +172,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 			//成功
 			webWrite_toudata(t2, wp, tou, i, mtr_no);
 			i++;
-			t2 += (mincycle*60);
+			t2 += (minCycle_t*60);
 		}// end while 在一个文件中
 		fclose(fp);
 	}// end for
