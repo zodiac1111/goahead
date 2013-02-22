@@ -725,6 +725,7 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	printf("监视参数-端口类型?:%x\n", monport.sioplan);
 #endif
 	int i;
+#if JSON==0
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=protocol>\n"));
 	for (i = 0; i<procotol_num; i++) {
@@ -735,6 +736,16 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	}
 	websWrite(wp, T("<select>\n"));
 	websWrite(wp, T("</td>\n"));
+#else
+	websWrite(wp, T("\"protocol\":["));
+	for (i = 0; i<procotol_num; i++) {
+		websWrite(wp, T("\"%s\""),procotol_name[i]);
+		if(i!=procotol_num-1){
+			websWrite(wp, T(","));
+		}
+	}
+	websWrite(wp, T("]"));
+#endif
 	return 0;
 
 }
@@ -794,17 +805,29 @@ static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 #if DEBUG_PRINT_MONPARAM
 	printf("监视参数-使用端口:%x\n", monport.comm_port);
 #endif
+
 	int i;
+#if JSON==0
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T(" <select name=commport >\n"));
 	for (i = 0; i<mon_port_num; i++) {
 		websWrite(wp, T("  <option value=\"%d\" %s >%s"
-				"</option>\n"), i,
-		                (i==monport.comm_port) ? "selected" : "",
-		                mon_port_name[i]);
+						"</option>\n"), i,
+				(i==monport.comm_port) ? "selected" : "",
+				mon_port_name[i]);
 	}
 	websWrite(wp, T(" <select>\n"));
 	websWrite(wp, T("</td>\n"));
+#else
+	websWrite(wp, T("\"commport\":["));
+	for (i = 0; i<mon_port_num; i++) {
+		websWrite(wp, T("\"%s\""), mon_port_name[i]);
+		if (i!=mon_port_num-1) {
+			websWrite(wp, T(","));
+		}
+	}
+	websWrite(wp, T("]"));
+#endif
 	return 0;
 
 }
@@ -1775,6 +1798,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stMonparam monpara;
+#if JSON==0
 	for (no = 0; no<sysparam.monitor_ports; no++) {
 		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
 			web_err_proc(EL);
@@ -1792,6 +1816,14 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 		(void) webWrite_forward_mtr_num(wp, no, monpara);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
+#else
+	websWrite(wp, T("{"));
+	webWrite_commport(wp, no, monpara);
+	websWrite(wp, T(","));
+	webWrite_porttype(wp, monpara);
+	//websWrite(wp, T(","));
+	websWrite(wp, T("}"));
+#endif
 	return 0;
 }
 /**
