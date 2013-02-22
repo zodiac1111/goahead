@@ -527,8 +527,6 @@ int load_web_root_dir(char* webdir)
  * Initialize the web server.
  * 注册asp和form函数
  * @todo:(doing)分解成较短的函数
- * @param demo
- * @param argv
  * @return
  */
 static int initWebs(void)
@@ -1689,6 +1687,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
 	stUart_plan plan;
+#if JSON == 0
 	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
@@ -1703,6 +1702,21 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 		(void) webWrite_commtype(wp, no, plan);
 		(void) websWrite(wp, T("</tr>\n"));
 	}
+#else
+	websWrite(wp, T("{"));
+	websWrite(wp, T("\"p_t\":[\"none\",\"even\",\"odd\"],"));//3种奇偶校验方式
+	websWrite(wp, T("\"db_t\":[7,8,9],"));//三种数据位
+	websWrite(wp, T("\"sb_t\":[0,1],"));//2中停止位 0 1
+	//6种波特率
+	websWrite(wp, T("\"baud_t\":[300,600,1200,2400,4800,9600],"));
+	websWrite(wp, T("\"baud_t\":[\"asyn\",\"syn\"],"));
+	websWrite(wp, T("\"item\":["));//下面是串口数组,每个元素为一个串口配置
+	for (no = 0; no<sp.sioplan_num; no++) {
+		websWrite(wp, T("item:["));
+	}
+	websWrite(wp, T("]"));
+	websWrite(wp, T("}"));
+#endif
 	return 0;
 }
 /**

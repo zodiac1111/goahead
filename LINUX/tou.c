@@ -53,9 +53,10 @@ void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
  * 	程序始终以min{当前周期,文件中读取的周期}为步距递增.所以不同天不同周期没问题.
  * 4. 在同一天中变更采样周期. @bug
  * 	无法判断,因为一天就保存一个周期到文件头中.而且文件的程度计算必然出错.
- * @param start
- * @param end
- * @param mtr_no
+ * @param[in] range
+ * @param[in] mtr_no
+ * @param[in] ptou
+ * @param[out] wp 写入到这个页面
  * @return
  * @todo 分解
  */
