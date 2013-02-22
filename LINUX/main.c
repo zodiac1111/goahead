@@ -810,38 +810,14 @@ static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 	return 0;
 
 }
-static int webWrite_net_no(webs_t wp, int no, stNetparam netparam)
-{
-	//printf("网口参数-序号:%x\n", no);
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <input %s type=text name=net_no "
-			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
-	                no);
-	websWrite(wp, T("</td>\n"));
-	return 0;
-
-}
 /**
- * 向网页写一个数据单元格,内容为网口标识,ETH1~ETH4等.
- * @param[out] wp 网页
- * @param[in] net_num 系统参数的网口数目.
- * @param[in] netparam
- * @return
+ * 填写形如 "ip":"111.222.333.444" 的json字符串
+ * @param[out] wp 写入到这个页面
+ * @param[in] name 变量名,如上面的ip,可取ip,mask,gateway
+ * @param[in] value 变量值,如上面的111.222.333.444
+ * @retval 0 成功
  */
-static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam)
-{
-	//printf("网口参数-网口:%x\n", netparam.no);
-	int i;
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <select name=eth >\n"));
-	for (i = 0; i<net_num; i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >ETH%d</option>\n"),
-		                i, (i==netparam.no) ? "selected" : "", i+1);
-	}
-	websWrite(wp, T(" <select>\n</td>\n"));
-	return 0;
-}
-static int webWrite_ip(webs_t wp, char *item, u8* val)
+static int webWrite_ip(webs_t wp, char *name, u8* value)
 {
 	//printf("网口参数-IP\n");
 	int i;
@@ -852,16 +828,16 @@ static int webWrite_ip(webs_t wp, char *item, u8* val)
 			" name=ip value=\""), INPUT_CLASS);
 
 	for (i = 0; i<IPV4_LEN; i++) {
-		websWrite(wp, T("%1d"), val[i]);
+		websWrite(wp, T("%1d"), value[i]);
 		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
 			websWrite(wp, T("."));
 		}
 	}
 	websWrite(wp, T("\"> </td>\n"));
 #else
-	websWrite(wp, T("\"%s\":\""),item);
+	websWrite(wp, T("\"%s\":\""),name);
 	for (i = 0; i<IPV4_LEN; i++) {
-		websWrite(wp, T("%1d"), val[i]);
+		websWrite(wp, T("%1d"), value[i]);
 		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
 			websWrite(wp, T("."));
 		}
@@ -870,42 +846,42 @@ static int webWrite_ip(webs_t wp, char *item, u8* val)
 #endif
 	return 0;
 }
-static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
-{
-	//printf("网口参数-掩码(mask)\n");
-	int i;
-	websWrite(wp, T("<td>\n"
-			" <input %s type=text size=15 maxlength=15 "
-			" onchange=\"isIPv4(event);\" "
-			" name=mask value=\""), INPUT_CLASS);
-
-	for (i = 0; i<IPV4_LEN; i++) {
-		websWrite(wp, T("%1d"), netparam.mask[i]);
-		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
-			websWrite(wp, T("."));
-		}
-	}
-	websWrite(wp, T("\"> </td>\n"));
-	return 0;
-}
-static int webWrite_gateway(webs_t wp, int no, stNetparam netparam)
-{
-	//printf("网口参数-网关(gateway)\n");
-	int i;
-	websWrite(wp, T("<td>\n"
-			" <input %s type=text size=15 maxlength=15 "
-			" onchange=\"isIPv4(event);\" "
-			" name=gateway value="), INPUT_CLASS);
-
-	for (i = 0; i<IPV4_LEN; i++) {
-		websWrite(wp, T("%1d"), netparam.gateway[i]);
-		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
-			websWrite(wp, T("."));
-		}
-	}
-	websWrite(wp, T("> </td>\n"));
-	return 0;
-}
+//static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
+//{
+//	//printf("网口参数-掩码(mask)\n");
+//	int i;
+//	websWrite(wp, T("<td>\n"
+//			" <input %s type=text size=15 maxlength=15 "
+//			" onchange=\"isIPv4(event);\" "
+//			" name=mask value=\""), INPUT_CLASS);
+//
+//	for (i = 0; i<IPV4_LEN; i++) {
+//		websWrite(wp, T("%1d"), netparam.mask[i]);
+//		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
+//			websWrite(wp, T("."));
+//		}
+//	}
+//	websWrite(wp, T("\"> </td>\n"));
+//	return 0;
+//}
+//static int webWrite_gateway(webs_t wp, int no, stNetparam netparam)
+//{
+//	//printf("网口参数-网关(gateway)\n");
+//	int i;
+//	websWrite(wp, T("<td>\n"
+//			" <input %s type=text size=15 maxlength=15 "
+//			" onchange=\"isIPv4(event);\" "
+//			" name=gateway value="), INPUT_CLASS);
+//
+//	for (i = 0; i<IPV4_LEN; i++) {
+//		websWrite(wp, T("%1d"), netparam.gateway[i]);
+//		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
+//			websWrite(wp, T("."));
+//		}
+//	}
+//	websWrite(wp, T("> </td>\n"));
+//	return 0;
+//}
 ///write 向web页面写串口方案号
 static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan)
 {
@@ -1985,7 +1961,7 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 		(void) websWrite(wp, T("</tr>\n"));
 	}
 #else
-	// todo 使用json,仅传输数据.样式和行为交由前端控制,易于扩展
+	//使用json,仅传输数据.样式和行为交由前端控制,易于扩展
 	websWrite(wp,T("{\"eth_num\":\"%d\","),sysparam.netports_num);
 	websWrite(wp,T("\"item\":["));
 	for (no = 0; no<sysparam.netports_num; no++) {
@@ -1996,11 +1972,11 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 		websWrite(wp,T("{"));
 		websWrite(wp,T("\"no\":\"%d\","),no);
 		websWrite(wp,T("\"eth\":\"%d\","),netparam.no);
-		(void) webWrite_ip(wp, "ip", netparam.ip);
+		webWrite_ip(wp, "ip", netparam.ip);
 		websWrite(wp, T(","));
-		(void) webWrite_ip(wp, "mask", netparam.mask);
+		webWrite_ip(wp, "mask", netparam.mask);
 		websWrite(wp, T(","));
-		(void) webWrite_ip(wp, "gateway", netparam.gateway);
+		webWrite_ip(wp, "gateway", netparam.gateway);
 		websWrite(wp,T("}"));
 		if(no!=sysparam.netports_num-1){
 			websWrite(wp,T(","));
