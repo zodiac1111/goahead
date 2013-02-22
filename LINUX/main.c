@@ -640,60 +640,6 @@ static int initWebs(void)
 	return 0;
 }
 /**
- * 向页面写转发表个数单元格
- * @param wp
- * @param no
- * @param monport
- * @return
- */
-static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-转发表计数目:%d \n", monport.forwardNum);
-#endif
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("<input class=inp type=text size=3 maxlength=3 "
-			" onchange=\"verify_forward_mtr_num(event);\" "
-			" name=forward_mtr_num value=\""));
-	websWrite(wp, T("%d\"> "), monport.forwardNum);
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-转发标志:%d\n", monport.forward_enable);
-#endif
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("<input type=checkbox name=forward_chk "
-			"value=%d %s %s>\n"), monport.bForward,
-	                (monport.bForward) ? "checked" : "",
-	                CHKBOX_ONCLICK);
-	///post不能传递没有被选中的复选框的值,通过text传递
-	websWrite(wp, T("<input type=\"text\""
-			"size=1 readonly name=forward value=%d>\n"),
-	                monport.bForward);
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-时间同步标志:%d\n", monport.bTimeSyn);
-#endif
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("<input type=checkbox name=time_syn_chk "
-			" value=%d %s %s>\n "), monport.bTimeSyn,
-	                (monport.bTimeSyn) ? "checked" : "",
-	                CHKBOX_ONCLICK);
-	///post不能传递没有被选中的复选框的值,通过text传递
-	websWrite(wp, T("<input type=text "
-			" size=1 readonly name=time_syn value=%d>\n")
-	                , monport.bTimeSyn);
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/**
  * 写终端地址4个数字字符到页面.
  * @param wp
  * @param no
@@ -708,22 +654,11 @@ static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 			monport.prot_addr[3]);
 #endif
 	int i;
-#if JSON==0
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <input type=text size=4 maxlength=4 "
-			" onchange=\"verify_rtu_addr(event);\" "
-			" name=rtu_addr value=\""));
-	for (i = 0; i<4; i++) {
-		websWrite(wp, T("%1d"), monport.prot_addr[i]);
-	}
-	websWrite(wp, T("\"> </td>\n"));
-#else
 	websWrite(wp, T("\"rtu_addr\":\""));
 	for (i = 0; i<4; i++) {
 		websWrite(wp, T("%1d"), monport.prot_addr[i]);
 	}
 	websWrite(wp, T("\""));
-#endif
 	return 0;
 }
 ///主站规约类型
@@ -733,18 +668,6 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	printf("监视参数-端口类型?:%x\n", monport.sioplan);
 #endif
 	int i;
-#if JSON==0
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <select name=protocol>\n"));
-	for (i = 0; i<procotol_num; i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s"
-				"</option>\n"), i,
-		                (i==monport.port_type) ? "selected" : "",
-		                procotol_name[i]);
-	}
-	websWrite(wp, T("<select>\n"));
-	websWrite(wp, T("</td>\n"));
-#else
 	websWrite(wp, T("\"protocol\":["));
 	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T("\"%s\""),procotol_name[i]);
@@ -753,25 +676,6 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 		}
 	}
 	websWrite(wp, T("]"));
-#endif
-	return 0;
-
-}
-static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-串口方案:%x\n", monport.sioplan);
-#endif
-	int i;
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <select name=sioplan>\n"));
-	for (i = 0; i<sioplan_num; i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >"CSTR_PLAN
-				"%d</option>\n"), i,
-		                (i==monport.sioplan) ? "selected" : "", i);
-	}
-	websWrite(wp, T("<select>\n"));
-	websWrite(wp, T("</td>\n"));
 	return 0;
 
 }
@@ -785,56 +689,31 @@ static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
 	}
 	printf("\n");
 #endif
-#if JSON==0
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <input type=text name=listenport %s"
-			" onchange=\"verify_port(event);\" "
-			" size=5  maxlength=5 value="), INPUT_CLASS);
-	for (i = 0; i<5; i++) {
-		websWrite(wp, T("%d"), monport.listen_port[i]);
-	}
-	websWrite(wp, T(">\n"));
-	websWrite(wp, T("</td>\n"));
-#else
 	websWrite(wp, T("\"listenport\":\""));
 	for (i = 0; i<5; i++) {
 		websWrite(wp, T("%1d"), monport.listen_port[i]);
 	}
 	websWrite(wp, T("\""));
-#endif
 	return 0;
 }
-static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-监视参数序号:%x\n", no);
-#endif
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <input type=text name=mon_no %s"
-			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
-	                no);
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-static int webWrite_commport(webs_t wp, int no, stMonparam monport)
+//static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
+//{
+//#if DEBUG_PRINT_MONPARAM
+//	printf("监视参数-监视参数序号:%x\n", no);
+//#endif
+//	websWrite(wp, T("<td>\n"));
+//	websWrite(wp, T(" <input type=text name=mon_no %s"
+//			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
+//	                no);
+//	websWrite(wp, T("</td>\n"));
+//	return 0;
+//}
+static int webWrite_commportList(webs_t wp)
 {
 #if DEBUG_PRINT_MONPARAM
 	printf("监视参数-使用端口:%x\n", monport.comm_port);
 #endif
-
 	int i;
-#if JSON==0
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T(" <select name=commport >\n"));
-	for (i = 0; i<mon_port_num; i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s"
-						"</option>\n"), i,
-				(i==monport.comm_port) ? "selected" : "",
-				mon_port_name[i]);
-	}
-	websWrite(wp, T(" <select>\n"));
-	websWrite(wp, T("</td>\n"));
-#else
 	websWrite(wp, T("\"commport\":["));
 	for (i = 0; i<mon_port_num; i++) {
 		websWrite(wp, T("\"%s\""), mon_port_name[i]);
@@ -843,7 +722,6 @@ static int webWrite_commport(webs_t wp, int no, stMonparam monport)
 		}
 	}
 	websWrite(wp, T("]"));
-#endif
 	return 0;
 
 }
@@ -1814,62 +1692,33 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stMonparam monpara;
-#if JSON==0
-	for (no = 0; no<sysparam.monitor_ports; no++) {
-		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		(void) websWrite(wp, T("<tr>\n"));
-		(void) webWrite_mon_no(wp, no, monpara);
-		(void) webWrite_commport(wp, no, monpara);
-		(void) webWrite_listen_port(wp, no, monpara);
-		(void) webWrite_portplan(wp, sysparam.sioplan_num, monpara);
-		(void) webWrite_porttype(wp, monpara);
-		(void) webWrite_rtu_addr(wp, no, monpara);
-		(void) webWrite_timesyn(wp, no, monpara);
-		(void) webWrite_forward_enable(wp, no, monpara);
-		(void) webWrite_forward_mtr_num(wp, no, monpara);
-		(void) websWrite(wp, T("</tr>\n"));
-	}
-#else
 	websWrite(wp, T("{"));
-	webWrite_commport(wp, no, monpara);
+	webWrite_commportList(wp);
 	websWrite(wp, T(","));
 	webWrite_porttype(wp, monpara);
-	websWrite(wp, T(","));
-	websWrite(wp, T("\"item\":["));
+	websWrite(wp, T(",\"sioplan_num\":\"%d\""),sysparam.sioplan_num);
+	websWrite(wp, T(",\"item\":["));
 	for (no = 0; no<sysparam.monitor_ports; no++) {
 		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
 			web_err_proc(EL);
 			continue;
 		}
 		websWrite(wp, T("{"));
-		websWrite(wp, T("\"mon_no\":\"%d\""),no);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"commport\":\"%d\""),monpara.comm_port);
-		websWrite(wp, T(","));
+		websWrite(wp, T("\"mon_no\":\"%d\","),no);
+		websWrite(wp, T("\"commport\":\"%d\","),monpara.comm_port);
 		webWrite_listen_port(wp, no, monpara);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"sioplan\":\"%d\""),monpara.sioplan);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"protocol\":\"%d\""),monpara.port_type);
-		websWrite(wp, T(","));
+		websWrite(wp, T(",\"sioplan\":\"%d\","),monpara.sioplan);;
+		websWrite(wp, T("\"protocol\":\"%d\","),monpara.port_type);
 		webWrite_rtu_addr(wp, no, monpara);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"time_syn_chk\":\"%d\""),monpara.bTimeSyn);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"forward_chk\":\"%d\""),monpara.bForward);
-		websWrite(wp, T(","));
+		websWrite(wp, T(",\"time_syn_chk\":\"%d\","),monpara.bTimeSyn);
+		websWrite(wp, T("\"forward_chk\":\"%d\","),monpara.bForward);
 		websWrite(wp, T("\"forward_mtr_num\":\"%d\""),monpara.forwardNum);
 		websWrite(wp, T("}"));
 		if(no!=sysparam.monitor_ports-1){
 			websWrite(wp, T(","));
 		}
 	}
-
 	websWrite(wp, T("]}"));
-#endif
 	return 0;
 }
 /**
