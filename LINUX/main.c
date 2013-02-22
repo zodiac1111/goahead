@@ -1939,7 +1939,27 @@ int portstr2u8(const char * str, u8* val)
  * @param wp
  * @param sysparam
  * @return
- * @todo 使用json格式传输数据,使数据和样式无关
+ * @note 使用json格式传输数据,使数据与样式无关
+ * 类似如下样式
+ * {
+ *   "eth_num": "2",
+ *   "item": [
+ *       {
+ *           "no": "0",
+ *           "eth": "0",
+ *           "ip": "192.168.001.189",
+ *           "mask": "255.255.255.000",
+ *           "gateway": "000.000.000.000"
+ *       },
+ *       {
+ *           "no": "1",
+ *           "eth": "0",
+ *           "ip": "000.000.000.000",
+ *           "mask": "000.000.000.000",
+ *           "gateway": "000.000.000.000"
+ *       }
+ *   ]
+ * }
  */
 int webSend_netparas(webs_t wp, stSysParam sysparam)
 {
