@@ -1679,9 +1679,8 @@ int webRece_sioplans(webs_t wp)
 }
 /**
  * 从文件中读取串口方案,向页面写串口方案.
- * @param wp
- * @param plan 串口方案
- * @param sp 系统参数
+ * @param[out] wp 向这个页面输出数据
+ * @param[in] sp 系统参数
  */
 int webSend_sioplans(webs_t wp, stSysParam sp)
 {
@@ -1712,7 +1711,12 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 	websWrite(wp, T("\"baud_t\":[\"asyn\",\"syn\"],"));
 	websWrite(wp, T("\"item\":["));//下面是串口数组,每个元素为一个串口配置
 	for (no = 0; no<sp.sioplan_num; no++) {
-		websWrite(wp, T("item:["));
+		websWrite(wp, T("{"));
+		websWrite(wp, T("\"no\":\"%d\""),no);
+		websWrite(wp, T("}"));
+		if(no != sp.sioplan_num-1){ //末尾的对象不用加逗号
+			websWrite(wp, T(","));
+		}
 	}
 	websWrite(wp, T("]"));
 	websWrite(wp, T("}"));
