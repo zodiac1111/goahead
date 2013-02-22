@@ -172,7 +172,7 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
 	time_t t = time(NULL);
 	printf("\t\t@%s", ctime(&t));
 	websHeader_pure(wp);
-	websWrite(wp, T("%d"), t);
+	websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
 	websDone(wp, 200);
 	return;
 }
@@ -1940,48 +1940,13 @@ int portstr2u8(const char * str, u8* val)
  * @param sysparam
  * @return
  * @note 使用json格式传输数据,使数据与样式无关
- * 类似如下样式
- * {
- *   "eth_num": "2",
- *   "item": [
- *       {
- *           "no": "0",
- *           "eth": "0",
- *           "ip": "192.168.001.189",
- *           "mask": "255.255.255.000",
- *           "gateway": "000.000.000.000"
- *       },
- *       {
- *           "no": "1",
- *           "eth": "0",
- *           "ip": "000.000.000.000",
- *           "mask": "000.000.000.000",
- *           "gateway": "000.000.000.000"
- *       }
- *   ]
- * }
  */
 int webSend_netparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stNetparam netparam;
-#if JSON == 0
-	/* 直接传输html传递数据,数据不纯净,且不易于扩展,属于硬编码. */
-	for (no = 0; no<sysparam.netports_num; no++) {
-		if (-1==load_netparam(&netparam, CFG_NET, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		(void) websWrite(wp, T("<tr>\n"));
-		(void) webWrite_net_no(wp, no, netparam);
-		(void) webWrite_eth(wp, sysparam.netports_num, netparam);
-		(void) webWrite_ip(wp, no, netparam);
-		(void) webWrite_mask(wp, no, netparam);
-		(void) webWrite_gateway(wp, no, netparam);
-		(void) websWrite(wp, T("</tr>\n"));
-	}
-#else
 	//使用json,仅传输数据.样式和行为交由前端控制,易于扩展
+	///@note eth_num 或许和下面的数据元素个数冗余
 	websWrite(wp,T("{\"eth_num\":\"%d\","),sysparam.netports_num);
 	websWrite(wp,T("\"item\":["));
 	for (no = 0; no<sysparam.netports_num; no++) {
@@ -2002,9 +1967,7 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 			websWrite(wp,T(","));
 		}
 	}
-
 	websWrite(wp,T("]}"));
-#endif
 	return 0;
 }
 /**
