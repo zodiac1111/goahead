@@ -881,96 +881,96 @@ static int webWrite_ip(webs_t wp, char *name, u8* value)
 //	return 0;
 //}
 ///write 向web页面写串口方案号
-static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan)
-{
-	//printf("串口方案-序号:%d\n", no);
-	return websWrite(wp, T("<td>\n"
-			" <input type=text %s name=sioplanno "
-			" readonly=readonly size=1 value=%d>\n"
-			"</td>\n"), INPUT_CLASS, no);
-}
+//static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan)
+//{
+//	//printf("串口方案-序号:%d\n", no);
+//	return websWrite(wp, T("<td>\n"
+//			" <input type=text %s name=sioplanno "
+//			" readonly=readonly size=1 value=%d>\n"
+//			"</td>\n"), INPUT_CLASS, no);
+//}
 ///write 向web页面写检验位,一个table单元格 table data
-static int webWrite_parity(webs_t wp, int no, stUart_plan plan)
-{
-	//printf("串口方案-校验位:%x\n", plan.parity);
-	int i;
-	websWrite(wp, T("<td>\n"
-			" <select name=parity >\n"));
-	for (i = 0; i<(int) (sizeof(UART_P)/sizeof(UART_P[0])); i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==plan.parity) ?
-		                                   "selected=\"selected\"" :
-		                                   "",
-		                UART_P[i]);
-	}
-	websWrite(wp, T(" <select>\n</td>\n"));
-	return 0;
-}
+//static int webWrite_parity(webs_t wp, int no, stUart_plan plan)
+//{
+//	//printf("串口方案-校验位:%x\n", plan.parity);
+//	int i;
+//	websWrite(wp, T("<td>\n"
+//			" <select name=parity >\n"));
+//	for (i = 0; i<(int) (sizeof(UART_P)/sizeof(UART_P[0])); i++) {
+//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
+//		                (i==plan.parity) ?
+//		                                   "selected=\"selected\"" :
+//		                                   "",
+//		                UART_P[i]);
+//	}
+//	websWrite(wp, T(" <select>\n</td>\n"));
+//	return 0;
+//}
 ///向页面也一个 串口方案-数据位 单元格,
-static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan)
-{
-	//printf("串口方案-数据位:%x\n", plan.data);
-	int i;
-	websWrite(wp, T("<td>\n"
-			" <select name=data >\n"));
-	for (i = 0; i<(int) (sizeof(UART_DAT_BIT)/sizeof(UART_DAT_BIT[0]));
-	                i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-		                (i+7==plan.data) ?
-		                                   "selected=\"selected\"" :
-		                                   "",
-		                UART_DAT_BIT[i]);
-	}
-	websWrite(wp, T(" <select>\n</td>\n"));
-	return 0;
-}
+//static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan)
+//{
+//	//printf("串口方案-数据位:%x\n", plan.data);
+//	int i;
+//	websWrite(wp, T("<td>\n"
+//			" <select name=data >\n"));
+//	for (i = 0; i<(int) (sizeof(UART_DAT_BIT)/sizeof(UART_DAT_BIT[0]));
+//	                i++) {
+//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
+//		                (i+7==plan.data) ?
+//		                                   "selected=\"selected\"" :
+//		                                   "",
+//		                UART_DAT_BIT[i]);
+//	}
+//	websWrite(wp, T(" <select>\n</td>\n"));
+//	return 0;
+//}
 ///向页面也一个 串口方案-停止位 单元格,
-static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan)
-{
-	//printf("串口方案-停止位:%x\n", plan.stop);
-	u32 i;
-	websWrite(wp, T("<td>\n"
-			" <select name=stop >\n"));
-	for (i = 0; i<sizeof(UART_STOP)/sizeof(UART_STOP[0]); i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==plan.stop) ? "selected" : "",
-		                UART_STOP[i]);
-	}
-	websWrite(wp, T(" <select>\n</td>\n"));
-	return 0;
-}
+//static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan)
+//{
+//	//printf("串口方案-停止位:%x\n", plan.stop);
+//	u32 i;
+//	websWrite(wp, T("<td>\n"
+//			" <select name=stop >\n"));
+//	for (i = 0; i<sizeof(UART_STOP)/sizeof(UART_STOP[0]); i++) {
+//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
+//		                (i==plan.stop) ? "selected" : "",
+//		                UART_STOP[i]);
+//	}
+//	websWrite(wp, T(" <select>\n</td>\n"));
+//	return 0;
+//}
 ///向页面也一个 串口方案-波特率 单元格,
-static int webWrite_baud(webs_t wp, int no, stUart_plan plan)
-{
-	//printf("串口方案-波特率(300*2^BaudByte=Baud):%x  \n", plan.baud);
-	u32 i;
-	websWrite(wp, T("<td>\n"
-			" <select name=baud >\n"));
-	for (i = 0; i<sizeof(UART_BAUD)/sizeof(UART_BAUD[0]); i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==plan.baud) ? "selected=\"selected\"" : "",
-		                UART_BAUD[i]);
-	}
-	websWrite(wp, T(" <select>\n</td>\n"));
-	return 0;
-}
+//static int webWrite_baud(webs_t wp, int no, stUart_plan plan)
+//{
+//	//printf("串口方案-波特率(300*2^BaudByte=Baud):%x  \n", plan.baud);
+//	u32 i;
+//	websWrite(wp, T("<td>\n"
+//			" <select name=baud >\n"));
+//	for (i = 0; i<sizeof(UART_BAUD)/sizeof(UART_BAUD[0]); i++) {
+//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
+//		                (i==plan.baud) ? "selected=\"selected\"" : "",
+//		                UART_BAUD[i]);
+//	}
+//	websWrite(wp, T(" <select>\n</td>\n"));
+//	return 0;
+//}
 ///向页面也一个 串口方案-通讯类型 单元格,
-static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
-{
-	//printf("串口方案-通讯方式(0-异步,1同步): %x \n", plan.Commtype);
-	u32 i;
-	websWrite(wp, T("<td>\n<select name=comm_type >\n"));
-	for (i = 0; i<sizeof(UART_COMM_TYPE)/sizeof(UART_COMM_TYPE[0]);
-	                i++) {
-		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==plan.Commtype) ?
-		                                     "selected=\"selected\"" :
-		                                     "",
-		                UART_COMM_TYPE[i]);
-	}
-	websWrite(wp, T(" <select>\n</td>\n"));
-	return 0;
-}
+//static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
+//{
+//	//printf("串口方案-通讯方式(0-异步,1同步): %x \n", plan.Commtype);
+//	u32 i;
+//	websWrite(wp, T("<td>\n<select name=comm_type >\n"));
+//	for (i = 0; i<sizeof(UART_COMM_TYPE)/sizeof(UART_COMM_TYPE[0]);
+//	                i++) {
+//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
+//		                (i==plan.Commtype) ?
+//		                                     "selected=\"selected\"" :
+//		                                     "",
+//		                UART_COMM_TYPE[i]);
+//	}
+//	websWrite(wp, T(" <select>\n</td>\n"));
+//	return 0;
+//}
 ///线路名称
 static int webWrite_line(webs_t wp, stMtr mtr)
 {
@@ -1686,14 +1686,12 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
 	stUart_plan plan;
-//#define P "\"parity\""
-//#define D
 	websWrite(wp, T("{"));
 	websWrite(wp, T("\"parity\":[\"无\",\"奇\",\"偶\"],"));     //3种奇偶校验方式
 	websWrite(wp, T("\"data\":[7,8,9],"));     //三种数据位
 	websWrite(wp, T("\"stop\":[0,1],"));     //2中停止位 0 1
 	websWrite(wp, T("\"baud\":[300,600,1200,2400,4800,9600],"));
-	websWrite(wp, T("\"commtype\":[\"异步asyn\",\"同步syn\"],"));
+	websWrite(wp, T("\"commtype\":[\"异步\",\"同步\"],"));
 	websWrite(wp, T("\"item\":["));     //下面是串口数组,每个元素为一个串口配置
 	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {

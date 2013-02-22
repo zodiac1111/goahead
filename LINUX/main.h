@@ -88,12 +88,12 @@ static int webWrite_factory(webs_t wp, stMtr mtr);
 static int webWrite_iv(webs_t wp, stMtr mtr);
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
 //串口方案项目
-static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan);
-static int webWrite_parity(webs_t wp, int no, stUart_plan plan);
-static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan);
-static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan);
-static int webWrite_baud(webs_t wp, int no, stUart_plan plan);
-static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
+//static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan);
+//static int webWrite_parity(webs_t wp, int no, stUart_plan plan);
+//static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan);
+//static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan);
+//static int webWrite_baud(webs_t wp, int no, stUart_plan plan);
+//static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
 //网口参数
 //static int webWrite_net_no(webs_t wp, int no, stNetparam netparam);
 //static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam);
