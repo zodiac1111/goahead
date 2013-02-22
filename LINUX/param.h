@@ -120,7 +120,7 @@ typedef struct{
 	u8 port_type;
 	u8 prot_addr[4];
 	u8 chktime_valid_flag;
-	u8 forward_enable;
+	u8 bForward;
 	u8 forward_mtr_num;
 }stMonparam;
 /// 存储周期参数文件结构
