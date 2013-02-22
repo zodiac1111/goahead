@@ -649,13 +649,13 @@ static int initWebs(void)
 static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport)
 {
 #if DEBUG_PRINT_MONPARAM
-	printf("监视参数-转发表计数目:%d \n", monport.forward_mtr_num);
+	printf("监视参数-转发表计数目:%d \n", monport.forwardNum);
 #endif
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input class=inp type=text size=3 maxlength=3 "
 			" onchange=\"verify_forward_mtr_num(event);\" "
 			" name=forward_mtr_num value=\""));
-	websWrite(wp, T("%d\"> "), monport.forward_mtr_num);
+	websWrite(wp, T("%d\"> "), monport.forwardNum);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -679,17 +679,17 @@ static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport)
 static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 {
 #if DEBUG_PRINT_MONPARAM
-	printf("监视参数-时间同步标志:%d\n", monport.chktime_valid_flag);
+	printf("监视参数-时间同步标志:%d\n", monport.bTimeSyn);
 #endif
 	websWrite(wp, T("<td>\n"));
 	websWrite(wp, T("<input type=checkbox name=time_syn_chk "
-			" value=%d %s %s>\n "), monport.chktime_valid_flag,
-	                (monport.chktime_valid_flag) ? "checked" : "",
+			" value=%d %s %s>\n "), monport.bTimeSyn,
+	                (monport.bTimeSyn) ? "checked" : "",
 	                CHKBOX_ONCLICK);
 	///post不能传递没有被选中的复选框的值,通过text传递
 	websWrite(wp, T("<input type=text "
 			" size=1 readonly name=time_syn value=%d>\n")
-	                , monport.chktime_valid_flag);
+	                , monport.bTimeSyn);
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
@@ -1857,7 +1857,11 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 		websWrite(wp, T(","));
 		webWrite_rtu_addr(wp, no, monpara);
 		websWrite(wp, T(","));
-		websWrite(wp, T("\"mon_no\":\"%d\""),no);
+		websWrite(wp, T("\"time_syn_chk\":\"%d\""),monpara.bTimeSyn);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"forward_chk\":\"%d\""),monpara.bForward);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"forward_mtr_num\":\"%d\""),monpara.forwardNum);
 		websWrite(wp, T("}"));
 		if(no!=sysparam.monitor_ports-1){
 			websWrite(wp, T(","));
@@ -1925,7 +1929,7 @@ int webRece_monparas(webs_t wp, stSysParam sysparam)
 		rtu_addr_str2array(rtu_addr, &monparam.prot_addr[0]);
 		rtu_addr = point2next(&rtu_addr, ' ');
 		//是否对时
-		n = sscanf(time_syn, "%hhu", &monparam.chktime_valid_flag);
+		n = sscanf(time_syn, "%hhu", &monparam.bTimeSyn);
 		if (n!=1) {
 			web_err_proc(EL);
 			break;
@@ -1939,7 +1943,7 @@ int webRece_monparas(webs_t wp, stSysParam sysparam)
 		}
 		forward = point2next(&forward, ' ');
 		//转发数量
-		n = sscanf(forward_mtr_num, "%hhu", &monparam.forward_mtr_num);
+		n = sscanf(forward_mtr_num, "%hhu", &monparam.forwardNum);
 		if (n!=1) {
 			web_err_proc(EL);
 			break;
