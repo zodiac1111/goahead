@@ -86,7 +86,7 @@ void init_semun(void)
  */
 int main(int argc, char** argv)
 {
-	init_semun();//初始化信号量,用于控制,未完善.
+	init_semun();     //初始化信号量,用于控制,未完善.
 	/*
 	 * Initialize the memory allocator. Allow use of malloc and start
 	 * with a 60K heap.  For each page request approx 8KB is allocated.
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 	 * 初始化并分配内存,如果内存不足可以在这里多分配一些.
 	 */
 	bopen(NULL, (600*1024), B_USE_MALLOC);
-	signal(SIGPIPE, SIG_IGN);
+	signal(SIGPIPE, SIG_IGN );
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
 
@@ -169,7 +169,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 void form_server_time(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	time_t t = time(NULL);
+	time_t t = time(NULL );
 	printf("\t\t@%s", ctime(&t));
 	websHeader_pure(wp);
 	websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
@@ -334,7 +334,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		}
 		if (pid==0) {		//子进程.
 			system("killall webs");
-			execl(app, app, NULL);
+			execl(app, app, NULL );
 			exit(0);
 		}
 		if (pid>0) {
@@ -485,7 +485,7 @@ int load_web_root_dir(char* webdir)
 	int i = 0;
 #endif
 	FILE* fp = fopen(CONF_FILE, "r");
-	if (fp==NULL) {
+	if (fp==NULL ) {
 		printf(PREFIX_ERR"open file goahead.conf\n");
 	}
 	while (!feof(fp)) {
@@ -553,7 +553,7 @@ static int initWebs(void)
 		error(E_L, E_LOG, T("Can't get hostname"));
 		return -1;
 	}
-	if ((hp = gethostbyname(host))==NULL) {
+	if ((hp = gethostbyname(host))==NULL ) {
 		error(E_L, E_LOG, T("Can't get host address"));
 		return -1;
 	}
@@ -703,9 +703,9 @@ static int webWrite_timesyn(webs_t wp, int no, stMonparam monport)
 static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 {
 #if DEBUG_PRINT_MONPARAM
-	 printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
-	 monport.prot_addr[1], monport.prot_addr[2],
-	 monport.prot_addr[3]);
+	printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
+			monport.prot_addr[1], monport.prot_addr[2],
+			monport.prot_addr[3]);
 #endif
 	int i;
 	websWrite(wp, T("<td>\n"));
@@ -821,9 +821,9 @@ static int webWrite_ip(webs_t wp, char *name, u8* value)
 	int i;
 #if JSON == 0
 	websWrite(wp, T("<td>\n"
-			" <input %s type=text size=15 maxlength=15 "
-			" onchange=\"isIPv4(event);\" "
-			" name=ip value=\""), INPUT_CLASS);
+					" <input %s type=text size=15 maxlength=15 "
+					" onchange=\"isIPv4(event);\" "
+					" name=ip value=\""), INPUT_CLASS);
 
 	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), value[i]);
@@ -833,7 +833,7 @@ static int webWrite_ip(webs_t wp, char *name, u8* value)
 	}
 	websWrite(wp, T("\"> </td>\n"));
 #else
-	websWrite(wp, T("\"%s\":\""),name);
+	websWrite(wp, T("\"%s\":\""), name);
 	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), value[i]);
 		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
@@ -1252,7 +1252,7 @@ static int split(char **ret, char* in)
 //PRINT_HERE
 	int i = 0;
 	char* token = strtok(in, " ");
-	while (token!=NULL) {
+	while (token!=NULL ) {
 		ret[i] = token;
 		//printf("%p \n", ret[i]);
 		token = strtok(NULL, " ");
@@ -1686,41 +1686,38 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
 	stUart_plan plan;
-#if JSON == 0
+//#define P "\"parity\""
+//#define D
+	websWrite(wp, T("{"));
+	websWrite(wp, T("\"parity\":[\"无\",\"奇\",\"偶\"],"));     //3种奇偶校验方式
+	websWrite(wp, T("\"data\":[7,8,9],"));     //三种数据位
+	websWrite(wp, T("\"stop\":[0,1],"));     //2中停止位 0 1
+	websWrite(wp, T("\"baud\":[300,600,1200,2400,4800,9600],"));
+	websWrite(wp, T("\"commtype\":[\"异步asyn\",\"同步syn\"],"));
+	websWrite(wp, T("\"item\":["));     //下面是串口数组,每个元素为一个串口配置
 	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
 			web_err_proc(EL);
 			continue;
 		}
-		(void) websWrite(wp, T("<tr>\n"));
-		(void) webWrite_plan_no(wp, no, plan);
-		(void) webWrite_parity(wp, no, plan);
-		(void) webWrite_dat_bit(wp, no, plan);
-		(void) webWrite_stop_bit(wp, no, plan);
-		(void) webWrite_baud(wp, no, plan);
-		(void) webWrite_commtype(wp, no, plan);
-		(void) websWrite(wp, T("</tr>\n"));
-	}
-#else
-	websWrite(wp, T("{"));
-	websWrite(wp, T("\"p_t\":[\"none\",\"even\",\"odd\"],"));//3种奇偶校验方式
-	websWrite(wp, T("\"db_t\":[7,8,9],"));//三种数据位
-	websWrite(wp, T("\"sb_t\":[0,1],"));//2中停止位 0 1
-	//6种波特率
-	websWrite(wp, T("\"baud_t\":[300,600,1200,2400,4800,9600],"));
-	websWrite(wp, T("\"baud_t\":[\"asyn\",\"syn\"],"));
-	websWrite(wp, T("\"item\":["));//下面是串口数组,每个元素为一个串口配置
-	for (no = 0; no<sp.sioplan_num; no++) {
 		websWrite(wp, T("{"));
-		websWrite(wp, T("\"no\":\"%d\""),no);
+		websWrite(wp, T("\"no\":\"%d\""), no);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"parity\":\"%u\""), plan.parity);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"data\":\"%u\""), plan.data);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"stop\":\"%d\""), plan.stop);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"baud\":\"%d\""), plan.baud);
+		websWrite(wp, T(","));
+		websWrite(wp, T("\"commtype\":\"%d\""), plan.Commtype);
 		websWrite(wp, T("}"));
-		if(no != sp.sioplan_num-1){ //末尾的对象不用加逗号
+		if (no!=sp.sioplan_num-1) {     //末尾的对象不用加逗号
 			websWrite(wp, T(","));
 		}
 	}
-	websWrite(wp, T("]"));
-	websWrite(wp, T("}"));
-#endif
+	websWrite(wp, T("]}"));
 	return 0;
 }
 /**
@@ -1965,27 +1962,27 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 	stNetparam netparam;
 	//使用json,仅传输数据.样式和行为交由前端控制,易于扩展
 	///@note eth_num 或许和下面的数据元素个数冗余
-	websWrite(wp,T("{\"eth_num\":\"%d\","),sysparam.netports_num);
-	websWrite(wp,T("\"item\":["));
+	websWrite(wp, T("{\"eth_num\":\"%d\","), sysparam.netports_num);
+	websWrite(wp, T("\"item\":["));
 	for (no = 0; no<sysparam.netports_num; no++) {
 		if (-1==load_netparam(&netparam, CFG_NET, no)) {
 			web_err_proc(EL);
 			continue;
 		}
-		websWrite(wp,T("{"));
-		websWrite(wp,T("\"no\":\"%d\","),no);
-		websWrite(wp,T("\"eth\":\"%d\","),netparam.no);
+		websWrite(wp, T("{"));
+		websWrite(wp, T("\"no\":\"%d\","), no);
+		websWrite(wp, T("\"eth\":\"%d\","), netparam.no);
 		webWrite_ip(wp, "ip", netparam.ip);
 		websWrite(wp, T(","));
 		webWrite_ip(wp, "mask", netparam.mask);
 		websWrite(wp, T(","));
 		webWrite_ip(wp, "gateway", netparam.gateway);
-		websWrite(wp,T("}"));
-		if(no!=sysparam.netports_num-1){
-			websWrite(wp,T(","));
+		websWrite(wp, T("}"));
+		if (no!=sysparam.netports_num-1) {
+			websWrite(wp, T(","));
 		}
 	}
-	websWrite(wp,T("]}"));
+	websWrite(wp, T("]}"));
 	return 0;
 }
 /**
@@ -2123,17 +2120,17 @@ int webSend_syspara(webs_t wp, stSysParam sysparam)
 	 websWrite(wp, T("%u"), sysparam.control_ports);
 	 */
 	/*JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
-	在线解析网站: http://jsoneditoronline.org/
-	前端使用eval 或者JSON.parse即可解析.传递类似下面的文本
-		{
-		    "meter_num": 1 ,
-		    "sioplan_num": 2 ,
-		    "monitor_ports": 3 ,
-		    "netports_num": 4 ,
-		    "sioports_num": 5 ,
-		    "control_ports": 6
-		}
-	*/
+	 在线解析网站: http://jsoneditoronline.org/
+	 前端使用eval 或者JSON.parse即可解析.传递类似下面的文本
+	 {
+	 "meter_num": 1 ,
+	 "sioplan_num": 2 ,
+	 "monitor_ports": 3 ,
+	 "netports_num": 4 ,
+	 "sioports_num": 5 ,
+	 "control_ports": 6
+	 }
+	 */
 	websWrite(wp, T("{"
 			"\"meter_num\":%u,"
 			"\"sioplan_num\":%u,"
@@ -2142,13 +2139,13 @@ int webSend_syspara(webs_t wp, stSysParam sysparam)
 			"\"sioports_num\":%u,"
 			"\"control_ports\":%u"
 			"}"),
-			sysparam.meter_num,
-			sysparam.sioplan_num,
-			sysparam.monitor_ports,
-			sysparam.netports_num,
-			sysparam.sioports_num,
-			sysparam.control_ports
-			);
+	                sysparam.meter_num,
+	                sysparam.sioplan_num,
+	                sysparam.monitor_ports,
+	                sysparam.netports_num,
+	                sysparam.sioports_num,
+	                sysparam.control_ports
+	                );
 	return 0;
 }
 
@@ -2369,7 +2366,7 @@ int webRece_txtfile(webs_t wp, char_t *query, const char* file)
 	websHeader_pure(wp);
 	char * txt = query;
 	FILE*fp = fopen(file, "w");
-	if (fp==NULL) {
+	if (fp==NULL ) {
 		return -1;
 	}
 	fwrite(txt, strlen(txt), 1, fp);
@@ -2388,7 +2385,7 @@ int webSend_txtfile(webs_t wp, const char*file)
 	char buf[1024] = { 0 };
 	int ret;
 	FILE*fp = fopen(file, "r");
-	if (fp==NULL) {
+	if (fp==NULL ) {
 		websWrite(wp, T("No info."));
 		goto WEB_END;
 	}
@@ -2421,7 +2418,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 		FILE* pf;
 		char line[256] = { 0 };
 		pf = popen(query, "r");
-		if (pf==NULL) {
+		if (pf==NULL ) {
 			perror("open ping:");
 			return;
 		}
@@ -2524,7 +2521,7 @@ char *trim(char in[], int len)
 	int tail = len-1;
 	//找到倒数第一个不为空白符的字符,截断之.
 	while (tail>=0) {
-		if (strchr(" \t\r\n\\/", in[tail])==NULL) {
+		if (strchr(" \t\r\n\\/", in[tail])==NULL ) {
 			break;
 		}
 		tail--;
@@ -2532,7 +2529,7 @@ char *trim(char in[], int len)
 	in[tail+1] = '\0';
 	//找到第一个不为空白符的字符,字符串头指向它.
 	while (i<=len) {
-		if (strchr(" \t\r\n", in[i])==NULL) {
+		if (strchr(" \t\r\n", in[i])==NULL ) {
 			break;
 		}
 		i++;

@@ -19,7 +19,84 @@ json数据格式示例 {#json-date-example}
 	}
 
 ## 串口方案
-
+	{
+	    "parity": [
+	        "无",
+	        "奇",
+	        "偶"
+	    ],
+	    "data": [
+	        7,
+	        8,
+	        9
+	    ],
+	    "stop": [
+	        0,
+	        1
+	    ],
+	    "baud": [
+	        300,
+	        600,
+	        1200,
+	        2400,
+	        4800,
+	        9600
+	    ],
+	    "commtype": [
+	        "异步asyn",
+	        "同步syn"
+	    ],
+	    "item": [
+	        {
+	            "no": "0",
+	            "parity": "0",
+	            "data": "7",
+	            "stop": "1",
+	            "baud": "3",
+	            "commtype": "1"
+	        },
+	        {
+	            "no": "1",
+	            "parity": "0",
+	            "data": "7",
+	            "stop": "0",
+	            "baud": "0",
+	            "commtype": "0"
+	        },
+	        {
+	            "no": "2",
+	            "parity": "0",
+	            "data": "7",
+	            "stop": "0",
+	            "baud": "0",
+	            "commtype": "0"
+	        },
+	        {
+	            "no": "3",
+	            "parity": "2",
+	            "data": "7",
+	            "stop": "0",
+	            "baud": "0",
+	            "commtype": "0"
+	        },
+	        {
+	            "no": "4",
+	            "parity": "1",
+	            "data": "7",
+	            "stop": "0",
+	            "baud": "0",
+	            "commtype": "0"
+	        },
+	        {
+	            "no": "5",
+	            "parity": "0",
+	            "data": "7",
+	            "stop": "0",
+	            "baud": "0",
+	            "commtype": "0"
+	        }
+	    ]
+	}
 ## 网口方案
 
 	{
