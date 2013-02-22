@@ -748,6 +748,9 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	websWrite(wp, T("\"protocol\":["));
 	for (i = 0; i<procotol_num; i++) {
 		websWrite(wp, T("\"%s\""),procotol_name[i]);
+		if(i!=procotol_num-1){
+			websWrite(wp, T(","));
+		}
 	}
 	websWrite(wp, T("]"));
 #endif
@@ -1837,6 +1840,11 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	websWrite(wp, T(","));
 	websWrite(wp, T("\"item\":["));
 	for (no = 0; no<sysparam.monitor_ports; no++) {
+		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		websWrite(wp, T("{"));
 		websWrite(wp, T("\"mon_no\":\"%d\""),no);
 		websWrite(wp, T(","));
 		websWrite(wp, T("\"commport\":\"%d\""),monpara.comm_port);
@@ -1850,6 +1858,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 		webWrite_rtu_addr(wp, no, monpara);
 		websWrite(wp, T(","));
 		websWrite(wp, T("\"mon_no\":\"%d\""),no);
+		websWrite(wp, T("}"));
 		if(no!=sysparam.monitor_ports-1){
 			websWrite(wp, T(","));
 		}
