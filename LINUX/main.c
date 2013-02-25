@@ -87,6 +87,9 @@ void init_semun(void)
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
+	PRINT_WELCOME
+	PRINT_VERSION
+	PRINT_BUILD_TIME
 	init_semun();     //初始化信号量,用于控制,未完善.
 	/*
 	 * Initialize the memory allocator. Allow use of malloc and start
@@ -116,6 +119,8 @@ int main(int argc __attribute__ ((unused)),
 	 * will actually do the servicing.
 	 */
 	finished = 0;
+	printf(PREFIX_INF"[\e[32mOK\e[0m]Initialization is complete.\n");
+	printf(PREFIX_INF"[\e[32mOK\e[0m]All configure is OK.\n");
 	while (!finished) {
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);

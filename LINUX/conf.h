@@ -51,5 +51,29 @@
 #define MAX_PROCOTOL_NUM 128 ///<规约文件中最大规约条目开始时分配这么多
 #define MON_PORT_NAME_FILE PROC_CFG_DIR"monparam_name.conf"///<监视端口描述文件
 
+//信息
+#define PRINT_WELCOME {					\
+	printf("\t\tWelcome to use "		\
+	"\e[31mHolley web services\e[0m\t\t\n");	\
+	}
+#ifndef MAJOR
+#define MAJOR 1 ///<库版本号:主版本号
+#endif
+#ifndef MINOR
+#define MINOR 0 ///<库版本号:次版本号
+#endif
+#ifndef PATCHLEVEL
+#define PATCHLEVEL 1 ///<库版本号:修订号
+#endif
+//打印版本信息
+#define PRINT_VERSION { 					\
+		printf("\tVersion:\e[32m%d.%d.%d\e[0m\n", 	\
+		MAJOR, MINOR, PATCHLEVEL); 			\
+	}
+//打印编译构建的日期和时间，类似：Dec  3 2012 09:59:57
+#define PRINT_BUILD_TIME {					\
+		printf("\tBuild time:\e[32m%s %s\e[0m\n",	\
+		 __DATE__, __TIME__);		\
+	}
 
 #endif /* CONF_H_ */
