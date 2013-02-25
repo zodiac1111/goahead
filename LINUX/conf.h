@@ -6,6 +6,16 @@
  */
 #ifndef CONF_H_
 #define CONF_H_
+//版本信息
+#ifndef MAJOR
+#define MAJOR 1 ///<库版本号:主版本号
+#endif
+#ifndef MINOR
+#define MINOR 0 ///<库版本号:次版本号
+#endif
+#ifndef PATCHLEVEL
+#define PATCHLEVEL 3 ///<库版本号:修订号
+#endif
 //调试信息开关.用于打印一些信息. 1 表示开启此项调试信息;0 表示关闭.
 #define DEBUG_INFO_FORM 1 ///<表单提交函数的信息,每个/次表单提交打印一次提交的内容
 #define DEBUG_PARSE_CONF_FILE 0 ///<解析配置文件时的调试信息(goahead.conf),
@@ -13,9 +23,9 @@
 #define DEBUG_PRINT_NETPARAM 0 ///<打印网口参数相关调试信息
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
 #define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
-//服务器配置
+//服务器配置 硬编码!
 ///@todo 独立成为配置文件项
-#define WEBS_DEFAULT_HOME	T("home.htm") /* Default home page */
+#define WEBS_DEFAULT_HOME	T("index.html") /* Default home page */
 #define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
 #define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
@@ -56,15 +66,6 @@
 	printf("\t\tWelcome to use "		\
 	"\e[31mHolley web services\e[0m\t\t\n");	\
 	}
-#ifndef MAJOR
-#define MAJOR 1 ///<库版本号:主版本号
-#endif
-#ifndef MINOR
-#define MINOR 0 ///<库版本号:次版本号
-#endif
-#ifndef PATCHLEVEL
-#define PATCHLEVEL 1 ///<库版本号:修订号
-#endif
 //打印版本信息
 #define PRINT_VERSION { 					\
 		printf("\tVersion:\e[32m%d.%d.%d\e[0m\n", 	\

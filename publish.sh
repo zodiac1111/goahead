@@ -12,8 +12,8 @@
 echo $1
 
 cd /samba_folder \
-&& tar -zcvf webs-$1.tar.gz \
-       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo \
+&& tar --exclude .git* -jcvf  webs-release-$1.tar.bz2 \
+       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
 	-C '/home/lee/workspace' goahead \
 	-C '/home/lee/文档' 说明.txt \
 && echo -e "\e[32m[成功]\e[0m 生成文件:\e[31m`pwd`/webs-$1.tar.gz\e[0m"

@@ -15,7 +15,8 @@ all:gold doc
 #清除
 clean:
 	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
-
+distclean:clean
+	rm -rf html
 #文档	
 doc:UPDATE-EVERY-TIME
 	doxygen Doxyfile

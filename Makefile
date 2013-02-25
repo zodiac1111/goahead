@@ -9,5 +9,9 @@ clean:
 	make -C ./LINUX clean
 doc:
 	make -C ./LINUX doc
+
+distclean:
+	make -C ./LINUX distclean
+
 publish:
-	./publish.sh 1.0.1
+	./publish.sh  $V

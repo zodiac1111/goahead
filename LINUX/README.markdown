@@ -50,7 +50,7 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 
 1.将 `webs` 文件通过ftp工具上传到终端 `/mnt/nor/bin` 目录下.如果 `webs` 正在运行则必须先运行 `killall webs` 以结束进程.
 
-2.在终端 `/mnt/nor/bin` 目录下执行: `chmod +x webs` 给予应用程序执行权限.
+2.在终端执行: `chmod +x /mnt/nor/bin/webs` 给予应用程序执行权限.
 
 <a name="conf"></a>
 ### 配置

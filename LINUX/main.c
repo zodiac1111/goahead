@@ -109,7 +109,7 @@ int main(int argc __attribute__ ((unused)),
 														return -1;
 	}
 #ifdef WEBS_SSL_SUPPORT
-	printf(PREFIX_INF"ssl support\n");
+	printf(PREFIX_INF"SSL support\n");
 	websSSLOpen();
 	/* websRequireSSL("/"); *//* Require all files be served via https */
 #endif
@@ -121,6 +121,7 @@ int main(int argc __attribute__ ((unused)),
 	finished = 0;
 	printf(PREFIX_INF"[\e[32mOK\e[0m]Initialization is complete.\n");
 	printf(PREFIX_INF"[\e[32mOK\e[0m]All configure is OK.\n");
+	printf(PREFIX_INF"Now access http://<IP>:%d with Browser.\n",WEBS_DEFAULT_PORT);
 	while (!finished) {
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);
@@ -647,6 +648,7 @@ static int initWebs(void)
 		//return -1;
 	}
 	return 0;
+
 }
 /**
  * 写终端地址4个数字字符到页面.
@@ -1219,79 +1221,79 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		//printf("接收循环[%d]\n", i);
 		amtr[i].mtrno = strtoul(no[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b1;
+			e[i] |= 0x1;
 		}
 		(void) strtoull(line[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b10;
+			e[i] |= 0x2;
 		}
 		(void) strtoull(addr[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b100;
+			e[i] |= 0x4;
 		}
 		//PRINT_HERE
 		(void) strtoul(pwd[i], &errstr, 10);     //32位无符号,最多4,294,967,295能存所有9位十进制数
 		if (*errstr!='\0') {
-			e[i] |= 0b1000;
+			e[i] |= 0x8;
 		}
 		amtr[i].it_dot = strtoul(it_dot[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b10000;
+			e[i] |= 0x10;
 		}
 		amtr[i].v_dot = strtol(v_dot[i], &errstr, 10);
 		if (*errstr!='\0') {
 
-			e[i] |= 0b100000;
+			e[i] |= 0x20;
 		}
 		amtr[i].p_dot = strtol(p_dot[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b1000000;
+			e[i] |= 0x40;
 		}
 		amtr[i].q_dot = strtol(q_dot[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b10000000;
+			e[i] |= 0x80;
 		}
 		amtr[i].i_dot = strtol(i_dot[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b100000000;
+			e[i] |= 0x100;
 		}
 		//PRINT_HERE
 		amtr[i].xl_dot = strtol(xl_dot[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b1000000000;
+			e[i] |= 0x200;
 		}
 		amtr[i].ue = strtol(ue[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b10000000000;
+			e[i] |= 0x400;
 		}
 		amtr[i].ie = strtol(ie[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b100000000000;
+			e[i] |= 0x800;
 		}
 		amtr[i].port = strtol(port[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b1000000000000;
+			e[i] |= 0x1000;
 		}
 		amtr[i].portplan = strtol(portplan[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b10000000000000;
+			e[i] |= 0x2000;
 		}
 		amtr[i].protocol = strtol(protocol[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b100000000000000;
+			e[i] |= 0x4000;
 		}
 		//PRINT_HERE
 		amtr[i].p3w4 = strtol(ph_wire[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b1000000000000000;
+			e[i] |= 0x8000;
 		}
 		amtr[i].fact = strtol(factory[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b10000000000000000;
+			e[i] |= 0x100000;
 		}
 		amtr[i].iv = strtol(iv[i], &errstr, 10);
 		if (*errstr!='\0') {
-			e[i] |= 0b100000000000000000;
+			e[i] |= 0x200000;
 		}
 		memset(amtr[i].line, '0', LINE_LEN);
 		memset(amtr[i].addr, '0', ADDR_LEN);
@@ -1839,7 +1841,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	 共8位表示6个项目,位[6,7]保留为0,位0至位5分别对应:
 	 get_meter_num ;get_sioports_num ;netports_num;monitor_ports;control_ports
 	 sioplan_num;*/
-	int erritem = 0b00000000;
+	int erritem = 0;
 	char * str_meter_num = websGetVar(wp, T("meter_num"), T("null"));
 	char * str_sioports_num = websGetVar(wp, T("sioports_num"), T("null"));
 	char * str_netports_num = websGetVar(wp, T("netports_num"), T("null"));
@@ -1853,32 +1855,26 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	int meter_num = strtol(str_meter_num, &errstr, 10);
 	if (*errstr!='\0'||meter_num<=0||meter_num>=256) {
 		printf("1:%s\n", errstr);
-		erritem |= 0b1;
 	}
 	int sioports_num = strtol(str_sioports_num, &errstr, 10);
 	if (*errstr!='\0'||sioports_num<=0||meter_num>=256) {
 		printf("2:%s\n", errstr);
-		erritem |= 0b10;
 	}
 	int netports_num = strtol(str_netports_num, &errstr, 10);
 	if (*errstr!='\0'||netports_num<=0||meter_num>=256) {
 		printf("3:%s\n", errstr);
-		erritem |= 0b100;
 	}
 	int monitor_ports = strtol(str_monitor_ports, &errstr, 10);
 	if (*errstr!='\0'||monitor_ports<=0||meter_num>=256) {
 		printf("4:%s\n", errstr);
-		erritem |= 0b1000;
 	}
 	int control_ports = strtol(str_control_ports, &errstr, 10);
 	if (*errstr!='\0'||control_ports<=0||meter_num>=256) {
 		printf("5:%s\n", errstr);
-		erritem |= 0b10000;
 	}
 	int sioplan_num = strtol(str_sioplan_num, &errstr, 10);
 	if (*errstr!='\0'||sioplan_num<=0||meter_num>=256) {
 		printf("6:%s\n", errstr);
-		erritem |= 0b100000;
 	}
 	if (erritem==0) {     //只有所有输入都合法
 		sysparam->meter_num = meter_num;
