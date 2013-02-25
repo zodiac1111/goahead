@@ -1,4 +1,4 @@
-使用说明 {#mainpage}
+安装指南 {#mainpage}
 ========
 goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和维护终端的功能.
 
@@ -20,7 +20,7 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 ### 文档 
 <b>如果您现在正在浏览器中查看本文档,那么就可以直接跳转到下一步[编译](#compile)了.</b><
 
-通过 `doxygen` 指令可以生成 `LINUX/html/index.html` (web形式的说明文档).执行
+通过 `doxygen` 指令可以生成 `goahead/LINUX/html/index.html` (web形式的说明文档).执行
 
 	make doc
 
@@ -31,7 +31,7 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 <a name="compile"></a>
 ### 编译
 
-<b>若 `LINUX` 目录下已经存在 `webs` 应用程序文件,则可以直接跳转到下一步[安装](#install)</b></br>
+<b>若已经存在 `goahead/LINUX/webs` 应用程序文件,则可以直接跳转到下一步[安装](#install).</b><br>
 
 如果确实需要重新编译,前运行
 
@@ -48,30 +48,32 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 <a name="install"></a>
 ### 安装
 
-1.将 `webs` 通过ftp工具上传到终端 `/mnt/nor/bin` 目录下.如果 `webs` 正在运行则必须先运行 `killall webs` 以结束进程.
+1.将 `webs` 文件通过ftp工具上传到终端 `/mnt/nor/bin` 目录下.如果 `webs` 正在运行则必须先运行 `killall webs` 以结束进程.
 
 2.在终端 `/mnt/nor/bin` 目录下执行: `chmod +x webs` 给予应用程序执行权限.
 
 <a name="conf"></a>
 ### 配置
 
-1.将 `conf/goahead.conf` goahead webs服务器配置文件通过ftp工具上传到终端的 `/mnt/nor/conf` 目录下.
+1.将 `conf/goahead.conf` webs服务器配置文件通过ftp工具上传到终端的 `/mnt/nor/conf` 目录下.
 
 2.将 `conf/monparam_name.conf` 网络监视端口名称配置信息文件上传到终端 `/mnt/nor/conf` 目录下.如果有必要,打开并按照文件内容指示修改内容使之与终端端口名称相符.
 
 <a name="www"></a>
-3.将整个 `wwwdemo` 网页目录通过ftp工具上传到终端 `/mnt/nor` 目录下.(这个目录位于 *另外一个项目* 中,是webs的前端页面).
+3.将整个 `wwwdemo` 网页目录通过ftp工具上传到终端 `/mnt/nor` 目录下.(该目录是webs的前端项目目录).
 
 4.修改看门狗配置文件.(可选)
 
 <a name="run"></a>
 ### 运行服务器
 
-在终端执行 `webs` .(运行前务必先执行配置的操作3:[上传网页](#www).)
+在终端执行(运行前务必先完成配置的操作3:[上传网页](#www)):
+
+	webs 
 
 <img src="../img/webs_start.png"  alt="webs启动" width=80% />
 
-如上图所示即表示已经运行.
+如上图所示即表示已经成功运行.若发生错误请参考[错误解决](@ref err)页面.
 
 此时使用PC机通过网络(路由器)连接终端.
 

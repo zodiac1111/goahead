@@ -9,3 +9,5 @@ clean:
 	make -C ./LINUX clean
 doc:
 	make -C ./LINUX doc
+publish:
+	./publish.sh 1.0.1

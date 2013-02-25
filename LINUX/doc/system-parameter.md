@@ -1,4 +1,5 @@
-# 系统参数文件结构
+系统参数文件结构 {#sys_format}
+=============
 
 系统参数文件:/mnt/nor/para/system.cfg
 

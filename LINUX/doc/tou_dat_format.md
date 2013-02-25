@@ -1,4 +1,4 @@
-历史电量文件格式说明
+历史电量文件格式说明 {#tou_format}
 ===================
 
 	Offset	Size	Description

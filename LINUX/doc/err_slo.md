@@ -4,7 +4,7 @@
 操作系统相关错误
 
 * 1001 `-sh: webs: Permission denied`<br>
-webs文件没有执行权限,参考[安装](@ref mainpage)的步骤2,为 `webs` 程序添加执行权限.
+webs文件没有执行权限,参考[安装](./index.html)的步骤2,为 `webs` 程序添加执行权限.
 
 webs服务器相关错误
 

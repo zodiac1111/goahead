@@ -1,4 +1,5 @@
-# 表计参数文件结构
+表计参数文件结构 {#mtr_format}
+=============
 
 默认文件路径 /mnt/nor/para/mtrspara
 

@@ -1,4 +1,5 @@
-# 网络端口参数文件格式
+网络端口参数文件格式 {#net_format}
+=================
 
 默认路径/mnt/nor/para/netpara.cfg
 
