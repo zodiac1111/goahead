@@ -10,6 +10,6 @@
 #include "wsIntrn.h"
 
 websRomPageIndexType websRomPageIndex[] = {
-  { 0, 0, 0 },
+  { 0, 0, 0 ,0},
 };
 

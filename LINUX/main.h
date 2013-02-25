@@ -64,7 +64,7 @@ int webRece_sioplans(webs_t wp);
 int webSend_netparas(webs_t wp, stSysParam sysparam);
 int webRece_netparas(webs_t wp);
 int webSend_monparas(webs_t wp, stSysParam sysparam);
-int webRece_monparas(webs_t wp, stSysParam sysparam);
+int webRece_monparas(webs_t wp);
 int webSend_txtfile(webs_t wp, const char*file);
 int webRece_txtfile(webs_t wp, char_t *query, const char* file);
 //表计参数页面 小相
@@ -104,10 +104,10 @@ static int webWrite_ip(webs_t wp, char *name, u8* value);
 
 //static int webWrite_mon_no(webs_t wp, int no, stMonparam monport);
 static int webWrite_commportList(webs_t wp);
-static int webWrite_listen_port(webs_t wp, int no, stMonparam monport);
+static int webWrite_listen_port(webs_t wp, stMonparam monport);
 //static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport);
-static int webWrite_porttype(webs_t wp, stMonparam monport);
-static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport);
+static int webWrite_porttype(webs_t wp);
+static int webWrite_rtu_addr(webs_t wp, stMonparam monport);
 //static int webWrite_timesyn(webs_t wp, int no, stMonparam monport);
 //static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport);
 //static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport);

@@ -26,9 +26,6 @@
 
 /*************************** User Configurable Defines ************************/
 
-#define WEBS_DEFAULT_HOME	T("home.htm") /* Default home page */
-#define WEBS_DEFAULT_PORT	8080 //8080	/* Default HTTP port */
-#define WEBS_DEFAULT_SSL_PORT	4433		/* Default HTTPS port */
 
 /* Enable Whitelist access to files */
 #define WEBS_WHITELIST_SUPPORT	1

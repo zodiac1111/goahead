@@ -13,11 +13,16 @@
 #define DEBUG_PRINT_NETPARAM 0 ///<打印网口参数相关调试信息
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
 #define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
+//服务器配置
+///@todo 独立成为配置文件项
+#define WEBS_DEFAULT_HOME	T("home.htm") /* Default home page */
+#define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
+#define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
-#define PREFIX "[webs]" ///<应用程序信息前缀
-#define PREFIX_INF PREFIX"info>" ///<一般信息
-#define PREFIX_WAR PREFIX"warning>" ///<警告信息
-#define PREFIX_ERR PREFIX"error>" ///<错误信息
+#define PREFIX "\e[34m[webs]\e[0m" ///<应用程序信息前缀
+#define PREFIX_INF PREFIX"\e[32mInfo\e[0m\t" ///<一般信息
+#define PREFIX_WAR PREFIX"\e[33mWarning\e[0m\t" ///<警告信息
+#define PREFIX_ERR PREFIX"\e[31mError\e[0m\t" ///<错误信息
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件
@@ -44,7 +49,7 @@
 #define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
 #define PORC_FILE PROC_CFG_DIR"protocol_config.txt"///<主站规约配置文件
 #define MAX_PROCOTOL_NUM 128 ///<规约文件中最大规约条目开始时分配这么多
-#define MON_PORT_NAME_FILE PROC_CFG_DIR"monprarm_config.txt"///<监视端口描述文件
+#define MON_PORT_NAME_FILE PROC_CFG_DIR"monparam_name.conf"///<监视端口描述文件
 
 
 #endif /* CONF_H_ */

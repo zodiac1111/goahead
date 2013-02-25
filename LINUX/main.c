@@ -69,7 +69,7 @@ struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
 #define JSON 1
-
+//#pragma  GCC diagnostic warning  "-Wunused-parameter"
 /**
  * 初始化信号量,用于进程间的控制,目前用于监视报文的启动和停止.
  */
@@ -84,7 +84,8 @@ void init_semun(void)
 /**
  * webs主函数,所有业务逻辑在此实现.
  */
-int main(int argc, char** argv)
+int main(int argc __attribute__ ((unused)),
+        char** argv __attribute__ ((unused)))
 {
 	init_semun();     //初始化信号量,用于控制,未完善.
 	/*
@@ -102,7 +103,7 @@ int main(int argc, char** argv)
 	//Initialize the web server 初始化web服务器
 	if (initWebs()<0) {
 		printf(PREFIX_ERR"init Webs.\n");
-		return -1;
+														return -1;
 	}
 #ifdef WEBS_SSL_SUPPORT
 	printf(PREFIX_INF"ssl support\n");
@@ -270,7 +271,7 @@ void form_monparas(webs_t wp, char_t *path, char_t *query)
 	if (*init=='1') {
 		webSend_monparas(wp, sysparam);
 	} else {
-		webRece_monparas(wp, sysparam);
+		webRece_monparas(wp);
 	}
 	websDone(wp, 200);
 	return;
@@ -463,7 +464,7 @@ int printf_webs_app_dir(void)
 		PRINT_RET(count);
 		printf(PREFIX_ERR"%s\n", __FUNCTION__);
 	}
-	printf(PREFIX_INF"App dir is:\"%s\"\n", dir);
+	printf(PREFIX_INF"App dir:\e[32m%s\e[0m\n", dir);
 	return 0;
 }
 
@@ -475,11 +476,15 @@ int printf_webs_app_dir(void)
 int load_web_root_dir(char* webdir)
 {
 	//配置文件定义为 一行一条, 以 变量名=变量值的形式
+	/** @bug 为了方便起见在栈上分配固定大小内存用于存储配置字符串.
+	 * 限制了配置项的长度,且过长可能溢出.更好的方式是使用malloc在堆上分配,
+	 * realloc动态调整大小,能够使适用范围更广.
+	 */
 	char line[256] = { 0 };
 	char var[256] = { 0 };
-	char *pvar = NULL;
-	char *pval = NULL;
 	char val[256] = { 0 };
+	char *name = NULL;
+	char *value = NULL;
 	int strnum = 0;
 #if DEBUG_PARSE_CONF_FILE
 	int i = 0;
@@ -501,31 +506,29 @@ int load_web_root_dir(char* webdir)
 		if (strnum!=2) {
 			continue;
 		}
-		pvar = trim(var, strlen(var));
-		pval = trim(val, strlen(val));
+		name = trim(var, strlen(var));//去除前导和后导空白符
+		value = trim(val, strlen(val));
 		//printf("\"%s\"\n",line);
 #if DEBUG_PARSE_CONF_FILE
-		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, pvar, pval);
+		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, name, value);
 #endif
-		if (strcmp(pvar, "wwwroot")==0) {
-			strcpy(webdir, pval);
+		if (strcmp(name, "wwwroot")==0) {
+			strcpy(webdir, value);
 #if DEBUG_PARSE_CONF_FILE
 			printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
 #endif
 		}
 	}
 	fclose(fp);
-	///@todo 使用配置文件读取路径,如果文件读取错误才由程序硬编码决定.
-#if __i386 //host上调试
-	//sprintf(webdir, "%s","/home/zodiac1111/Aptana Studio 3 Workspace/wwwdemo");
-	//sprintf(webdir, "%s","/home/lee/Aptana Studio 3 Workspace/wwwdemo");
-#endif
-	printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
+	printf(PREFIX_INF"Web root dir:\e[32m%s\e[0m\n", webdir);
 	return 0;
 }
 /**
  * Initialize the web server.
- * 注册asp和form函数
+ * 初始化web服务的一些操作:
+ * * 配置套接字
+ * * 修改运行目录和配置www根目录
+ * * 注册asp和form函数
  * @todo:(doing)分解成较短的函数
  * @return
  */
@@ -646,7 +649,7 @@ static int initWebs(void)
  * @param monport
  * @return
  */
-static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
+static int webWrite_rtu_addr(webs_t wp, stMonparam monport)
 {
 #if DEBUG_PRINT_MONPARAM
 	printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
@@ -662,7 +665,7 @@ static int webWrite_rtu_addr(webs_t wp, int no, stMonparam monport)
 	return 0;
 }
 ///主站规约类型
-static int webWrite_porttype(webs_t wp, stMonparam monport)
+static int webWrite_porttype(webs_t wp)
 {
 #if DEBUG_PRINT_MONPARAM
 	printf("监视参数-端口类型?:%x\n", monport.sioplan);
@@ -670,8 +673,8 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	int i;
 	websWrite(wp, T("\"protocol\":["));
 	for (i = 0; i<procotol_num; i++) {
-		websWrite(wp, T("\"%s\""),procotol_name[i]);
-		if(i!=procotol_num-1){
+		websWrite(wp, T("\"%s\""), procotol_name[i]);
+		if (i!=procotol_num-1) {
 			websWrite(wp, T(","));
 		}
 	}
@@ -679,7 +682,7 @@ static int webWrite_porttype(webs_t wp, stMonparam monport)
 	return 0;
 
 }
-static int webWrite_listen_port(webs_t wp, int no, stMonparam monport)
+static int webWrite_listen_port(webs_t wp, stMonparam monport)
 {
 	int i;
 #if DEBUG_PRINT_MONPARAM
@@ -736,20 +739,6 @@ static int webWrite_ip(webs_t wp, char *name, u8* value)
 {
 	//printf("网口参数-IP\n");
 	int i;
-#if JSON == 0
-	websWrite(wp, T("<td>\n"
-					" <input %s type=text size=15 maxlength=15 "
-					" onchange=\"isIPv4(event);\" "
-					" name=ip value=\""), INPUT_CLASS);
-
-	for (i = 0; i<IPV4_LEN; i++) {
-		websWrite(wp, T("%1d"), value[i]);
-		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
-			websWrite(wp, T("."));
-		}
-	}
-	websWrite(wp, T("\"> </td>\n"));
-#else
 	websWrite(wp, T("\"%s\":\""), name);
 	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), value[i]);
@@ -758,136 +747,8 @@ static int webWrite_ip(webs_t wp, char *name, u8* value)
 		}
 	}
 	websWrite(wp, T("\""));
-#endif
 	return 0;
 }
-//static int webWrite_mask(webs_t wp, int no, stNetparam netparam)
-//{
-//	//printf("网口参数-掩码(mask)\n");
-//	int i;
-//	websWrite(wp, T("<td>\n"
-//			" <input %s type=text size=15 maxlength=15 "
-//			" onchange=\"isIPv4(event);\" "
-//			" name=mask value=\""), INPUT_CLASS);
-//
-//	for (i = 0; i<IPV4_LEN; i++) {
-//		websWrite(wp, T("%1d"), netparam.mask[i]);
-//		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
-//			websWrite(wp, T("."));
-//		}
-//	}
-//	websWrite(wp, T("\"> </td>\n"));
-//	return 0;
-//}
-//static int webWrite_gateway(webs_t wp, int no, stNetparam netparam)
-//{
-//	//printf("网口参数-网关(gateway)\n");
-//	int i;
-//	websWrite(wp, T("<td>\n"
-//			" <input %s type=text size=15 maxlength=15 "
-//			" onchange=\"isIPv4(event);\" "
-//			" name=gateway value="), INPUT_CLASS);
-//
-//	for (i = 0; i<IPV4_LEN; i++) {
-//		websWrite(wp, T("%1d"), netparam.gateway[i]);
-//		if (((i+1)%3==0)&&(i!=11)) {     //aaa.bbb.ccc.ddd
-//			websWrite(wp, T("."));
-//		}
-//	}
-//	websWrite(wp, T("> </td>\n"));
-//	return 0;
-//}
-///write 向web页面写串口方案号
-//static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan)
-//{
-//	//printf("串口方案-序号:%d\n", no);
-//	return websWrite(wp, T("<td>\n"
-//			" <input type=text %s name=sioplanno "
-//			" readonly=readonly size=1 value=%d>\n"
-//			"</td>\n"), INPUT_CLASS, no);
-//}
-///write 向web页面写检验位,一个table单元格 table data
-//static int webWrite_parity(webs_t wp, int no, stUart_plan plan)
-//{
-//	//printf("串口方案-校验位:%x\n", plan.parity);
-//	int i;
-//	websWrite(wp, T("<td>\n"
-//			" <select name=parity >\n"));
-//	for (i = 0; i<(int) (sizeof(UART_P)/sizeof(UART_P[0])); i++) {
-//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-//		                (i==plan.parity) ?
-//		                                   "selected=\"selected\"" :
-//		                                   "",
-//		                UART_P[i]);
-//	}
-//	websWrite(wp, T(" <select>\n</td>\n"));
-//	return 0;
-//}
-///向页面也一个 串口方案-数据位 单元格,
-//static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan)
-//{
-//	//printf("串口方案-数据位:%x\n", plan.data);
-//	int i;
-//	websWrite(wp, T("<td>\n"
-//			" <select name=data >\n"));
-//	for (i = 0; i<(int) (sizeof(UART_DAT_BIT)/sizeof(UART_DAT_BIT[0]));
-//	                i++) {
-//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-//		                (i+7==plan.data) ?
-//		                                   "selected=\"selected\"" :
-//		                                   "",
-//		                UART_DAT_BIT[i]);
-//	}
-//	websWrite(wp, T(" <select>\n</td>\n"));
-//	return 0;
-//}
-///向页面也一个 串口方案-停止位 单元格,
-//static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan)
-//{
-//	//printf("串口方案-停止位:%x\n", plan.stop);
-//	u32 i;
-//	websWrite(wp, T("<td>\n"
-//			" <select name=stop >\n"));
-//	for (i = 0; i<sizeof(UART_STOP)/sizeof(UART_STOP[0]); i++) {
-//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-//		                (i==plan.stop) ? "selected" : "",
-//		                UART_STOP[i]);
-//	}
-//	websWrite(wp, T(" <select>\n</td>\n"));
-//	return 0;
-//}
-///向页面也一个 串口方案-波特率 单元格,
-//static int webWrite_baud(webs_t wp, int no, stUart_plan plan)
-//{
-//	//printf("串口方案-波特率(300*2^BaudByte=Baud):%x  \n", plan.baud);
-//	u32 i;
-//	websWrite(wp, T("<td>\n"
-//			" <select name=baud >\n"));
-//	for (i = 0; i<sizeof(UART_BAUD)/sizeof(UART_BAUD[0]); i++) {
-//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-//		                (i==plan.baud) ? "selected=\"selected\"" : "",
-//		                UART_BAUD[i]);
-//	}
-//	websWrite(wp, T(" <select>\n</td>\n"));
-//	return 0;
-//}
-///向页面也一个 串口方案-通讯类型 单元格,
-//static int webWrite_commtype(webs_t wp, int no, stUart_plan plan)
-//{
-//	//printf("串口方案-通讯方式(0-异步,1同步): %x \n", plan.Commtype);
-//	u32 i;
-//	websWrite(wp, T("<td>\n<select name=comm_type >\n"));
-//	for (i = 0; i<sizeof(UART_COMM_TYPE)/sizeof(UART_COMM_TYPE[0]);
-//	                i++) {
-//		websWrite(wp, T("  <option value=\"%d\" %s >%s</option>\n"), i,
-//		                (i==plan.Commtype) ?
-//		                                     "selected=\"selected\"" :
-//		                                     "",
-//		                UART_COMM_TYPE[i]);
-//	}
-//	websWrite(wp, T(" <select>\n</td>\n"));
-//	return 0;
-//}
 ///线路名称
 static int webWrite_line(webs_t wp, stMtr mtr)
 {
@@ -1695,26 +1556,30 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	websWrite(wp, T("{"));
 	webWrite_commportList(wp);
 	websWrite(wp, T(","));
-	webWrite_porttype(wp, monpara);
-	websWrite(wp, T(",\"sioplan_num\":\"%d\""),sysparam.sioplan_num);
-	websWrite(wp, T(",\"item\":["));
+	webWrite_porttype(wp);
+	websWrite(wp, T(",\"sioplan_num\":\"%d\","), sysparam.sioplan_num);
+	websWrite(wp, T("\"item\":["));
 	for (no = 0; no<sysparam.monitor_ports; no++) {
 		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
 			web_err_proc(EL);
 			continue;
 		}
 		websWrite(wp, T("{"));
-		websWrite(wp, T("\"mon_no\":\"%d\","),no);
-		websWrite(wp, T("\"commport\":\"%d\","),monpara.comm_port);
-		webWrite_listen_port(wp, no, monpara);
-		websWrite(wp, T(",\"sioplan\":\"%d\","),monpara.sioplan);;
-		websWrite(wp, T("\"protocol\":\"%d\","),monpara.port_type);
-		webWrite_rtu_addr(wp, no, monpara);
-		websWrite(wp, T(",\"time_syn_chk\":\"%d\","),monpara.bTimeSyn);
-		websWrite(wp, T("\"forward_chk\":\"%d\","),monpara.bForward);
-		websWrite(wp, T("\"forward_mtr_num\":\"%d\""),monpara.forwardNum);
+		websWrite(wp, T("\"mon_no\":\"%d\","), no);
+		websWrite(wp, T("\"commport\":\"%d\","), monpara.comm_port);
+		webWrite_listen_port(wp, monpara);
+		websWrite(wp, T(",\"sioplan\":\"%d\","), monpara.sioplan);
+		;
+		websWrite(wp, T("\"protocol\":\"%d\","), monpara.port_type);
+		webWrite_rtu_addr(wp, monpara);
+		websWrite(wp, T(",\"time_syn_chk\":\"%d\","), monpara.bTimeSyn);
+		websWrite(wp, T("\"forward_chk\":\"%d\","), monpara.bForward);
+		websWrite(
+		                wp,
+		                T("\"forward_mtr_num\":\"%d\""),
+		                monpara.forwardNum);
 		websWrite(wp, T("}"));
-		if(no!=sysparam.monitor_ports-1){
+		if (no!=sysparam.monitor_ports-1) {
 			websWrite(wp, T(","));
 		}
 	}
@@ -1727,7 +1592,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
  * @param sysparam
  * @return
  */
-int webRece_monparas(webs_t wp, stSysParam sysparam)
+int webRece_monparas(webs_t wp)
 {
 	stMonparam monparam;
 	int n;
@@ -2404,8 +2269,12 @@ char * point2next(char** s, const char split)
 	return *s;
 }
 ///Home page handler,首页句柄
-static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
-        int arg, char_t *url, char_t *path, char_t *query)
+static int websHomePageHandler(webs_t wp,
+        char_t *urlPrefix __attribute__ ((unused)),
+        char_t *webDir __attribute__ ((unused)),
+        int arg __attribute__ ((unused)), char_t *url,
+        char_t *path __attribute__ ((unused)),
+        char_t *query __attribute__ ((unused)))
 {
 	/** If the empty or "/" URL is invoked,
 	 * 例如 "http:192.168.1.189:8080" 或者 "http:192.168.1.189:8080/"
@@ -2430,7 +2299,7 @@ void print_array(const u8 *a, const int len)
 /**
  * Exit cleanly on interrupt
  */
-static void sigintHandler(int unused)
+static void sigintHandler(int unused __attribute__ ((unused)))
 {
 	finished = 1;
 }
@@ -2462,3 +2331,4 @@ char *trim(char in[], int len)
 	in += i;
 	return in;
 }
+//#pragma  GCC diagnostic ignored  "-Wunused-parameter"
