@@ -496,7 +496,8 @@ int load_web_root_dir(char* webdir)
 #endif
 	FILE* fp = fopen(CONF_FILE, "r");
 	if (fp==NULL ) {
-		printf(PREFIX_ERR"open file goahead.conf\n");
+		perror(PREFIX_ERR"open file goahead.conf");
+		return -1;
 	}
 	while (!feof(fp)) {
 		memset(&line, 0x00, 256);
