@@ -119,9 +119,9 @@ int main(int argc __attribute__ ((unused)),
 	 * will actually do the servicing.
 	 */
 	finished = 0;
-	printf(PREFIX_INF"[\e[32mOK\e[0m]Initialization is complete.\n");
-	printf(PREFIX_INF"[\e[32mOK\e[0m]All configure is OK.\n");
-	printf(PREFIX_INF"Now access http://<IP>:%d with Browser.\n",WEBS_DEFAULT_PORT);
+	printf(PREFIX_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
+	printf(PREFIX_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
+	printf(PREFIX_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m with Browser.\n",WEBS_DEFAULT_PORT);
 	while (!finished) {
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);
@@ -463,6 +463,67 @@ void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
+ * 报文监视(执行指令) 表单提交处理函数.
+ * @todo:未实现,执行命令的输出还不能读取.前后端可能需要频繁交互.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_msg(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	printf(PREFIX_WAR"This function is being debugged.\n");
+	pid_t pid;
+	if ((pid = fork())==0) {
+		websHeader_pure(wp);
+		FILE* pf;
+		char line[256] = { 0 };
+		pf = popen(query, "r");
+		if (pf==NULL ) {
+			perror("open ping:");
+			return;
+		}
+		printf("信号量 s =%d\n", semctl(semid, 0, GETVAL, 0));
+		while (fgets(line, 256-1, pf)
+		                &&(semctl(semid, 0, GETVAL, 0))) {
+
+			printf("%s", line);
+			websWrite(wp, T("%s"), line);
+		}
+		///如果是点击停止使之退出的,那么信号量现在是0,
+		///为了下次使用,加1.如果自然结束退出,信号量还是1不变.
+		if (semctl(semid, 0, GETVAL, 0)==0) {
+			printf("点击停止\n");
+			sb.sem_num = 0;
+			sb.sem_op = 1;
+			sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
+			semop(semid, &sb, 1);
+		}
+		websDone(wp, 200);
+		pclose(pf);
+	}
+}
+/**
+ * 监控报文(执行指令)停止函数.使用信号量控制.
+ * @todo: 未实现,中止进程的方法待考虑.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_msg_stop(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	printf(PREFIX_WAR"This function is being debugged.\n");
+	websHeader_pure(wp);
+	sb.sem_num = 0;     //将0号信号量
+	sb.sem_op = -1;     //减1
+	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
+	semop(semid, &sb, 1);     //操作信号量
+	printf("信号量 s :%d \n", semctl(semid, 0, GETVAL, 0));
+	websWrite(wp, T("ok"));
+	websDone(wp, 200);
+}
+/**
  * 打印服务器应用程序运行路径,依赖proc文件系统.
  * @return
  */
@@ -533,6 +594,61 @@ int load_web_root_dir(char* webdir)
 	}
 	fclose(fp);
 	printf(PREFIX_INF"Web root dir:\e[32m%s\e[0m\n", webdir);
+	return 0;
+}
+/** 通用读取配置文件项函数.
+ * 读取类似 name = value 这样的配置项
+ * 输入一个项目名称字符串,输出这个项目的值(字符串)
+ * 暂时配有被使用,因为需要修改很多关联的地方.
+ * 例子:
+ *	char* val = getconf("paradir");
+ *	if (val==NULL) {
+ *		printf("paradir is not set.");
+ *	}
+ * @param name
+ * @retval NULL 没有这个项,或则其他错误情况
+ * @retval 其他 指向一个字符串的指针.这个字符串即项的值
+ * @return
+ */
+char* getconf( char const* name)
+{
+	//配置文件定义为 一行一条, 以 变量名=变量值的形式
+	/** @bug 为了方便起见在栈上分配固定大小内存用于存储配置字符串.
+	 * 限制了配置项的长度,且过长可能溢出.更好的方式是使用malloc在堆上分配,
+	 * realloc动态调整大小,能够使适用范围更广.
+	 */
+	char* value=NULL;
+	char line[256] = { 0 };
+	char n[256] = { 0 };
+	char v[256] = { 0 };
+	char *pname = NULL;
+	char *pvalue = NULL;
+	int strnum = 0;
+
+	FILE* fp = fopen(CONF_FILE, "r");
+	if (fp==NULL ) {
+		perror(PREFIX_ERR"open file goahead.conf");
+		return NULL;
+	}
+	while (!feof(fp)) {
+		memset(&line, 0x00, 256);
+		memset(&n, 0x00, 256);
+		memset(&v, 0x00, 256);
+		fgets(line, 255, fp);     //得到一行
+		//得到这一行的字符串,根据表达式截断
+		strnum = sscanf(line, "%[^#=]=%[^#\r\n]", n, v);
+		if (strnum!=2) {
+			continue;
+		}
+		pname = trim(n, strlen(n));//去除前导和后导空白符
+		pvalue = trim(v, strlen(v));
+		if (strcmp(pname, name)==0) {
+			value=(char*)malloc(strlen(pvalue)+1);
+			strcpy(value, pvalue);
+		}
+	}
+	fclose(fp);
+	printf(PREFIX_INF"read conf: %s=\e[32m%s\e[0m\n", name,value);
 	return 0;
 }
 /**
@@ -2208,65 +2324,7 @@ int webSend_txtfile(webs_t wp, const char*file)
 	websDone(wp, 200);
 	return 0;
 }
-/**
- * 报文监视(执行指令) 表单提交处理函数.
- * @todo:未实现,执行命令的输出还不能读取.前后端可能需要频繁交互.
- * @param wp
- * @param path
- * @param query
- */
-void form_msg(webs_t wp, char_t *path, char_t *query)
-{
-	printf("%s:%s\n", __FUNCTION__, query);
-	pid_t pid;
-	if ((pid = fork())==0) {
-		websHeader_pure(wp);
-		FILE* pf;
-		char line[256] = { 0 };
-		pf = popen(query, "r");
-		if (pf==NULL ) {
-			perror("open ping:");
-			return;
-		}
-		printf("信号量 s =%d\n", semctl(semid, 0, GETVAL, 0));
-		while (fgets(line, 256-1, pf)
-		                &&(semctl(semid, 0, GETVAL, 0))) {
 
-			printf("%s", line);
-			websWrite(wp, T("%s"), line);
-		}
-		///如果是点击停止使之退出的,那么信号量现在是0,
-		///为了下次使用,加1.如果自然结束退出,信号量还是1不变.
-		if (semctl(semid, 0, GETVAL, 0)==0) {
-			printf("点击停止\n");
-			sb.sem_num = 0;
-			sb.sem_op = 1;
-			sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
-			semop(semid, &sb, 1);
-		}
-		websDone(wp, 200);
-		pclose(pf);
-	}
-}
-/**
- * 监控报文(执行指令)停止函数.使用信号量控制.
- * @todo: 未实现,中止进程的方法待考虑.
- * @param wp
- * @param path
- * @param query
- */
-void form_msg_stop(webs_t wp, char_t *path, char_t *query)
-{
-	websHeader_pure(wp);
-	printf("%s:%s\n", __FUNCTION__, query);
-	sb.sem_num = 0;     //将0号信号量
-	sb.sem_op = -1;     //减1
-	sb.sem_flg = sb.sem_flg&~IPC_NOWAIT;
-	semop(semid, &sb, 1);     //操作信号量
-	printf("信号量 s :%d \n", semctl(semid, 0, GETVAL, 0));
-	websWrite(wp, T("ok"));
-	websDone(wp, 200);
-}
 /**
  * 以split为分割字符,指向下一个项.
  * 例如空格为分隔符."1 2 3"输入,"2 3"输出.不能排除多个连续的分隔符.

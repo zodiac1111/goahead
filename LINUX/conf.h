@@ -20,10 +20,10 @@
 #define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
 #define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
-#define PREFIX "\e[34m[webs]\e[0m" ///<应用程序信息前缀
-#define PREFIX_INF PREFIX"\e[32mInfo\e[0m" ///<一般信息
-#define PREFIX_WAR PREFIX"\e[33mWarning\e[0m" ///<警告信息
-#define PREFIX_ERR PREFIX"\e[31mError\e[0m" ///<错误信息
+#define PREFIX "[webs]" ///<应用程序信息前缀
+#define PREFIX_INF PREFIX"Info " ///<一般信息
+#define PREFIX_WAR PREFIX"\e[33mWarning\e[0m " ///<警告信息
+#define PREFIX_ERR PREFIX"\e[31mError\e[0m " ///<错误信息
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件
