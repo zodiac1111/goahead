@@ -59,7 +59,7 @@
 	}
 //打印版本信息
 #define PRINT_VERSION { 					\
-		printf("\tVersion:\e[32m%d.%d.%s\e[0m"	\
+		printf("\tVersion:\e[32m%d.%d.%d\e[0m"	\
 			"[\e[31m%s\e[0m]\n", 	 \
 		MAJOR, MINOR, PATCHLEVEL,GIT_VERSION); 		\
 	}

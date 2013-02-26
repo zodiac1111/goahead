@@ -48,15 +48,19 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 <a name="install"></a>
 ### 安装
 
+<a name="install_1"></a>
 1.将 `webs` 文件通过ftp工具上传到终端 `/mnt/nor/bin` 目录下.如果 `webs` 正在运行则必须先运行 `killall webs` 以结束进程.
 
+<a name="install_2"></a>
 2.在终端执行: `chmod +x /mnt/nor/bin/webs` 给予应用程序执行权限.
 
 <a name="conf"></a>
 ### 配置
 
+<a name="conf_1"></a>
 1.将 `conf/goahead.conf` webs服务器配置文件通过ftp工具上传到终端的 `/mnt/nor/conf` 目录下.
 
+<a name="conf_2"></a>
 2.将 `conf/monparam_name.conf` 网络监视端口名称配置信息文件上传到终端 `/mnt/nor/conf` 目录下.如果有必要,打开并按照文件内容指示修改内容使之与终端端口名称相符.
 
 <a name="www"></a>

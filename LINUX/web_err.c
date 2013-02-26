@@ -76,7 +76,6 @@ const char *myweberrstr[] =
 /**
  * 服务器错误处理函数.
  * 处理web_errno错误号,控制台打印,文件打印.清除web_errno.
- * @param EL_ARGS
  */
 void web_err_proc(EL_ARGS)
 {

@@ -653,7 +653,6 @@ static int initWebs(void)
 /**
  * 写终端地址4个数字字符到页面.
  * @param wp
- * @param no
  * @param monport
  * @return
  */
@@ -1069,7 +1068,6 @@ static int is_all_equ(int n[], int num)
  * 返回值表示有多少组.小于0 错误.
  * @param[out] amtr 表计参数数组.下标即序号(表号)
  * @param[in] wp 页面
- * @param[in] query post来的表计参数值字符串,(所有)
  * @param[out] e 输出错误数组,每个元素表示一个表,每以位表示这个表的某一相参数的错误,1错误,0正确.
  * @retval 大于0整数:参数数组个数
  * @retval 小于0 :错误代码
@@ -1597,7 +1595,6 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 /**
  * 从页面获取监视参数,保存到文件
  * @param wp
- * @param sysparam
  * @return
  */
 int webRece_monparas(webs_t wp)
@@ -1831,7 +1828,8 @@ int webRece_netparas(webs_t wp)
 
 /**
  * 从页面获取系统参数，保存到文件．同时更新全局变量．
- * @param wp
+ * @param[in] wp
+ * @param[out] sysparam
  * @return
  */
 int webRece_syspara(webs_t wp, stSysParam * sysparam)
@@ -1894,6 +1892,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 /**
  * 向页面写系统参数,各项数据以json对象形式,客户端解析并添加到指定的框中
  * @param wp
+ * @param sysparam
  * @return
  */
 int webSend_syspara(webs_t wp, stSysParam sysparam)
@@ -1984,7 +1983,6 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 /**
  * 从页面接收所有表计参数,保存到服务器端文件中
  * @param wp
- * @param mtrnum
  * @return
  */
 int webRece_mtrparams(webs_t wp)
