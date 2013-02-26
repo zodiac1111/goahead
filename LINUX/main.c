@@ -158,7 +158,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	char * init = websGetVar(wp, T("init"), T("null"));
 	websHeader_pure(wp);
 	if (*init=='1') {
-		webSend_syspara(wp, sysparam);
+		webSend_syspara(wp);
 	} else {
 		webRece_syspara(wp, &sysparam);
 	}
@@ -223,6 +223,11 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 表计参数项目表头表单提交函数.
+ * 列举:
+ *  所有的规约名称(用于规约选择)
+ *  所有的串口方案名称(用于选择串口方案)
+ *  所有的生产厂家名称(用于选择表计的厂家)
+ * @todo 数据格式化
  * @param wp
  * @param path
  * @param query
@@ -620,6 +625,7 @@ static int initWebs(void)
 	///form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
+	///@todo 表计参数的数据项,若使用json可以自描述就不需要描述项了
 	websFormDefine(T("mtr_items"), form_mtr_items);
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
@@ -1895,8 +1901,9 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
  * @param sysparam
  * @return
  */
-int webSend_syspara(webs_t wp, stSysParam sysparam)
+int webSend_syspara(webs_t wp)
 {
+	stSysParam sysparam;
 	int ret = load_sysparam(&sysparam, CFG_SYS);
 	if (ret==-1) {
 		web_err_proc(EL);
@@ -1945,6 +1952,7 @@ int webSend_syspara(webs_t wp, stSysParam sysparam)
  * @param wp 页面
  * @param mtrnum 一共有的表计个数
  * @return
+ * @todo 数据格式修改,只发送数据,不发送格式(样式)和行为(js函数).
  */
 int webSend_mtrparams(webs_t wp, int mtrnum)
 {
@@ -2046,6 +2054,12 @@ int webSend_mtr_procotol(webs_t wp)
 	websWrite(wp, T("</td>\n"));
 	return 0;
 }
+/**
+ * 向客户端页面发送串口数据
+ * @param[out] wp
+ * @param[in] sysparam
+ * @return
+ */
 int webSend_mtr_sioplan(webs_t wp, stSysParam sysparam)
 {
 	int i;
@@ -2094,6 +2108,7 @@ int webRece_savecycle(webs_t wp)
  * 从文件读取储存周期,发送(写)到页面 .
  * @param wp
  * @return
+ * @todo 发送的数据格式修改,需要与前端配置修改格式.
  */
 int webSend_savecycle(webs_t wp)
 {

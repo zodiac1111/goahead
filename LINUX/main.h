@@ -50,7 +50,7 @@ void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 //各类大相
 int webRece_syspara(webs_t wp,stSysParam* sysparam);
-int webSend_syspara(webs_t wp, stSysParam sysparam);
+int webSend_syspara(webs_t wp);
 int webSend_mtr_sioplan(webs_t wp,stSysParam sysparam);
 int webSend_mtr_procotol(webs_t wp);
 int webSend_mtr_factory(webs_t wp);
