@@ -104,9 +104,6 @@ int listen_port_str2array(const char* str, u8 a[5]);
 int rtu_addr_str2array(const char* str, u8 a[4]);
 static int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
-
-//
-
 ////设置函数
 int printf_webs_app_dir(void);
 int load_web_root_dir(char* webdir);
@@ -116,4 +113,11 @@ static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
 static void sigintHandler(int);
+union semun
+{
+	int val;
+	struct semid_ds *buf;
+	unsigned short int *array;
+	struct seminfo *__buf;
+};
 #endif /* MAIN_H_ */

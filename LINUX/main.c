@@ -3,9 +3,9 @@
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
  * Copyright (c) GoAhead Software Inc., 1995-2010. All Rights Reserved.
  * See the file "license.txt" for usage and redistribution license requirements
- * @todo 尽量只操作处理数据,样式和行为应该交给前端控制.
+ * @todo 尽量只操作处理数据,样式和行为应该交给前端控制.[表计参数和储存周期部分未完成]
  * @todo 给前端发送的数据可以使用JSON.接收前端的数据就还是使用goahead的getVal吧.
- * 后端仅进行一些必要的数值合法性验证.
+ * 	后端仅进行一些必要的数值合法性验证.
  */
 #include "../uemf.h"
 #include "../wsIntrn.h"
@@ -58,13 +58,7 @@ static int procotol_num = MAX_PROCOTOL_NUM;
 static char *mon_port_name[MAX_MON_PORT_NUM];
 ///规约文件中的实际规约数,初始化为最大
 static int mon_port_num = MAX_MON_PORT_NUM;
-union semun
-{
-	int val;
-	struct semid_ds *buf;
-	unsigned short int *array;
-	struct seminfo *__buf;
-};
+
 struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
@@ -98,7 +92,7 @@ int main(int argc __attribute__ ((unused)),
 	 * is required, malloc will be used for the overflow.
 	 * 初始化并分配内存,如果内存不足可以在这里多分配一些.
 	 */
-	bopen(NULL, (600*1024), B_USE_MALLOC);
+	bopen(NULL, (60*1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN );
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
@@ -123,6 +117,7 @@ int main(int argc __attribute__ ((unused)),
 	printf(PREFIX_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
 	printf(PREFIX_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m with Browser.\n",WEBS_DEFAULT_PORT);
 	while (!finished) {
+		//PRINT_HERE
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
 			socketProcess(-1);
 		}
@@ -353,13 +348,14 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 
 		}
 		break;
-	case RET_SAMPLE_PROC:
+	case RET_SAMPLE_PROC:///@待定
 		system("killall hl3104_com ");
 		break;
 	case RET_RTU:
 		reflash_this_wp(wp, PAGE_RESET);
 #if __i386 == 1
-		system("ls");
+		//调试不要重启PC系统...
+		system("echo \"reboot ok\"");
 #else
 		system("reboot");
 #endif
@@ -414,12 +410,8 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
-/**
- * 接收客户端的日志文件
- * @param wp
- * @param path
- * @param query
- */
+
+/// 接收客户端的日志文件
 void form_save_log(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
@@ -736,8 +728,6 @@ static int initWebs(void)
 	/**
 	 * 注册asp函数,给予asp调用
 	 */
-	//websAspDefine(T("load_mtr_param"), asp_load_mtr_param);     ///加载表参数
-	//websAspDefine(T("read_mtr_no"), read_mtr_no);     ///读取表号
 	///form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
@@ -770,7 +760,6 @@ static int initWebs(void)
 		//return -1;
 	}
 	return 0;
-
 }
 /**
  * 写终端地址4个数字字符到页面.
@@ -828,18 +817,7 @@ static int webWrite_listen_port(webs_t wp, stMonparam monport)
 	websWrite(wp, T("\""));
 	return 0;
 }
-//static int webWrite_mon_no(webs_t wp, int no, stMonparam monport)
-//{
-//#if DEBUG_PRINT_MONPARAM
-//	printf("监视参数-监视参数序号:%x\n", no);
-//#endif
-//	websWrite(wp, T("<td>\n"));
-//	websWrite(wp, T(" <input type=text name=mon_no %s"
-//			" readonly=readonly size=1 value=%d>\n"), INPUT_CLASS,
-//	                no);
-//	websWrite(wp, T("</td>\n"));
-//	return 0;
-//}
+
 static int webWrite_commportList(webs_t wp)
 {
 #if DEBUG_PRINT_MONPARAM
@@ -1333,7 +1311,6 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 	if (ret!=0) {
 		return ret;
 	}
-//PRINT_HERE
 #if DEBUG_PRINT_MTRPARAM
 	printf("record num[0]=%d\n", n[0]);
 #endif
@@ -1455,12 +1432,9 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		for (j = 0; j<PWD_LEN; j++) {
 			amtr[i].pwd[j] -= 0x30;
 		}
-		//PRINT_HERE
 		//print_array(webWrite_line[i], LINE_LEN);
 		//print_array(amtr[i].webWrite_line, LINE_LEN);
-
 	}
-//PRINT_HERE
 	return n[0];
 }
 /**
@@ -2026,14 +2000,6 @@ int webSend_syspara(webs_t wp)
 		web_err_proc(EL);
 		return -1;
 	}
-	/*
-	 websWrite(wp, T("%u,"), sysparam.meter_num);
-	 websWrite(wp, T("%u,"), sysparam.sioplan_num);
-	 websWrite(wp, T("%u,"), sysparam.monitor_ports);
-	 websWrite(wp, T("%u,"), sysparam.netports_num);
-	 websWrite(wp, T("%u,"), sysparam.sioports_num);
-	 websWrite(wp, T("%u"), sysparam.control_ports);
-	 */
 	/*JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
 	 在线解析网站: http://jsoneditoronline.org/
 	 前端使用eval 或者JSON.parse即可解析.传递类似下面的文本
