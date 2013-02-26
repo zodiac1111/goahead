@@ -8,7 +8,7 @@
 # 最后打包成如下结构
 # ./goahead/		<-目录
 # ./wwwdemo/		<-目录
-# ./说明.txt		<-文件
+# ./README.txt		<-文件
 major=`cat version.h |grep -i major|awk -F ' ' '{print $3}'`
 minor=`cat version.h |grep -i minor|awk -F ' ' '{print $3}'`
 patchlevel=`cat version.h |grep -i patchlevel|awk -F ' ' '{print $3}'`
@@ -20,6 +20,6 @@ cd /samba_folder \
 && tar --exclude .git* -jcf  $filename \
        	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
 	-C '/home/lee/workspace' goahead \
-	-C '/home/lee/文档' 说明.txt \
+	-C '/home/lee/workspace' README.txt \
 && echo -e \
 "\e[32m[成功]\e[0m 生成文件:\e[31m`pwd`/$filename\e[0m"
