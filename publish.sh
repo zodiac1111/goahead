@@ -21,7 +21,7 @@ if [ r"$1" = r"dev" ] ; then
 	&& tar -jvcf  $filename \
        		-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
 		-C '/home/lee/workspace' goahead \
-		-C '/home/lee/workspace' README.txt index.html \
+		-C '/home/lee/workspace' README.txt \
 	&& echo -e \
 		"\e[32m[成功]\e[0m 生成文件:\e[31m`pwd`/$filename\e[0m"
 else
@@ -31,7 +31,7 @@ else
 	&& tar --exclude .git* -jvcf  $filename \
 	       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
 		-C '/home/lee/workspace' goahead \
-		-C '/home/lee/workspace' README.txt index.html \
+		-C '/home/lee/workspace' README.txt \
 	&& echo -e \
 		"\e[32m[成功]\e[0m 生成文件:\e[31m`pwd`/$filename\e[0m"
 fi
