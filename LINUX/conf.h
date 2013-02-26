@@ -59,13 +59,13 @@
 	}
 //打印版本信息
 #define PRINT_VERSION { 					\
-		printf("\tVersion:\e[32m%d.%d.%d\e[0m"	\
-			"[\e[31m%s\e[0m]\n", 	 \
+		printf("\tVersion:\t\e[32m%d.%d.%d\e[0m"	\
+			" [\e[31m%s\e[0m]\n", 	 \
 		MAJOR, MINOR, PATCHLEVEL,GIT_VERSION); 		\
 	}
 //打印编译构建的日期和时间，类似：Dec  3 2012 09:59:57
 #define PRINT_BUILD_TIME {					\
-		printf("\tBuild time:\e[32m%s %s\e[0m\n",	\
+		printf("\tBuild time:\t\e[32m%s %s\e[0m\n",	\
 		 __DATE__, __TIME__);		\
 	}
 

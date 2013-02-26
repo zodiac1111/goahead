@@ -7,7 +7,7 @@
 #
 #
 #默认目标:开发版本/发布版本
-default: debug
+default:  debug
 
 #所有,包括发布版本和文档
 all:gold doc

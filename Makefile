@@ -1,5 +1,5 @@
 #主目录的Makefile文件,用于总体掌控,各项实现均在/LINUX下的Makefile实现.
-default:
+default:version
 	make -C ./LINUX
 all:
 	make -C ./LINUX all
