@@ -6,16 +6,7 @@
  */
 #ifndef CONF_H_
 #define CONF_H_
-//版本信息
-#ifndef MAJOR
-#define MAJOR 1 ///<库版本号:主版本号
-#endif
-#ifndef MINOR
-#define MINOR 0 ///<库版本号:次版本号
-#endif
-#ifndef PATCHLEVEL
-#define PATCHLEVEL 3 ///<库版本号:修订号
-#endif
+#include <version.h>
 //调试信息开关.用于打印一些信息. 1 表示开启此项调试信息;0 表示关闭.
 #define DEBUG_INFO_FORM 1 ///<表单提交函数的信息,每个/次表单提交打印一次提交的内容
 #define DEBUG_PARSE_CONF_FILE 0 ///<解析配置文件时的调试信息(goahead.conf),

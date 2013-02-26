@@ -12,6 +12,7 @@ doc:
 
 distclean:
 	make -C ./LINUX distclean
-
-publish:
-	./publish.sh  $V
+version:
+	./makeversion.sh
+publish:version
+	./publish.sh 
