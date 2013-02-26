@@ -12,7 +12,7 @@ echo "LOCALVER:" $LOCALVER
 
 if [ $LOCALVER \> 1 ]  ; then
     VER=`git rev-list origin/master | sort | join config.git-hash - | wc -l | awk '{print $1}'`
-    PATHLEVEL=$VER
+    PATHLEVEL=$LOCALVER
     if [ $VER != $LOCALVER ]  ; then
         VER="$VER+$(($LOCALVER-$VER))"
     fi

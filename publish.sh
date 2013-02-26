@@ -28,7 +28,7 @@ else
 	filename=webs-$major.$minor.$patchlevel.tar.bz2 
 	echo "Filename:"$filename "正在打包[发布版本](packing)..."
 	cd /samba_folder \
-	&& tar --exclude .git* -jcf  $filename \
+	&& tar --exclude .git* -jvcf  $filename \
 	       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
 		-C '/home/lee/workspace' goahead \
 		-C '/home/lee/workspace' README.txt index.html \
