@@ -1,6 +1,6 @@
 #!/bin/bash 
 #使用的文件模板
-VER_FILE_TEMPLATE=version.h.template
+VER_FILE_TEMPLATE=version-template.h
 #替换模板文件中的文字
 
 #生成的版本文件名

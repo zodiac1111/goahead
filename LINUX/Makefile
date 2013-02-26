@@ -15,8 +15,12 @@ all:gold doc
 #清除
 clean:
 	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
+	rm -f err.log log.txt 
+	rm -f ../log.txt 
 distclean:clean
 	rm -rf html
+	rm -rf ../version.h
+	rm -rf *~ ../*~
 #文档	
 doc:UPDATE-EVERY-TIME
 	doxygen Doxyfile
