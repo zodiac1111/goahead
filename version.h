@@ -9,5 +9,5 @@
 #define MAJOR 1
 #define MINOR 0
 #define PATCHLEVEL 170
-#define GIT_VERSION "r170+1-bb2b237"
+#define GIT_VERSION "r170+2-7f82e1f"
 #endif // VERSION_H
