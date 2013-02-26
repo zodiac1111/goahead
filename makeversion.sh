@@ -12,6 +12,7 @@ echo "LOCALVER:" $LOCALVER
 
 if [ $LOCALVER \> 1 ]  ; then
     VER=`git rev-list origin/master | sort | join config.git-hash - | wc -l | awk '{print $1}'`
+    PATHLEVEL=$VER
     if [ $VER != $LOCALVER ]  ; then
         VER="$VER+$(($LOCALVER-$VER))"
     fi
@@ -19,24 +20,25 @@ if [ $LOCALVER \> 1 ]  ; then
         VER="${VER}M"
     fi
     #VER="$VER $(git rev-list HEAD -n 1 | cut -c 1-7)"
-    PATHLEAVE=r$VER
     VER="$VER-$(git rev-list HEAD -n 1 | cut -c 1-7)"
-    GIT_VERSION=$VER
+    GIT_VERSION=r$VER
 else
-    PATHLEAVE=
+    PATHLEVEL=
     GIT_VERSION=
     VER="x"
 fi
 rm -f config.git-hash
 
-echo "VER: " $VER
-echo "GIT_VERSION: " $GIT_VERSION
-echo "Generated" $VER_FILE 
+echo -e "PATHLEVEL:\e[31m" $PATHLEVEL "\e[0m"
+echo -e "VER:\e[31m"  $VER "\e[0m"
+echo -e "GIT_VERSION:\e[31m"  $GIT_VERSION "\e[0m"
+echo -e "Generated\e[31m" $VER_FILE  "\e[0m"
 
 #git log --pretty=format:'[%h] %ad %s' --date=short  > dev.log
 #echo `git log --pretty=format:'%ad(%h)%s.\n' --date=short` |
 #sed -e 's/\\n/\n/g'
 #生成并替换相应的字段
 cat $VER_FILE_TEMPLATE | \
-sed "s/\$PATHLEAVE/$PATHLEAVE/g" > $VER_FILE 
+sed "s/\$PATHLEAVE/$PATHLEVEL/g" |
+sed "s/\$GIT_VERSION/$GIT_VERSION/g" > $VER_FILE 
 

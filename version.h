@@ -8,6 +8,6 @@
 #define _VERSION_H_
 #define MAJOR 1
 #define MINOR 0
-#define PATCHLEVEL r167
-#endif
+#define PATCHLEVEL "167"
+#define GIT_VERSION "r167+2-0cd3a1b"
 #endif // VERSION_H

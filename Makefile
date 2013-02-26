@@ -12,9 +12,13 @@ doc:
 
 distclean:
 	make -C ./LINUX distclean
+	
+#生成版本号	
 version:
 	./makeversion.sh
-publish:version
+
+#用于打包
+publish:version  all
 	./publish.sh 
 log:
 	echo "生成开发日志 dev.log "

@@ -14,10 +14,10 @@ minor=`cat version.h |grep -i minor|awk -F ' ' '{print $3}'`
 patchlevel=`cat version.h |grep -i patchlevel|awk -F ' ' '{print $3}'`
 #
 filename=web-release-$major.$minor.$patchlevel.tar.bz2 
-echo "filename:"$filename
+echo "Filename:"$filename "正在打包(packing)..."
 #exit -1
 cd /samba_folder \
-&& tar --exclude .git* -jcvf  $filename \
+&& tar --exclude .git* -jcf  $filename \
        	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
 	-C '/home/lee/workspace' goahead \
 	-C '/home/lee/文档' 说明.txt \
