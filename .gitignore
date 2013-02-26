@@ -11,7 +11,7 @@ log.txt
 *.orig
 *.a
 *.log*
-#version.h
+version.h
 /LINUX/webs
 /LINUX/log.txt
 /LINUX/html/*
