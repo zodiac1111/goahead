@@ -15,7 +15,7 @@ all:gold doc
 #清除
 clean:
 	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
-	rm -f err.log log.txt 
+	rm -f err.log log.txt trace.txt ../trace.txt 
 	rm -f ../log.txt 
 distclean:clean
 	rm -rf html

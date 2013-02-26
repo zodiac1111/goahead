@@ -28,15 +28,17 @@ if [ r"$1" = r"dev" ] ; then
 		"\e[32m[成功]\e[0m 生成文件:\e[31m`pwd`/$filename\e[0m"
 else
 #用于安装使用的版本
+#使用类似 --exclude="*.[ch]" \ 的语句排除不需要打开的文件.
 	filename=webs-$major.$minor.$patchlevel.tar.bz2 
 	echo "Filename:"$filename "正在打包[发布版本](packing)..."
 	cd /samba_folder \
-	&& tar --exclude .git* \
-		--exclude .settings* \
-		--exclude .cproject  \
-		--exclude .project \
+	&& tar --exclude=".*" \
+		--exclude="*~" \
+		--exclude="*.o" \
+		--exclude="*.a" \
+		--exclude="*.log" \
 	       	-jvcf  $filename \
-	       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
+	       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo \
 		-C '/home/lee/workspace' goahead \
 		-C '/home/lee/workspace' README.txt \
 	&& echo -e \
