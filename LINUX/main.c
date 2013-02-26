@@ -214,7 +214,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
-		webSend_netparas(wp, sysparam);
+		webSend_netparas(wp, sysparam.netports_num);
 	} else {
 		webRece_netparas(wp);
 	}
@@ -1751,27 +1751,29 @@ int portstr2u8(const char * str, u8* val)
 	return i+1;
 }
 /**
- * 显示网口参数(所有): 文件->页面
- * @param wp
- * @param sysparam
+ * 将所有网口参数数据:
+ * 1.从文件中读取到内存中
+ * 2.以json的格式发送的客户端页面(wp)
+ * @param[out] wp 客户端页面结构体
+ * @param[in] netParamNum 网口的个数
  * @return
- * @note 使用json格式传输数据,使数据与样式无关
+ * @note 使用json格式传输数据,使数据与样式无关,示例格式参见/doc下 @ref json-date-example
  */
-int webSend_netparas(webs_t wp, stSysParam sysparam)
+int webSend_netparas(webs_t wp, int netParamNum)
 {
-	int no;
+	int i;
 	stNetparam netparam;
 	//使用json,仅传输数据.样式和行为交由前端控制,易于扩展
-	///@note eth_num 或许和下面的数据元素个数冗余
-	websWrite(wp, T("{\"eth_num\":\"%d\","), sysparam.netports_num);
+	///@note eth_num 或许和下面的数据元素个数冗余,待定
+	websWrite(wp, T("{\"eth_num\":\"%d\","), netParamNum);
 	websWrite(wp, T("\"item\":["));
-	for (no = 0; no<sysparam.netports_num; no++) {
-		if (-1==load_netparam(&netparam, CFG_NET, no)) {
+	for (i = 0; i<netParamNum; i++) {
+		if (-1==load_netparam(&netparam, CFG_NET, i)) {
 			web_err_proc(EL);
 			continue;
 		}
 		websWrite(wp, T("{"));
-		websWrite(wp, T("\"no\":\"%d\","), no);
+		websWrite(wp, T("\"no\":\"%d\","), i);
 		websWrite(wp, T("\"eth\":\"%d\","), netparam.no);
 		webWrite_ip(wp, "ip", netparam.ip);
 		websWrite(wp, T(","));
@@ -1779,7 +1781,7 @@ int webSend_netparas(webs_t wp, stSysParam sysparam)
 		websWrite(wp, T(","));
 		webWrite_ip(wp, "gateway", netparam.gateway);
 		websWrite(wp, T("}"));
-		if (no!=sysparam.netports_num-1) {
+		if (i!=netParamNum-1) {
 			websWrite(wp, T(","));
 		}
 	}
@@ -1898,7 +1900,6 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 /**
  * 向页面写系统参数,各项数据以json对象形式,客户端解析并添加到指定的框中
  * @param wp
- * @param sysparam
  * @return
  */
 int webSend_syspara(webs_t wp)

@@ -27,7 +27,7 @@
 #define MTR_UPDATE  4
 #define MAX_MTR_NUM 256 ///<最大表计个数
 #define PAGE_RESET "/um/Reset.asp"///重启页面
-#define INPUT_CLASS " class=ntx "
+//#define INPUT_CLASS " class=ntx "
 #define CHKBOX_ONCLICK " onclick=\"chk_change(event);\" "
 //提交表单函数定义
 void form_server_time(webs_t wp, char_t *path, char_t *query);
@@ -61,13 +61,14 @@ int webRece_mtrparams(webs_t wp);
 int webSend_mtrparams(webs_t wp, int mtrnum);
 int webSend_sioplans(webs_t wp, stSysParam sp);
 int webRece_sioplans(webs_t wp);
-int webSend_netparas(webs_t wp, stSysParam sysparam);
+int webSend_netparas(webs_t wp, int netParamNum);
 int webRece_netparas(webs_t wp);
 int webSend_monparas(webs_t wp, stSysParam sysparam);
 int webRece_monparas(webs_t wp);
 int webSend_txtfile(webs_t wp, const char*file);
 int webRece_txtfile(webs_t wp, char_t *query, const char* file);
-//表计参数页面 小相
+//表计参数页面 小项目
+///@todo 表计参数所有数据传输方式都需要使用json格式
 static int webWrite_mtrno(webs_t wp, int no);
 static int webWrite_line(webs_t wp, stMtr mtr);
 static int webWrite_mtraddr(webs_t wp, stMtr mtr);
@@ -88,29 +89,13 @@ static int webWrite_factory(webs_t wp, stMtr mtr);
 static int webWrite_iv(webs_t wp, stMtr mtr);
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
 //串口方案项目
-//static int webWrite_plan_no(webs_t wp, int no, stUart_plan plan);
-//static int webWrite_parity(webs_t wp, int no, stUart_plan plan);
-//static int webWrite_dat_bit(webs_t wp, int no, stUart_plan plan);
-//static int webWrite_stop_bit(webs_t wp, int no, stUart_plan plan);
-//static int webWrite_baud(webs_t wp, int no, stUart_plan plan);
-//static int webWrite_commtype(webs_t wp, int no, stUart_plan plan);
 //网口参数
-//static int webWrite_net_no(webs_t wp, int no, stNetparam netparam);
-//static int webWrite_eth(webs_t wp, int net_num, stNetparam netparam);
 static int webWrite_ip(webs_t wp, char *name, u8* value);
-//static int webWrite_mask(webs_t wp, int no, stNetparam netparam);
-//static int webWrite_gateway(webs_t wp, int no, stNetparam netparam);
 //监视端口参数
-
-//static int webWrite_mon_no(webs_t wp, int no, stMonparam monport);
 static int webWrite_commportList(webs_t wp);
 static int webWrite_listen_port(webs_t wp, stMonparam monport);
-//static int webWrite_portplan(webs_t wp, int sioplan_num, stMonparam monport);
 static int webWrite_porttype(webs_t wp);
 static int webWrite_rtu_addr(webs_t wp, stMonparam monport);
-//static int webWrite_timesyn(webs_t wp, int no, stMonparam monport);
-//static int webWrite_forward_enable(webs_t wp, int no, stMonparam monport);
-//static int webWrite_forward_mtr_num(webs_t wp, int no, stMonparam monport);
 ///其他
 static int split(char **ret, char* in);
 static int is_all_equ(int n[], int num);
@@ -126,7 +111,6 @@ char * point2next(char** s, const char split);
 int printf_webs_app_dir(void);
 int load_web_root_dir(char* webdir);
 char *trim(char in[], int len);
-int printf_webs_app_dir(void);
 int load_web_root_dir(char* webdir);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
