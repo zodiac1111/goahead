@@ -16,3 +16,6 @@ version:
 	./makeversion.sh
 publish:version
 	./publish.sh 
+log:
+	echo "生成开发日志 dev.log "
+	git log --pretty=format:'[%h] %ad %s' --date=short  > dev.log
