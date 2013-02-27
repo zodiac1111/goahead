@@ -61,19 +61,9 @@ static int mon_port_num = MAX_MON_PORT_NUM;
 struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
+static char* errlog=NULL; ///配置项(错误日志文件路径)
 #define JSON 1
 //#pragma  GCC diagnostic warning  "-Wunused-parameter"
-/**
- * 初始化信号量,用于进程间的控制,目前用于监视报文的启动和停止.
- */
-void init_semun(void)
-{
-	///申请信号量组，包含1个信号量
-	semid = semget(1000, 1, 0666|IPC_CREAT);
-	sem.val = 1;
-	///初始化0号信号量为1,起始便有一个进程可以使用.
-	semctl(semid, 0, SETVAL, sem);
-}
 /**
  * webs主函数,所有业务逻辑在此实现.
  */
@@ -83,7 +73,6 @@ int main(int argc __attribute__ ((unused)),
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
-	char* errlog=NULL;
 	getconf("errlog",&errlog);
 	init_semun();     //初始化信号量,用于控制,未完善.
 	/*
@@ -124,7 +113,6 @@ int main(int argc __attribute__ ((unused)),
 		}
 		websCgiCleanup();
 		emfSchedProcess();
-		break;
 	}
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
@@ -140,20 +128,7 @@ int main(int argc __attribute__ ((unused)),
 	memLeaks();
 #endif
 	bclose();
-	//释放堆上分配的内存
-	if(errlog!=NULL){
-		free(errlog);
-		errlog=NULL;
-	}
-	int i;
-	for(i=0;i<mon_port_num;i++){
-		free(mon_port_name[i]);
-		mon_port_name[i]=NULL;
-	}
-	for(i=0;i<procotol_num;i++){
-		free(procotol_name[i]);
-		procotol_name[i]=NULL;
-	}
+	webs_free();
 	return 0;
 }
 /**
@@ -2394,5 +2369,46 @@ char *trim(char in[], int len)
 	}
 	in += i;
 	return in;
+}
+/**
+ * 初始化信号量,用于进程间的控制,目前用于监视报文的启动和停止.
+ */
+void init_semun(void)
+{
+	///申请信号量组，包含1个信号量
+	semid = semget(1000, 1, 0666|IPC_CREAT);
+	sem.val = 1;
+	///初始化0号信号量为1,起始便有一个进程可以使用.
+	semctl(semid, 0, SETVAL, sem);
+}
+/**
+ * 释放手动分配在堆上的内存.
+ * 主要包括:
+ * 1. 配置文件项占用的
+ * 2. 监视参数端口名称占用的.
+ * 3. 规约名称(如sx102这样的文本)所占用的.
+ */
+void webs_free(void)
+{
+	int i;
+	//配置文件项
+	if(errlog!=NULL){
+		free(errlog);
+		errlog=NULL;
+	}
+	//监视参数端口名称
+	for(i=0;i<mon_port_num;i++){
+		if(mon_port_name[i]!=NULL){
+			free(mon_port_name[i]);
+			mon_port_name[i]=NULL;
+		}
+	}
+	//规约名称
+	for(i=0;i<procotol_num;i++){
+		if(procotol_name[i]!=NULL){
+			free(procotol_name[i]);
+			procotol_name[i]=NULL;
+		}
+	}
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"
