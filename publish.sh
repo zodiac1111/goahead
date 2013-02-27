@@ -38,7 +38,7 @@ else
 		--exclude="*.a" \
 		--exclude="*.log" \
 	       	-zcf  $filename \
-	       	-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo \
+	       	-C '/home/lee/Aptana Studio 3 Workspace/' www \
 		-C '/home/lee/workspace' goahead \
 		-C '/home/lee/workspace' README.txt \
 	&& echo -e \

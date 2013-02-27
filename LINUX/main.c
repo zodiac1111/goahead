@@ -26,6 +26,7 @@
 #include <sys/sem.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <netdb.h>
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
@@ -70,6 +71,7 @@ static char* errlog=NULL; ///配置项(错误日志文件路径)
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
+	print_ip();
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
@@ -104,7 +106,8 @@ int main(int argc __attribute__ ((unused)),
 	finished = 0;
 	printf(WEBS_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
 	printf(WEBS_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
-	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m with Browser.\n",WEBS_DEFAULT_PORT);
+	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m"
+		"with Browser.\n",WEBS_DEFAULT_PORT);
 	while (!finished) {
 		//PRINT_HERE
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
@@ -582,7 +585,7 @@ char* getconf(const char const* name,char** value)
 		}
 	}
 	fclose(fp);
-	printf(WEBS_INF"Configure Item \e[33m%s\e[0m = \e[32m%s\e[0m\n"
+	printf(WEBS_INF"Item \e[33m%s\e[0m = \e[32m%s\e[0m\n"
 		, name,*value);
 	return *value;
 }
@@ -627,8 +630,8 @@ static int initWebs(void)
 	}
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
 	                (size_t) hp->h_length);
+
 	(void) printf_webs_app_dir();
-	//
 	if(getconf("wwwroot",&webdir)==NULL){
 		return -2;
 	}
@@ -2378,5 +2381,20 @@ void webs_free(void)
  */
 void response_ok(webs_t wp){
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
+}
+#include <stdio.h>
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <arpa/inet.h>
+int print_ip(void)
+{
+        struct hostent *he;
+        char hostname[20] = {0};
+        gethostname(hostname,sizeof(hostname));
+        he = gethostbyname(hostname);
+        printf("hostname=%s\n",hostname);
+        printf("%s\n",inet_ntoa(*(struct in_addr*)(he->h_addr)));
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"
