@@ -173,6 +173,10 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
 	time_t t = time(NULL );
 	printf("\t\t@%s", ctime(&t));
 	websHeader_pure(wp);
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if(strcmp(action,"get")==0){
+		///@todo 时间处理的函数
+	}
 	websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
 	websDone(wp, 200);
 	return;
@@ -187,11 +191,13 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action,"init")==0) {
 		webSend_sioplans(wp, sysparam);
-	} else {
+	} else if(strcmp(action,"set")==0) {
 		webRece_sioplans(wp);
+	} else {
+		web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
