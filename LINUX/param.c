@@ -71,6 +71,7 @@ int read_protocol_file(char *protocol_names[], int *max, const char* file)
 		//最多多少个规约,如果比预计的多了,返回错误.
 		if (i >= (*max)) {
 			web_errno = toomany_protocol_err;
+			fclose(fp);
 			return -1;
 		}
 		fgets(line, 255, fp);
@@ -93,6 +94,7 @@ int read_protocol_file(char *protocol_names[], int *max, const char* file)
 	for (i = 0; i < *max; i++) {
 		//printf("\t[%d]: %s\n", i, protocol_names[i]);
 	}
+	fclose(fp);
 	return 0;
 }
 /**
@@ -122,6 +124,7 @@ int init_monparam_port_name(char *port_name[], int *num, const char* file)
 	fseek(fp, 0, SEEK_SET);
 	while (ftell(fp) < flen) {
 		if (i >= (*num)) { //大于最大监视端口描述数量.
+			fclose(fp);
 			return -3;
 		}
 		fgets(line, 255, fp); //得到一行
@@ -142,6 +145,7 @@ int init_monparam_port_name(char *port_name[], int *num, const char* file)
 	for (i = 0; i < *num; i++) {
 		//printf("\t[%d]: %s\n", i, port_name[i]);
 	}
+	fclose(fp);
 	return 0;
 }
 /**
@@ -172,6 +176,7 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
 		PRINT_HERE
 		printf("mtrparam num no=%d\n", no);
 		web_errno = no_this_mtrparam;
+		fclose(fp);
 		return -1;
 	}
 	fseek(fp, sizeof(stMtr_File) * no, SEEK_SET);
@@ -180,16 +185,18 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_mtrcfgfile_err;
+		fclose(fp);
 		return -1;
 	}
-	fclose(fp);
 	//转化
 	ret = mtr_file2men(pmtr, &mtr_file);
 	if (ret != 0) {
 		PRINT_HERE
 		web_errno = mtr_file2men_err;
+		fclose(fp);
 		return -1;
 	}
+	fclose(fp);
 	return 0;
 }
 /**
@@ -238,6 +245,7 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 		perror("write");
 		PRINT_HERE
 		web_errno = write_mtrcfgfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -325,6 +333,7 @@ int load_sysparam(stSysParam * param, const char * file)
 		perror("open sysparam.cfg");
 		PRINT_HERE
 		web_errno = open_sysparam_file;
+		fclose(fp);
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -334,6 +343,7 @@ int load_sysparam(stSysParam * param, const char * file)
 	if (flen < (long int)sizeof(stSysParam)) {
 		PRINT_HERE
 		web_errno = sysfile_size_err;
+		fclose(fp);
 		return -1;
 	}
 	ret = fread(param, sizeof(stSysParam), 1, fp);
@@ -341,6 +351,7 @@ int load_sysparam(stSysParam * param, const char * file)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_sysfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -372,6 +383,7 @@ int load_stsparam(stSysParam * param, const char * file)
 	if (flen < sizeof(stSysParam)) {
 		PRINT_HERE
 		web_errno = sysfile_size_err;
+		fclose(fp);
 		return -1;
 	}
 	ret = fread(param, sizeof(stSysParam), 1, fp);
@@ -379,6 +391,7 @@ int load_stsparam(stSysParam * param, const char * file)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_sysfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -408,7 +421,7 @@ int save_sysparam(const stSysParam * param, const char * file)
 	///不应该小一个字节或者大一个字节.
 	ret = ftruncate(fd, sizeof(stSysParam));
 	if (ret != 0) {
-		perror("ftruncate");
+		fclose(fp);
 		PRINT_HERE
 		web_errno = write_sysfile_size_err;
 		return -1;
@@ -418,6 +431,7 @@ int save_sysparam(const stSysParam * param, const char * file)
 		perror("write");
 		PRINT_HERE
 		web_errno = write_sysfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -472,6 +486,7 @@ int load_sioplan(stUart_plan * plan, const char * file, int no)
 		PRINT_HERE
 		printf("sioplan no=%d\n", no);
 		web_errno = no_this_sioplan;
+		fclose(fp);
 		return -1;
 	}
 	fseek(fp, sizeof(stUart_plan) * no, SEEK_SET);
@@ -480,6 +495,7 @@ int load_sioplan(stUart_plan * plan, const char * file, int no)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_sioplan_cfgfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -524,6 +540,7 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no)
 		perror("write");
 		PRINT_HERE
 		web_errno= write_sioplan_cfgfile_err;
+		fclose(fp);
 		return(-1);
 	}
 	fclose(fp);
@@ -564,9 +581,10 @@ int save_monparam(const stMonparam * mon, const char * file, int no)
 	fseek(fp, sizeof(stMonparam) * no, SEEK_SET);		//指向特定的表参数
 	ret = fwrite(mon, sizeof(stMonparam), 1, fp);		//写入
 	if (ret != 1) {
-		perror(PREFIX_ERR"write");
+		perror(WEBS_ERR"write");
 		PRINT_HERE
 		web_errno= write_monparam_cfgfile_err;
+		fclose(fp);
 		return(-1);
 	}
 	fclose(fp);
@@ -610,6 +628,7 @@ int save_netport(const stNetparam * net, const char * file, int no)
 		perror("write");
 		PRINT_HERE
 		web_errno= write_netparam_cfgfile_err;
+		fclose(fp);
 		return(-1);
 	}
 	fclose(fp);
@@ -640,6 +659,7 @@ int load_netparam(stNetparam * netparam, const char * file, int no)
 		PRINT_HERE
 		printf("monparam no=%d\n", no);
 		web_errno = no_this_netparam;
+		fclose(fp);
 		return -1;
 	}
 	fseek(fp, sizeof(stNetparam) * no, SEEK_SET);
@@ -648,6 +668,7 @@ int load_netparam(stNetparam * netparam, const char * file, int no)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_netparam_cfgfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -679,6 +700,7 @@ int load_monparam(stMonparam * monparam, const char * file, int no)
 		PRINT_HERE
 		printf("monparam no=%d\n", no);
 		web_errno = no_this_monparam;
+		fclose(fp);
 		return -1;
 	}
 	fseek(fp, sizeof(stMonparam) * no, SEEK_SET);
@@ -687,6 +709,7 @@ int load_monparam(stMonparam * monparam, const char * file, int no)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_monparam_cfgfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);
@@ -715,6 +738,7 @@ int load_savecycle(stSave_cycle sav[], const char * file)
 	if (flen != sizeof(stSave_cycle) * SAVE_CYCLE_ITEM) {
 		PRINT_HERE
 		web_errno = savecycle_cfgfile_size_err;
+		fclose(fp);
 		return -1;
 	}
 	ret = fread(sav, sizeof(stSave_cycle)* SAVE_CYCLE_ITEM, 1, fp);
@@ -722,6 +746,7 @@ int load_savecycle(stSave_cycle sav[], const char * file)
 		perror("read");
 		PRINT_HERE
 		web_errno = read_savecycle_cfgfile_err;
+		fclose(fp);
 		return -1;
 	}
 	fclose(fp);

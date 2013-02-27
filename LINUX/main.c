@@ -83,6 +83,8 @@ int main(int argc __attribute__ ((unused)),
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
+	char* errlog=NULL;
+	getconf("errlog",&errlog);
 	init_semun();     //初始化信号量,用于控制,未完善.
 	/*
 	 * Initialize the memory allocator. Allow use of malloc and start
@@ -98,11 +100,11 @@ int main(int argc __attribute__ ((unused)),
 
 	//Initialize the web server 初始化web服务器
 	if (initWebs()<0) {
-		printf(PREFIX_ERR"init Webs.\n");
+		printf(WEBS_ERR"init Webs.\n");
 														return -1;
 	}
 #ifdef WEBS_SSL_SUPPORT
-	printf(PREFIX_INF"SSL support\n");
+	printf(WEBS_INF"SSL support\n");
 	websSSLOpen();
 	/* websRequireSSL("/"); *//* Require all files be served via https */
 #endif
@@ -112,9 +114,9 @@ int main(int argc __attribute__ ((unused)),
 	 * will actually do the servicing.
 	 */
 	finished = 0;
-	printf(PREFIX_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
-	printf(PREFIX_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
-	printf(PREFIX_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m with Browser.\n",WEBS_DEFAULT_PORT);
+	printf(WEBS_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
+	printf(WEBS_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
+	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m with Browser.\n",WEBS_DEFAULT_PORT);
 	while (!finished) {
 		//PRINT_HERE
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
@@ -122,6 +124,7 @@ int main(int argc __attribute__ ((unused)),
 		}
 		websCgiCleanup();
 		emfSchedProcess();
+		break;
 	}
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
@@ -137,6 +140,20 @@ int main(int argc __attribute__ ((unused)),
 	memLeaks();
 #endif
 	bclose();
+	//释放堆上分配的内存
+	if(errlog!=NULL){
+		free(errlog);
+		errlog=NULL;
+	}
+	int i;
+	for(i=0;i<mon_port_num;i++){
+		free(mon_port_name[i]);
+		mon_port_name[i]=NULL;
+	}
+	for(i=0;i<procotol_num;i++){
+		free(procotol_name[i]);
+		procotol_name[i]=NULL;
+	}
 	return 0;
 }
 /**
@@ -469,7 +486,7 @@ void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 void form_msg(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	printf(PREFIX_WAR"This function is being debugged.\n");
+	printf(WEBS_WAR"This function is being debugged.\n");
 	pid_t pid;
 	if ((pid = fork())==0) {
 		websHeader_pure(wp);
@@ -510,7 +527,7 @@ void form_msg(webs_t wp, char_t *path, char_t *query)
 void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	printf(PREFIX_WAR"This function is being debugged.\n");
+	printf(WEBS_WAR"This function is being debugged.\n");
 	websHeader_pure(wp);
 	sb.sem_num = 0;     //将0号信号量
 	sb.sem_op = -1;     //减1
@@ -531,9 +548,9 @@ int printf_webs_app_dir(void)
 	int count = readlink("/proc/self/exe", dir, 128);
 	if (count<0||count>128) {
 		PRINT_RET(count);
-		printf(PREFIX_ERR"%s\n", __FUNCTION__);
+		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
-	printf(PREFIX_INF"App dir:\e[32m%s\e[0m\n", dir);
+	printf(WEBS_INF"App dir:\e[32m%s\e[0m\n", dir);
 	return 0;
 }
 
@@ -560,7 +577,7 @@ int load_web_root_dir(char* webdir)
 #endif
 	FILE* fp = fopen(CONF_FILE, "r");
 	if (fp==NULL ) {
-		perror(PREFIX_ERR"open file goahead.conf");
+		perror(WEBS_ERR"open file goahead.conf");
 		return -1;
 	}
 	while (!feof(fp)) {
@@ -585,36 +602,38 @@ int load_web_root_dir(char* webdir)
 		if (strcmp(name, "wwwroot")==0) {
 			strcpy(webdir, value);
 #if DEBUG_PARSE_CONF_FILE
-			printf(PREFIX_INF"Web root dir is:\"%s\"\n", webdir);
+			printf(WEBS_INF"Web root dir is:\"%s\"\n", webdir);
 #endif
 		}
 	}
 	fclose(fp);
-	printf(PREFIX_INF"Web root dir:\e[32m%s\e[0m\n", webdir);
+	printf(WEBS_INF"Web root dir:\e[32m%s\e[0m\n", webdir);
 	return 0;
 }
 /** 通用读取配置文件项函数.
  * 读取类似 name = value 这样的配置项
  * 输入一个项目名称字符串,输出这个项目的值(字符串)
  * 暂时配有被使用,因为需要修改很多关联的地方.
+ * 用完要free!
  * 例子:
  *	char* val = getconf("paradir");
  *	if (val==NULL) {
  *		printf("paradir is not set.");
  *	}
- * @param name
+ * @param name 名字,const
+ * @param value 值的指针,函数内部修改
  * @retval NULL 没有这个项,或则其他错误情况
  * @retval 其他 指向一个字符串的指针.这个字符串即项的值
  * @return
  */
-char* getconf( char const* name)
+char* getconf(const char const* name,char** value)
 {
 	//配置文件定义为 一行一条, 以 变量名=变量值的形式
 	/** @bug 为了方便起见在栈上分配固定大小内存用于存储配置字符串.
 	 * 限制了配置项的长度,且过长可能溢出.更好的方式是使用malloc在堆上分配,
 	 * realloc动态调整大小,能够使适用范围更广.
 	 */
-	char* value=NULL;
+	//char* value=NULL;
 	char line[256] = { 0 };
 	char n[256] = { 0 };
 	char v[256] = { 0 };
@@ -624,7 +643,7 @@ char* getconf( char const* name)
 
 	FILE* fp = fopen(CONF_FILE, "r");
 	if (fp==NULL ) {
-		perror(PREFIX_ERR"open file goahead.conf");
+		perror(WEBS_ERR"open file goahead.conf");
 		return NULL;
 	}
 	while (!feof(fp)) {
@@ -640,13 +659,13 @@ char* getconf( char const* name)
 		pname = trim(n, strlen(n));//去除前导和后导空白符
 		pvalue = trim(v, strlen(v));
 		if (strcmp(pname, name)==0) {
-			value=(char*)malloc(strlen(pvalue)+1);
-			strcpy(value, pvalue);
+			*value=(char*)malloc(strlen(pvalue)+1);
+			strcpy(*value, pvalue);
 		}
 	}
 	fclose(fp);
-	printf(PREFIX_INF"read conf: %s=\e[32m%s\e[0m\n", name,value);
-	return 0;
+	printf(WEBS_DBG"read conf: %s=\e[32m%s\e[0m\n", name,*value);
+	return *value;
 }
 /**
  * Initialize the web server.

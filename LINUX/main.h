@@ -17,7 +17,7 @@
 
 #if DEBUG_INFO_FORM
 ///打印form表单提交函数的入口信息:函数名,传递进来的队列
-#define PRINT_FORM_INFO printf(PREFIX_INF"%s:%s\n", __FUNCTION__,query)
+#define PRINT_FORM_INFO printf(WEBS_INF"%s:%s\n", __FUNCTION__,query)
 #else
 #define PRINT_FORM_INFO
 #endif
@@ -105,6 +105,7 @@ int rtu_addr_str2array(const char* str, u8 a[4]);
 static int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
 ////设置函数
+char* getconf(const char const* name,char** value);
 int printf_webs_app_dir(void);
 int load_web_root_dir(char* webdir);
 char *trim(char in[], int len);

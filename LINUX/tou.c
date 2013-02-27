@@ -105,7 +105,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		                stTime.tm_mday, TOU_DAT_SUFFIX);
 		fp = fopen(file, "r");
 		if (fp==NULL) {	//这一天没有数据,直接跳到次日零点,这不是错误
-			printf(PREFIX_INF"%d:%04d-%02d-%02d没有数据文件\n",
+			printf(WEBS_INF"%d:%04d-%02d-%02d没有数据文件\n",
 			                mtr_no, stTime.tm_year+1900, stTime.tm_mon+1
 			                                , stTime.tm_mday);
 			web_errno = open_tou_file;
@@ -156,7 +156,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
 
 		if (ftell(fp)>=flen) {
-			printf(PREFIX_INF"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
+			printf(WEBS_INF"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
 			                ftell(fp), file);
 			t2 += (minCycle_t*60);
 			fclose(fp);

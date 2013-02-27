@@ -21,9 +21,10 @@
 #define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
-#define PREFIX_INF PREFIX"Info " ///<一般信息
-#define PREFIX_WAR PREFIX"\e[33mWarning\e[0m " ///<警告信息
-#define PREFIX_ERR PREFIX"\e[31mError\e[0m " ///<错误信息
+#define WEBS_DBG PREFIX"\e[33mDebug\e[0m " ///<调试信息
+#define WEBS_INF PREFIX"Info " ///<一般信息
+#define WEBS_WAR PREFIX"\e[33mWarning\e[0m " ///<警告信息
+#define WEBS_ERR PREFIX"\e[31mError\e[0m " ///<错误信息
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件
