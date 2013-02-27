@@ -146,9 +146,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(action,"init")==0) {
 		webSend_syspara(wp);
 	} else {
-		if(webRece_syspara(wp, &sysparam)==0){
-			websWrite(wp, T("{\"ret\"=\"ok\"}"));
-		}
+		webRece_syspara(wp, &sysparam);
 	}
 	websDone(wp, 200);
 	return;
@@ -531,62 +529,6 @@ int printf_webs_app_dir(void)
 	return 0;
 }
 
-/**
- * 服务器配置文件读取,设置.
- * @param webdir
- * @return
- */
-int load_web_root_dir(char* webdir)
-{
-	//配置文件定义为 一行一条, 以 变量名=变量值的形式
-	/** @bug 为了方便起见在栈上分配固定大小内存用于存储配置字符串.
-	 * 限制了配置项的长度,且过长可能溢出.更好的方式是使用malloc在堆上分配,
-	 * realloc动态调整大小,能够使适用范围更广.
-	 */
-	char line[256] = { 0 };
-	char var[256] = { 0 };
-	char val[256] = { 0 };
-	char *name = NULL;
-	char *value = NULL;
-	int strnum = 0;
-#if DEBUG_PARSE_CONF_FILE
-	int i = 0;
-#endif
-	FILE* fp = fopen(CONF_FILE, "r");
-	if (fp==NULL ) {
-		perror(WEBS_ERR"open file goahead.conf");
-		return -1;
-	}
-	while (!feof(fp)) {
-		memset(&line, 0x00, 256);
-		memset(&var, 0x00, 256);
-		memset(&val, 0x00, 256);
-		fgets(line, 255, fp);     //得到一行
-		//得到这一行的字符串,根据表达式截断
-		strnum = sscanf(line, "%[^#=]=%[^#\r\n]", var, val);
-#if DEBUG_PARSE_CONF_FILE
-		i++;
-#endif
-		if (strnum!=2) {
-			continue;
-		}
-		name = trim(var, strlen(var));//去除前导和后导空白符
-		value = trim(val, strlen(val));
-		//printf("\"%s\"\n",line);
-#if DEBUG_PARSE_CONF_FILE
-		printf("%d[%d]:\"%s\"=\"%s\"\n", i, strnum, name, value);
-#endif
-		if (strcmp(name, "wwwroot")==0) {
-			strcpy(webdir, value);
-#if DEBUG_PARSE_CONF_FILE
-			printf(WEBS_INF"Web root dir is:\"%s\"\n", webdir);
-#endif
-		}
-	}
-	fclose(fp);
-	printf(WEBS_INF"Web root dir:\e[32m%s\e[0m\n", webdir);
-	return 0;
-}
 /** 通用读取配置文件项函数.
  * 读取类似 name = value 这样的配置项
  * 输入一个项目名称字符串,输出这个项目的值(字符串)
@@ -657,7 +599,9 @@ static int initWebs(void)
 {
 	struct hostent *hp;
 	struct in_addr intaddr;
-	char host[128], webdir[128];
+	char host[128];
+	//char webdir[128];
+	char * webdir;
 	char *cp;
 	char_t wbuf[128];
 	//Initialize the socket subsystem
@@ -684,7 +628,11 @@ static int initWebs(void)
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
 	                (size_t) hp->h_length);
 	(void) printf_webs_app_dir();
-	(void) load_web_root_dir(webdir);	//获取根目录
+	//
+	if(getconf("wwwroot",&webdir)==NULL){
+		return -2;
+	}
+	//(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
@@ -1992,6 +1940,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 			web_err_proc(EL);
 		}
 	}
+	response_ok(wp);
 	return 0;
 }
 /**
@@ -2418,5 +2367,12 @@ void webs_free(void)
 			procotol_name[i]=NULL;
 		}
 	}
+}
+/**
+ * 对于客户端的更新请求给予响应.如果更新成功则简单的返回这个成功响应
+ * @param wp 页面
+ */
+void response_ok(webs_t wp){
+	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"

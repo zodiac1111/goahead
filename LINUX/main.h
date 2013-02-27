@@ -107,6 +107,7 @@ char * point2next(char** s, const char split);
 ////设置函数
 char* getconf(const char const* name,char** value);
 void webs_free(void);
+void response_ok(webs_t wp);
 int printf_webs_app_dir(void);
 int load_web_root_dir(char* webdir);
 char *trim(char in[], int len);
