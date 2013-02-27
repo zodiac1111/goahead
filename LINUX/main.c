@@ -64,7 +64,7 @@ union semun sem;     ///<用于控制报文监视停止的信号量.0停止监�
 int semid;     ///<信号量id
 stCfg webs_cfg;
 #define JSON 1
-//#pragma  GCC diagnostic warning  "-Wunused-parameter"
+#pragma  GCC diagnostic warning  "-Wunused-parameter"
 /**
  * webs主函数,所有业务逻辑在此实现.
  */
@@ -627,7 +627,6 @@ static int initWebs(void)
 	struct hostent *hp;
 	struct in_addr intaddr;
 	char host[128];
-	//char webdir[128];
 	char * webdir;
 	char *cp;
 	char_t wbuf[128];
@@ -675,15 +674,13 @@ static int initWebs(void)
 	webs_cfg.monparam_name = mkFullPath(
 	                webs_cfg.confdir,
 	                MON_PORT_NAME_FILE);
-
-	//(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
 	///因为web根目录需要
 	chdir(webdir);
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
-	if (webdir!=NULL )
+	if (webdir!=NULL ) //不使用了就尽早释放.
 		free(webdir);
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
@@ -2468,4 +2465,4 @@ void response_ok(webs_t wp)
 {
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
-//#pragma  GCC diagnostic ignored  "-Wunused-parameter"
+#pragma  GCC diagnostic ignored  "-Wunused-parameter"

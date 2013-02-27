@@ -24,7 +24,7 @@
 #endif
 
 #include	"uemf.h"
-
+#include <netdb.h>
 #ifdef VXWORKS
 	#include	<hostLib.h>
 #endif
