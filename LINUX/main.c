@@ -141,12 +141,14 @@ int main(int argc __attribute__ ((unused)),
 void form_sysparam(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	char * init = websGetVar(wp, T("init"), T("null"));
 	websHeader_pure(wp);
-	if (*init=='1') {
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action,"init")==0) {
 		webSend_syspara(wp);
 	} else {
-		webRece_syspara(wp, &sysparam);
+		if(webRece_syspara(wp, &sysparam)==0){
+			websWrite(wp, T("{\"ret\"=\"ok\"}"));
+		}
 	}
 	websDone(wp, 200);
 	return;
@@ -1950,26 +1952,32 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	int meter_num = strtol(str_meter_num, &errstr, 10);
 	if (*errstr!='\0'||meter_num<=0||meter_num>=256) {
 		printf("1:%s\n", errstr);
+		erritem|=0x1;
 	}
 	int sioports_num = strtol(str_sioports_num, &errstr, 10);
 	if (*errstr!='\0'||sioports_num<=0||meter_num>=256) {
 		printf("2:%s\n", errstr);
+		erritem|=0x2;
 	}
 	int netports_num = strtol(str_netports_num, &errstr, 10);
 	if (*errstr!='\0'||netports_num<=0||meter_num>=256) {
 		printf("3:%s\n", errstr);
+		erritem|=0x4;
 	}
 	int monitor_ports = strtol(str_monitor_ports, &errstr, 10);
 	if (*errstr!='\0'||monitor_ports<=0||meter_num>=256) {
 		printf("4:%s\n", errstr);
+		erritem|=0x8;
 	}
 	int control_ports = strtol(str_control_ports, &errstr, 10);
 	if (*errstr!='\0'||control_ports<=0||meter_num>=256) {
 		printf("5:%s\n", errstr);
+		erritem|=0x10;
 	}
 	int sioplan_num = strtol(str_sioplan_num, &errstr, 10);
 	if (*errstr!='\0'||sioplan_num<=0||meter_num>=256) {
 		printf("6:%s\n", errstr);
+		erritem|=0x20;
 	}
 	if (erritem==0) {     //只有所有输入都合法
 		sysparam->meter_num = meter_num;
