@@ -62,7 +62,6 @@ static int mon_port_num = MAX_MON_PORT_NUM;
 struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
-static char* errlog=NULL; ///配置项(错误日志文件路径)
 stCfg webs_cfg;
 #define JSON 1
 //#pragma  GCC diagnostic warning  "-Wunused-parameter"
@@ -91,7 +90,7 @@ int main(int argc __attribute__ ((unused)),
 	//Initialize the web server 初始化web服务器
 	if (initWebs()<0) {
 		printf(WEBS_ERR"init Webs.\n");
-														return -1;
+		return -1;
 	}
 #ifdef WEBS_SSL_SUPPORT
 	printf(WEBS_INF"SSL support\n");
@@ -107,7 +106,7 @@ int main(int argc __attribute__ ((unused)),
 	printf(WEBS_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
 	printf(WEBS_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
 	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m"
-		"with Browser.\n",WEBS_DEFAULT_PORT);
+	"with Browser.\n", WEBS_DEFAULT_PORT);
 	while (!finished) {
 		//PRINT_HERE
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
@@ -145,7 +144,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
-	if (strcmp(action,"init")==0) {
+	if (strcmp(action, "init")==0) {
 		webSend_syspara(wp);
 	} else {
 		webRece_syspara(wp, &sysparam);
@@ -168,7 +167,7 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
 	printf("\t\t@%s", ctime(&t));
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
-	if(strcmp(action,"get")==0){
+	if (strcmp(action, "get")==0) {
 		///@todo 时间处理的函数
 	}
 	websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
@@ -186,9 +185,9 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
-	if (strcmp(action,"init")==0) {
+	if (strcmp(action, "init")==0) {
 		webSend_sioplans(wp, sysparam);
-	} else if(strcmp(action,"set")==0) {
+	} else if (strcmp(action, "set")==0) {
 		webRece_sioplans(wp);
 	} else {
 		web_err_proc(EL);
@@ -325,7 +324,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 	switch (typ) {
 	case REINIT_PROTOCOL_FILE:
 		ret = read_protocol_file(procotol_name, &procotol_num,
-		                PORC_FILE);
+				webs_cfg.protocol);
 		if (ret!=0) {
 			web_err_proc(EL);
 		}
@@ -347,7 +346,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 
 		}
 		break;
-	case RET_SAMPLE_PROC:///@待定
+	case RET_SAMPLE_PROC:		///@待定
 		system("killall hl3104_com ");
 		break;
 	case RET_RTU:
@@ -420,13 +419,13 @@ void form_save_log(webs_t wp, char_t *path, char_t *query)
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	webRece_txtfile(wp, query, MON_PORT_NAME_FILE);
+	webRece_txtfile(wp, query, webs_cfg.monparam_name);
 	return;
 }
 void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	webRece_txtfile(wp, query, PORC_FILE);
+	webRece_txtfile(wp, query, webs_cfg.protocol);
 	return;
 }
 /**
@@ -444,13 +443,13 @@ void form_load_log(webs_t wp, char_t *path, char_t *query)
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	webSend_txtfile(wp, PORC_FILE);
+	webSend_txtfile(wp, webs_cfg.protocol);
 	return;
 }
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	webSend_txtfile(wp, MON_PORT_NAME_FILE);
+	webSend_txtfile(wp, webs_cfg.monparam_name);
 	return;
 }
 /**
@@ -547,7 +546,7 @@ int printf_webs_app_dir(void)
  * @retval 其他 指向一个字符串的指针.这个字符串即项的值
  * @return
  */
-char* getconf(const char const* name,char** value)
+char* getconf(const char const* name, char** value)
 {
 	//配置文件定义为 一行一条, 以 变量名=变量值的形式
 	/** @bug 为了方便起见在栈上分配固定大小内存用于存储配置字符串.
@@ -565,7 +564,7 @@ char* getconf(const char const* name,char** value)
 	FILE* fp = fopen(CONF_FILE, "r");
 	if (fp==NULL ) {
 		perror(WEBS_ERR"open file goahead.conf");
-		return NULL;
+		return NULL ;
 	}
 	while (!feof(fp)) {
 		memset(&line, 0x00, 256);
@@ -577,31 +576,38 @@ char* getconf(const char const* name,char** value)
 		if (strnum!=2) {
 			continue;
 		}
-		pname = trim(n, strlen(n));//去除前导和后导空白符
+		pname = trim(n, strlen(n));		//去除前导和后导空白符
 		pvalue = trim(v, strlen(v));
 		if (strcmp(pname, name)==0) {
-			*value=(char*)malloc(strlen(pvalue)+1);
+			*value = (char*) malloc(strlen(pvalue)+1);
 			strcpy(*value, pvalue);
 		}
 	}
 	fclose(fp);
 	printf(WEBS_INF"Item \e[33m%s\e[0m = \e[32m%s\e[0m\n"
-		, name,*value);
+	                , name, *value);
 	return *value;
 }
-char *mkfilePath(const char  *path,const char  *name)
+/**
+ * 传入目录和文件构造完整的绝对路径.用完注意free!
+ * path 和 name 变成"path/name"的形式
+ * @param path
+ * @param name
+ * @return
+ */
+char *mkFullPath(const char *path, const char *name)
 {
-	char *fullname=NULL;
-	int l1=strlen(path);
-	int l2=strlen(name);
-	int len=l1+1+l2;
-	fullname=(char*)malloc(len+1);
-	memset(fullname,0x0,len+1);
-	memcpy(fullname,path,l1);
-	memcpy(fullname+l1,"/",1);
-	memcpy(fullname+l1+1,name,l2);
-	printf(WEBS_DBG"系统参数绝对路径%s\n",fullname);
-	return fullname;
+	char *fullpath = NULL;
+	int l1 = strlen(path);
+	int l2 = strlen(name);
+	int len = l1+1+l2;		// "/"中间添加正斜杠
+	fullpath = (char*) malloc(len+1);		// \0
+	memset(fullpath, 0x0, len+1);
+	memcpy(fullpath, path, l1);
+	memcpy(fullpath+l1, "/", 1);
+	memcpy(fullpath+l1+1, name, l2);
+	printf(WEBS_DBG"FullPath %s\n", fullpath);
+	return fullpath;
 }
 /**
  * Initialize the web server.
@@ -646,20 +652,25 @@ static int initWebs(void)
 	                (size_t) hp->h_length);
 
 	(void) printf_webs_app_dir();
-	if(getconf("wwwroot",&webdir)==NULL){
+	if (getconf("wwwroot", &webdir)==NULL )
 		return -2;
-	}
-	if(getconf("errlog",&webs_cfg.errlog)==NULL){
-			return -2;
-	}
-	if(getconf("paradir",&webs_cfg.paradir)==NULL){
-			return -2;
-	}
-	if(getconf("confdir",&webs_cfg.confdir)==NULL){
-			return -2;
-	}
-
-	webs_cfg.syspara=mkfilePath(webs_cfg.paradir,FILE_SYSPARA);
+	if (getconf("errlog", &webs_cfg.errlog)==NULL )
+		return -2;
+	if (getconf("paradir", &webs_cfg.paradir)==NULL )
+		return -3;
+	if (getconf("confdir", &webs_cfg.confdir)==NULL )
+		return -4;
+	webs_cfg.syspara = mkFullPath(webs_cfg.paradir, FILE_SYSPARA);
+	webs_cfg.mtrspara = mkFullPath(webs_cfg.paradir, CFG_MTR);
+	webs_cfg.sioplan = mkFullPath(webs_cfg.paradir, CFG_SIOPALN);
+	webs_cfg.netpara = mkFullPath(webs_cfg.paradir, CFG_NET);
+	webs_cfg.monpara = mkFullPath(webs_cfg.paradir, CFG_MON_PARAM);
+	webs_cfg.retranTable = mkFullPath(webs_cfg.paradir, CFG_FORWARD_TABLE);
+	webs_cfg.stspara = mkFullPath(webs_cfg.paradir, CFG_SAVE_CYCLE);
+	webs_cfg.protocol = mkFullPath(webs_cfg.confdir, PORC_FILE);
+	webs_cfg.monparam_name = mkFullPath(
+	                webs_cfg.confdir,
+	                MON_PORT_NAME_FILE);
 
 	//(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
@@ -668,7 +679,8 @@ static int initWebs(void)
 	chdir(webdir);
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
-	if(webdir!=NULL)free(webdir);
+	if (webdir!=NULL )
+		free(webdir);
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
@@ -696,12 +708,13 @@ static int initWebs(void)
 	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
 	                WEBS_HANDLER_LAST);
 	//printf("监视端口文件:%s", MON_PORT_NAME_FILE);
-	//载入配置文件
-	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
-	                MON_PORT_NAME_FILE)) {
+	//载入名称文件,给服务器程序显示用的.
+	if (-1==read_protocol_file(procotol_name,
+	                &procotol_num, webs_cfg.protocol)) {
 		web_err_proc(EL);
 	}
-	if (-1==read_protocol_file(procotol_name, &procotol_num, PORC_FILE)) {
+	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
+	                webs_cfg.monparam_name)) {
 		web_err_proc(EL);
 	}
 	/**
@@ -1532,7 +1545,7 @@ int webRece_sioplans(webs_t wp)
 		}
 		comm_type = point2next(&comm_type, ' ');
 		//最后:保存
-		save_sioplan(&plan, CFG_SIOPALN, no);
+		save_sioplan(&plan, webs_cfg.sioplan, no);
 	}
 	return 0;
 }
@@ -1553,7 +1566,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 	websWrite(wp, T("\"commtype\":[\"异步\",\"同步\"],"));
 	websWrite(wp, T("\"item\":["));     //下面是串口数组,每个元素为一个串口配置
 	for (no = 0; no<sp.sioplan_num; no++) {
-		if (-1==load_sioplan(&plan, CFG_SIOPALN, no)) {
+		if (-1==load_sioplan(&plan, webs_cfg.sioplan, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -1641,7 +1654,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	websWrite(wp, T(",\"sioplan_num\":\"%d\","), sysparam.sioplan_num);
 	websWrite(wp, T("\"item\":["));
 	for (no = 0; no<sysparam.monitor_ports; no++) {
-		if (-1==load_monparam(&monpara, CFG_MON_PARAM, no)) {
+		if (-1==load_monparam(&monpara, webs_cfg.monpara, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -1743,7 +1756,7 @@ int webRece_monparas(webs_t wp)
 			break;
 		}
 		forward_mtr_num = point2next(&forward_mtr_num, ' ');
-		save_monparam(&monparam, CFG_MON_PARAM, param_no);
+		save_monparam(&monparam, webs_cfg.monpara, param_no);
 	}
 	return 0;
 }
@@ -1837,7 +1850,7 @@ int webSend_netparas(webs_t wp, int netParamNum)
 	websWrite(wp, T("{\"eth_num\":\"%d\","), netParamNum);
 	websWrite(wp, T("\"item\":["));
 	for (i = 0; i<netParamNum; i++) {
-		if (-1==load_netparam(&netparam, CFG_NET, i)) {
+		if (-1==load_netparam(&netparam, webs_cfg.netpara, i)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -1865,6 +1878,7 @@ int webSend_netparas(webs_t wp, int netParamNum)
 int webRece_netparas(webs_t wp)
 {
 	stNetparam netparam;
+	memset(&netparam,0x0,sizeof(stNetparam));
 	int n;
 	int param_no = 0;		///参数序号,即数据库的主键,base 0.没有物理意义
 	char * net_no = websGetVar(wp, T("net_no"), T("null"));
@@ -1898,7 +1912,7 @@ int webRece_netparas(webs_t wp)
 		//gateway
 		ipstr2ipfile(gateway, netparam.gateway);
 		gateway = point2next(&gateway, ' ');
-		save_netport(&netparam, CFG_NET, param_no);
+		save_netport(&netparam, webs_cfg.netpara, param_no);
 	}
 	return 0;
 }
@@ -1930,32 +1944,32 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	int meter_num = strtol(str_meter_num, &errstr, 10);
 	if (*errstr!='\0'||meter_num<=0||meter_num>=256) {
 		printf("1:%s\n", errstr);
-		erritem|=0x1;
+		erritem |= 0x1;
 	}
 	int sioports_num = strtol(str_sioports_num, &errstr, 10);
 	if (*errstr!='\0'||sioports_num<=0||meter_num>=256) {
 		printf("2:%s\n", errstr);
-		erritem|=0x2;
+		erritem |= 0x2;
 	}
 	int netports_num = strtol(str_netports_num, &errstr, 10);
 	if (*errstr!='\0'||netports_num<=0||meter_num>=256) {
 		printf("3:%s\n", errstr);
-		erritem|=0x4;
+		erritem |= 0x4;
 	}
 	int monitor_ports = strtol(str_monitor_ports, &errstr, 10);
 	if (*errstr!='\0'||monitor_ports<=0||meter_num>=256) {
 		printf("4:%s\n", errstr);
-		erritem|=0x8;
+		erritem |= 0x8;
 	}
 	int control_ports = strtol(str_control_ports, &errstr, 10);
 	if (*errstr!='\0'||control_ports<=0||meter_num>=256) {
 		printf("5:%s\n", errstr);
-		erritem|=0x10;
+		erritem |= 0x10;
 	}
 	int sioplan_num = strtol(str_sioplan_num, &errstr, 10);
 	if (*errstr!='\0'||sioplan_num<=0||meter_num>=256) {
 		printf("6:%s\n", errstr);
-		erritem|=0x20;
+		erritem |= 0x20;
 	}
 	if (erritem==0) {     //只有所有输入都合法
 		sysparam->meter_num = meter_num;
@@ -1981,7 +1995,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 int webSend_syspara(webs_t wp)
 {
 	stSysParam sysparam;
-	int ret = load_sysparam(&sysparam,FILE_SYSPARA);
+	int ret = load_sysparam(&sysparam, webs_cfg.syspara);
 	if (ret==-1) {
 		web_err_proc(EL);
 		return -1;
@@ -2030,7 +2044,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	memset(&mtr, 0x00, sizeof(stMtr));
 	///@todo 使用JSON传递数据可以使格式更明确,前端处理字符串不难.
 	for (no = 0; no<mtrnum; no++) {
-		if (-1==load_mtrparam(&mtr, CFG_MTR, no)) {
+		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, no)) {
 			web_err_proc(EL);
 			continue;
 		}
@@ -2076,7 +2090,7 @@ int webRece_mtrparams(webs_t wp)
 	printf("get param from clint ret %d \n", mtr_num);
 	if (mtr_num>0) {     //只有所有输入都合法
 		for (i = 0; i<mtr_num; i++) {
-			saveret = save_mtrparam(&amtr[i], CFG_MTR,
+			saveret = save_mtrparam(&amtr[i], webs_cfg.mtrspara,
 			                amtr[i].mtrno);
 			printf("1047 i=%d saveret=%d\n", i, saveret);
 			printf("amtr[i].mtrno=%d\n", amtr[i].mtrno);
@@ -2170,7 +2184,7 @@ int webRece_savecycle(webs_t wp)
 		}
 		cycle = point2next(&cycle, ' ');
 	}
-	save_savecycle(sav, CFG_SAVE_CYCLE);
+	save_savecycle(sav, webs_cfg.stspara);
 	return 0;
 }
 /**
@@ -2184,7 +2198,7 @@ int webSend_savecycle(webs_t wp)
 	//printf("读取存储周期.\n");
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
 	int i = 0;
-	int ret = load_savecycle(sav, CFG_SAVE_CYCLE);
+	int ret = load_savecycle(sav, webs_cfg.stspara);
 	if (ret==-1) {
 		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
 		                __LINE__, __FUNCTION__);
@@ -2379,58 +2393,66 @@ void webs_free(void)
 {
 	int i;
 	//配置文件项
-	if(webs_cfg.errlog!=NULL){
+	if (webs_cfg.errlog!=NULL ) {
 		free(webs_cfg.errlog);
-		webs_cfg.errlog=NULL;
+		webs_cfg.errlog = NULL;
 	}
-	if(webs_cfg.paradir!=NULL){
+	if (webs_cfg.paradir!=NULL ) {
 		free(webs_cfg.paradir);
-		webs_cfg.paradir=NULL;
+		webs_cfg.paradir = NULL;
 	}
-	if(webs_cfg.syspara!=NULL){
+	if (webs_cfg.syspara!=NULL ) {
 		free(webs_cfg.syspara);
-		webs_cfg.syspara=NULL;
+		webs_cfg.syspara = NULL;
 	}
-	if(webs_cfg.mtrspara!=NULL){
+	if (webs_cfg.mtrspara!=NULL ) {
 		free(webs_cfg.mtrspara);
-		webs_cfg.mtrspara=NULL;
+		webs_cfg.mtrspara = NULL;
 	}
-	if(webs_cfg.sioplan!=NULL){
+	if (webs_cfg.sioplan!=NULL ) {
 		free(webs_cfg.sioplan);
-		webs_cfg.sioplan=NULL;
+		webs_cfg.sioplan = NULL;
 	}
-	if(webs_cfg.netpara!=NULL){
+	if (webs_cfg.netpara!=NULL ) {
 		free(webs_cfg.netpara);
-		webs_cfg.netpara=NULL;
+		webs_cfg.netpara = NULL;
 	}
-	if(webs_cfg.monpara!=NULL){
+	if (webs_cfg.monpara!=NULL ) {
 		free(webs_cfg.monpara);
-		webs_cfg.monpara=NULL;
+		webs_cfg.monpara = NULL;
 	}
-	if(webs_cfg.retranTable!=NULL){
+	if (webs_cfg.retranTable!=NULL ) {
 		free(webs_cfg.retranTable);
-		webs_cfg.retranTable=NULL;
+		webs_cfg.retranTable = NULL;
 	}
-	if(webs_cfg.stspara!=NULL){
+	if (webs_cfg.stspara!=NULL ) {
 		free(webs_cfg.stspara);
-		webs_cfg.stspara=NULL;
+		webs_cfg.stspara = NULL;
 	}
-	if(webs_cfg.confdir!=NULL){
+	if (webs_cfg.confdir!=NULL ) {
 		free(webs_cfg.confdir);
-		webs_cfg.confdir=NULL;
+		webs_cfg.confdir = NULL;
+	}
+	if (webs_cfg.protocol!=NULL ) {
+		free(webs_cfg.protocol);
+		webs_cfg.protocol = NULL;
+	}
+	if (webs_cfg.monparam_name!=NULL ) {
+		free(webs_cfg.monparam_name);
+		webs_cfg.monparam_name = NULL;
 	}
 	//监视参数端口名称
-	for(i=0;i<mon_port_num;i++){
-		if(mon_port_name[i]!=NULL){
+	for (i = 0; i<mon_port_num; i++) {
+		if (mon_port_name[i]!=NULL ) {
 			free(mon_port_name[i]);
-			mon_port_name[i]=NULL;
+			mon_port_name[i] = NULL;
 		}
 	}
 	//规约名称
-	for(i=0;i<procotol_num;i++){
-		if(procotol_name[i]!=NULL){
+	for (i = 0; i<procotol_num; i++) {
+		if (procotol_name[i]!=NULL ) {
 			free(procotol_name[i]);
-			procotol_name[i]=NULL;
+			procotol_name[i] = NULL;
 		}
 	}
 }
@@ -2438,7 +2460,8 @@ void webs_free(void)
  * 对于客户端的更新请求给予响应.如果更新成功则简单的返回这个成功响应
  * @param wp 页面
  */
-void response_ok(webs_t wp){
+void response_ok(webs_t wp)
+{
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"

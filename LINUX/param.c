@@ -621,8 +621,8 @@ int save_netport(const stNetparam * net, const char * file, int no)
 		ret = ftruncate(fd, sizeof(stNetparam) * (no + 1));
 	}
 	fseek(fp, 0, SEEK_SET);
-	fseek(fp, sizeof(stNetparam) * no, SEEK_SET);		//指向特定的表参数
-	ret = fwrite(net, sizeof(stNetparam), 1, fp);		//写入
+	fseek(fp, sizeof(stNetparam) * no, SEEK_SET);//指向特定的表参数
+	ret = fwrite(net, sizeof(stNetparam), 1, fp);//写入
 	if (ret != 1) {
 		perror("write");
 		PRINT_HERE
@@ -796,7 +796,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 int update_mtrfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(CFG_MTR, "rb+");
+	FILE* fp = fopen(webs_cfg.mtrspara, "rb+");
 	if (fp == NULL ) {
 		web_errno = open_mtrcfgfile_err;
 		return -1;
@@ -819,7 +819,7 @@ int update_mtrfile(const stSysParam param)
 int update_siofile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(CFG_SIOPALN, "rb+");
+	FILE* fp = fopen(webs_cfg.sioplan, "rb+");
 	if (fp == NULL ) {
 		web_errno = open_sioplan_cfgfile_err;
 		return -1;
@@ -841,7 +841,7 @@ int update_siofile(const stSysParam param)
 int update_netparamfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(CFG_NET, "rb+");
+	FILE* fp = fopen(webs_cfg.netpara, "rb+");
 	if (fp == NULL ) {
 		web_errno = open_netparam_cfgfile_err;
 		return -1;
@@ -864,7 +864,7 @@ int update_netparamfile(const stSysParam param)
 int update_monparamfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(CFG_MON_PARAM, "rb+");
+	FILE* fp = fopen(webs_cfg.monpara, "rb+");
 	if (fp == NULL ) {
 		web_errno = open_monparam_cfgfile_err;
 		return -1;

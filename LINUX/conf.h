@@ -15,13 +15,16 @@ typedef struct cfg{
 	char *syspara; //系统参数文件绝对路径
 	char *mtrspara; //表计参数文件绝对路径
 	char *sioplan; //串口方案文件绝对路径
-	char *netpara;
-	char *monpara;
-	char *retranTable;
-	char *stspara;
+	char *netpara;//网络参数
+	char *monpara; //监视参数
+	char *retranTable; //转发表
+	char *stspara; //储存周期
 	//   conf目录(用于计算下面的绝对路径
 	char *confdir;
+	char *protocol; //规约配置
+	char *monparam_name;//监视参数名称
 }stCfg;
+extern stCfg webs_cfg;
 //调试信息开关.用于打印一些信息. 1 表示开启此项调试信息;0 表示关闭.
 #define DEBUG_INFO_FORM 1 ///<表单提交函数的信息,每个/次表单提交打印一次提交的内容
 #define DEBUG_PARSE_CONF_FILE 0 ///<解析配置文件时的调试信息(goahead.conf),
@@ -55,18 +58,17 @@ typedef struct cfg{
 //conf配置相关文件
 #define CFG_DIR "../para/"///<参数路径
 #define FILE_SYSPARA "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
-//#define FILE_SYSPARA "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
-#define CFG_MTR CFG_DIR"mtrspara.cfg"///<表计参数配置文件
-#define CFG_SIOPALN CFG_DIR"sioplan.cfg"///<串口方案配置文件
-#define CFG_NET CFG_DIR"netpara.cfg"///<网络參數配置文件
-#define CFG_MON_PARAM CFG_DIR"monpara.cfg"///<监视参数数配置文件
-#define CFG_FORWARD_TABLE CFG_DIR"retranTable.cfg"///<转发表信息文件
-#define CFG_SAVE_CYCLE CFG_DIR"stspara.cfg"///<采集保存周期和项目配置文件
+#define CFG_MTR "mtrspara.cfg"///<表计参数配置文件
+#define CFG_SIOPALN "sioplan.cfg"///<串口方案配置文件
+#define CFG_NET "netpara.cfg"///<网络參數配置文件
+#define CFG_MON_PARAM "monpara.cfg"///<监视参数数配置文件
+#define CFG_FORWARD_TABLE "retranTable.cfg"///<转发表信息文件
+#define CFG_SAVE_CYCLE "stspara.cfg"///<采集保存周期和项目配置文件
 //para参数相关文件.
 #define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
-#define PORC_FILE PROC_CFG_DIR"protocol_config.txt"///<主站规约配置文件
+#define PORC_FILE "protocol_config.txt"///<主站规约配置文件
 #define MAX_PROCOTOL_NUM 128 ///<规约文件中最大规约条目开始时分配这么多
-#define MON_PORT_NAME_FILE PROC_CFG_DIR"monparam_name.conf"///<监视端口描述文件
+#define MON_PORT_NAME_FILE "monparam_name.conf"///<监视端口描述文件
 
 //信息
 #define PRINT_WELCOME {					\
