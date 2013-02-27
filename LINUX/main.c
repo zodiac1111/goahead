@@ -105,7 +105,7 @@ int main(int argc __attribute__ ((unused)),
 	finished = 0;
 	printf(WEBS_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
 	printf(WEBS_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
-	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m"
+	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m "
 	"with Browser.\n", WEBS_DEFAULT_PORT);
 	while (!finished) {
 		//PRINT_HERE
@@ -580,6 +580,10 @@ char* getconf(const char const* name, char** value)
 		pvalue = trim(v, strlen(v));
 		if (strcmp(pname, name)==0) {
 			*value = (char*) malloc(strlen(pvalue)+1);
+			if(*value==NULL){
+				web_err_proc(EL);
+				break;
+			}
 			strcpy(*value, pvalue);
 		}
 	}
