@@ -58,7 +58,6 @@ static int procotol_num = MAX_PROCOTOL_NUM;
 static char *mon_port_name[MAX_MON_PORT_NUM];
 ///规约文件中的实际规约数,初始化为最大
 static int mon_port_num = MAX_MON_PORT_NUM;
-
 struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
