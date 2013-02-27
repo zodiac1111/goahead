@@ -7,6 +7,18 @@
 #ifndef CONF_H_
 #define CONF_H_
 #include <version.h>
+typedef struct cfg{
+	char *errlog;
+	char *paradir;
+	char *cfg_sys;
+	char *cfg_mtr;
+	char *cfg_sioplan;
+	char *cfg_net;
+	char *confdir;
+	char *pro_file;
+
+	char *sysconf;
+}stCfg;
 //调试信息开关.用于打印一些信息. 1 表示开启此项调试信息;0 表示关闭.
 #define DEBUG_INFO_FORM 1 ///<表单提交函数的信息,每个/次表单提交打印一次提交的内容
 #define DEBUG_PARSE_CONF_FILE 0 ///<解析配置文件时的调试信息(goahead.conf),
@@ -14,7 +26,6 @@
 #define DEBUG_PRINT_NETPARAM 0 ///<打印网口参数相关调试信息
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
 #define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
-//服务器配置 硬编码!
 ///@todo 独立成为配置文件项
 #define WEBS_DEFAULT_HOME	T("index.html") /* Default home page */
 #define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
@@ -41,6 +52,7 @@
 //conf配置相关文件
 #define CFG_DIR "../para/"///<参数路径
 #define CFG_SYS CFG_DIR"sysspara.cfg"///<系统参数文件,关系到下面的其他参数
+//#define CFG_SYS "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
 #define CFG_MTR CFG_DIR"mtrspara.cfg"///<表计参数配置文件
 #define CFG_SIOPALN CFG_DIR"sioplan.cfg"///<串口方案配置文件
 #define CFG_NET CFG_DIR"netpara.cfg"///<网络參數配置文件

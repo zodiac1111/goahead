@@ -333,7 +333,6 @@ int load_sysparam(stSysParam * param, const char * file)
 		perror("open sysparam.cfg");
 		PRINT_HERE
 		web_errno = open_sysparam_file;
-		fclose(fp);
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);

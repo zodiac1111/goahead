@@ -63,6 +63,7 @@ struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
 static char* errlog=NULL; ///配置项(错误日志文件路径)
+stCfg webs_cfg;
 #define JSON 1
 //#pragma  GCC diagnostic warning  "-Wunused-parameter"
 /**
@@ -71,7 +72,6 @@ static char* errlog=NULL; ///配置项(错误日志文件路径)
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
-	print_ip();
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
@@ -589,6 +589,20 @@ char* getconf(const char const* name,char** value)
 		, name,*value);
 	return *value;
 }
+char *mkfilePath(const char  *path,const char  *name)
+{
+	char *fullname=NULL;
+	int l1=strlen(path);
+	int l2=strlen(name);
+	int len=l1+1+l2;
+	fullname=(char*)malloc(len+1);
+	memset(fullname,0x0,len+1);
+	memcpy(fullname,path,l1);
+	memcpy(fullname+l1,"/",1);
+	memcpy(fullname+l1+1,name,l2);
+	printf(WEBS_DBG"系统参数绝对路径%s\n",fullname);
+	return fullname;
+}
 /**
  * Initialize the web server.
  * 初始化web服务的一些操作:
@@ -635,9 +649,18 @@ static int initWebs(void)
 	if(getconf("wwwroot",&webdir)==NULL){
 		return -2;
 	}
-	if(getconf("errlog",&errlog)==NULL){
+	if(getconf("errlog",&webs_cfg.errlog)==NULL){
 			return -2;
 	}
+	if(getconf("paradir",&webs_cfg.paradir)==NULL){
+			return -2;
+	}
+	if(getconf("confdir",&webs_cfg.confdir)==NULL){
+			return -2;
+	}
+
+	webs_cfg.cfg_sys=mkfilePath(webs_cfg.paradir,"sysspara.cfg");
+
 	//(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
@@ -711,7 +734,7 @@ static int initWebs(void)
 	//Create a handler for the default home page
 	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
 	///加载系统参数
-	if (-1==load_sysparam(&sysparam, CFG_SYS)) {
+	if (-1==load_sysparam(&sysparam, webs_cfg.cfg_sys)) {
 		web_err_proc(EL);
 		//return -1;
 	}
@@ -1942,7 +1965,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 		sysparam->monitor_ports = monitor_ports;
 		sysparam->control_ports = control_ports;
 		sysparam->sioplan_num = sioplan_num;
-		ret = save_sysparam(sysparam, CFG_SYS);
+		ret = save_sysparam(sysparam, webs_cfg.cfg_sys);
 		if (ret==-1) {
 			web_err_proc(EL);
 		}
@@ -1958,7 +1981,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 int webSend_syspara(webs_t wp)
 {
 	stSysParam sysparam;
-	int ret = load_sysparam(&sysparam, CFG_SYS);
+	int ret = load_sysparam(&sysparam,CFG_SYS);
 	if (ret==-1) {
 		web_err_proc(EL);
 		return -1;
@@ -2381,20 +2404,5 @@ void webs_free(void)
  */
 void response_ok(webs_t wp){
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
-}
-#include <stdio.h>
-#include <sys/types.h>
-#include <ifaddrs.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <arpa/inet.h>
-int print_ip(void)
-{
-        struct hostent *he;
-        char hostname[20] = {0};
-        gethostname(hostname,sizeof(hostname));
-        he = gethostbyname(hostname);
-        printf("hostname=%s\n",hostname);
-        printf("%s\n",inet_ntoa(*(struct in_addr*)(he->h_addr)));
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"

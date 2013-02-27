@@ -105,7 +105,6 @@ int rtu_addr_str2array(const char* str, u8 a[4]);
 static int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
 ////设置函数
-int print_ip(void);
 char* getconf(const char const* name,char** value);
 void webs_free(void);
 void response_ok(webs_t wp);
