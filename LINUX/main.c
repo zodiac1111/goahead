@@ -73,7 +73,6 @@ int main(int argc __attribute__ ((unused)),
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
-	getconf("errlog",&errlog);
 	init_semun();     //初始化信号量,用于控制,未完善.
 	/*
 	 * Initialize the memory allocator. Allow use of malloc and start
@@ -583,7 +582,8 @@ char* getconf(const char const* name,char** value)
 		}
 	}
 	fclose(fp);
-	printf(WEBS_DBG"read conf: %s=\e[32m%s\e[0m\n", name,*value);
+	printf(WEBS_INF"Configure Item \e[33m%s\e[0m = \e[32m%s\e[0m\n"
+		, name,*value);
 	return *value;
 }
 /**
@@ -632,6 +632,9 @@ static int initWebs(void)
 	if(getconf("wwwroot",&webdir)==NULL){
 		return -2;
 	}
+	if(getconf("errlog",&errlog)==NULL){
+			return -2;
+	}
 	//(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
@@ -639,6 +642,7 @@ static int initWebs(void)
 	chdir(webdir);
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
+	if(webdir!=NULL)free(webdir);
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
