@@ -659,7 +659,7 @@ static int initWebs(void)
 			return -2;
 	}
 
-	webs_cfg.cfg_sys=mkfilePath(webs_cfg.paradir,"sysspara.cfg");
+	webs_cfg.syspara=mkfilePath(webs_cfg.paradir,FILE_SYSPARA);
 
 	//(void) load_web_root_dir(webdir);	//获取根目录
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
@@ -734,7 +734,7 @@ static int initWebs(void)
 	//Create a handler for the default home page
 	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
 	///加载系统参数
-	if (-1==load_sysparam(&sysparam, webs_cfg.cfg_sys)) {
+	if (-1==load_sysparam(&sysparam, webs_cfg.syspara)) {
 		web_err_proc(EL);
 		//return -1;
 	}
@@ -1965,7 +1965,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 		sysparam->monitor_ports = monitor_ports;
 		sysparam->control_ports = control_ports;
 		sysparam->sioplan_num = sioplan_num;
-		ret = save_sysparam(sysparam, webs_cfg.cfg_sys);
+		ret = save_sysparam(sysparam, webs_cfg.syspara);
 		if (ret==-1) {
 			web_err_proc(EL);
 		}
@@ -1981,7 +1981,7 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 int webSend_syspara(webs_t wp)
 {
 	stSysParam sysparam;
-	int ret = load_sysparam(&sysparam,CFG_SYS);
+	int ret = load_sysparam(&sysparam,FILE_SYSPARA);
 	if (ret==-1) {
 		web_err_proc(EL);
 		return -1;
@@ -2379,9 +2379,45 @@ void webs_free(void)
 {
 	int i;
 	//配置文件项
-	if(errlog!=NULL){
-		free(errlog);
-		errlog=NULL;
+	if(webs_cfg.errlog!=NULL){
+		free(webs_cfg.errlog);
+		webs_cfg.errlog=NULL;
+	}
+	if(webs_cfg.paradir!=NULL){
+		free(webs_cfg.paradir);
+		webs_cfg.paradir=NULL;
+	}
+	if(webs_cfg.syspara!=NULL){
+		free(webs_cfg.syspara);
+		webs_cfg.syspara=NULL;
+	}
+	if(webs_cfg.mtrspara!=NULL){
+		free(webs_cfg.mtrspara);
+		webs_cfg.mtrspara=NULL;
+	}
+	if(webs_cfg.sioplan!=NULL){
+		free(webs_cfg.sioplan);
+		webs_cfg.sioplan=NULL;
+	}
+	if(webs_cfg.netpara!=NULL){
+		free(webs_cfg.netpara);
+		webs_cfg.netpara=NULL;
+	}
+	if(webs_cfg.monpara!=NULL){
+		free(webs_cfg.monpara);
+		webs_cfg.monpara=NULL;
+	}
+	if(webs_cfg.retranTable!=NULL){
+		free(webs_cfg.retranTable);
+		webs_cfg.retranTable=NULL;
+	}
+	if(webs_cfg.stspara!=NULL){
+		free(webs_cfg.stspara);
+		webs_cfg.stspara=NULL;
+	}
+	if(webs_cfg.confdir!=NULL){
+		free(webs_cfg.confdir);
+		webs_cfg.confdir=NULL;
 	}
 	//监视参数端口名称
 	for(i=0;i<mon_port_num;i++){

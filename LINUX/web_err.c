@@ -16,13 +16,13 @@ const char *myweberrstr[] =
                 {[no_error]="No Error.",
                                 ///系统参数相关
                                 [open_sysparam_file
-                                                ]="Open system confingure file "CFG_SYS" err.",
+                                                ]="Open system confingure file "FILE_SYSPARA" err.",
                                 [sysfile_size_err
                                                 ]="System parameter file size err.",
                                 [write_sysfile_size_err
                                                 ]="Save system parameter err,size is error.",
-                                [read_sysfile_err]="读取系统参数文件"CFG_SYS"时出错",
-                                [write_sysfile_err]="写入系统参数文件"CFG_SYS"时出错",
+                                [read_sysfile_err]="读取系统参数文件"FILE_SYSPARA"时出错",
+                                [write_sysfile_err]="写入系统参数文件"FILE_SYSPARA"时出错",
                                 [update_mtr_file_err]="更新表计参数数量"CFG_MTR"时出错",
                                 ///表计参数相关
                                 [open_mtrcfgfile_err]="打开表计参数文件"CFG_MTR"时出错",

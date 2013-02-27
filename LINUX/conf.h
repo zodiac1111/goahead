@@ -8,16 +8,19 @@
 #define CONF_H_
 #include <version.h>
 typedef struct cfg{
+	//   错误日志绝对路径
 	char *errlog;
+	//   para目录(用于计算下面的绝对路径)
 	char *paradir;
-	char *cfg_sys;
-	char *cfg_mtr;
-	char *cfg_sioplan;
-	char *cfg_net;
+	char *syspara; //系统参数文件绝对路径
+	char *mtrspara; //表计参数文件绝对路径
+	char *sioplan; //串口方案文件绝对路径
+	char *netpara;
+	char *monpara;
+	char *retranTable;
+	char *stspara;
+	//   conf目录(用于计算下面的绝对路径
 	char *confdir;
-	char *pro_file;
-
-	char *sysconf;
 }stCfg;
 //调试信息开关.用于打印一些信息. 1 表示开启此项调试信息;0 表示关闭.
 #define DEBUG_INFO_FORM 1 ///<表单提交函数的信息,每个/次表单提交打印一次提交的内容
@@ -51,8 +54,8 @@ typedef struct cfg{
 #define MAX_ERR_LOG_FILE_SIZE (100*1024) ///<错误日志文件最大尺寸(字节)
 //conf配置相关文件
 #define CFG_DIR "../para/"///<参数路径
-#define CFG_SYS CFG_DIR"sysspara.cfg"///<系统参数文件,关系到下面的其他参数
-//#define CFG_SYS "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
+#define FILE_SYSPARA "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
+//#define FILE_SYSPARA "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
 #define CFG_MTR CFG_DIR"mtrspara.cfg"///<表计参数配置文件
 #define CFG_SIOPALN CFG_DIR"sioplan.cfg"///<串口方案配置文件
 #define CFG_NET CFG_DIR"netpara.cfg"///<网络參數配置文件
