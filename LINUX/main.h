@@ -96,6 +96,8 @@ static int webWrite_commportList(webs_t wp);
 static int webWrite_listen_port(webs_t wp, stMonparam monport);
 static int webWrite_porttype(webs_t wp);
 static int webWrite_rtu_addr(webs_t wp, stMonparam monport);
+//存储周期
+char *addItem(char **oItem,stSave_cycle sav);
 ///其他
 static int split(char **ret, char* in);
 static int is_all_equ(int n[], int num);
