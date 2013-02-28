@@ -64,13 +64,14 @@ union semun sem;     ///<用于控制报文监视停止的信号量.0停止监�
 int semid;     ///<信号量id
 stCfg webs_cfg;
 #define JSON 1
-#pragma  GCC diagnostic warning  "-Wunused-parameter"
+//#pragma  GCC diagnostic warning  "-Wunused-parameter"
 /**
  * webs主函数,所有业务逻辑在此实现.
  */
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
+	jsonDemo();
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
@@ -271,11 +272,13 @@ void form_monparas(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "get")==0) {
 		webSend_monparas(wp, sysparam);
-	} else {
+	} else if (strcmp(action, "set")==0) {
 		webRece_monparas(wp);
+	} else {
+		web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -291,10 +294,12 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
-	if (strcmp(action, "init")==0) {
+	if (strcmp(action, "get")==0) {
 		(void) webSend_savecycle(wp);
-	} else {
+	} else if (strcmp(action, "set")==0) {
 		(void) webRece_savecycle(wp);
+	} else {
+		web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -2207,6 +2212,7 @@ int webSend_savecycle(webs_t wp)
 		web_err_proc(EL);
 		return 0;
 	}
+#if JSON==0
 	//第一行:有效标识
 	websWrite(wp, T("<tr>\n"));
 	websWrite(wp, T("<td>\n"));
@@ -2242,8 +2248,39 @@ int webSend_savecycle(webs_t wp)
 		}
 		websWrite(wp, T("</td>\n"));
 	}
+#else
+	char* oSavCycle=jsonNew();
+	jsonAddValue(&oSavCycle,"it","1");
+	printf(WEBS_DBG"%s\n",oSavCycle);
+	websWrite(wp,T("%s"),oSavCycle);
+	jsonFree(&oSavCycle);
+
+	/*websWrite(wp, T("{"));
+	jsonSavCycle(wp,"it",sav[0]);
+	websWrite(wp, T(","));
+	jsonSavCycle(wp,"tp",sav[1]);
+	websWrite(wp, T(","));
+	jsonSavCycle(wp,"p",sav[2]);
+	websWrite(wp, T(","));
+	jsonSavCycle(wp,"maxneed",sav[3]);
+	websWrite(wp, T(","));
+	jsonSavCycle(wp,"realtime",sav[4]);
+	websWrite(wp, T(","));
+	jsonSavCycle(wp,"breakphase",sav[5]);
+	websWrite(wp, T("}")); */
+#endif
 	return 0;
 }
+int jsonSavCycle(webs_t wp,const char* name,const stSave_cycle sav)
+{
+	websWrite(wp, T("\"%s\":{"),name);
+	websWrite(wp, T("\"en\":"));
+	websWrite(wp, T("\"%d\","),sav.enable);
+	websWrite(wp, T("\"t\":"));
+	websWrite(wp, T("\"%d\"}"),sav.cycle);
+	return 0;
+}
+
 
 /**
  * 从页面中获取文本,保存到本地文本文件中.
@@ -2466,4 +2503,4 @@ void response_ok(webs_t wp)
 {
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
-#pragma  GCC diagnostic ignored  "-Wunused-parameter"
+//#pragma  GCC diagnostic ignored  "-Wunused-parameter"

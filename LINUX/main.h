@@ -14,7 +14,7 @@
 #include "type.h"
 #include "tou.h"
 #include "conf.h"
-
+#include "json.h"
 #if DEBUG_INFO_FORM
 ///打印form表单提交函数的入口信息:函数名,传递进来的队列
 #define PRINT_FORM_INFO printf(WEBS_INF"%s:%s\n", __FUNCTION__,query)
@@ -117,6 +117,8 @@ static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
 static void sigintHandler(int);
 void init_semun(void);
+///@todo 实现一个json数据格式生成器,
+int jsonSavCycle(webs_t wp,const char* name,const stSave_cycle sav);
 union semun
 {
 	int val;

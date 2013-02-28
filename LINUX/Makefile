@@ -84,7 +84,7 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../security.o ../sym.o ../uemf.o ../url.o ../value.o \
 		../um.o ../umui.o ../websda.o ../emfdb.o \
 		../webrom.o ../webs.o ../websuemf.o \
-	       	param.o main.o web_err.o tou.o
+	       	param.o main.o web_err.o tou.o json.o
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 OTHERS	= -DB_STATS -DB_FILL 
 IFLAGS 	= -I.. 
@@ -174,13 +174,15 @@ $(NAME): Makefile $(ARCH)
 
 ../matrixSSLSocket.o:  ../matrixSSLSocket.c ../matrixSSLSocket.h
 
-main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h conf.h
+main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h conf.h 
 
 param.o: param.c param.h web_err.h conf.h
 
 web_err.o: web_err.c web_err.h conf.h
 
 tou.o:tou.c tou.h conf.h
+
+json.o:json.c json.h
 #
 #	Transition rules (add -o to put object in right directory)
 #

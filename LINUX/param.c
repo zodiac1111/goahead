@@ -775,6 +775,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 		int fd = fileno(fp);
 		ret = ftruncate(fd, sizeof(stSave_cycle) * SAVE_CYCLE_ITEM);
 		if(ret!=0){
+			fclose(fp);
 			return (-1);
 		}
 	}
@@ -783,6 +784,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 		perror("write");
 		PRINT_HERE
 		web_errno= write_netparam_cfgfile_err;
+		fclose(fp);
 		return (-1);
 	}
 	fclose(fp);
