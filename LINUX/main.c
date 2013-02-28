@@ -2255,11 +2255,11 @@ int webSend_savecycle(webs_t wp)
 	char* oItemArray = jsonNewArray();
 	int j;
 	for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);j++) {
-		jsonAddValue(&oCycle,NULL,SAVE_CYCLE[j]);
+		//jsonAddValue(&oCycle,NULL,SAVE_CYCLE[j]);
 	}
 
 	for(j=0;j<SAVE_CYCLE_ITEM;j++){
-		jsonAddValue(&oItemArray, NULL, addItem(&oItem, sav[0]));
+		jsonAddValue(&oItemArray, NULL, addItem(&oItem, sav[j]));
 	}
 	jsonAddValue(&oSavCycle,"cycle",oCycle);
 	jsonAddValue(&oSavCycle,"item",oItemArray);
