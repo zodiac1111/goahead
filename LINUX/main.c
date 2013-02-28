@@ -2252,26 +2252,21 @@ int webSend_savecycle(webs_t wp)
 	char* oSavCycle = jsonNew();
 	char* oCycle=jsonNewArray();
 	char* oItem = jsonNew();
+	char* oItemArray = jsonNewArray();
 	int j;
 	for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);j++) {
 		jsonAddValue(&oCycle,NULL,SAVE_CYCLE[j]);
 	}
+
+	for(j=0;j<SAVE_CYCLE_ITEM;j++){
+		jsonAddValue(&oItemArray, NULL, addItem(&oItem, sav[0]));
+	}
 	jsonAddValue(&oSavCycle,"cycle",oCycle);
-	jsonFree(&oCycle);
-	jsonAddValue(&oSavCycle, "it", addItem(&oItem, sav[0]));
-	jsonClear(&oItem);
-	jsonAddValue(&oSavCycle, "tp", addItem(&oItem, sav[1]));
-	jsonClear(&oItem);
-	jsonAddValue(&oSavCycle, "pn", addItem(&oItem, sav[2]));
-	jsonClear(&oItem);
-	jsonAddValue(&oSavCycle, "mx", addItem(&oItem, sav[3]));
-	jsonClear(&oItem);
-	jsonAddValue(&oSavCycle, "rt", addItem(&oItem, sav[4]));
-	jsonClear(&oItem);
-	jsonAddValue(&oSavCycle, "pb", addItem(&oItem, sav[5]));
-	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle,"item",oItemArray);
 	websWrite(wp, T("%s"), oSavCycle);
+	jsonFree(&oItemArray);
 	jsonFree(&oItem);
+	jsonFree(&oCycle);
 	jsonFree(&oSavCycle);
 #endif
 	return 0;
