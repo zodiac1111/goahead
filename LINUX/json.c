@@ -72,54 +72,56 @@ char* jsonAddObj(char**dobj,char*name,char*obj)
 }
 /**
  * json使用示例函数,演示创建,添加,销毁一个json对象的全部过程.
+ * 以一张名片为例.
+ * 名片:
+ * 	姓名:Bob
+ * 	电话:85070110
+ * 	地址:浙江省 杭州市 A路810号
  * 用于开发参考 :)
+ * 在线解析:http://jsoneditoronline.org/
  */
 void jsonDemo(void)
 {
-	printf(JSON_DEMO"Online JSON Editor: http://jsoneditoronline.org/");
+	printf(JSON_DEMO"在线解析 Online JSON Editor: "
+			GREEN"http://jsoneditoronline.org/"_COLOR"\n");
 
-	char* o1=jsonNew();
-	printf(JSON_DEMO"Create a void Object.O1 "
-		RED"%s"_COLOR"\n",o1);
+	char* oCard=jsonNew();
+	printf(JSON_DEMO"Create a void Object. oCard "
+		RED"%s"_COLOR"\n",oCard);
 
-	o1=jsonAddValue(&o1,"name1","value1");
-	printf(JSON_DEMO"Add a name/value to O1 "
-		RED"%s"_COLOR"\n",o1);
+	oCard=jsonAddValue(&oCard,"name","Bob");
+	printf(JSON_DEMO"Add a field(name) to oCard "
+		RED"%s"_COLOR"\n",oCard);
 
-	o1=jsonAddValue(&o1,"name2","value2");
-	printf(JSON_DEMO"Add second name/value to O1 "
-		RED"%s"_COLOR"\n",o1);
+	oCard=jsonAddValue(&oCard,"Tel","85070110");
+	printf(JSON_DEMO"Add a field(Tel) to oCard "
+		RED"%s"_COLOR"\n",oCard);
 
-	jsonFree(&o1);
-	printf(JSON_DEMO"Free O1 "
-		RED"%s"_COLOR"\n",o1);
+	char* oAddr=jsonNew();
+	printf(JSON_DEMO"Create a void Object. oAddress "
+		RED"%s"_COLOR"\n",oAddr);
 
-	char* o2=jsonNew();
-	printf(JSON_DEMO"Create a void Object.O2 "
-		RED"%s"_COLOR"\n",o2);
+	jsonAddValue(&oAddr,"Province","Zhejiang");
+	printf(JSON_DEMO"Add a field(Province) to oAddress "
+		RED"%s"_COLOR"\n",oAddr);
 
-	char* o3=jsonNew();
-	printf(JSON_DEMO"Create a void Object.O3 "
-		RED"%s"_COLOR"\n",o2);
+	jsonAddValue(&oAddr,"City","Hangzhou");
+	printf(JSON_DEMO"Add a field(City) to oAddress "
+		RED"%s"_COLOR"\n",oAddr);
 
-	jsonAddValue(&o2,"name3","value3");
-	printf(JSON_DEMO"Add a name/value to O2 "
-		RED"%s"_COLOR"\n",o2);
+	jsonAddValue(&oAddr,"No","810 A Road");
+	printf(JSON_DEMO"Add a field(No) to oAddress "
+		RED"%s"_COLOR"\n",oAddr);
 
-	jsonAddObj(&o3,"name4",o2);
-	printf(JSON_DEMO"Add a name/value(o2) to O3 "
-		RED"%s"_COLOR"\n",o3);
+	jsonAddObj(&oCard,"Address",oAddr);
+	printf(JSON_DEMO"Add a Object(oAddress) to oCard "
+		RED"%s"_COLOR"\n",oCard);
 
-	jsonAddValue(&o3,"name5","value5");
-	printf(JSON_DEMO"Add a name/value to O2 "
-		RED"%s"_COLOR"\n",o3);
+	jsonFree(&oAddr);
+	printf(JSON_DEMO"Free oAddress "
+		RED"%s"_COLOR"\n",oAddr);
 
-	jsonFree(&o2);
-	printf(JSON_DEMO"Free O2 "
-		RED"%s"_COLOR"\n",o2);
-
-	jsonFree(&o3);
-	printf(JSON_DEMO"Free O3 "
-		RED"%s"_COLOR"\n",o3);
-
+	jsonFree(&oCard);
+	printf(JSON_DEMO"Free oCard "
+		RED"%s"_COLOR"\n",oCard);
 }
