@@ -1,12 +1,11 @@
 #include "json.h"
 #include <malloc.h>
 #include <string.h>
-#define RED "\e[31m"
-#define GREEN "\e[32m"
-#define _COLOR "\e[0m"
-#define JSON_DEMO RED"JSON DEMO"_COLOR">"
+#include "color.h"
+#define JSON_DEMO YELLOW"JSON DEMO"_COLOR">"
+#define JSON_ERR RED"JSON ERR"_COLOR">"
 /**
- * 创建一个空的json对象,用完注意释放 free
+ * 创建一个空的json对象"{}",用完注意释放 free
  * @return
  */
 char* jsonNew(void)
@@ -17,7 +16,7 @@ char* jsonNew(void)
 	}
 	return obj;
 }
-///穿件空数组 ,注意释放 free
+///穿件空数组"[]" ,注意释放 free
 char* jsonNewArray(void)
 {
 	char* obj=malloc(strlen("[]")+1);
@@ -71,47 +70,75 @@ int jsonFree(char**obj)
  * @param value
  * @return
  */
-char* jsonAddValue(char**dobj,char*name,char*value)
+char* jsonAddValue(char**dobj, const char*name,const char*value)
 {
-	if(dobj==NULL||name==NULL||value==NULL){
-		perror("jsonAddValue-in");
+	if(dobj==NULL){
+		perror("jsonAddValue-dobj");
+		return NULL;
+	}
+	int isArray=(*dobj)[0]=='['?1:0;//是否是向数组内添加.
+	if(name==NULL && !isArray){ //添加数组原书不需要name.设置成空.
+		perror("jsonAddValue-name");
+		return NULL;
+	}
+	if(value==NULL){
+		perror("jsonAddValue-value");
 		return NULL;
 	}
 	int dlen=strlen(*dobj);
 	int isObj=(value[0]=='{'||value[0]=='[')?1:0;
 	int isFirst=((dlen==2)?1:0); //原始对象为空则不需要加逗号.
+
 	char end ;//区分是像对象还是向数组添加名/值对.
 	end=(*dobj)[0]+2;
 	*dobj=realloc(*dobj,
 			strlen(*dobj) //原来对象长度
 			+(isFirst?0:1) //可能存在的逗号.如果空对象,则新增的名/值对不需要逗号
-			+strlen("\"\":")//名/值对的可格式 "名":
+			+(isArray?0:strlen("\"\":"))//名/值对的可格式 "名":
 			+(isObj?0:2) //图过不是对象则要加一对引号
-			+strlen(name)+strlen(value)// 名/值对的长度
+			+(isArray?0:strlen(name)) //数组不需要name字段.
+			+strlen(value)// 名/值对的长度
 			+1);// \0
 	if(*dobj==NULL){
 		perror("jsonAddValue-realloc");
 		return *dobj;
 	}
-	switch(isFirst*10+isObj){
-	case 00://不是首个元素(需要逗号),不是对象(需要引号).
+	///@note 用三个bit分别表示,若gcc版本过低不能识别0b开头的二进制表达方式.
+	/// 换成0x开头的十六进制表示就可以了.这里用二进制表示更形象 XD
+	int cs=isArray*4+isFirst*2+isObj;
+	switch(cs){
+	//添加到不是数组的对象中
+	case 0b000:	//不是首个元素(需要逗号),不是对象(需要引号).
 		sprintf(*dobj+dlen-1,",\"%s\":\"%s\"%c",name,value,end);
 		break;
-	case 01://不是首个元素(需要逗号),是对象(不需要引号)
+	case 0b001:	//不是首个元素(需要逗号),是对象(不需要引号)
 		sprintf(*dobj+dlen-1,",\"%s\":%s%c",name,value,end);
 		break;
-	case 10://是首个元素(不需要逗号),不是对象(需要引号).
+	case 0b010:	//是首个元素(不需要逗号),不是对象(需要引号).
 		sprintf(*dobj+dlen-1,"\"%s\":\"%s\"%c",name,value,end);
 		break;
-	case 11://是首个元素(不需要逗号),是对象(不需要引号).
+	case 0b011:	//是首个元素(不需要逗号),是对象(不需要引号).
 		sprintf(*dobj+dlen-1,"\"%s\":%s%c",name,value,end);
 		break;
+	//添加到一个数组对象中,不需要name
+	case 0b100:	//不是首个元素(需要逗号),不是对象(需要引号).
+		sprintf(*dobj+dlen-1,",\"%s\"%c",value,end);
+		break;
+	case 0b101:	//不是首个元素(需要逗号),是对象(不需要引号)
+		sprintf(*dobj+dlen-1,",%s%c",value,end);
+		break;
+	case 0b110:	//是首个元素(不需要逗号),不是对象(需要引号).
+		sprintf(*dobj+dlen-1,"\"%s\"%c",value,end);
+		break;
+	case 0b111:	//是首个元素(不需要逗号),是对象(不需要引号).
+		sprintf(*dobj+dlen-1,"%s%c",value,end);
+		break;
 	default:
+		printf(JSON_ERR"in switch case cs=%d\n",cs);
 		break;
 	}
 	return *dobj;
 }
-
 /**
  * json使用示例函数,演示创建,添加,销毁一个json对象的全部过程.
  * 以一张名片为例.
