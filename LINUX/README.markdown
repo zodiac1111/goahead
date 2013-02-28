@@ -11,7 +11,7 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 * ☐ [编译webs服务器](#compile)(可略过)
 * ☐ [安装webs](#install)
 * ☐ [配置webs](#conf)
-* ☐ [上传wwwdemo目录](#www)
+* ☐ [上传www目录](#www)
 * ☐ [启动webs](#run)
 * ☐ 将用于维护的个人电脑与终端连接.使之能 `ping` 通终端的IP
 * ☐ [在浏览器输入地址,进入管理界面](#use)
@@ -64,7 +64,7 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 2.将 `conf/monparam_name.conf` 网络监视端口名称配置信息文件上传到终端 `/mnt/nor/conf` 目录下.如果有必要,打开并按照文件内容指示修改内容使之与终端端口名称相符.
 
 <a name="www"></a>
-3.将整个 `wwwdemo` 网页目录通过ftp工具上传到终端 `/mnt/nor` 目录下.(该目录是webs的前端项目目录).
+3.将整个 `www` 网页目录通过ftp工具上传到终端 `/mnt/nor` 目录下.(该目录是webs的前端项目目录).
 
 4.修改看门狗配置文件.(可选)
 

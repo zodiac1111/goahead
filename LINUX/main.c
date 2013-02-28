@@ -290,8 +290,8 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "init")==0) {
 		(void) webSend_savecycle(wp);
 	} else {
 		(void) webRece_savecycle(wp);
@@ -718,10 +718,11 @@ static int initWebs(void)
 	                webs_cfg.monparam_name)) {
 		web_err_proc(EL);
 	}
-	/**
+	/*
 	 * 注册asp函数,给予asp调用
+	 * [空]
 	 */
-	///form define/用于post
+	//注册表单post函数. form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
 	///@todo 表计参数的数据项,若使用json可以自描述就不需要描述项了
