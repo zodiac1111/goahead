@@ -2204,7 +2204,6 @@ int webSend_savecycle(webs_t wp)
 {
 	//printf("读取存储周期.\n");
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
-	int i = 0;
 	int ret = load_savecycle(sav, webs_cfg.stspara);
 	if (ret==-1) {
 		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
@@ -2213,6 +2212,7 @@ int webSend_savecycle(webs_t wp)
 		return 0;
 	}
 #if JSON==0
+	int i = 0;
 	//第一行:有效标识
 	websWrite(wp, T("<tr>\n"));
 	websWrite(wp, T("<td>\n"));
@@ -2249,40 +2249,25 @@ int webSend_savecycle(webs_t wp)
 		websWrite(wp, T("</td>\n"));
 	}
 #else
-
 	char* oSavCycle = jsonNew();
 	char* oItem = jsonNew();
-	//jsonAddValue(&oSavCycle,"it",oItem);
 	jsonAddValue(&oSavCycle, "it", addItem(&oItem, sav[0]));
 	jsonClear(&oItem);
-//	jsonAddValue(&oSavCycle, "ip", addItem(&oItem, sav[1]));
-//	jsonClear(&oItem);
-//	jsonAddValue(&oSavCycle, "tp", addItem(&oItem, sav[2]));
-//	jsonClear(&oItem);
-//	jsonAddValue(&oSavCycle, "pn", addItem(&oItem, sav[3]));
-//	jsonClear(&oItem);
-//	jsonAddValue(&oSavCycle, "mx", addItem(&oItem, sav[4]));
-//	jsonClear(&oItem);
-//	jsonAddValue(&oSavCycle, "rt", addItem(&oItem, sav[5]));
-//	jsonClear(&oItem);
-//	jsonAddValue(&oSavCycle, "pb", addItem(&oItem, sav[6]));
-//	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle, "ip", addItem(&oItem, sav[1]));
+	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle, "tp", addItem(&oItem, sav[2]));
+	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle, "pn", addItem(&oItem, sav[3]));
+	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle, "mx", addItem(&oItem, sav[4]));
+	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle, "rt", addItem(&oItem, sav[5]));
+	jsonClear(&oItem);
+	jsonAddValue(&oSavCycle, "pb", addItem(&oItem, sav[6]));
+	jsonClear(&oItem);
 	websWrite(wp, T("%s"), oSavCycle);
 	jsonFree(&oItem);
 	jsonFree(&oSavCycle);
-	/*websWrite(wp, T("{"));
-	 jsonSavCycle(wp,"it",sav[0]);
-	 websWrite(wp, T(","));
-	 jsonSavCycle(wp,"tp",sav[1]);
-	 websWrite(wp, T(","));
-	 jsonSavCycle(wp,"p",sav[2]);
-	 websWrite(wp, T(","));
-	 jsonSavCycle(wp,"maxneed",sav[3]);
-	 websWrite(wp, T(","));
-	 jsonSavCycle(wp,"realtime",sav[4]);
-	 websWrite(wp, T(","));
-	 jsonSavCycle(wp,"breakphase",sav[5]);
-	 websWrite(wp, T("}")); */
 #endif
 	return 0;
 }
