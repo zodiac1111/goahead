@@ -91,7 +91,6 @@ int main(int argc __attribute__ ((unused)),
 	signal(SIGPIPE, SIG_IGN );
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
-
 	//Initialize the web server 初始化web服务器
 	if (initWebs()<0) {
 		printf(WEBS_ERR"init Webs.\n");
@@ -117,7 +116,7 @@ int main(int argc __attribute__ ((unused)),
 		}
 		websCgiCleanup();
 		emfSchedProcess();
-		break;//用于调试正确的退出.
+		//break;//用于调试正确的退出.
 	}
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
@@ -606,7 +605,7 @@ char* getconf(const char const* name, char** value)
 		}
 	}
 	fclose(fp);
-	printf(WEBS_INF"conf \e[33m%s\e[0m\t= \e[32m%s\e[0m\n"
+	printf(WEBS_INF"conf "YELLOW"%s"_COLOR"\t= "GREEN"%s"_COLOR"\n"
 	                , name, *value);
 	return *value;
 }
@@ -1477,7 +1476,7 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
  * @param[in] page 重定向到的页面 char *
  * @return
  */
-static int reflash_this_wp(webs_t wp, const char *page)
+ int reflash_this_wp(webs_t wp, const char *page)
 {
 	websHeader(wp);
 	websWrite(wp, T("<meta http-equiv=refresh content=\"0.01;"

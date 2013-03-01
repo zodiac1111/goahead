@@ -104,7 +104,7 @@ static int is_all_equ(int n[], int num);
 int portstr2u8(const char * str, u8* val);
 int listen_port_str2array(const char* str, u8 a[5]);
 int rtu_addr_str2array(const char* str, u8 a[4]);
-static int reflash_this_wp(webs_t wp, const char *page);
+int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
 ////设置函数
 char* getconf(const char const* name,char** value);
