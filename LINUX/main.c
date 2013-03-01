@@ -325,7 +325,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 #define RET_RTU 4
 #define RET_TEST 10
 	PRINT_FORM_INFO;
-	char app[128] = { 0 };
+	char app[256] = { 0 };
 	int typ = 0;
 	int ret = -1;
 	pid_t pid;
@@ -344,24 +344,29 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		readlink("/proc/self/exe", app, 128);
 		pid = fork();
 		if (pid==-1) {
+			printf(WEBS_ERR"重启webs错误\n");
+			web_err_proc(EL);
 			fprintf(stderr, "fork() error.errno:%d error:%s\n",
 			                errno, strerror(errno));
 			break;
 		}
-		if (pid==0) {		//子进程.
+		if (pid==0) {	//子进程.
+			//printf(WEBS_INF"子进程-结束webs进程\n");
+			//readlink("/proc/self/exe", app, 128);
+			//printf(WEBS_INF"子进程app:%s\n",app);
 			system("killall webs");
 			execl(app, app, NULL );
 			exit(0);
 		}
-		if (pid>0) {
-
+		if (pid>0) { //父进程
+			//printf(WEBS_INF"父进程-结束webs进程\n");
 		}
 		break;
 	case RET_SAMPLE_PROC:		///@待定
 		system("killall hl3104_com ");
 		break;
 	case RET_RTU:
-		reflash_this_wp(wp, PAGE_RESET);
+		//reflash_this_wp(wp, PAGE_RESET);
 #if __i386 == 1
 		//调试不要重启PC系统...
 		system("echo \"reboot ok\"");
@@ -374,11 +379,11 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		system("ls");
 		break;
 	default:
-		reflash_this_wp(wp, PAGE_RESET);
+		//reflash_this_wp(wp, PAGE_RESET);
 		return;
 		break;
 	}
-	reflash_this_wp(wp, PAGE_RESET);
+	//reflash_this_wp(wp, PAGE_RESET);
 }
 /**
  * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
@@ -424,7 +429,7 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 void form_save_log(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	webRece_txtfile(wp, query, ERR_LOG);
+	webRece_txtfile(wp, query, webs_cfg.errlog);
 	return;
 }
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
@@ -448,7 +453,7 @@ void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 void form_load_log(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	webSend_txtfile(wp, ERR_LOG);
+	webSend_txtfile(wp, webs_cfg.errlog);
 	return;
 }
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
@@ -599,7 +604,7 @@ char* getconf(const char const* name, char** value)
 		}
 	}
 	fclose(fp);
-	printf(WEBS_INF"Item \e[33m%s\e[0m = \e[32m%s\e[0m\n"
+	printf(WEBS_INF"conf \e[33m%s\e[0m\t= \e[32m%s\e[0m\n"
 	                , name, *value);
 	return *value;
 }
@@ -2257,15 +2262,7 @@ char *addItem(char **oItem, stSave_cycle sav)
 	jsonAdd(oItem, "t", value);
 	return *oItem;
 }
-int jsonSavCycle(webs_t wp, const char* name, const stSave_cycle sav)
-{
-	websWrite(wp, T("\"%s\":{"), name);
-	websWrite(wp, T("\"en\":"));
-	websWrite(wp, T("\"%d\","), sav.enable);
-	websWrite(wp, T("\"t\":"));
-	websWrite(wp, T("\"%d\"}"), sav.cycle);
-	return 0;
-}
+
 
 /**
  * 从页面中获取文本,保存到本地文本文件中.
@@ -2366,6 +2363,15 @@ void print_array(const u8 *a, const int len)
 static void sigintHandler(int unused __attribute__ ((unused)))
 {
 	finished = 1;
+}
+int jsonSavCycle(webs_t wp, const char* name, const stSave_cycle sav)
+{
+	websWrite(wp, T("\"%s\":{"), name);
+	websWrite(wp, T("\"en\":"));
+	websWrite(wp, T("\"%d\","), sav.enable);
+	websWrite(wp, T("\"t\":"));
+	websWrite(wp, T("\"%d\"}"), sav.cycle);
+	return 0;
 }
 /**
  * 去除输入数组中的前导空白符和后导空白符

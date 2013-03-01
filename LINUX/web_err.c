@@ -7,10 +7,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "conf.h"
 #include "web_err.h"
 #include "param.h"
 #include <time.h>
-static int save_log(const char * errstring);
 int web_errno = 0;
 const char *myweberrstr[] =
                 {[no_error]="No Error.",
@@ -97,7 +97,7 @@ void web_err_proc(EL_ARGS)
 		printf("%s", errstring);
 	}
 	// 写入文件
-	save_log(errstring);
+	save_log(errstring,webs_cfg.errlog);
 	web_errno = 0;
 	return;
 }
@@ -106,14 +106,15 @@ void web_err_proc(EL_ARGS)
  * @param errstring
  * @return
  */
-static int save_log(const char * errstring)
+ int save_log(const char * errstring,const char*filename)
 {
 	FILE*fp=NULL;
-	fp = fopen(ERR_LOG, "a");
+	fp = fopen(filename, "a");
 	if (fp==NULL) {
-		fp = fopen(ERR_LOG, "w");
+		fp = fopen(filename, "w");
 		if (fp==NULL) {
-			perror(WEBS_ERR"create errlog file err:");
+			printf("[%s]=>%s\n", errstring,filename);
+			perror(WEBS_ERR"create errlog file err");
 			return -1;
 		}
 	}
