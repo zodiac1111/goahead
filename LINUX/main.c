@@ -107,10 +107,8 @@ int main(int argc __attribute__ ((unused)),
 	 * will actually do the servicing.
 	 */
 	finished = 0;
-	printf(WEBS_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
-	printf(WEBS_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
-	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%s\e[0m "
-	"with Browser.\n", webs_cfg.port);
+	printf(WEBS_INF"Now access "GREEN UNDERLINE "http://<IP>:%s"_COLOR
+	" with Browser.\n", webs_cfg.port);
 	while (!finished) {
 		//PRINT_HERE
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
@@ -623,7 +621,9 @@ char *mkFullPath(const char *path, const char *name)
 	memcpy(fullpath, path, l1);
 	memcpy(fullpath+l1, "/", 1);
 	memcpy(fullpath+l1+1, name, l2);
+#if DEBUG_CONF_FULLPATH
 	printf(WEBS_DBG"FullPath %s\n", fullpath);
+#endif
 	return fullpath;
 }
 /**

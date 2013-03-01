@@ -36,11 +36,13 @@ extern stCfg webs_cfg;
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
 #define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
 #define DEBUG_PRINT_SAVE_CYCLE 0 ///<打印储存周期调试信息
+#define DEBUG_CONF_FULLPATH 0 ///<解析配置文件合并成为完整的绝对路径(打印调试信息)
 #define DEBUG_JSON_DEMO 0 ///<json生成器(不包括解析器)的使用demo示例
 ///@todo 端口首页这类配置成 独立配置文件项
 #define WEBS_DEFAULT_HOME	T("index.html") /* Default home page */
-#define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
-#define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
+//遗留的goahead2.5.0版本的端口宏定义,现在放到配置文件中实现
+//#define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
+//#define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
 #define WEBS_DBG PREFIX YELLOW"Debug>"_COLOR ///<调试信息
