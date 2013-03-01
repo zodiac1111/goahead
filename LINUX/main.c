@@ -147,7 +147,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
-	if (strcmp(action, "init")==0) {
+	if (strcmp(action, "get")==0) {
 		webSend_syspara(wp);
 	} else {
 		webRece_syspara(wp, &sysparam);
@@ -2053,6 +2053,23 @@ int webSend_syspara(webs_t wp)
 	 "control_ports": 6
 	 }
 	 */
+	char* oSysPara = jsonNew();
+	char tmp[128]={0};
+	sprintf(tmp,"%u", sysparam.meter_num);
+	jsonAdd(&oSysPara,"meter_num",tmp);
+	sprintf(tmp,"%u", sysparam.sioplan_num);
+	jsonAdd(&oSysPara,"sioplan_num",tmp);
+	sprintf(tmp,"%u", sysparam.monitor_ports);
+	jsonAdd(&oSysPara,"monitor_ports",tmp);
+	sprintf(tmp,"%u", sysparam.netports_num);
+	jsonAdd(&oSysPara,"netports_num",tmp);
+	sprintf(tmp,"%u", sysparam.sioports_num);
+	jsonAdd(&oSysPara,"sioports_num",tmp);
+	sprintf(tmp,"%u", sysparam.control_ports);
+	jsonAdd(&oSysPara,"control_ports",tmp);
+	websWrite(wp,T("%s"),oSysPara);
+	jsonFree(&oSysPara);
+	/*
 	websWrite(wp, T("{"
 			"\"meter_num\":%u,"
 			"\"sioplan_num\":%u,"
@@ -2067,7 +2084,7 @@ int webSend_syspara(webs_t wp)
 	                sysparam.netports_num,
 	                sysparam.sioports_num,
 	                sysparam.control_ports
-	                );
+	                ); */
 	return 0;
 }
 

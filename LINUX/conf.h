@@ -61,7 +61,7 @@ extern stCfg webs_cfg;
 	//如果在配置文件中查找errlog失败启用这个路径作为备用的错误处理文件路径.
 	#define BACKUP_ERR_FILE "/mnt/nor/goahead-backup.log"
 #else 		//运行在i368,host调试平台上.
-	#define CONF_FILE "/home/lee/workspace/goahead/conf/goahead-host.conf"
+	#define CONF_FILE "/home/lee/workspace/goahead/conf-host/goahead.conf"
 	#define BACKUP_ERR_FILE "/home/lee/workspace/goahead/goahead-backup.log"
 #endif
 
