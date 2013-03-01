@@ -65,5 +65,8 @@ enum e_errno {
 	open_tou_file,
 	read_tou_file_filehead,
 	read_tou_file_dat,
+	//其他系统警告
+	use_backup_err_log,
+	use_backup_port,
 };
 #endif

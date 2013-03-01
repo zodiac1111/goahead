@@ -8,26 +8,27 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "conf.h"
+#include "color.h"
 #include "web_err.h"
 #include "param.h"
 #include <time.h>
 int web_errno = 0;
-const char *myweberrstr[] =
-                {[no_error]="No Error.",
-                                ///系统参数相关
-                                [open_sysparam_file
-                                                ]="Open system confingure file "FILE_SYSPARA" err.",
-                                [sysfile_size_err
-                                                ]="System parameter file size err.",
-                                [write_sysfile_size_err
-                                                ]="Save system parameter err,size is error.",
-                                [read_sysfile_err]="读取系统参数文件"FILE_SYSPARA"时出错",
-                                [write_sysfile_err]="写入系统参数文件"FILE_SYSPARA"时出错",
-                                [update_mtr_file_err]="更新表计参数数量"CFG_MTR"时出错",
-                                ///表计参数相关
-                                [open_mtrcfgfile_err]="打开表计参数文件"CFG_MTR"时出错",
-                                [no_this_mtrparam
-]                =CFG_MTR"中没有这个表计参数",
+const char *myweberrstr[] = {
+                [no_error]="No Error.",
+                ///系统参数相关
+                [open_sysparam_file]=
+                "Open system confingure file "FILE_SYSPARA" err.",
+                [sysfile_size_err]=
+                "System parameter file size err.",
+                [write_sysfile_size_err]=
+                "Save system parameter err,size is error.",
+                [read_sysfile_err]="读取系统参数文件"FILE_SYSPARA"时出错",
+                [write_sysfile_err]="写入系统参数文件"FILE_SYSPARA"时出错",
+                [update_mtr_file_err]="更新表计参数数量"CFG_MTR"时出错",
+                ///表计参数相关
+                [open_mtrcfgfile_err]="打开表计参数文件"CFG_MTR"时出错",
+                [no_this_mtrparam
+                ] =CFG_MTR"中没有这个表计参数",
                 [read_mtrcfgfile_err]="读取表计参数文件"CFG_MTR"时出错",
                 [write_mtrcfgfile_err]="Write Meter cfg file Err."
                 "写入表计参数文件"CFG_MTR"时出错",
@@ -60,8 +61,8 @@ const char *myweberrstr[] =
         [write_savecycle_cfgfile_err]="Write save cycle cfg file error.",
         ///规约初始化
         [open_protocolfile_err]="Open Protocol file err:"PORC_FILE,
-        [toomany_protocol_err]="Too many Protocol in "PORC_FILE"."
-        "Quantity of Protocol is Greater than MAX_PROCOTOL_NUM"
+        [toomany_protocol_err]="Too many Protocol in "PORC_FILE"."\
+        "Quantity of Protocol is Greater than MAX_PROCOTOL_NUM"\
         "[128].",
         [open_monitor_name_file_err]="Open Monitor Port name file "
         		MON_PORT_NAME_FILE" err.",
@@ -72,6 +73,13 @@ const char *myweberrstr[] =
         [open_tou_file]="Open history Tou data err.",
         [read_tou_file_filehead]="Read history Tou file(file head) err.",
         [read_tou_file_dat]="Read history Tou file(data) err.",
+        //系统警告
+        [use_backup_err_log]="Can't find "YELLOW"errlog"_COLOR
+        		" in "RED CONF_FILE _COLOR
+        		",use file " RED BACKUP_ERR_FILE _COLOR" as a backup.",
+        [use_backup_port]="Can't find "YELLOW"port"_COLOR" in "RED CONF_FILE _COLOR
+        		",use " RED WEBS_DEFAULT_PORT _COLOR
+        		" as a backup port number.",
 };
 /**
  * 服务器错误处理函数.
@@ -79,7 +87,7 @@ const char *myweberrstr[] =
  */
 void web_err_proc(EL_ARGS)
 {
-	time_t timer = time(NULL);
+	time_t timer = time(NULL );
 	struct tm * t = localtime(&timer);
 	char strtime[25] = { 0 };
 	char errstring[MAX_ERR_LOG_LINE_LENTH] = { 0 };
@@ -93,11 +101,11 @@ void web_err_proc(EL_ARGS)
 	sprintf(errstring, WEBS_ERR"[%s]ErrCode[%d]:%s (%s,%s:%d)%s\n",
 	                strtime, web_errno, myweberrstr[web_errno],
 	                file, func, line, strerror(errno));
-	if (myweberrstr[web_errno]!=NULL) {
+	if (myweberrstr[web_errno]!=NULL ) {
 		printf("%s", errstring);
 	}
 	// 写入文件
-	save_log(errstring,webs_cfg.errlog);
+	save_log(errstring, webs_cfg.errlog);
 	web_errno = 0;
 	return;
 }
@@ -106,14 +114,14 @@ void web_err_proc(EL_ARGS)
  * @param errstring
  * @return
  */
- int save_log(const char * errstring,const char*filename)
+int save_log(const char * errstring, const char*filename)
 {
-	FILE*fp=NULL;
+	FILE*fp = NULL;
 	fp = fopen(filename, "a");
-	if (fp==NULL) {
+	if (fp==NULL ) {
 		fp = fopen(filename, "w");
-		if (fp==NULL) {
-			printf("[%s]=>%s\n", errstring,filename);
+		if (fp==NULL ) {
+			printf("errfile:%s\n", filename);
 			perror(WEBS_ERR"create errlog file err");
 			return -1;
 		}

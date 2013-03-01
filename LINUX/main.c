@@ -542,7 +542,7 @@ int printf_webs_app_dir(void)
 		PRINT_RET(count);
 		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
-	printf(WEBS_INF"App dir:\e[32m%s\e[0m\n", dir);
+	printf(WEBS_INF"App dir\t:"GREEN"%s"_COLOR"\n", dir);
 	return 0;
 }
 
@@ -673,18 +673,26 @@ static int initWebs(void)
 	                (size_t) hp->h_length);
 
 	(void) printf_webs_app_dir();
+	printf(WEBS_INF"Config file\t:"GREEN CONF_FILE _COLOR "\n");
 	if (getconf("wwwroot", &webdir)==NULL )
 		return -2;
-	if (getconf("errlog", &webs_cfg.errlog)==NULL )
-		return -2;
+	if (getconf("errlog", &webs_cfg.errlog)==NULL ){
+		webs_cfg.errlog=BACKUP_ERR_FILE;
+		web_errno=use_backup_err_log;
+		web_err_proc(EL);
+	}
 	if (getconf("paradir", &webs_cfg.paradir)==NULL )
 		return -3;
 	if (getconf("confdir", &webs_cfg.confdir)==NULL )
 		return -4;
-	if (getconf("port", &webs_cfg.port)==NULL )
-			return -200;
-	if (getconf("ssl_port", &webs_cfg.ssl_port)==NULL )
-			return -201;
+	if (getconf("port", &webs_cfg.port)==NULL ){
+		webs_cfg.port=WEBS_DEFAULT_PORT;
+		web_errno=use_backup_port;
+		web_err_proc(EL);
+	}
+	if (getconf("sslport", &webs_cfg.ssl_port)==NULL ){
+		return -201;
+	}
 	webs_cfg.syspara = mkFullPath(webs_cfg.paradir, FILE_SYSPARA);
 	webs_cfg.mtrspara = mkFullPath(webs_cfg.paradir, CFG_MTR);
 	webs_cfg.sioplan = mkFullPath(webs_cfg.paradir, CFG_SIOPALN);
@@ -2422,8 +2430,10 @@ void init_semun(void)
 void webs_free(void)
 {
 	int i;
-	//配置文件项
-	if (webs_cfg.port!=NULL ) {
+	//配置文件项 WEBS_DEFAULT_PORT
+	if (webs_cfg.port!=NULL &&
+		//如果使用了备用的端口号,分配在静态区,不能/需要释放.
+		strcmp(webs_cfg.port, WEBS_DEFAULT_PORT)!=0) {
 		free(webs_cfg.port);
 		webs_cfg.port = NULL;
 	}
@@ -2431,7 +2441,9 @@ void webs_free(void)
 		free(webs_cfg.ssl_port);
 		webs_cfg.ssl_port = NULL;
 	}
-	if (webs_cfg.errlog!=NULL ) {
+	if (webs_cfg.errlog!=NULL &&
+		//如果使用了备用的错误日志文件,分配在静态区,不能/需要释放.
+		strcmp(webs_cfg.errlog, BACKUP_ERR_FILE)!=0) {
 		free(webs_cfg.errlog);
 		webs_cfg.errlog = NULL;
 	}

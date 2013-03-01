@@ -41,7 +41,8 @@ extern stCfg webs_cfg;
 ///@todo 端口首页这类配置成 独立配置文件项
 #define WEBS_DEFAULT_HOME	T("index.html") /* Default home page */
 //遗留的goahead2.5.0版本的端口宏定义,现在放到配置文件中实现
-//#define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
+//保留用于读取配置文件错误时使用
+#define WEBS_DEFAULT_PORT	"8080" //默认 HTTP 端口,只有root有权限访问1000以下端口
 //#define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
@@ -54,9 +55,13 @@ extern stCfg webs_cfg;
 //webs服务器应用程序配置文件
 #if __arm__  	//运行在终端平台arm上.
 #define CONF_FILE "/mnt/nor/conf/goahead.conf"
+//如果在配置文件中查找errlog失败启用这个路径作为备用的错误处理文件路径.
+#define BACKUP_ERR_FILE "/mnt/nor/goahead-backup.log"
 #else 		//运行在i368,host调试平台上.
 #define CONF_FILE "/home/lee/workspace/goahead/conf/goahead-host.conf"
+#define BACKUP_ERR_FILE "/home/lee/workspace/goahead/goahead-backup.log"
 #endif
+
 ///@todo 这些项目可以放到配置文件中.程序中需要一些修改
 //webs服务器错误文件相关
 #define ERR_LOG "./err.log" ///<错误日志文件
