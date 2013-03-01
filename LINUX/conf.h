@@ -7,7 +7,10 @@
 #ifndef CONF_H_
 #define CONF_H_
 #include <version.h>
+#include "color.h"
 typedef struct cfg{
+	char *port;//默认端口
+	char *ssl_port;//ssl默认端口哦
 	//   错误日志绝对路径
 	char *errlog;
 	//   para目录(用于计算下面的绝对路径)
@@ -33,16 +36,17 @@ extern stCfg webs_cfg;
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
 #define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
 #define DEBUG_PRINT_SAVE_CYCLE 0 ///<打印储存周期调试信息
-///@todo 独立成为配置文件项
+#define DEBUG_JSON_DEMO 0 ///<json生成器(不包括解析器)的使用demo示例
+///@todo 端口首页这类配置成 独立配置文件项
 #define WEBS_DEFAULT_HOME	T("index.html") /* Default home page */
 #define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口
 #define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
-#define WEBS_DBG PREFIX"\e[33mDebug\e[0m>" ///<调试信息
-#define WEBS_INF PREFIX"\e[32mInfo\e[0m>" ///<一般信息
-#define WEBS_WAR PREFIX"\e[33mWarning\e[0m>" ///<警告信息
-#define WEBS_ERR PREFIX"\e[31mError\e[0m>" ///<错误信息
+#define WEBS_DBG PREFIX YELLOW"Debug>"_COLOR ///<调试信息
+#define WEBS_INF PREFIX GREEN "Info>"_COLOR ///<一般信息
+#define WEBS_WAR PREFIX YELLOW"Warning>"_COLOR ///<警告信息
+#define WEBS_ERR PREFIX RED"Error>" _COLOR///<错误信息
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件
@@ -74,17 +78,17 @@ extern stCfg webs_cfg;
 //信息
 #define PRINT_WELCOME {					\
 	printf("\t\tWelcome to use "		\
-	"\e[31mHolley web services\e[0m\t\t\n");	\
+	RED"Holley web services"_COLOR"\t\t\n");	\
 	}
 //打印版本信息
 #define PRINT_VERSION { 					\
-		printf("\tVersion:\t\e[32m%d.%d.%d\e[0m"	\
-			" [\e[31m%s\e[0m]\n", 	 \
+		printf("\tVersion:\t"GREEN"%d.%d.%d"_COLOR	\
+			" ["RED"%s"_COLOR"]\n", 	 \
 		MAJOR, MINOR, PATCHLEVEL,GIT_VERSION); 		\
 	}
 //打印编译构建的日期和时间，类似：Dec  3 2012 09:59:57
 #define PRINT_BUILD_TIME {					\
-		printf("\tBuild time:\t\e[32m%s %s\e[0m\n",	\
+		printf("\tBuild time:\t"GREEN"%s %s"_COLOR"\n",\
 		 __DATE__, __TIME__);		\
 	}
 

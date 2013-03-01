@@ -75,7 +75,8 @@ int jsonFree(char**obj)
  * @param dobj 对象或者数组.
  * @param name
  * @param value
- * @return
+ * @retval 返回添加到的对象的地址,方便链式调用.
+ * @retval NULL 错误.
  */
 char* jsonAdd(char**dobj, const char*name,const char*value)
 {
@@ -150,9 +151,9 @@ char* jsonAdd(char**dobj, const char*name,const char*value)
  * json使用示例函数,演示创建,添加,销毁一个json对象的全部过程.
  * 以一张名片为例.
  * 名片:
- * 	姓名:Bob
- * 	电话:85070110
- * 	地址:浙江省 杭州市 A路810号
+ * 	姓名:Bob [基本的名/值对]
+ * 	电话:89300405,133****8628 [数组的使用]
+ * 	地址:浙江省 杭州市 A路810号 [以对象为值]
  * 用于开发参考 :)
  * 在线解析:http://jsoneditoronline.org/
  */
@@ -160,51 +161,91 @@ void jsonDemo(void)
 {
 	printf(JSON_DEMO"在线解析 Online JSON Editor: "
 			GREEN"http://jsoneditoronline.org/"_COLOR"\n");
-	printf(JSON_DEMO"  ********  Example  ********\n"
-		JSON_DEMO"  * Name   :Bob             *\n"
-		JSON_DEMO"  * Tel    :85070110        *\n"
-		JSON_DEMO"  * Address:                *\n"
-		JSON_DEMO"  *   Province:Zhejiang     *\n"
-		JSON_DEMO"  *   City    :Hanzhou      *\n"
-		JSON_DEMO"  *   No.     :810 A Road   *\n"
-		JSON_DEMO"  ***************************\n");
+	printf(JSON_DEMO RED" /------------ Card ------------\\\n"_COLOR
+		JSON_DEMO RED" | Name   :Bob                  |\n"_COLOR
+		JSON_DEMO RED" | Tel    :89300405,133****8628 |\n"_COLOR
+		JSON_DEMO RED" | Address:                     |\n"_COLOR
+		JSON_DEMO RED" |   Province:Zhejiang          |\n"_COLOR
+		JSON_DEMO RED" |   City    :Hangzhou          |\n"_COLOR
+		JSON_DEMO RED" |   No.     :810 A Road        |\n"_COLOR
+		JSON_DEMO RED" \\------------------------------/\n"_COLOR);
 	char* oCard=jsonNew();
-	printf(JSON_DEMO"1. Create a void Object. oCard "
+	printf(JSON_DEMO" Create a Empty Object. oCard "
 		RED"%s"_COLOR"\n",oCard);
 
 	oCard=jsonAdd(&oCard,"name","Bob");
-	printf(JSON_DEMO"2. Add a field(name) to oCard "
+	printf(JSON_DEMO" Add a field(name) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 
-	oCard=jsonAdd(&oCard,"Tel","85070110");
-	printf(JSON_DEMO"3. Add a field(Tel) to oCard "
+	char* aTel=jsonNewArray();
+		printf(JSON_DEMO" Create a Empty Array. aTel "
+			RED"%s"_COLOR"\n",aTel);
+
+	jsonAdd(&aTel,NULL,"89300405");
+	printf(JSON_DEMO" Add a Element to aTel "
+		RED"%s"_COLOR"\n",aTel);
+
+	jsonAdd(&aTel,NULL,"133****8628");
+	printf(JSON_DEMO" Add a Element to aTel "
+		RED"%s"_COLOR"\n",aTel);
+
+	oCard=jsonAdd(&oCard,"Tel",aTel);
+	printf(JSON_DEMO" Add a field(Tel) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 
 	char* oAddr=jsonNew();
-	printf(JSON_DEMO"4. Create a void Object. oAddress "
+	printf(JSON_DEMO" Create a Empty Object. oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
 	jsonAdd(&oAddr,"Province","Zhejiang");
-	printf(JSON_DEMO"5. Add a field(Province) to oAddress "
+	printf(JSON_DEMO" Add a field(Province) to oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
 	jsonAdd(&oAddr,"City","Hangzhou");
-	printf(JSON_DEMO"6. Add a field(City) to oAddress "
+	printf(JSON_DEMO" Add a field(City) to oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
 	jsonAdd(&oAddr,"No","810 A Road");
-	printf(JSON_DEMO"7. Add a field(No) to oAddress "
+	printf(JSON_DEMO" Add a field(No) to oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
 	jsonAdd(&oCard,"Address",oAddr);
-	printf(JSON_DEMO"8. Add a Object(oAddress) to oCard "
+	printf(JSON_DEMO" Add a Object(oAddress) to oCard \n "
 		RED"%s"_COLOR"\n",oCard);
 
+	jsonFree(&aTel);
+	printf(JSON_DEMO" Free array aTel "
+		RED"%s"_COLOR"\n",aTel);
+
 	jsonFree(&oAddr);
-	printf(JSON_DEMO"9. Free oAddress "
+	printf(JSON_DEMO" Free oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
 	jsonFree(&oCard);
-	printf(JSON_DEMO"10.Free oCard "
+	printf(JSON_DEMO" Free oCard "
 		RED"%s"_COLOR"\n",oCard);
+	//清空和释放的区别.数组和对象都适用.
+	printf(JSON_DEMO" ***** A Example of jsonClear *****\n");
+	char* aTemp=jsonNewArray();
+	printf(JSON_DEMO" Create a Empty Array. aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+	jsonAdd(&aTemp,NULL,"a");
+	printf(JSON_DEMO" Add a Element(a) to aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+	jsonAdd(&aTemp,NULL,"b");
+	printf(JSON_DEMO" Add a Element(b) to aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+	jsonClear(&aTemp);
+	printf(JSON_DEMO" Clear aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+	jsonAdd(&aTemp,NULL,"c");
+	printf(JSON_DEMO" Add a Element(c) to aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+	jsonClear(&aTemp);
+	printf(JSON_DEMO" Clear aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+	jsonFree(&aTemp);
+	printf(JSON_DEMO" Free aTemp "
+		RED"%s"_COLOR"\n",aTemp);
+
 }

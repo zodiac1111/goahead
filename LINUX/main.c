@@ -43,7 +43,7 @@ void formDefineUserMgmt(void);
 #endif
 //Change configuration here
 static char_t *password = T(""); /* Security password */
-static int port = WEBS_DEFAULT_PORT;/* Server port */
+//static int port = WEBS_DEFAULT_PORT;/* Server port */
 static int retries = 5; /* Server port retries */
 static int finished = 0; /* Finished flag */
 #ifdef B_STATS
@@ -72,7 +72,9 @@ stCfg webs_cfg;
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
-	///jsonDemo(); ///@note json操作示例.对操作不熟悉可以反注释来查看
+#if DEBUG_JSON_DEMO
+	jsonDemo(); ///@note json操作示例.对操作不熟悉可以反注释来查看
+#endif
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
@@ -107,8 +109,8 @@ int main(int argc __attribute__ ((unused)),
 	finished = 0;
 	printf(WEBS_INF"Initialization is complete.\t[\e[32mOK\e[0m]\n");
 	printf(WEBS_INF"All configure is OK.\t[\e[32mOK\e[0m]\n");
-	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%d\e[0m "
-	"with Browser.\n", WEBS_DEFAULT_PORT);
+	printf(WEBS_INF"Now access \e[32m\033[4mhttp://<IP>:%s\e[0m "
+	"with Browser.\n", webs_cfg.port);
 	while (!finished) {
 		//PRINT_HERE
 		if (socketReady(-1)||socketSelect(-1, 1000)) {
@@ -674,6 +676,10 @@ static int initWebs(void)
 		return -3;
 	if (getconf("confdir", &webs_cfg.confdir)==NULL )
 		return -4;
+	if (getconf("port", &webs_cfg.port)==NULL )
+			return -200;
+	if (getconf("ssl_port", &webs_cfg.ssl_port)==NULL )
+			return -201;
 	webs_cfg.syspara = mkFullPath(webs_cfg.paradir, FILE_SYSPARA);
 	webs_cfg.mtrspara = mkFullPath(webs_cfg.paradir, CFG_MTR);
 	webs_cfg.sioplan = mkFullPath(webs_cfg.paradir, CFG_SIOPALN);
@@ -706,7 +712,8 @@ static int initWebs(void)
 	 * Open the web server on the given port. If that port is taken, try
 	 * the next sequential port for up to "retries" attempts.
 	 */
-	websOpenServer(port, retries);
+	//websOpenServer(port, retries);
+	websOpenServer(atoi(webs_cfg.port), retries);
 
 	/*
 	 * First create the URL handlers. Note: handlers are called in sorted order
@@ -2410,6 +2417,14 @@ void webs_free(void)
 {
 	int i;
 	//配置文件项
+	if (webs_cfg.port!=NULL ) {
+		free(webs_cfg.port);
+		webs_cfg.port = NULL;
+	}
+	if (webs_cfg.ssl_port!=NULL ) {
+		free(webs_cfg.ssl_port);
+		webs_cfg.ssl_port = NULL;
+	}
 	if (webs_cfg.errlog!=NULL ) {
 		free(webs_cfg.errlog);
 		webs_cfg.errlog = NULL;
