@@ -80,6 +80,10 @@ const char *myweberrstr[] = {
         [use_backup_port]="Can't find "YELLOW"port"_COLOR" in "RED CONF_FILE _COLOR
         		",use " RED WEBS_DEFAULT_PORT _COLOR
         		" as a backup port number.",
+        [use_backup_sslport]="Can't find "YELLOW"sslport"_COLOR
+        	" in "RED CONF_FILE _COLOR
+        	",use " RED WEBS_DEFAULT_SSL_PORT _COLOR
+        	" as a backup sslport number.",
 };
 /**
  * 服务器错误处理函数.

@@ -68,5 +68,6 @@ enum e_errno {
 	//其他系统警告
 	use_backup_err_log,
 	use_backup_port,
+	use_backup_sslport,
 };
 #endif

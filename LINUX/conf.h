@@ -10,9 +10,12 @@
 #include "color.h"
 typedef struct cfg{
 	char *port;//默认端口
-	char *ssl_port;//ssl默认端口哦
+	int default_port;
+	char *sslport;//ssl默认端口哦
+	int default_sslport;
 	//   错误日志绝对路径
 	char *errlog;
+	int default_errlog;
 	//   para目录(用于计算下面的绝对路径)
 	char *paradir;
 	char *syspara; //系统参数文件绝对路径
@@ -43,7 +46,7 @@ extern stCfg webs_cfg;
 //遗留的goahead2.5.0版本的端口宏定义,现在放到配置文件中实现
 //保留用于读取配置文件错误时使用
 #define WEBS_DEFAULT_PORT	"8080" //默认 HTTP 端口,只有root有权限访问1000以下端口
-//#define WEBS_DEFAULT_SSL_PORT	4433 /* Default HTTPS port */
+#define WEBS_DEFAULT_SSL_PORT	"4433" /* Default HTTPS port */
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
 #define WEBS_DBG PREFIX YELLOW"Debug>"_COLOR ///<调试信息

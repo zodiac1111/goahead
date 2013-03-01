@@ -75,6 +75,7 @@ int main(int argc __attribute__ ((unused)),
 #if DEBUG_JSON_DEMO
 	jsonDemo(); ///@note json操作示例.对操作不熟悉可以反注释来查看
 #endif
+	memset(&webs_cfg,0x0,sizeof(stCfg));
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
@@ -116,6 +117,7 @@ int main(int argc __attribute__ ((unused)),
 		}
 		websCgiCleanup();
 		emfSchedProcess();
+		break;//用于调试正确的退出.
 	}
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
@@ -678,6 +680,7 @@ static int initWebs(void)
 		return -2;
 	if (getconf("errlog", &webs_cfg.errlog)==NULL ){
 		webs_cfg.errlog=BACKUP_ERR_FILE;
+		webs_cfg.default_errlog=1;
 		web_errno=use_backup_err_log;
 		web_err_proc(EL);
 	}
@@ -687,12 +690,18 @@ static int initWebs(void)
 		return -4;
 	if (getconf("port", &webs_cfg.port)==NULL ){
 		webs_cfg.port=WEBS_DEFAULT_PORT;
+		webs_cfg.default_port=1;
 		web_errno=use_backup_port;
 		web_err_proc(EL);
 	}
-	if (getconf("sslport", &webs_cfg.ssl_port)==NULL ){
-		return -201;
+#ifdef WEBS_SSL_SUPPORT
+	if (getconf("sslport", &webs_cfg.sslport)==NULL ){
+		webs_cfg.sslport=WEBS_DEFAULT_SSL_PORT;
+		webs_cfg.default_sslport=1;
+		web_errno=use_backup_sslport;
+		web_err_proc(EL);
 	}
+#endif
 	webs_cfg.syspara = mkFullPath(webs_cfg.paradir, FILE_SYSPARA);
 	webs_cfg.mtrspara = mkFullPath(webs_cfg.paradir, CFG_MTR);
 	webs_cfg.sioplan = mkFullPath(webs_cfg.paradir, CFG_SIOPALN);
@@ -2433,17 +2442,18 @@ void webs_free(void)
 	//配置文件项 WEBS_DEFAULT_PORT
 	if (webs_cfg.port!=NULL &&
 		//如果使用了备用的端口号,分配在静态区,不能/需要释放.
-		strcmp(webs_cfg.port, WEBS_DEFAULT_PORT)!=0) {
+		webs_cfg.default_port!=1) {
 		free(webs_cfg.port);
 		webs_cfg.port = NULL;
 	}
-	if (webs_cfg.ssl_port!=NULL ) {
-		free(webs_cfg.ssl_port);
-		webs_cfg.ssl_port = NULL;
+	if (webs_cfg.sslport!=NULL &&
+		webs_cfg.default_sslport!=1) {
+		free(webs_cfg.sslport);
+		webs_cfg.sslport = NULL;
 	}
 	if (webs_cfg.errlog!=NULL &&
 		//如果使用了备用的错误日志文件,分配在静态区,不能/需要释放.
-		strcmp(webs_cfg.errlog, BACKUP_ERR_FILE)!=0) {
+		webs_cfg.default_errlog!=1) {
 		free(webs_cfg.errlog);
 		webs_cfg.errlog = NULL;
 	}
