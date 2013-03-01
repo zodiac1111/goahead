@@ -21,7 +21,7 @@ if [ r"$1" = r"dev" ] ; then
 	echo "Filename:"$filename "正在打包[dev版本](packing)..."
 	cd /samba_folder \
 	&& tar -zcf  $filename \
-       		-C '/home/lee/Aptana Studio 3 Workspace/' wwwdemo  \
+       		-C '/home/lee/Aptana Studio 3 Workspace/' www  \
 		-C '/home/lee/workspace' goahead \
 		-C '/home/lee/workspace' README.txt \
 	&& echo -e \

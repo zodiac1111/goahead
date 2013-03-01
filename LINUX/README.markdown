@@ -33,7 +33,7 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 
 <b>若已经存在 `goahead/LINUX/webs` 应用程序文件,则可以直接跳转到下一步[安装](#install).</b><br>
 
-如果确实需要重新编译,前运行
+如果确实需要重新编译,执行
 
 	make clean
 

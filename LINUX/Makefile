@@ -10,7 +10,7 @@
 default:  debug
 
 #所有,包括发布版本和文档
-all:gold doc
+all:gold
 
 #清除
 clean:
@@ -21,10 +21,12 @@ distclean:clean
 	rm -rf html
 	rm -rf ../version.h
 	rm -rf *~ ../*~
-#文档	
-doc:UPDATE-EVERY-TIME
+#文档(简化的文档,主要给使用人员阅读)	
+doc-simple:UPDATE-EVERY-TIME
 	doxygen Doxyfile
-	
+#给开发人员的更详细的文档
+doc:UPDATE-EVERY-TIME
+	doxygen Doxyfile-dev
 #"伪"目标,每次都强制更新
 UPDATE-EVERY-TIME:
 
@@ -55,8 +57,6 @@ debug:
 
 gold:
 	@$(MAKE) compile
-
-
 
 #
 #   Enable SSL build if MatrixSSL package found in root source directory

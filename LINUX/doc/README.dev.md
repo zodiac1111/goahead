@@ -1,9 +1,47 @@
-开发说明 {#dev}
+开发人员说明 {#dev}
 ==========
 本项目是web服务器的后端程序.与前端www目录共同使用.用户终端的维护.
 git可以查看版本历史.
 
 基于 goahead2.5.0 服务器开发.
+
+###开发版本文档
+
+* 发布版(release)包: `webs-x.x.xxx.tar.gz` 
+* 开发版(debug)包: `webs-x.x.xxx-dev.tar.gz`
+
+发布版本较开发版本精简了:
+* 版本控制记录库(约9M)
+* eclipse工程文件
+* 精简的文档(不包含源码浏览功能和函数调用图)
+* 发布版(精简)不能使用`make publish`和`make publish-dev`打包.(因为需要版本控制信息)
+
+####Makefile项目简介:
+
+`default`:生成host i386体系上的webs软件,可以方便使用如gdb insight之类的调试器调试.
+
+`all`:生成target版本webs.
+
+`debug`:同default
+
+`clean`:清理 `*.o` 和生成的 `webs`
+
+`distclean`:在 `clean` 基础上清理文档目录 `html`
+
+`doc-simple`:简单版的文档
+
+`doc`:开发文档
+
+对于文档生成,需要 `doxygen` 软件.如果有此软件,发布版也可以通过 `make doc` 生成详细的文档.`make doc-simple`是用于生成精简的文档.生成的文档使用不依赖除浏览器外的任何软件.
+
+####其他脚本
+
+`publish.sh` 生成发布包
+
+`makeversion.sh` 生成`version.h` 版本信息头文件,需要`git`
+
+`chkcode.sh`运行程序并进行详细的内存检查,需要`valgrind`.只能在host平台使用.
+
 
 ###交互
 与客户端重度使用 POST 方法传递,前端重度使用 jQuery 的 ajax 与后端交互.
