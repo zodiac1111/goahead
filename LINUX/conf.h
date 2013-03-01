@@ -32,6 +32,7 @@ extern stCfg webs_cfg;
 #define DEBUG_PRINT_NETPARAM 0 ///<打印网口参数相关调试信息
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
 #define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
+#define DEBUG_PRINT_SAVE_CYCLE 0 ///<打印储存周期调试信息
 ///@todo 独立成为配置文件项
 #define WEBS_DEFAULT_HOME	T("index.html") /* Default home page */
 #define WEBS_DEFAULT_PORT	8080 //默认 HTTP 端口,只有root有权限访问1000以下端口

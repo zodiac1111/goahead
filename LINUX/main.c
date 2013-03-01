@@ -240,7 +240,10 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 		webSend_mtr_factory(wp);
 	} else if (strcmp(item, "type")==0) {
 		webSend_mtr_type(wp);
-	}/* 在这里添加其他需要的项目类型 */
+		/* 在这里添加其他需要的项目类型 */
+	}else {
+		web_err_proc(EL);
+	}
 	websDone(wp, 200);
 	return;
 }
@@ -2205,86 +2208,46 @@ int webRece_savecycle(webs_t wp)
  */
 int webSend_savecycle(webs_t wp)
 {
-	//printf("读取存储周期.\n");
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
 	int ret = load_savecycle(sav, webs_cfg.stspara);
 	if (ret==-1) {
-		websWrite(wp, T("[File:%s Line:%d] Fun:%s .\n"), __FILE__,
-		                __LINE__, __FUNCTION__);
 		web_err_proc(EL);
-		return 0;
+		return -1;
 	}
-#if JSON==0
-	int i = 0;
-	//第一行:有效标识
-	websWrite(wp, T("<tr>\n"));
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("%s"), CSTR_SAVECYCLE_FLAG);
-	websWrite(wp, T("</td>\n"));
-	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
-		websWrite(wp, T("<td>\n"));
-		websWrite(wp, T("<input type=checkbox "
-						"name=chk_save_enable value=%d %s %s>\n"),
-				sav[i].enable&0x01,
-				(sav[i].enable==1) ? "checked" : "",
-				CHKBOX_ONCLICK);
-		///post不能传递没有被选中的复选框的值,通过text传递 class=hideinp
-		websWrite(wp, T("<input type=text "
-						"size=1 name=flag value=%d >\n"),
-				sav[i].enable);
-		websWrite(wp, T("</td>\n"));
-	}
-	//第二行:储存周期
-	websWrite(wp, T("<tr>\n"));
-	websWrite(wp, T("<td>\n"));
-	websWrite(wp, T("%s"), CSTR_SAVECYCLE_CYCLE);
-	websWrite(wp, T("</td>\n"));
-	for (i = 0; i<SAVE_CYCLE_ITEM; i++) {
-		u32 j;
-		websWrite(wp, T("<td>\n"));
-		websWrite(wp, T("<select name=cycle >\n"));
-		for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);
-				j++) {
-			websWrite(wp, T("<option value=%d %s>%s</option>\n"), j,
-					(j==sav[i].cycle) ? "selected" : "",
-					SAVE_CYCLE[j]);
-		}
-		websWrite(wp, T("</td>\n"));
-	}
-#else
 	char* oSavCycle = jsonNew();
-	char* oCycle=jsonNewArray();
+	char* oCycleList=jsonNewArray();
 	char* oItem = jsonNew();
 	char* oItemArray = jsonNewArray();
 	uint j;
 	for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);j++) {
-		jsonAddValue(&oCycle,NULL,SAVE_CYCLE[j]);
+		jsonAdd(&oCycleList,NULL,SAVE_CYCLE[j]);
 	}
-
 	for(j=0;j<SAVE_CYCLE_ITEM;j++){
-		jsonAddValue(&oItemArray, NULL, addItem(&oItem, sav[j]));
-#if 1
+		jsonAdd(&oItemArray, NULL, addItem(&oItem, sav[j]));
+#if DEBUG_PRINT_SAVE_CYCLE
 		printf(WEBS_DBG"oItem:%s\n",oItemArray);
 #endif
 		jsonClear(&oItem);
 	}
-	jsonAddValue(&oSavCycle,"cycle",oCycle);
-	jsonAddValue(&oSavCycle,"item",oItemArray);
-	websWrite(wp, T("%s"), oSavCycle);
+	jsonAdd(&oSavCycle,"cycle",oCycleList);
+	jsonAdd(&oSavCycle,"item",oItemArray);
+#if DEBUG_PRINT_SAVE_CYCLE
+	printf(WEBS_DBG"oSavCycle:%s\n",oSavCycle);
+#endif
+	websWrite(wp, T("%s"), oSavCycle);//发送给客户端页面
 	jsonFree(&oItemArray);
 	jsonFree(&oItem);
-	jsonFree(&oCycle);
+	jsonFree(&oCycleList);
 	jsonFree(&oSavCycle);
-#endif
 	return 0;
 }
 char *addItem(char **oItem, stSave_cycle sav)
 {
 	char value[256] = { 0 };
 	sprintf(value, "%d", sav.enable);
-	jsonAddValue(oItem, "en", value);
+	jsonAdd(oItem, "en", value);
 	sprintf(value, "%d", sav.cycle);
-	jsonAddValue(oItem, "t", value);
+	jsonAdd(oItem, "t", value);
 	return *oItem;
 }
 int jsonSavCycle(webs_t wp, const char* name, const stSave_cycle sav)

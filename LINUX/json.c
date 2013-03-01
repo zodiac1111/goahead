@@ -2,7 +2,9 @@
 #include <malloc.h>
 #include <string.h>
 #include "color.h"
-#define JSON_DEMO YELLOW"JSON DEMO"_COLOR">"
+#define DEBUG_JSON_CLEAR 0 //调试选项
+#define JSON_DEMO GREEN"JSON DEMO"_COLOR">"
+#define JSON_DBG YELLOW"JSON ERR"_COLOR">"
 #define JSON_ERR RED"JSON ERR"_COLOR">"
 /**
  * 创建一个空的json对象"{}",用完注意释放 free
@@ -33,11 +35,16 @@ char* jsonClear(char** obj)
 	}
 	char s ;
 	char e ;//区分是像对象还是向数组添加名/值对.
-	s=*obj[0];
-	if(s!='{' && s!='['){
+	s=(*obj)[0];
+	e=(*obj)[strlen(*obj)-1];
+#if DEBUG_JSON_CLEAR ==1
+	printf(JSON_DBG"%s s=%c e=%c \n",*obj,s,e);
+#endif
+	if((s!='{' && s!='[') //只能是{ 或者 [开头
+			||(e!=s+2)){ //同时要求括号匹配
+		perror("jsonClear-not obj or array");
 		return NULL;
 	}
-	e=s+2;
 	*obj=realloc(*obj,2+1);
 	if(obj==NULL){
 		perror("jsonClear-realloc");
@@ -70,19 +77,19 @@ int jsonFree(char**obj)
  * @param value
  * @return
  */
-char* jsonAddValue(char**dobj, const char*name,const char*value)
+char* jsonAdd(char**dobj, const char*name,const char*value)
 {
 	if(dobj==NULL){
-		perror("jsonAddValue-dobj");
+		perror("jsonAdd-null dobj");
 		return NULL;
 	}
-	int isArray=(*dobj)[0]=='['?1:0;//是否是向数组内添加.
+	int isArray=((*dobj)[0]=='[')?1:0;//是否是向数组内添加.
 	if(name==NULL && !isArray){ //添加数组原书不需要name.设置成空.
-		perror("jsonAddValue-name");
+		perror("jsonAdd-null name");
 		return NULL;
 	}
 	if(value==NULL){
-		perror("jsonAddValue-value");
+		perror("jsonAdd- null value");
 		return NULL;
 	}
 	int dlen=strlen(*dobj);
@@ -105,7 +112,7 @@ char* jsonAddValue(char**dobj, const char*name,const char*value)
 	}
 	///@note 用三个bit分别表示,若gcc版本过低不能识别0b开头的二进制表达方式.
 	/// 换成0x开头的十六进制表示就可以了.这里用二进制表示更形象 XD
-	int cs=isArray*4+isFirst*2+isObj;
+	int cs=isArray*0b100+isFirst*0b10+isObj*0b1;
 	switch(cs){
 	//添加到不是数组的对象中
 	case 0b000:	//不是首个元素(需要逗号),不是对象(需要引号).
@@ -165,11 +172,11 @@ void jsonDemo(void)
 	printf(JSON_DEMO"1. Create a void Object. oCard "
 		RED"%s"_COLOR"\n",oCard);
 
-	oCard=jsonAddValue(&oCard,"name","Bob");
+	oCard=jsonAdd(&oCard,"name","Bob");
 	printf(JSON_DEMO"2. Add a field(name) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 
-	oCard=jsonAddValue(&oCard,"Tel","85070110");
+	oCard=jsonAdd(&oCard,"Tel","85070110");
 	printf(JSON_DEMO"3. Add a field(Tel) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 
@@ -177,19 +184,19 @@ void jsonDemo(void)
 	printf(JSON_DEMO"4. Create a void Object. oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
-	jsonAddValue(&oAddr,"Province","Zhejiang");
+	jsonAdd(&oAddr,"Province","Zhejiang");
 	printf(JSON_DEMO"5. Add a field(Province) to oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
-	jsonAddValue(&oAddr,"City","Hangzhou");
+	jsonAdd(&oAddr,"City","Hangzhou");
 	printf(JSON_DEMO"6. Add a field(City) to oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
-	jsonAddValue(&oAddr,"No","810 A Road");
+	jsonAdd(&oAddr,"No","810 A Road");
 	printf(JSON_DEMO"7. Add a field(No) to oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
-	jsonAddValue(&oCard,"Address",oAddr);
+	jsonAdd(&oCard,"Address",oAddr);
 	printf(JSON_DEMO"8. Add a Object(oAddress) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 

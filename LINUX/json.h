@@ -5,6 +5,6 @@ char* jsonNew(void);
 char* jsonNewArray(void);
 char* jsonClear(char**obj);
 int jsonFree(char**obj);
-char* jsonAddValue(char**dobj,const char*name,const char*value);
+char* jsonAdd(char**dobj,const char*name,const char*value);
 char* jsonAddObj(char**dobj,char*name,char*obj);
 #endif
