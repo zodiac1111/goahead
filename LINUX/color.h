@@ -40,9 +40,15 @@
 #define BLUE "\e[34m"
 #define PURPLE "\e[35m"
 //效果
+
+#define CLEAR "\033[2J" //清屏
+#define TOZERO "\033[0;0H" //这是光标到0 0 位置
+#define BOLD "\033[1m" //黑体,加粗
 #define UNDERLINE "\033[4m" //下划线效果
 #define HIGHLIGHT "\033[7m" //反显
 #define FLASH "\033[5m" //闪烁
+#define HIDE "\033[8m" //隐藏
+
 #define _COLOR "\e[0m" //一次性关闭所有颜色和特效 类似xml的标签闭合.不需嵌套
 #define _COLOR_H
 #endif

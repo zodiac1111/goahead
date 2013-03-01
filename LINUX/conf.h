@@ -50,19 +50,19 @@ extern stCfg webs_cfg;
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
 #define WEBS_DBG PREFIX YELLOW"Debug>"_COLOR ///<调试信息
-#define WEBS_INF PREFIX GREEN "Info>"_COLOR ///<一般信息
+#define WEBS_INF PREFIX GREEN"Info>"_COLOR ///<一般信息
 #define WEBS_WAR PREFIX YELLOW"Warning>"_COLOR ///<警告信息
-#define WEBS_ERR PREFIX RED"Error>" _COLOR///<错误信息
+#define WEBS_ERR PREFIX RED BOLD"Error>"_COLOR///<错误信息
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件
 #if __arm__  	//运行在终端平台arm上.
-#define CONF_FILE "/mnt/nor/conf/goahead.conf"
-//如果在配置文件中查找errlog失败启用这个路径作为备用的错误处理文件路径.
-#define BACKUP_ERR_FILE "/mnt/nor/goahead-backup.log"
+	#define CONF_FILE "/mnt/nor/conf/goahead.conf"
+	//如果在配置文件中查找errlog失败启用这个路径作为备用的错误处理文件路径.
+	#define BACKUP_ERR_FILE "/mnt/nor/goahead-backup.log"
 #else 		//运行在i368,host调试平台上.
-#define CONF_FILE "/home/lee/workspace/goahead/conf/goahead-host.conf"
-#define BACKUP_ERR_FILE "/home/lee/workspace/goahead/goahead-backup.log"
+	#define CONF_FILE "/home/lee/workspace/goahead/conf/goahead-host.conf"
+	#define BACKUP_ERR_FILE "/home/lee/workspace/goahead/goahead-backup.log"
 #endif
 
 ///@todo 这些项目可以放到配置文件中.程序中需要一些修改
