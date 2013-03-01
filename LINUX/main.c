@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <sys/types.h>
@@ -253,11 +254,13 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
-	char * init = websGetVar(wp, T("init"), T("null"));
-	if (*init=='1') {
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "get")==0) {
 		webSend_mtrparams(wp, sysparam.meter_num);
-	} else {
+	} else if (strcmp(action, "set")==0) {
 		webRece_mtrparams(wp);
+	} else {
+		web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -844,7 +847,7 @@ static int webWrite_commportList(webs_t wp)
 static int webWrite_ip(webs_t wp, char *name, u8* value)
 {
 	//printf("网口参数-IP\n");
-	int i;
+	uint i;
 	websWrite(wp, T("\"%s\":\""), name);
 	for (i = 0; i<IPV4_LEN; i++) {
 		websWrite(wp, T("%1d"), value[i]);
@@ -865,7 +868,7 @@ static int webWrite_line(webs_t wp, stMtr mtr)
 			"<input type=text  maxlength=6 "
 			"onchange=\"line_changed(event);\""
 			"name=line value=\""));
-	int i;
+	uint i;
 	for (i = 0; i<LINE_LEN; i++) {
 		//if (mtr.webWrite_line[i]!=0)
 		websWrite(wp, T("%1d"), mtr.line[i]);
@@ -879,7 +882,7 @@ static int webWrite_mtraddr(webs_t wp, stMtr mtr)
 #if DEBUG_PRINT_MTRPARAM
 	printf("\t表计地址\n");
 #endif
-	int i;
+	uint i;
 	websWrite(wp, T("<td>\n"
 			"<input type=text  maxlength=12 "
 			"onchange=\"addr_changed(event);\""
@@ -897,7 +900,7 @@ static int webWrite_pwd(webs_t wp, stMtr mtr)
 #if DEBUG_PRINT_MTRPARAM
 	printf("\t表计口令\n");
 #endif
-	int i;
+	uint i;
 	websWrite(wp, T("<td>\n"
 			"<input type=text maxlength=8 "
 			"onchange=\"pwd_changed(event);\""
@@ -1421,7 +1424,7 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 			memcpy(&amtr[i].pwd[0], pwd[i], PWD_LEN);
 		}
 		//PRINT_HERE
-		int j = 0;
+		uint j = 0;
 		for (j = 0; j<LINE_LEN; j++) {
 			amtr[i].line[j] -= 0x30;
 		}
@@ -2172,7 +2175,7 @@ int webSend_mtr_sioplan(webs_t wp, stSysParam sysparam)
  */
 int webRece_savecycle(webs_t wp)
 {
-	int i;
+	uint i;
 	int n;
 	stSave_cycle sav[SAVE_CYCLE_ITEM];
 	char *flags = websGetVar(wp, T("flag"), T("null"));
@@ -2253,13 +2256,17 @@ int webSend_savecycle(webs_t wp)
 	char* oCycle=jsonNewArray();
 	char* oItem = jsonNew();
 	char* oItemArray = jsonNewArray();
-	int j;
+	uint j;
 	for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);j++) {
-		//jsonAddValue(&oCycle,NULL,SAVE_CYCLE[j]);
+		jsonAddValue(&oCycle,NULL,SAVE_CYCLE[j]);
 	}
 
 	for(j=0;j<SAVE_CYCLE_ITEM;j++){
 		jsonAddValue(&oItemArray, NULL, addItem(&oItem, sav[j]));
+#if 1
+		printf(WEBS_DBG"oItem:%s\n",oItemArray);
+#endif
+		jsonClear(&oItem);
 	}
 	jsonAddValue(&oSavCycle,"cycle",oCycle);
 	jsonAddValue(&oSavCycle,"item",oItemArray);

@@ -479,7 +479,7 @@ int load_sioplan(stUart_plan * plan, const char * file, int no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	long int flen = ftell(fp);
+	 uint flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	if (flen < sizeof(stUart_plan) * (no + 1)) {
 		PRINT_HERE
@@ -520,13 +520,13 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no)
 		return(-1);
 	}
 	fseek(fp, 0, SEEK_END);
-	long  int  flen = ftell(fp);
+	 long  flen = ftell(fp);
 #if DEBUG_SIOPLAN_INFO
 	printf("save_sioplan 文件长度:%lu \n", flen);
 #endif
 	fseek(fp, 0, SEEK_SET);
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
-	if (flen < sizeof(stUart_plan) * (no + 1)) {
+	if (flen < (long)sizeof(stUart_plan) * (no + 1)) {
 		int fd = fileno(fp);
 		///确保文件的大小,大了截断,小了添0,这个文件应该是正好sizeof(stSysParam)大小,
 		///不应该小一个字节或者大一个字节.
