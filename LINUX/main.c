@@ -1477,7 +1477,7 @@ int reflash_this_wp(webs_t wp, const char *page)
 {
 	websHeader(wp);
 	websWrite(wp, T("<meta http-equiv=refresh content=\"0.01;"
-			"url=%s\">\n"), page);
+			 "url=%s\">\n"), page);
 	websFooter(wp);
 	websDone(wp, 200);
 	return 0;
