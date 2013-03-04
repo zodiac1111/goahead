@@ -73,9 +73,9 @@ int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
 #if DEBUG_JSON_DEMO
-	jsonDemo(); ///@note json操作示例.对操作不熟悉可以反注释来查看
+	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
 #endif
-	memset(&webs_cfg,0x0,sizeof(stCfg));
+	memset(&webs_cfg, 0x0, sizeof(stCfg));
 	PRINT_WELCOME
 	PRINT_VERSION
 	PRINT_BUILD_TIME
@@ -242,7 +242,7 @@ void form_mtr_items(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(item, "type")==0) {
 		webSend_mtr_type(wp);
 		/* 在这里添加其他需要的项目类型 */
-	}else {
+	} else {
 		web_err_proc(EL);
 	}
 	websDone(wp, 200);
@@ -351,7 +351,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 			                errno, strerror(errno));
 			break;
 		}
-		if (pid==0) {	//子进程.
+		if (pid==0) {     //子进程.
 			//printf(WEBS_INF"子进程-结束webs进程\n");
 			//readlink("/proc/self/exe", app, 128);
 			//printf(WEBS_INF"子进程app:%s\n",app);
@@ -359,8 +359,8 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 			execl(app, app, NULL );
 			exit(0);
 		}
-		if (pid>0) { //父进程
-			//printf(WEBS_INF"父进程-结束webs进程\n");
+		if (pid>0) {     //父进程
+		                 //printf(WEBS_INF"父进程-结束webs进程\n");
 		}
 		break;
 	case RET_SAMPLE_PROC:		///@待定
@@ -677,24 +677,24 @@ static int initWebs(void)
 	printf(WEBS_INF"Config file\t:"GREEN CONF_FILE _COLOR "\n");
 	if (getconf("wwwroot", &webdir)==NULL )
 		return -2;
-	if (getconf("errlog", &webs_cfg.errlog)==NULL ){
-		webs_cfg.errlog=BACKUP_ERR_FILE;
-		webs_cfg.default_errlog=1;
-		web_errno=use_backup_err_log;
+	if (getconf("errlog", &webs_cfg.errlog)==NULL ) {
+		webs_cfg.errlog = BACKUP_ERR_FILE;
+		webs_cfg.default_errlog = 1;
+		web_errno = use_backup_err_log;
 		web_err_proc(EL);
 	}
 	if (getconf("paradir", &webs_cfg.paradir)==NULL )
 		return -3;
 	if (getconf("confdir", &webs_cfg.confdir)==NULL )
 		return -4;
-	if (getconf("port", &webs_cfg.port)==NULL ){
-		webs_cfg.port=WEBS_DEFAULT_PORT;
-		webs_cfg.default_port=1;
-		web_errno=use_backup_port;
+	if (getconf("port", &webs_cfg.port)==NULL ) {
+		webs_cfg.port = WEBS_DEFAULT_PORT;
+		webs_cfg.default_port = 1;
+		web_errno = use_backup_port;
 		web_err_proc(EL);
 	}
 #ifdef WEBS_SSL_SUPPORT
-	if (getconf("sslport", &webs_cfg.sslport)==NULL ){
+	if (getconf("sslport", &webs_cfg.sslport)==NULL ) {
 		webs_cfg.sslport=WEBS_DEFAULT_SSL_PORT;
 		webs_cfg.default_sslport=1;
 		web_errno=use_backup_sslport;
@@ -800,7 +800,7 @@ static int initWebs(void)
  * @param monport
  * @return
  */
-static int webWrite_rtu_addr(webs_t wp, stMonparam monport)
+char* webWrite_rtu_addr(char* tmp ,webs_t wp, stMonparam monport)
 {
 #if DEBUG_PRINT_MONPARAM
 	printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
@@ -808,12 +808,11 @@ static int webWrite_rtu_addr(webs_t wp, stMonparam monport)
 			monport.prot_addr[3]);
 #endif
 	int i;
-	websWrite(wp, T("\"rtu_addr\":\""));
+	//websWrite(wp, T("\"rtu_addr\":\""));
 	for (i = 0; i<4; i++) {
-		websWrite(wp, T("%1d"), monport.prot_addr[i]);
+		sprintf(tmp+i, "%1d", monport.prot_addr[i]);
 	}
-	websWrite(wp, T("\""));
-	return 0;
+	return tmp;
 }
 ///主站规约类型
 static int webWrite_porttype(webs_t wp)
@@ -833,7 +832,7 @@ static int webWrite_porttype(webs_t wp)
 	return 0;
 
 }
-static int webWrite_listen_port(webs_t wp, stMonparam monport)
+char* webWrite_listen_port(char* tmp, stMonparam monport)
 {
 	int i;
 #if DEBUG_PRINT_MONPARAM
@@ -843,12 +842,10 @@ static int webWrite_listen_port(webs_t wp, stMonparam monport)
 	}
 	printf("\n");
 #endif
-	websWrite(wp, T("\"listenport\":\""));
 	for (i = 0; i<5; i++) {
-		websWrite(wp, T("%1d"), monport.listen_port[i]);
+		sprintf(tmp+i, "%1d", monport.listen_port[i]);
 	}
-	websWrite(wp, T("\""));
-	return 0;
+	return tmp;
 }
 
 static int webWrite_commportList(webs_t wp)
@@ -1476,7 +1473,7 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
  * @param[in] page 重定向到的页面 char *
  * @return
  */
- int reflash_this_wp(webs_t wp, const char *page)
+int reflash_this_wp(webs_t wp, const char *page)
 {
 	websHeader(wp);
 	websWrite(wp, T("<meta http-equiv=refresh content=\"0.01;"
@@ -1677,7 +1674,16 @@ int ipstr2ipfile(char *ipstr, u8 ipfile[12])
 	ipfile[11] = (val[3]/1)%10;
 	return j+1;
 }
-
+char* itoa(char* str, const char*format, int value)
+{
+	sprintf(str, format, value);
+	return str;
+}
+char* u8toa(char* str, const char*format, uint8_t value)
+{
+	sprintf(str, format, value);
+	return str;
+}
 /**
  * 从文件读取监视参数,显示到页面
  * @param wp
@@ -1688,6 +1694,55 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stMonparam monpara;
+	//jsonlib start
+	char tmp[256] = { 0 };
+	char* oMonPara = jsonNew();
+	char* aCommList = jsonNewArray();
+	char* aProcList = jsonNewArray();
+	char* aItemList = jsonNewArray();
+	char* oItem = jsonNew();
+	int i;
+	jsonAdd( &oMonPara,"sioplan_num",u8toa(tmp, "%d", sysparam.sioplan_num));
+	for (i = 0; i<mon_port_num; i++) {
+		jsonAdd(&aCommList, NULL, mon_port_name[i]);
+	}
+	jsonAdd(&oMonPara, "commport", aCommList);
+	for (i = 0; i<procotol_num; i++) {
+		jsonAdd(&aProcList, NULL, procotol_name[i]);
+	}
+	//printf(WEBS_DBG"%s\n",oMonPara);
+	jsonAdd(&oMonPara, "protocol", aProcList);
+
+	for (no = 0; no<sysparam.monitor_ports; no++) {
+		if (-1==load_monparam(&monpara, webs_cfg.monpara, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		jsonAdd(&oItem, "mon_no", u8toa(tmp, "%d", no));
+		jsonAdd(&oItem, "commport",u8toa(tmp, "%d", monpara.comm_port));
+		webWrite_listen_port(tmp, monpara);
+		jsonAdd(&oItem, "listenport",tmp);
+		jsonAdd(&oItem, "sioplan", u8toa(tmp, "%d", monpara.sioplan));
+		jsonAdd(&oItem,"protocol", u8toa(tmp, "%d", monpara.port_type));
+		webWrite_rtu_addr(tmp,wp, monpara);
+		jsonAdd(&oItem, "rtu_addr", tmp);
+		jsonAdd(&oItem, "time_syn_chk", u8toa(tmp, "%d", monpara.bTimeSyn));
+		jsonAdd(&oItem, "forward_chk", u8toa(tmp, "%d", monpara.bForward));
+		jsonAdd(&oItem,"forward_mtr_num",u8toa(tmp, "%d", monpara.forwardNum));
+		jsonAdd(&aItemList, NULL, oItem);
+		jsonClear(&oItem);
+	}
+	//printf(WEBS_DBG"%s\n",oMonPara);
+	jsonAdd(&oMonPara, "item", aItemList);
+	//printf(WEBS_DBG"%s\n",oMonPara);
+	websWrite(wp, T("%s"), oMonPara);
+	jsonFree(&oItem);
+	jsonFree(&aItemList);
+	jsonFree(&aCommList);
+	jsonFree(&aProcList);
+	jsonFree(&oMonPara);
+	return 0;
+	//jsonlib end
 	websWrite(wp, T("{"));
 	webWrite_commportList(wp);
 	websWrite(wp, T(","));
@@ -1702,11 +1757,11 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 		websWrite(wp, T("{"));
 		websWrite(wp, T("\"mon_no\":\"%d\","), no);
 		websWrite(wp, T("\"commport\":\"%d\","), monpara.comm_port);
-		webWrite_listen_port(wp, monpara);
+		//webWrite_listen_port(wp, monpara);
 		websWrite(wp, T(",\"sioplan\":\"%d\","), monpara.sioplan);
 		;
 		websWrite(wp, T("\"protocol\":\"%d\","), monpara.port_type);
-		webWrite_rtu_addr(wp, monpara);
+		//webWrite_rtu_addr(wp, monpara);
 		websWrite(wp, T(",\"time_syn_chk\":\"%d\","), monpara.bTimeSyn);
 		websWrite(wp, T("\"forward_chk\":\"%d\","), monpara.bForward);
 		websWrite(
@@ -2054,37 +2109,37 @@ int webSend_syspara(webs_t wp)
 	 }
 	 */
 	char* oSysPara = jsonNew();
-	char tmp[128]={0};
-	sprintf(tmp,"%u", sysparam.meter_num);
-	jsonAdd(&oSysPara,"meter_num",tmp);
-	sprintf(tmp,"%u", sysparam.sioplan_num);
-	jsonAdd(&oSysPara,"sioplan_num",tmp);
-	sprintf(tmp,"%u", sysparam.monitor_ports);
-	jsonAdd(&oSysPara,"monitor_ports",tmp);
-	sprintf(tmp,"%u", sysparam.netports_num);
-	jsonAdd(&oSysPara,"netports_num",tmp);
-	sprintf(tmp,"%u", sysparam.sioports_num);
-	jsonAdd(&oSysPara,"sioports_num",tmp);
-	sprintf(tmp,"%u", sysparam.control_ports);
-	jsonAdd(&oSysPara,"control_ports",tmp);
-	websWrite(wp,T("%s"),oSysPara);
+	char tmp[128] = { 0 };
+	sprintf(tmp, "%u", sysparam.meter_num);
+	jsonAdd(&oSysPara, "meter_num", tmp);
+	sprintf(tmp, "%u", sysparam.sioplan_num);
+	jsonAdd(&oSysPara, "sioplan_num", tmp);
+	sprintf(tmp, "%u", sysparam.monitor_ports);
+	jsonAdd(&oSysPara, "monitor_ports", tmp);
+	sprintf(tmp, "%u", sysparam.netports_num);
+	jsonAdd(&oSysPara, "netports_num", tmp);
+	sprintf(tmp, "%u", sysparam.sioports_num);
+	jsonAdd(&oSysPara, "sioports_num", tmp);
+	sprintf(tmp, "%u", sysparam.control_ports);
+	jsonAdd(&oSysPara, "control_ports", tmp);
+	websWrite(wp, T("%s"), oSysPara);
 	jsonFree(&oSysPara);
 	/*
-	websWrite(wp, T("{"
-			"\"meter_num\":%u,"
-			"\"sioplan_num\":%u,"
-			"\"monitor_ports\":%u,"
-			"\"netports_num\":%u,"
-			"\"sioports_num\":%u,"
-			"\"control_ports\":%u"
-			"}"),
-	                sysparam.meter_num,
-	                sysparam.sioplan_num,
-	                sysparam.monitor_ports,
-	                sysparam.netports_num,
-	                sysparam.sioports_num,
-	                sysparam.control_ports
-	                ); */
+	 websWrite(wp, T("{"
+	 "\"meter_num\":%u,"
+	 "\"sioplan_num\":%u,"
+	 "\"monitor_ports\":%u,"
+	 "\"netports_num\":%u,"
+	 "\"sioports_num\":%u,"
+	 "\"control_ports\":%u"
+	 "}"),
+	 sysparam.meter_num,
+	 sysparam.sioplan_num,
+	 sysparam.monitor_ports,
+	 sysparam.netports_num,
+	 sysparam.sioports_num,
+	 sysparam.control_ports
+	 ); */
 	return 0;
 }
 
@@ -2260,26 +2315,26 @@ int webSend_savecycle(webs_t wp)
 		return -1;
 	}
 	char* oSavCycle = jsonNew();
-	char* oCycleList=jsonNewArray();
+	char* oCycleList = jsonNewArray();
 	char* oItem = jsonNew();
 	char* oItemArray = jsonNewArray();
 	uint j;
-	for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]);j++) {
-		jsonAdd(&oCycleList,NULL,SAVE_CYCLE[j]);
+	for (j = 0; j<sizeof(SAVE_CYCLE)/sizeof(SAVE_CYCLE[0]); j++) {
+		jsonAdd(&oCycleList, NULL, SAVE_CYCLE[j]);
 	}
-	for(j=0;j<SAVE_CYCLE_ITEM;j++){
+	for (j = 0; j<SAVE_CYCLE_ITEM; j++) {
 		jsonAdd(&oItemArray, NULL, addItem(&oItem, sav[j]));
 #if DEBUG_PRINT_SAVE_CYCLE
 		printf(WEBS_DBG"oItem:%s\n",oItemArray);
 #endif
 		jsonClear(&oItem);
 	}
-	jsonAdd(&oSavCycle,"cycle",oCycleList);
-	jsonAdd(&oSavCycle,"item",oItemArray);
+	jsonAdd(&oSavCycle, "cycle", oCycleList);
+	jsonAdd(&oSavCycle, "item", oItemArray);
 #if DEBUG_PRINT_SAVE_CYCLE
 	printf(WEBS_DBG"oSavCycle:%s\n",oSavCycle);
 #endif
-	websWrite(wp, T("%s"), oSavCycle);//发送给客户端页面
+	websWrite(wp, T("%s"), oSavCycle);     //发送给客户端页面
 	jsonFree(&oItemArray);
 	jsonFree(&oItem);
 	jsonFree(&oCycleList);
@@ -2295,7 +2350,6 @@ char *addItem(char **oItem, stSave_cycle sav)
 	jsonAdd(oItem, "t", value);
 	return *oItem;
 }
-
 
 /**
  * 从页面中获取文本,保存到本地文本文件中.
@@ -2457,19 +2511,19 @@ void webs_free(void)
 	int i;
 	//配置文件项 WEBS_DEFAULT_PORT
 	if (webs_cfg.port!=NULL &&
-		//如果使用了备用的端口号,分配在静态区,不能/需要释放.
-		webs_cfg.default_port!=1) {
+	                //如果使用了备用的端口号,分配在静态区,不能/需要释放.
+	                webs_cfg.default_port!=1) {
 		free(webs_cfg.port);
 		webs_cfg.port = NULL;
 	}
 	if (webs_cfg.sslport!=NULL &&
-		webs_cfg.default_sslport!=1) {
+	                webs_cfg.default_sslport!=1) {
 		free(webs_cfg.sslport);
 		webs_cfg.sslport = NULL;
 	}
 	if (webs_cfg.errlog!=NULL &&
-		//如果使用了备用的错误日志文件,分配在静态区,不能/需要释放.
-		webs_cfg.default_errlog!=1) {
+	                //如果使用了备用的错误日志文件,分配在静态区,不能/需要释放.
+	                webs_cfg.default_errlog!=1) {
 		free(webs_cfg.errlog);
 		webs_cfg.errlog = NULL;
 	}
