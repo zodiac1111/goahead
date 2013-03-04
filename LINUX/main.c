@@ -800,7 +800,7 @@ static int initWebs(void)
  * @param monport
  * @return
  */
-char* webWrite_rtu_addr(char* tmp ,webs_t wp, stMonparam monport)
+char* webWrite_rtu_addr(char* tmp, stMonparam monport)
 {
 #if DEBUG_PRINT_MONPARAM
 	printf("监视参数-终端地址:%d%d%d%d\n", monport.prot_addr[0],
@@ -1724,8 +1724,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 		jsonAdd(&oItem, "listenport",tmp);
 		jsonAdd(&oItem, "sioplan", u8toa(tmp, "%d", monpara.sioplan));
 		jsonAdd(&oItem,"protocol", u8toa(tmp, "%d", monpara.port_type));
-		webWrite_rtu_addr(tmp,wp, monpara);
-		jsonAdd(&oItem, "rtu_addr", tmp);
+		jsonAdd(&oItem, "rtu_addr", webWrite_rtu_addr(tmp, monpara));
 		jsonAdd(&oItem, "time_syn_chk", u8toa(tmp, "%d", monpara.bTimeSyn));
 		jsonAdd(&oItem, "forward_chk", u8toa(tmp, "%d", monpara.bForward));
 		jsonAdd(&oItem,"forward_mtr_num",u8toa(tmp, "%d", monpara.forwardNum));
@@ -1743,6 +1742,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	jsonFree(&oMonPara);
 	return 0;
 	//jsonlib end
+
 	websWrite(wp, T("{"));
 	webWrite_commportList(wp);
 	websWrite(wp, T(","));

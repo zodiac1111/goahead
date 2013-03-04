@@ -95,7 +95,7 @@ static int webWrite_ip(webs_t wp, char *name, u8* value);
 static int webWrite_commportList(webs_t wp);
 char* webWrite_listen_port(char* tmp, stMonparam monport);
 static int webWrite_porttype(webs_t wp);
-char* webWrite_rtu_addr(char* tmp,webs_t wp, stMonparam monport);
+char* webWrite_rtu_addr(char* tmp, stMonparam monport);
 //存储周期
 char *addItem(char **oItem,stSave_cycle sav);
 ///其他

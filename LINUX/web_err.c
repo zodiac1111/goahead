@@ -115,7 +115,8 @@ void web_err_proc(EL_ARGS)
 }
 /**
  * 保存服务器错误日志.
- * @param errstring
+ * @param[in] errstring
+ * @param[in] filename
  * @return
  */
 int save_log(const char * errstring, const char*filename)

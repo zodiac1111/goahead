@@ -38,6 +38,7 @@ echo -e "Generated\e[31m" $VER_FILE  "\e[0m"
 #echo `git log --pretty=format:'%ad(%h)%s.\n' --date=short` |
 #sed -e 's/\\n/\n/g'
 #生成并替换相应的字段
+#  将模板文件中的"$PATHLEAVE"字符串替换成为PATCHLEVEL变量的值
 cat $VER_FILE_TEMPLATE | \
 sed "s/\$PATHLEAVE/$PATHLEVEL/g" |
 sed "s/\$GIT_VERSION/$GIT_VERSION/g" > $VER_FILE 
