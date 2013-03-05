@@ -9,7 +9,7 @@
 #define EL T(__FILE__),T(__FUNCTION__),__LINE__
 #define EL_ARGS	const char* file,const char* func,int line
 extern void web_err_proc(EL_ARGS);
-int save_log(const char * errstring,const char*filename);
+int save_log(const char *strtime,const char * errstring,const char*filename);
 ///错误号
 extern int web_errno;
 ///错误描述

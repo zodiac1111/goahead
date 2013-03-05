@@ -88,13 +88,17 @@ const char *myweberrstr[] = {
 /**
  * 服务器错误处理函数.
  * 处理web_errno错误号,控制台打印,文件打印.清除web_errno.
+ * @todo 保存到文件中格式不要有颜色的代码，且使用cvs样式
  */
 void web_err_proc(EL_ARGS)
 {
 	time_t timer = time(NULL );
 	struct tm * t = localtime(&timer);
+	//错误时间
 	char strtime[25] = { 0 };
+	//错误描述
 	char errstring[MAX_ERR_LOG_LINE_LENTH] = { 0 };
+	//错误等级
 	if (web_errno<0) {
 		web_errno = 0;
 		return;
@@ -102,14 +106,14 @@ void web_err_proc(EL_ARGS)
 	sprintf(strtime, "%04d-%02d-%02d %02d:%02d:%02d",
 	                t->tm_year+1900, t->tm_mon+1, t->tm_mday,
 	                t->tm_hour, t->tm_min, t->tm_sec);
-	sprintf(errstring, WEBS_ERR"[%s]ErrCode[%d]:%s (%s,%s:%d)%s\n",
-	                strtime, web_errno, myweberrstr[web_errno],
+	sprintf(errstring,"{%d}:%s (%s,%s:%d)%s",
+	                 web_errno, myweberrstr[web_errno],
 	                file, func, line, strerror(errno));
 	if (myweberrstr[web_errno]!=NULL ) {
-		printf("%s", errstring);
+		printf(WEBS_ERR"%s %s\n", strtime,errstring);
 	}
 	// 写入文件
-	save_log(errstring, webs_cfg.errlog);
+	save_log(strtime,errstring, webs_cfg.errlog);
 	web_errno = 0;
 	return;
 }
@@ -119,7 +123,7 @@ void web_err_proc(EL_ARGS)
  * @param[in] filename
  * @return
  */
-int save_log(const char * errstring, const char*filename)
+int save_log(const char *strtime,const char * errstring, const char*filename)
 {
 	FILE*fp = NULL;
 	fp = fopen(filename, "a");
@@ -138,7 +142,7 @@ int save_log(const char * errstring, const char*filename)
 		int fd = fileno(fp);
 		ftruncate(fd, 0);
 	}
-	fprintf(fp, "%s", errstring);
+	fprintf(fp, "%s %s\n",strtime, errstring);
 	fclose(fp);
 	return 0;
 }
