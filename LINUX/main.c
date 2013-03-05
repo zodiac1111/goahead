@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <sys/time.h>
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
@@ -171,9 +172,12 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "get")==0) {
-		///@todo 时间处理的函数
+		websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
+	} else if (strcmp(action, "set")==0) {
+		webRece_syntime(wp);
+	} else {
+		web_err_proc(EL);
 	}
-	websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
 	websDone(wp, 200);
 	return;
 }
@@ -1477,7 +1481,7 @@ int reflash_this_wp(webs_t wp, const char *page)
 {
 	websHeader(wp);
 	websWrite(wp, T("<meta http-equiv=refresh content=\"0.01;"
-			 "url=%s\">\n"), page);
+			"url=%s\">\n"), page);
 	websFooter(wp);
 	websDone(wp, 200);
 	return 0;
@@ -1702,7 +1706,10 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	char* aItemList = jsonNewArray();
 	char* oItem = jsonNew();
 	int i;
-	jsonAdd( &oMonPara,"sioplan_num",u8toa(tmp, "%d", sysparam.sioplan_num));
+	jsonAdd(
+	                &oMonPara,
+	                "sioplan_num",
+	                u8toa(tmp, "%d", sysparam.sioplan_num));
 	for (i = 0; i<mon_port_num; i++) {
 		jsonAdd(&aCommList, NULL, mon_port_name[i]);
 	}
@@ -1719,15 +1726,30 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 			continue;
 		}
 		jsonAdd(&oItem, "mon_no", u8toa(tmp, "%d", no));
-		jsonAdd(&oItem, "commport",u8toa(tmp, "%d", monpara.comm_port));
+		jsonAdd(
+		                &oItem,
+		                "commport",
+		                u8toa(tmp, "%d", monpara.comm_port));
 		webWrite_listen_port(tmp, monpara);
-		jsonAdd(&oItem, "listenport",tmp);
+		jsonAdd(&oItem, "listenport", tmp);
 		jsonAdd(&oItem, "sioplan", u8toa(tmp, "%d", monpara.sioplan));
-		jsonAdd(&oItem,"protocol", u8toa(tmp, "%d", monpara.port_type));
+		jsonAdd(
+		                &oItem,
+		                "protocol",
+		                u8toa(tmp, "%d", monpara.port_type));
 		jsonAdd(&oItem, "rtu_addr", webWrite_rtu_addr(tmp, monpara));
-		jsonAdd(&oItem, "time_syn_chk", u8toa(tmp, "%d", monpara.bTimeSyn));
-		jsonAdd(&oItem, "forward_chk", u8toa(tmp, "%d", monpara.bForward));
-		jsonAdd(&oItem,"forward_mtr_num",u8toa(tmp, "%d", monpara.forwardNum));
+		jsonAdd(
+		                &oItem,
+		                "time_syn_chk",
+		                u8toa(tmp, "%d", monpara.bTimeSyn));
+		jsonAdd(
+		                &oItem,
+		                "forward_chk",
+		                u8toa(tmp, "%d", monpara.bForward));
+		jsonAdd(
+		                &oItem,
+		                "forward_mtr_num",
+		                u8toa(tmp, "%d", monpara.forwardNum));
 		jsonAdd(&aItemList, NULL, oItem);
 		jsonClear(&oItem);
 	}
@@ -1736,12 +1758,12 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	///@todo  @bug 数据太长必须分开传输
 #define WP_MAX_LEN (512)
-	char buff[WP_MAX_LEN]={0};
-	for(i=0;i<=(int)strlen(oMonPara)/(WP_MAX_LEN-1);i++){
-		memcpy (buff,oMonPara+i*(WP_MAX_LEN-1),WP_MAX_LEN-1);
+	char buff[WP_MAX_LEN] = { 0 };
+	for (i = 0; i<=(int) strlen(oMonPara)/(WP_MAX_LEN-1); i++) {
+		memcpy(buff, oMonPara+i*(WP_MAX_LEN-1), WP_MAX_LEN-1);
 		//printf(WEBS_DBG"%s\n",buff);
 		websWrite(wp, T("%s"), buff);
-		memset(buff,0x0,WP_MAX_LEN);
+		memset(buff, 0x0, WP_MAX_LEN);
 	}
 	//websWrite(wp, T("%s"), oMonPara);
 	jsonFree(&oItem);
@@ -2149,6 +2171,42 @@ int webSend_syspara(webs_t wp)
 	 sysparam.sioports_num,
 	 sysparam.control_ports
 	 ); */
+	return 0;
+}
+/**
+ * 接收时间戳和时区(暂时不用,未搞懂),修改为系统参数.
+ * @param wp
+ * @return
+ */
+int webRece_syntime(webs_t wp)
+{
+
+	char *timestamp = websGetVar(wp, T("timestamp"), T("null"));
+	char *timezone = websGetVar(wp, T("timezone"), T("null"));
+	//char *dsttime = websGetVar(wp, T("dsttime"), T("null"));
+	char *oRet=jsonNew();
+	//特别定义成64位长度,希望解决Y2038时修改轻松点.
+	int64_t t = atoll(timestamp);     //时间戳数值
+	int tz_min = atoi(timezone);     //与标准时间的差值(分钟)
+	//int tz_dsttime=atot(dsttime); //日光节约时,夏令
+	printf("time=%lld timezone=%s\n", t, timezone);
+	struct timeval tv;
+	struct timezone tz;
+	//tz.tz_minuteswest=tz_min;
+	//tz.tz_dsttime=tz_dsttime;
+
+	tv.tv_sec = t;
+	tv.tv_usec = 0;     //毫秒不要了
+	if (settimeofday(&tv, (struct timezone *) 0)<0) {
+		printf("Set system datatime error!\n");
+		jsonAdd(&oRet,"ret","error");
+		jsonAdd(&oRet,"strerror",strerror(errno));
+	} else {
+		printf("Set system datatime successfully!\n");
+		jsonAdd(&oRet,"ret","success");
+	}
+	websWrite(wp,"%s",oRet);
+	jsonFree(&oRet);
 	return 0;
 }
 
