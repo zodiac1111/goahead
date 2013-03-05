@@ -87,7 +87,7 @@ int main(int argc __attribute__ ((unused)),
 	 * is required, malloc will be used for the overflow.
 	 * 初始化并分配内存,如果内存不足可以在这里多分配一些.
 	 */
-	bopen(NULL, (60*1024), B_USE_MALLOC);
+	bopen(NULL, (600*1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN );
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
@@ -1734,7 +1734,16 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	jsonAdd(&oMonPara, "item", aItemList);
 	//printf(WEBS_DBG"%s\n",oMonPara);
-	websWrite(wp, T("%s"), oMonPara);
+	///@todo  @bug 数据太长必须分开传输
+#define WP_MAX_LEN (512)
+	char buff[WP_MAX_LEN]={0};
+	for(i=0;i<=(int)strlen(oMonPara)/(WP_MAX_LEN-1);i++){
+		memcpy (buff,oMonPara+i*(WP_MAX_LEN-1),WP_MAX_LEN-1);
+		//printf(WEBS_DBG"%s\n",buff);
+		websWrite(wp, T("%s"), buff);
+		memset(buff,0x0,WP_MAX_LEN);
+	}
+	//websWrite(wp, T("%s"), oMonPara);
 	jsonFree(&oItem);
 	jsonFree(&aItemList);
 	jsonFree(&aCommList);

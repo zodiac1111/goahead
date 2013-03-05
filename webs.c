@@ -1758,14 +1758,10 @@ int websWrite(webs_t wp, char_t *fmt, ...)
 	va_list vargs;
 	char_t *buf;
 	int rc;
-
 	a_assert(websValid(wp));
-
 	va_start(vargs, fmt);
-
 	buf = NULL;
 	rc = 0;
-
 	if (fmtValloc(&buf, WEBS_BUFSIZE, fmt, vargs)>=WEBS_BUFSIZE) {
 		trace(
 		                0,
