@@ -1597,7 +1597,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 	int no;
 	stUart_plan plan;
 	websWrite(wp, T("{"));
-	websWrite(wp, T("\"parity\":[\"无\",\"奇\",\"偶\"],"));     //3种奇偶校验方式
+	websWrite(wp, T("\"parity\":[\"无\",\"偶\",\"奇\"],"));     //3种奇偶校验方式
 	websWrite(wp, T("\"data\":[7,8,9],"));     //三种数据位
 	websWrite(wp, T("\"stop\":[0,1],"));     //2中停止位 0 1
 	websWrite(wp, T("\"baud\":[300,600,1200,2400,4800,9600],"));
