@@ -168,9 +168,9 @@ void form_server_time(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	time_t t = time(NULL );
+	char * action = websGetVar(wp, T("action"), T("null"));
 	printf("\t\t@%s", ctime(&t));
 	websHeader_pure(wp);
-	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "get")==0) {
 		websWrite(wp, T("{\"timestamp\":\"%d\"}"), t);
 	} else if (strcmp(action, "set")==0) {
@@ -370,7 +370,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		}
 		break;
 	case RET_SAMPLE_PROC:		///@待定
-		system("killall hl3104_com ");
+		system("killall hl3104_com");
 		break;
 	case RET_RTU:
 		//reflash_this_wp(wp, PAGE_RESET);
@@ -1051,14 +1051,14 @@ static int webWrite_uartport(webs_t wp, stMtr mtr)
 	websWrite(wp, T("<td>\n"
 			"<select name=port >\n"));
 	///@note 更喜监视端口文件中前面的几个为串口,名称填入
-	if(mon_port_num<sysparam.sioports_num){
+	if (mon_port_num<sysparam.sioports_num) {
 		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
 		web_err_proc(EL);
 	}
 	for (i = 0; i<sysparam.sioports_num; i++) {
 		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
 		                (i==mtr.port) ? "selected=\"selected\"" : "",
-		                		mon_port_name[i]);
+		                mon_port_name[i]);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -2198,28 +2198,37 @@ int webRece_syntime(webs_t wp)
 	char *timestamp = websGetVar(wp, T("timestamp"), T("null"));
 	char *timezone = websGetVar(wp, T("timezone"), T("null"));
 	//char *dsttime = websGetVar(wp, T("dsttime"), T("null"));
-	char *oRet=jsonNew();
+	char *oRet = jsonNew();
 	//特别定义成64位长度,希望解决Y2038时修改轻松点.
 	int64_t t = atoll(timestamp);     //时间戳数值
-	int tz_min = atoi(timezone);     //与标准时间的差值(分钟)
+	//int tz_min = atoi(timezone);     //与标准时间的差值(分钟)
 	//int tz_dsttime=atot(dsttime); //日光节约时,夏令
 	printf("time=%lld timezone=%s\n", t, timezone);
 	struct timeval tv;
-	struct timezone tz;
+	//struct timezone tz;
 	//tz.tz_minuteswest=tz_min;
 	//tz.tz_dsttime=tz_dsttime;
-
 	tv.tv_sec = t;
 	tv.tv_usec = 0;     //毫秒不要了
+	//设置系统时间
 	if (settimeofday(&tv, (struct timezone *) 0)<0) {
-		printf("Set system datatime error!\n");
-		jsonAdd(&oRet,"ret","error");
-		jsonAdd(&oRet,"strerror",strerror(errno));
+		web_errno = syn_time;
+		web_err_proc(EL);
+		jsonAdd(&oRet, "ret", "error");
+		jsonAdd(&oRet, "strerror", strerror(errno));
 	} else {
-		printf("Set system datatime successfully!\n");
-		jsonAdd(&oRet,"ret","success");
+		//成功之后再设置硬件时间
+		if(system("hwclock -w")<0){
+			web_errno = syn_time;
+			web_err_proc(EL);
+			jsonAdd(&oRet, "ret", "error");
+			jsonAdd(&oRet, "strerror", strerror(errno));
+		}else{
+			printf("Set system datatime successfully!\n");
+			jsonAdd(&oRet, "ret", "success");
+		}
 	}
-	websWrite(wp,"%s",oRet);
+	websWrite(wp, "%s", oRet);
 	jsonFree(&oRet);
 	return 0;
 }

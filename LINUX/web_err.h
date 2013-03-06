@@ -69,5 +69,6 @@ enum e_errno {
 	use_backup_err_log,
 	use_backup_port,
 	use_backup_sslport,
+	syn_time,///<设置终端时间错误
 };
 #endif

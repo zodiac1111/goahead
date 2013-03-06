@@ -84,6 +84,7 @@ const char *myweberrstr[] = {
         	" in "RED CONF_FILE _COLOR
         	",use " RED WEBS_DEFAULT_SSL_PORT _COLOR
         	" as a backup sslport number.",
+          [syn_time]="Set system datatime error.",
 };
 /**
  * 服务器错误处理函数.
