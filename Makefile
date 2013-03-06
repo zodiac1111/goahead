@@ -18,7 +18,7 @@ version:
 	./makeversion.sh
 #用于打包(发布版 尽量保留少量东西,文档被简化)
 publish:clean version all doc
-	./publish.sh dev
+	./publish.sh
 #用于打包 开发板.去除全部可以由代码生成的文件.
 #使用时需要 git awk sed doxygen 这些工具用于重建.
 publish-dev:distclean version doc

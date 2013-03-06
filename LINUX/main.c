@@ -329,7 +329,9 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 #define RET_SAMPLE_PROC 3
 #define RET_RTU 4
 #define RET_TEST 10
+#define WEBS_REQ_TEST 12
 	PRINT_FORM_INFO;
+	websHeader_pure(wp);
 	char app[256] = { 0 };
 	int typ = 0;
 	int ret = -1;
@@ -377,17 +379,22 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		system("echo \"reboot ok\"");
 #else
 		system("reboot");
+		//websDone(wp, 200);
 #endif
-		return;
 		break;
 	case RET_TEST:
 		system("ls");
+		//websDone(wp, 200);
+		break;
+	case WEBS_REQ_TEST:
+		//websDone(wp, 200);
 		break;
 	default:
-		//reflash_this_wp(wp, PAGE_RESET);
+		//websDone(wp, 200);
 		return;
 		break;
 	}
+	websDone(wp, 200);
 	//reflash_this_wp(wp, PAGE_RESET);
 }
 /**
@@ -1043,10 +1050,15 @@ static int webWrite_uartport(webs_t wp, stMtr mtr)
 #endif
 	websWrite(wp, T("<td>\n"
 			"<select name=port >\n"));
+	///@note 更喜监视端口文件中前面的几个为串口,名称填入
+	if(mon_port_num<sysparam.sioports_num){
+		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
+		web_err_proc(EL);
+	}
 	for (i = 0; i<sysparam.sioports_num; i++) {
-		websWrite(wp, T("<option value=\"%d\" %s >com%d</option>\n"), i,
+		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
 		                (i==mtr.port) ? "selected=\"selected\"" : "",
-		                i+1);
+		                		mon_port_name[i]);
 	}
 	websWrite(wp, T("</td>\n"));
 	return 0;
@@ -1333,7 +1345,9 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		PRINT_HERE
 		return -1150;
 	}
+#if DEBUG_PRINT_MTRPARAM
 	printf("iv= %s\n", websGetVar(wp, T("iv"), T("0")));
+#endif
 	if (websTestVar(wp, T("iv"))) {
 		n[17] = split(iv, websGetVar(wp, T("iv"), T("0")));
 	} else {
@@ -2272,8 +2286,10 @@ int webRece_mtrparams(webs_t wp)
 		for (i = 0; i<mtr_num; i++) {
 			saveret = save_mtrparam(&amtr[i], webs_cfg.mtrspara,
 			                amtr[i].mtrno);
+#if 0
 			printf("1047 i=%d saveret=%d\n", i, saveret);
 			printf("amtr[i].mtrno=%d\n", amtr[i].mtrno);
+#endif
 		}
 	} else {
 		saveret = mtr_num;

@@ -12,8 +12,11 @@
 major=`cat version.h |grep -i major|awk -F ' ' '{print $3}'`
 minor=`cat version.h |grep -i minor|awk -F ' ' '{print $3}'`
 patchlevel=`cat version.h |grep -i patchlevel|awk -F ' ' '{print $3}'`
+#前端根目录
+www="/home/lee/Aptana Studio 3 Workspace/www"
 #
-#echo $1
+echo "into www"
+cd "$www" && ./makeversion.sh 
 
 if [ r"$1" = r"dev" ] ; then
 	#用于软件开发的版本
