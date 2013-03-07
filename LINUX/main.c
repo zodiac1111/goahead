@@ -2286,6 +2286,12 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	}
 	jsonAdd(&oAll,"procotol",aList);
 	jsonClear(&aList);//清空,还可以用来装别的list
+	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
+	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
+		jsonAdd(&aList, NULL, fact[i]);
+	}
+	jsonAdd(&oAll,"factory",aList);
+	jsonClear(&aList);//清空,还可以用来装别的list
 	for(i = 0; i<mtrnum; i++){
 		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, i)) {
 			web_err_proc(EL);
@@ -2313,7 +2319,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&aMtrParaList,NULL,oMtrPara);
 		jsonClear(&oMtrPara);
 	}
-	jsonAdd(&oAll,"params",aMtrParaList);
+	jsonAdd(&oAll,"items",aMtrParaList);
 	wpsend(wp,oAll);
 	jsonFree(&oAll);
 	jsonFree(&oMtrPara);
