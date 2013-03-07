@@ -264,9 +264,9 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 		webSend_mtrparams(wp, sysparam.meter_num);
 	} else if (strcmp(action, "set")==0) {
 		webRece_mtrparams(wp);
-	} else {//其他未知命令一律忽略
-		//web_errno=mtr_form;
-		//web_err_proc(EL);
+	} else {     //其他未知命令一律忽略
+	             //web_errno=mtr_form;
+	             //web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -1765,7 +1765,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	jsonAdd(&oMonPara, "item", aItemList);
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	///@todo  @bug 数据太长必须分开传输
-	wpsend(wp,oMonPara);
+	wpsend(wp, oMonPara);
 	//websWrite(wp, T("%s"), oMonPara);
 	jsonFree(&oItem);
 	jsonFree(&aItemList);
@@ -2205,12 +2205,12 @@ int webRece_syntime(webs_t wp)
 		jsonAdd(&oRet, "strerror", strerror(errno));
 	} else {
 		//成功之后再设置硬件时间
-		if(system("hwclock -w")<0){
+		if (system("hwclock -w")<0) {
 			web_errno = syn_time;
 			web_err_proc(EL);
 			jsonAdd(&oRet, "ret", "error");
 			jsonAdd(&oRet, "strerror", strerror(errno));
-		}else{
+		} else {
 			printf("Set system datatime successfully!\n");
 			jsonAdd(&oRet, "ret", "success");
 		}
@@ -2263,15 +2263,15 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 #else
 	int i;
 	char tmp[256];
-	jsObj oAll=jsonNew();//所有要传递的数据,包括一些表单名称
-	jsObj aList=jsonNewArray();//所有要传递的列表,如所有表计规约名称/监视端口
-	jsObj aMtrParaList=jsonNewArray();//所有表计参数的集合,是一个数组
-	jsObj oMtrPara=jsonNew();//一个表计参数
+	jsObj oAll = jsonNew();     //所有要传递的数据,包括一些表单名称
+	jsObj aList = jsonNewArray();     //所有要传递的列表,如所有表计规约名称/监视端口
+	jsObj aMtrParaList = jsonNewArray();     //所有表计参数的集合,是一个数组
+	jsObj oMtrPara = jsonNew();     //一个表计参数
 	for (i = 0; i<sysparam.sioplan_num; i++) {
 		jsonAdd(&aList, NULL, u8toa(tmp, "%d", i));
 	}
-	jsonAdd(&oAll,"portplan",aList);
-	jsonClear(&aList);//清空,还可以用来装别的list
+	jsonAdd(&oAll, "portplan", aList);
+	jsonClear(&aList);
 	if (mon_port_num<sysparam.sioports_num) {
 		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
 		web_err_proc(EL);
@@ -2279,48 +2279,53 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	for (i = 0; i<sysparam.sioports_num; i++) {
 		jsonAdd(&aList, NULL, mon_port_name[i]);
 	}
-	jsonAdd(&oAll,"port",aList);
-	jsonClear(&aList);//清空,还可以用来装别的list
+	jsonAdd(&oAll, "port", aList);
+	jsonClear(&aList);
 	for (i = 0; i<procotol_num; i++) {
 		jsonAdd(&aList, NULL, procotol_name[i]);
 	}
-	jsonAdd(&oAll,"procotol",aList);
-	jsonClear(&aList);//清空,还可以用来装别的list
+	jsonAdd(&oAll, "procotol", aList);
+	jsonClear(&aList);
 	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
+	for (i = 0; i<(int)(sizeof(fact)/sizeof(fact[0])); i++) {
 		jsonAdd(&aList, NULL, fact[i]);
 	}
-	jsonAdd(&oAll,"factory",aList);
-	jsonClear(&aList);//清空,还可以用来装别的list
-	for(i = 0; i<mtrnum; i++){
+	jsonAdd(&oAll, "factory", aList);
+	jsonClear(&aList);
+	for (i = 0; i<(int)(sizeof(PW)/sizeof(PW[0])); i++) {
+		jsonAdd(&aList, NULL, PW[i]);
+	}
+	jsonAdd(&oAll, "type", aList);
+	jsonClear(&aList);
+	for (i = 0; i<mtrnum; i++) {
 		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, i)) {
 			web_err_proc(EL);
 			continue;
 		}
-		jsonAdd(&oMtrPara,"mtrno",u8toa(tmp, "%d", i));
-		jsonAdd(&oMtrPara,"iv_check",u8toa(tmp, "%d", mtr.iv));
-		jsonAdd(&oMtrPara,"line",a2jsObj(tmp, mtr.line,LINE_LEN));
-		jsonAdd(&oMtrPara,"addr",a2jsObj(tmp, mtr.addr,ADDR_LEN));
-		jsonAdd(&oMtrPara,"pwd",a2jsObj(tmp, mtr.pwd,PWD_LEN));
-		jsonAdd(&oMtrPara,"port",u8toa(tmp, "%d",mtr.port));
-		jsonAdd(&oMtrPara,"portplan",u8toa(tmp,"%d", mtr.portplan));
-		jsonAdd(&oMtrPara,"protocol",u8toa(tmp, "%d",mtr.protocol));
-		jsonAdd(&oMtrPara,"factory",u8toa(tmp, "%d",mtr.fact));
-		jsonAdd(&oMtrPara,"ph_wire",u8toa(tmp, "%d",mtr.p3w4));
-		jsonAdd(&oMtrPara,"it_dot",u8toa(tmp, "%d",mtr.it_dot));
-		jsonAdd(&oMtrPara,"xl_dot",u8toa(tmp, "%d",mtr.xl_dot));
-		jsonAdd(&oMtrPara,"v_dot",u8toa(tmp, "%d",mtr.v_dot));
-		jsonAdd(&oMtrPara,"i_dot",u8toa(tmp, "%d",mtr.i_dot));
-		jsonAdd(&oMtrPara,"p_dot",u8toa(tmp, "%d",mtr.p_dot));
-		jsonAdd(&oMtrPara,"q_dot",u8toa(tmp, "%d",mtr.q_dot));
-		jsonAdd(&oMtrPara,"ue",u8toa(tmp, "%d",mtr.ue));
-		jsonAdd(&oMtrPara,"ie",u8toa(tmp, "%d",mtr.ie));
+		jsonAdd(&oMtrPara, "mtrno", u8toa(tmp, "%d", i));
+		jsonAdd(&oMtrPara, "iv_check", u8toa(tmp, "%d", mtr.iv));
+		jsonAdd(&oMtrPara, "line", a2jsObj(tmp, mtr.line, LINE_LEN));
+		jsonAdd(&oMtrPara, "addr", a2jsObj(tmp, mtr.addr, ADDR_LEN));
+		jsonAdd(&oMtrPara, "pwd", a2jsObj(tmp, mtr.pwd, PWD_LEN));
+		jsonAdd(&oMtrPara, "port", u8toa(tmp, "%d", mtr.port));
+		jsonAdd(&oMtrPara, "portplan", u8toa(tmp, "%d", mtr.portplan));
+		jsonAdd(&oMtrPara, "protocol", u8toa(tmp, "%d", mtr.protocol));
+		jsonAdd(&oMtrPara, "factory", u8toa(tmp, "%d", mtr.fact));
+		jsonAdd(&oMtrPara, "ph_wire", u8toa(tmp, "%d", mtr.p3w4));
+		jsonAdd(&oMtrPara, "it_dot", u8toa(tmp, "%d", mtr.it_dot));
+		jsonAdd(&oMtrPara, "xl_dot", u8toa(tmp, "%d", mtr.xl_dot));
+		jsonAdd(&oMtrPara, "v_dot", u8toa(tmp, "%d", mtr.v_dot));
+		jsonAdd(&oMtrPara, "i_dot", u8toa(tmp, "%d", mtr.i_dot));
+		jsonAdd(&oMtrPara, "p_dot", u8toa(tmp, "%d", mtr.p_dot));
+		jsonAdd(&oMtrPara, "q_dot", u8toa(tmp, "%d", mtr.q_dot));
+		jsonAdd(&oMtrPara, "ue", u8toa(tmp, "%d", mtr.ue));
+		jsonAdd(&oMtrPara, "ie", u8toa(tmp, "%d", mtr.ie));
 		//添加到数组
-		jsonAdd(&aMtrParaList,NULL,oMtrPara);
+		jsonAdd(&aMtrParaList, NULL, oMtrPara);
 		jsonClear(&oMtrPara);
 	}
-	jsonAdd(&oAll,"items",aMtrParaList);
-	wpsend(wp,oAll);
+	jsonAdd(&oAll, "items", aMtrParaList);
+	wpsend(wp, oAll);
 	jsonFree(&oAll);
 	jsonFree(&oMtrPara);
 	jsonFree(&aList);
@@ -2335,27 +2340,27 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
  * @param n
  * @return
  */
-jsObj a2jsObj(char *tmp, uint8_t * array,int n)
+jsObj a2jsObj(char *tmp, uint8_t * array, int n)
 {
-	int	i;
-	for (i=0;i<n;i++){
-		sprintf(tmp+i,"%1d",array[i]);
+	int i;
+	for (i = 0; i<n; i++) {
+		sprintf(tmp+i, "%1d", array[i]);
 	}
 	return tmp;
 }
 ///向页面发送json对象,字符串过长需要分段发送
-int wpsend(webs_t wp,char* oJson)
+int wpsend(webs_t wp, char* oJson)
 {
 	int i;
 	char buff[WP_MAX_LEN] = { 0 };
-	int t=strlen(oJson)/(WP_MAX_LEN-1);//商
-	int mod=strlen(oJson)%(WP_MAX_LEN-1);//余,最后部分大小可能不是正好,即不整
+	int t = strlen(oJson)/(WP_MAX_LEN-1);     //商
+	int mod = strlen(oJson)%(WP_MAX_LEN-1);     //余,最后部分大小可能不是正好,即不整
 	//int len=0;//实际拷贝长度
 	for (i = 0; i<=t; i++) {
-		if(i==t){//最后一次循环/可能不整
-			memcpy(buff, oJson+i*(WP_MAX_LEN-1),mod);
-		}else{
-			memcpy(buff, oJson+i*(WP_MAX_LEN-1),WP_MAX_LEN-1);
+		if (i==t) {	//最后一次循环/可能不整
+			memcpy(buff, oJson+i*(WP_MAX_LEN-1), mod);
+		} else {
+			memcpy(buff, oJson+i*(WP_MAX_LEN-1), WP_MAX_LEN-1);
 		}
 		//printf(WEBS_DBG"%s\n",buff);
 		websWrite(wp, T("%s"), buff);
