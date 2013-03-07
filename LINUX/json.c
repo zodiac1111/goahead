@@ -10,25 +10,25 @@
  * 创建一个空的json对象"{}",用完注意释放 free
  * @return
  */
-char* jsonNew(void)
+jsObj jsonNew(void)
 {
-	char* obj=malloc(strlen("{}")+1);
+	jsObj obj=malloc(strlen("{}")+1);
 	if(obj!=NULL){
 		strcpy(obj,"{}");
 	}
 	return obj;
 }
 ///穿件空数组"[]" ,注意释放 free
-char* jsonNewArray(void)
+jsObj jsonNewArray(void)
 {
-	char* obj=malloc(strlen("[]")+1);
+	jsObj obj=malloc(strlen("[]")+1);
 	if(obj!=NULL){
 		strcpy(obj,"[]");
 	}
 	return obj;
 }
 ///清空对象/数组内的内容.不是删除!
-char* jsonClear(char** obj)
+jsObj jsonClear(jsObj* obj)
 {
 	if(obj==NULL){
 		return NULL;
@@ -56,7 +56,7 @@ char* jsonClear(char** obj)
 	return *obj;
 }
 ///删除对象/数组 (free掉堆内存)
-int jsonFree(char**obj)
+int jsonFree(jsObj*obj)
 {
 	if(*obj!=NULL){
 		free(*obj);
@@ -65,7 +65,16 @@ int jsonFree(char**obj)
 	}
 	return -1;
 }
-
+/**向str中按照format格式打印value,并且放回str的指针.
+ * 参考系统的sprintf,多了返回指针的功能.
+ * 多了限制:str必须已经分配足够的内存用于打印.
+ * @todo 改成标准的不定参数传递,提高可重用性,注意安全性.
+ * */
+char* u8toa(char* str, const char*format, uint8_t value)
+{
+	sprintf(str, format, value);
+	return str;
+}
 /**
  * 向json对象/数组最末尾中添加一个名/值对或对象.
  * 能过简单的自动区分是向(对象/数组)内添加(对象/数组/名值对).通过判断"{"
@@ -78,7 +87,7 @@ int jsonFree(char**obj)
  * @retval 返回添加到的对象的地址,方便链式调用.
  * @retval NULL 错误.
  */
-char* jsonAdd(char**dobj, const char*name,const char*value)
+jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 {
 	if(dobj==NULL){
 		perror("jsonAdd-null dobj");
@@ -169,7 +178,7 @@ void jsonDemo(void)
 		JSON_DEMO RED" |   City    :Hangzhou          |\n"_COLOR
 		JSON_DEMO RED" |   No.     :810 A Road        |\n"_COLOR
 		JSON_DEMO RED" \\------------------------------/\n"_COLOR);
-	char* oCard=jsonNew();
+	jsObj oCard=jsonNew();
 	printf(JSON_DEMO" Create a Empty Object. oCard "
 		RED"%s"_COLOR"\n",oCard);
 
@@ -177,7 +186,7 @@ void jsonDemo(void)
 	printf(JSON_DEMO" Add a field(name) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 
-	char* aTel=jsonNewArray();
+	jsObj aTel=jsonNewArray();
 		printf(JSON_DEMO" Create a Empty Array. aTel "
 			RED"%s"_COLOR"\n",aTel);
 
@@ -193,7 +202,7 @@ void jsonDemo(void)
 	printf(JSON_DEMO" Add a field(Tel) to oCard "
 		RED"%s"_COLOR"\n",oCard);
 
-	char* oAddr=jsonNew();
+	jsObj oAddr=jsonNew();
 	printf(JSON_DEMO" Create a Empty Object. oAddress "
 		RED"%s"_COLOR"\n",oAddr);
 
@@ -226,7 +235,7 @@ void jsonDemo(void)
 		RED"%s"_COLOR"\n",oCard);
 	//清空和释放的区别.数组和对象都适用.
 	printf(JSON_DEMO" ***** A Example of jsonClear *****\n");
-	char* aTemp=jsonNewArray();
+	jsObj aTemp=jsonNewArray();
 	printf(JSON_DEMO" Create a Empty Array. aTemp "
 		RED"%s"_COLOR"\n",aTemp);
 	jsonAdd(&aTemp,NULL,"a");

@@ -47,6 +47,7 @@ extern stCfg webs_cfg;
 //保留用于读取配置文件错误时使用
 #define WEBS_DEFAULT_PORT	"8080" //默认 HTTP 端口,只有root有权限访问1000以下端口
 #define WEBS_DEFAULT_SSL_PORT	"4433" /* Default HTTPS port */
+#define WP_MAX_LEN (512) //页面一次发送最大长度,超长则分多次发送.
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
 #define WEBS_DBG PREFIX YELLOW"Debug>"_COLOR ///<调试信息

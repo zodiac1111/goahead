@@ -12,17 +12,14 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/stat.h>
@@ -267,8 +264,9 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 		webSend_mtrparams(wp, sysparam.meter_num);
 	} else if (strcmp(action, "set")==0) {
 		webRece_mtrparams(wp);
-	} else {
-		web_err_proc(EL);
+	} else {//其他未知命令一律忽略
+		//web_errno=mtr_form;
+		//web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -1697,11 +1695,7 @@ char* itoa(char* str, const char*format, int value)
 	sprintf(str, format, value);
 	return str;
 }
-char* u8toa(char* str, const char*format, uint8_t value)
-{
-	sprintf(str, format, value);
-	return str;
-}
+
 /**
  * 从文件读取监视参数,显示到页面
  * @param wp
@@ -1771,14 +1765,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	jsonAdd(&oMonPara, "item", aItemList);
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	///@todo  @bug 数据太长必须分开传输
-#define WP_MAX_LEN (512)
-	char buff[WP_MAX_LEN] = { 0 };
-	for (i = 0; i<=(int) strlen(oMonPara)/(WP_MAX_LEN-1); i++) {
-		memcpy(buff, oMonPara+i*(WP_MAX_LEN-1), WP_MAX_LEN-1);
-		//printf(WEBS_DBG"%s\n",buff);
-		websWrite(wp, T("%s"), buff);
-		memset(buff, 0x0, WP_MAX_LEN);
-	}
+	wpsend(wp,oMonPara);
 	//websWrite(wp, T("%s"), oMonPara);
 	jsonFree(&oItem);
 	jsonFree(&aItemList);
@@ -2245,6 +2232,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	int no;
 	stMtr mtr;
 	memset(&mtr, 0x00, sizeof(stMtr));
+#if JSON==0
 	///@todo 使用JSON传递数据可以使格式更明确,前端处理字符串不难.
 	for (no = 0; no<mtrnum; no++) {
 		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, no)) {
@@ -2271,6 +2259,97 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		(void) webWrite_ue(wp, mtr);
 		(void) webWrite_ie(wp, mtr);
 		websWrite(wp, T("</tr>\n"));
+	}
+#else
+	int i;
+	char tmp[256];
+	jsObj oAll=jsonNew();//所有要传递的数据,包括一些表单名称
+	jsObj aList=jsonNewArray();//所有要传递的列表,如所有表计规约名称/监视端口
+	jsObj aMtrParaList=jsonNewArray();//所有表计参数的集合,是一个数组
+	jsObj oMtrPara=jsonNew();//一个表计参数
+	if (mon_port_num<sysparam.sioports_num) {
+		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
+		web_err_proc(EL);
+	}
+	for (i = 0; i<sysparam.sioports_num; i++) {
+		jsonAdd(&aList, NULL, mon_port_name[i]);
+	}
+	jsonAdd(&oAll,"port",aList);
+	jsonClear(&aList);//清空,还可以用来装别的list
+
+	for (i = 0; i<procotol_num; i++) {
+		jsonAdd(&aList, NULL, procotol_name[i]);
+	}
+	jsonAdd(&oAll,"procotol",aList);
+	jsonClear(&aList);//清空,还可以用来装别的list
+	for(i = 0; i<mtrnum; i++){
+		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, i)) {
+			web_err_proc(EL);
+			continue;
+		}
+		jsonAdd(&oMtrPara,"mtrno",u8toa(tmp, "%d", i));
+		jsonAdd(&oMtrPara,"iv_check",u8toa(tmp, "%d", mtr.iv));
+		jsonAdd(&oMtrPara,"line",a2jsObj(tmp, mtr.line,LINE_LEN));
+		jsonAdd(&oMtrPara,"addr",a2jsObj(tmp, mtr.addr,ADDR_LEN));
+		jsonAdd(&oMtrPara,"pwd",a2jsObj(tmp, mtr.pwd,PWD_LEN));
+		jsonAdd(&oMtrPara,"port",u8toa(tmp, "%d",mtr.port));
+		jsonAdd(&oMtrPara,"portplan",u8toa(tmp,"%d", mtr.portplan));
+		jsonAdd(&oMtrPara,"protocol",u8toa(tmp, "%d",mtr.protocol));
+		jsonAdd(&oMtrPara,"factory",u8toa(tmp, "%d",mtr.fact));
+		jsonAdd(&oMtrPara,"ph_wire",u8toa(tmp, "%d",mtr.p3w4));
+		jsonAdd(&oMtrPara,"it_dot",u8toa(tmp, "%d",mtr.it_dot));
+		jsonAdd(&oMtrPara,"xl_dot",u8toa(tmp, "%d",mtr.xl_dot));
+		jsonAdd(&oMtrPara,"v_dot",u8toa(tmp, "%d",mtr.v_dot));
+		jsonAdd(&oMtrPara,"i_dot",u8toa(tmp, "%d",mtr.i_dot));
+		jsonAdd(&oMtrPara,"p_dot",u8toa(tmp, "%d",mtr.p_dot));
+		jsonAdd(&oMtrPara,"q_dot",u8toa(tmp, "%d",mtr.q_dot));
+		jsonAdd(&oMtrPara,"ue",u8toa(tmp, "%d",mtr.ue));
+		jsonAdd(&oMtrPara,"ie",u8toa(tmp, "%d",mtr.ie));
+		//添加到数组
+		jsonAdd(&aMtrParaList,NULL,oMtrPara);
+		jsonClear(&oMtrPara);
+	}
+	jsonAdd(&oAll,"params",aMtrParaList);
+	wpsend(wp,oAll);
+	jsonFree(&oAll);
+	jsonFree(&oMtrPara);
+	jsonFree(&aList);
+	jsonFree(&aMtrParaList);
+#endif
+	return 0;
+}
+/**
+ * 将纯数值数值转化为jsObj对象.并返回指向这个对象的指针
+ * @param tmp
+ * @param array
+ * @param n
+ * @return
+ */
+jsObj a2jsObj(char *tmp, uint8_t * array,int n)
+{
+	int	i;
+	for (i=0;i<n;i++){
+		sprintf(tmp+i,"%1d",array[i]);
+	}
+	return tmp;
+}
+///向页面发送json对象,字符串过长需要分段发送
+int wpsend(webs_t wp,char* oJson)
+{
+	int i;
+	char buff[WP_MAX_LEN] = { 0 };
+	int t=strlen(oJson)/(WP_MAX_LEN-1);//商
+	int mod=strlen(oJson)%(WP_MAX_LEN-1);//余,最后部分大小可能不是正好,即不整
+	//int len=0;//实际拷贝长度
+	for (i = 0; i<=t; i++) {
+		if(i==t){//最后一次循环/可能不整
+			memcpy(buff, oJson+i*(WP_MAX_LEN-1),mod);
+		}else{
+			memcpy(buff, oJson+i*(WP_MAX_LEN-1),WP_MAX_LEN-1);
+		}
+		//printf(WEBS_DBG"%s\n",buff);
+		websWrite(wp, T("%s"), buff);
+		memset(buff, 0x0, WP_MAX_LEN);
 	}
 	return 0;
 }

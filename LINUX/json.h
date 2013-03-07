@@ -1,10 +1,14 @@
 #ifndef _JSON_H_
 #define _JSON_H_
+#include <stdint.h>
+//json对象,其实就是一串字符串XD
+typedef  char* jsObj;
 void jsonDemo(void);
-char* jsonNew(void);
-char* jsonNewArray(void);
-char* jsonClear(char**obj);
-int jsonFree(char**obj);
-char* jsonAdd(char**dobj,const char*name,const char*value);
-char* jsonAddObj(char**dobj,char*name,char*obj);
+jsObj jsonNew(void);
+jsObj jsonNewArray(void);
+jsObj jsonClear(jsObj* obj);
+int jsonFree(jsObj *obj);
+jsObj u8toa(jsObj str, const char*format, uint8_t value);
+jsObj jsonAdd(jsObj*dobj,const char*name,const char*value);
+jsObj jsonAddObj(jsObj*dobj,char*name,char*obj);
 #endif
