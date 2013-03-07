@@ -2267,6 +2267,11 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	jsObj aList=jsonNewArray();//所有要传递的列表,如所有表计规约名称/监视端口
 	jsObj aMtrParaList=jsonNewArray();//所有表计参数的集合,是一个数组
 	jsObj oMtrPara=jsonNew();//一个表计参数
+	for (i = 0; i<sysparam.sioplan_num; i++) {
+		jsonAdd(&aList, NULL, u8toa(tmp, "%d", i));
+	}
+	jsonAdd(&oAll,"portplan",aList);
+	jsonClear(&aList);//清空,还可以用来装别的list
 	if (mon_port_num<sysparam.sioports_num) {
 		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
 		web_err_proc(EL);
@@ -2276,7 +2281,6 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	}
 	jsonAdd(&oAll,"port",aList);
 	jsonClear(&aList);//清空,还可以用来装别的list
-
 	for (i = 0; i<procotol_num; i++) {
 		jsonAdd(&aList, NULL, procotol_name[i]);
 	}
