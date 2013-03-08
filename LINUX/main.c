@@ -407,6 +407,8 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
 	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
 	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
+	char * strtz = websGetVar(wp, T("timezone"), T("0"));
+	int tz=0;
 	//printf("时间戳范围:%s~%s\n", stime_t, etime_t);
 	TimeRange tr;
 	int ret;
@@ -425,6 +427,12 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	if (ret!=1) {
 		web_err_proc(EL);
 	}
+	ret = sscanf(strtz, "%d", &tz);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	tr.s+=(tz*60);
+	tr.e+=(tz*60);
 	//printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
 	websHeader_pure(wp);
 	ret = load_tou_dat(mtr_no, tr, &tou, wp);
@@ -895,280 +903,6 @@ static int webWrite_ip(webs_t wp, char *name, u8* value)
 	websWrite(wp, T("\""));
 	return 0;
 }
-///线路名称
-static int webWrite_line(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t线路名称\n");
-#endif
-	websWrite(wp, T("<td>\n"
-			"<input type=text  maxlength=6 "
-			"onchange=\"line_changed(event);\""
-			"name=line value=\""));
-	uint i;
-	for (i = 0; i<LINE_LEN; i++) {
-		//if (mtr.webWrite_line[i]!=0)
-		websWrite(wp, T("%1d"), mtr.line[i]);
-	}
-	websWrite(wp, T("\" >\n</td>\n"));
-	return 0;
-}
-/// 表计地址
-static int webWrite_mtraddr(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t表计地址\n");
-#endif
-	uint i;
-	websWrite(wp, T("<td>\n"
-			"<input type=text  maxlength=12 "
-			"onchange=\"addr_changed(event);\""
-			"name=addr value=\""));
-	for (i = 0; i<ADDR_LEN; i++) {
-		//if (mtr.addr[i]!=0)
-		websWrite(wp, T("%1d"), mtr.addr[i]);
-	}
-	websWrite(wp, T("\" >\n</td>\n"));
-	return 0;
-}
-/// 表计口令
-static int webWrite_pwd(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t表计口令\n");
-#endif
-	uint i;
-	websWrite(wp, T("<td>\n"
-			"<input type=text maxlength=8 "
-			"onchange=\"pwd_changed(event);\""
-			"name=pwd value=\""));
-	for (i = 0; i<PWD_LEN; i++) {
-		//if (mtr.webWrite_pwd[i]!=0)
-		websWrite(wp, T("%1d"), mtr.pwd[i]);
-	}
-	websWrite(wp, T("\" >\n</td>\n"));
-	return 0;
-}
-/// 电量小数位数
-static int webWrite_it_dot(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t电量小数位数:%u\n", mtr.it_dot);
-#endif
-	return websWrite(wp, T("<td>\n"
-			" <input type=text  maxlength=1 "
-			" onchange=\"dot_changed(event);\" "
-			" name=it_dot value=%u>\n</td>\n "), mtr.it_dot);
-}
-/// 电压小数位数
-static int webWrite_v_dot(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t电压小数位数:%u\n", mtr.v_dot);
-#endif
-	return websWrite(wp, T("<td>\n"
-			" <input type=text  maxlength=1  "
-			" onchange=\"dot_changed(event);\" "
-			" name=v_dot value=%u >\n</td>\n "), mtr.v_dot);
-
-}
-/// 电流小数位数
-static int webWrite_i_dot(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t电流小数位数:%u\n", mtr.i_dot);
-#endif
-	return websWrite(wp, T("<td>\n"
-			"<input type=text maxlength=1  "
-			" onchange=\"dot_changed(event);\" "
-			"name=i_dot value=%u>\n</td>\n "), mtr.i_dot);
-}
-/// 有功功率小数位数
-static int webWrite_p_dot(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t有功功率小数:%u\n", mtr.p_dot);
-#endif
-	return websWrite(wp, T("<td>\n"
-			"<input  type=text  maxlength=1 "
-			" onchange=\"dot_changed(event);\" "
-			"name=p_dot value=%u>\n</td>\n "), mtr.p_dot);
-}
-/// 无功功率小数位数
-static int webWrite_q_dot(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t无功功率小数:%u\n", mtr.q_dot);
-#endif
-	return websWrite(wp, T("<td>\n"
-			" <input  type=text  maxlength=1 "
-			" onchange=\"dot_changed(event);\" "
-			" name=q_dot value=%u>\n</td>\n "), mtr.q_dot);
-}
-/// 需量小数位数
-static int webWrite_xl_dot(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t需量小数:%u\n", mtr.xl_dot);
-#endif
-	return websWrite(wp, T("<td>\n"
-			" <input type=text  maxlength=1 "
-			" onchange=\"dot_changed(event);\" "
-			" name=xl_dot value=%u>\n</td>\n "), mtr.xl_dot);
-
-}
-/// 额定电压
-static int webWrite_ue(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t额定电压:%u\n", mtr.ue);
-#endif
-	return websWrite(wp, T("<td>\n"
-			" <input type=text  "
-			" onchange=\"ue_changed(event);\" "
-			" name=ue value=%u>\n</td>\n "), mtr.ue);
-}
-/// 额定电流
-static int webWrite_ie(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t额定电压:%u\n", mtr.ie);
-#endif
-	return websWrite(wp, T("<td>\n"
-			" <input type=text size=4 "
-			" onchange=\"ie_changed(event);\" "
-			" name=ie value=%u>\n</td>\n "), mtr.ie);
-}
-/// 使用的串口号
-static int webWrite_uartport(webs_t wp, stMtr mtr)
-{
-	int i;
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t使用串口号:%d\n", mtr.port);
-#endif
-	websWrite(wp, T("<td>\n"
-			"<select name=port >\n"));
-	///@note 更喜监视端口文件中前面的几个为串口,名称填入
-	if (mon_port_num<sysparam.sioports_num) {
-		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
-		web_err_proc(EL);
-	}
-	for (i = 0; i<sysparam.sioports_num; i++) {
-		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==mtr.port) ? "selected=\"selected\"" : "",
-		                mon_port_name[i]);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/// 串口方案号
-static int webWrite_uartPlan(webs_t wp, stMtr mtr)
-{
-	int i;
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t串口方案号:%d,总串口个数%d个\n", mtr.portplan, sysparam.sioplan_num);
-#endif
-	websWrite(wp, T("<td>\n"
-			"<select name=portplan >\n"));
-	for (i = 0; i<sysparam.sioplan_num; i++) {
-		websWrite(
-		                wp,
-		                T("<option value=\"%d\" %s >"CSTR_PLAN"%d</option>\n"),
-		                i,
-		                (i==mtr.portplan) ?
-		                                    "selected=\"selected\"" :
-		                                    "",
-		                i);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/// 表计规约
-static int webWrite_mtr_protocol(webs_t wp, stMtr mtr)
-{
-	int i;
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t表计规约:%d\n", mtr.protocol);
-#endif
-	websWrite(wp, T("<td>\n"
-			"<select name=protocol >\n"));
-	for (i = 0; i<procotol_num; i++) {
-		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==mtr.protocol) ?
-		                                    "selected=\"selected\"" :
-		                                    "",
-		                procotol_name[i]);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/// 几相几线制,就两种情况 0-3相3线 1-3相4线
-static int webWrite_ph_wire(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t几相几线:%d\n", mtr.p3w4);
-#endif
-	u32 i;
-	websWrite(wp, T("<td>\n"
-			"<select name=ph_wire >\n"));
-	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
-		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==mtr.p3w4) ? "selected=\"selected\"" : "",
-		                PW[i]);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/// 生产厂家 @todo: 现在是硬编码,期待使用文件配置.
-static int webWrite_factory(webs_t wp, stMtr mtr)
-{
-	u32 i;
-	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t生产厂家:%d\n", mtr.fact);
-#endif
-	websWrite(wp, T("<td>\n"
-			"<select name=factory >\n"));
-	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
-		websWrite(wp, T("<option value=\"%d\" %s >%s</option>\n"), i,
-		                (i==mtr.fact) ? "selected=\"selected\"" : "",
-		                fact[i]);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/// 有效标志
-static int webWrite_iv(webs_t wp, stMtr mtr)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("\t有效标志:%x\n", mtr.iv);
-#endif
-	websWrite(wp, T("<td>\n"
-			"<input type=checkbox  name=iv_check value=\"%d\" %s "
-			" id=ivchk onclick=\"chk_change(event);\" >"
-			"\n"), mtr.iv&0x01, (mtr.iv&0x01) ? "checked" : "");
-	///post不能传递没有被选中的复选框的值,通过text传递
-	websWrite(wp, T("<input class=\"hideinp\" type=\"text\""
-			"size=1 name=\"iv\" value=%d >"), mtr.iv&0x01);
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
-/**
- * 向页面写"表计参数-表号"单元格
- * @param wp
- * @param no
- * @return
- */
-static int webWrite_mtrno(webs_t wp, int no)
-{
-#if DEBUG_PRINT_MTRPARAM
-	printf("表计参数:表号:%d\n", no);
-#endif
-	return websWrite(wp, T("<td>"
-			"<input type=text name=mtrno "
-			" readonly=readonly  value=%d>"
-			"</td>\n"), no);
-}
 
 /**
  * 分割字符串
@@ -1607,15 +1341,63 @@ int webRece_sioplans(webs_t wp)
  * 从文件中读取串口方案,向页面写串口方案.
  * @param[out] wp 向这个页面输出数据
  * @param[in] sp 系统参数
+ * @todo  使用json库函数处理字串
  */
 int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
+#if JSON==1
+	char tmp[256]={0};
 	stUart_plan plan;
+	jsObj oSioPlan= jsonNew();
+	jsObj aList=jsonNewArray();
+	jsObj aItems=jsonNewArray();
+	jsObj oItem=jsonNew();
+	jsonAdd(&aList,NULL,"无");
+	jsonAdd(&aList,NULL,"偶");
+	jsonAdd(&aList,NULL,"奇");
+	jsonAdd(&oSioPlan,"parity",aList);
+	jsonClear(&aList);
+	jsonAdd(&aList,NULL,"7");
+	jsonAdd(&aList,NULL,"8");
+	jsonAdd(&aList,NULL,"9");
+	jsonAdd(&oSioPlan,"data",aList);
+	jsonClear(&aList);
+	jsonAdd(&aList,NULL,"0");
+	jsonAdd(&aList,NULL,"1");
+	jsonAdd(&oSioPlan,"stop",aList);
+	jsonClear(&aList);
+	jsonAdd(&oSioPlan,"baud","[300,600,1200,2400,4800,9600]");
+	jsonClear(&aList);
+	jsonAdd(&oSioPlan,"commtype","[\"异步\",\"同步\"]");
+	jsonClear(&aList);
+	for (no = 0; no<sp.sioplan_num; no++) {
+		if (-1==load_sioplan(&plan, webs_cfg.sioplan, no)) {
+			web_err_proc(EL);
+			continue;
+		}
+		jsonAdd(&oItem,"no",u8toa(tmp,"%d",no));
+		jsonAdd(&oItem,"parity",u8toa(tmp,"%d",plan.parity));
+		jsonAdd(&oItem,"data",u8toa(tmp,"%d",plan.data));
+		jsonAdd(&oItem,"stop",u8toa(tmp,"%d",plan.stop));
+		jsonAdd(&oItem,"baud",u8toa(tmp,"%d",plan.baud));
+		jsonAdd(&oItem,"commtype",u8toa(tmp,"%d",plan.Commtype));
+		jsonAdd(&aItems,NULL,oItem);
+		jsonClear(&oItem);
+
+	}
+	jsonAdd(&oSioPlan,"item",aItems);
+	wpsend(wp,oSioPlan);
+	jsonFree(&oSioPlan);
+	jsonFree(&aList);
+	jsonFree(&aItems);
+	jsonFree(&oItem);
+
+#else
 	websWrite(wp, T("{"));
 	websWrite(wp, T("\"parity\":[\"无\",\"偶\",\"奇\"],"));     //3种奇偶校验方式
-	websWrite(wp, T("\"data\":[7,8,9],"));     //三种数据位
-	websWrite(wp, T("\"stop\":[0,1],"));     //2中停止位 0 1
+	websWrite(wp, T("\"data\":[\"7\",\"8\",\"9\"],"));     //三种数据位
+	websWrite(wp, T("\"stop\":[\"0\",\"1\"],"));     //2中停止位 0 1
 	websWrite(wp, T("\"baud\":[300,600,1200,2400,4800,9600],"));
 	websWrite(wp, T("\"commtype\":[\"异步\",\"同步\"],"));
 	websWrite(wp, T("\"item\":["));     //下面是串口数组,每个元素为一个串口配置
@@ -1642,6 +1424,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 		}
 	}
 	websWrite(wp, T("]}"));
+#endif
 	return 0;
 }
 /**
@@ -2181,7 +1964,6 @@ int webSend_syspara(webs_t wp)
  */
 int webRece_syntime(webs_t wp)
 {
-
 	char *timestamp = websGetVar(wp, T("timestamp"), T("null"));
 	char *timezone = websGetVar(wp, T("timezone"), T("null"));
 	//char *dsttime = websGetVar(wp, T("dsttime"), T("null"));
@@ -2303,7 +2085,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 			continue;
 		}
 		jsonAdd(&oMtrPara, "mtrno", u8toa(tmp, "%d", i));
-		jsonAdd(&oMtrPara, "iv_check", u8toa(tmp, "%d", mtr.iv));
+		jsonAdd(&oMtrPara, "iv", u8toa(tmp, "%d", mtr.iv));
 		jsonAdd(&oMtrPara, "line", a2jsObj(tmp, mtr.line, LINE_LEN));
 		jsonAdd(&oMtrPara, "addr", a2jsObj(tmp, mtr.addr, ADDR_LEN));
 		jsonAdd(&oMtrPara, "pwd", a2jsObj(tmp, mtr.pwd, PWD_LEN));
@@ -2349,7 +2131,7 @@ jsObj a2jsObj(char *tmp, uint8_t * array, int n)
 	return tmp;
 }
 ///向页面发送json对象,字符串过长需要分段发送
-int wpsend(webs_t wp, char* oJson)
+int wpsend(webs_t wp, jsObj oJson)
 {
 	int i;
 	char buff[WP_MAX_LEN] = { 0 };

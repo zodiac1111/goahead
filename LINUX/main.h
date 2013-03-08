@@ -68,26 +68,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam);
 int webRece_monparas(webs_t wp);
 int webSend_txtfile(webs_t wp, const char*file);
 int webRece_txtfile(webs_t wp, char_t *query, const char* file);
-//表计参数页面 小项目
-///@todo 表计参数所有数据传输方式都需要使用json格式
-static int webWrite_mtrno(webs_t wp, int no);
-static int webWrite_line(webs_t wp, stMtr mtr);
-static int webWrite_mtraddr(webs_t wp, stMtr mtr);
-static int webWrite_pwd(webs_t wp, stMtr mtr);
-static int webWrite_it_dot(webs_t wp, stMtr mtr);
-static int webWrite_v_dot(webs_t wp, stMtr mtr);
-static int webWrite_i_dot(webs_t wp, stMtr mtr);
-static int webWrite_p_dot(webs_t wp, stMtr mtr);
-static int webWrite_q_dot(webs_t wp, stMtr mtr);
-static int webWrite_xl_dot(webs_t wp, stMtr mtr);
-static int webWrite_ue(webs_t wp, stMtr mtr);
-static int webWrite_ie(webs_t wp, stMtr mtr);
-static int webWrite_uartport(webs_t wp, stMtr mtr);
-static int webWrite_uartPlan(webs_t wp, stMtr mtr);
-static int webWrite_mtr_protocol(webs_t wp, stMtr mtr);
-static int webWrite_ph_wire(webs_t wp, stMtr mtr);
-static int webWrite_factory(webs_t wp, stMtr mtr);
-static int webWrite_iv(webs_t wp, stMtr mtr);
+
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
 //串口方案项目
 //网口参数
@@ -108,7 +89,7 @@ int rtu_addr_str2array(const char* str, u8 a[4]);
 int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
 ////设置函数
-int wpsend(webs_t wp,char* oJson);
+int wpsend(webs_t wp,jsObj oJson);
 char* a2jsObj(char *tmp, uint8_t * array,int n);
 char* getconf(const char const* name,char** value);
 void webs_free(void);
