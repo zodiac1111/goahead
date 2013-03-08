@@ -61,7 +61,8 @@ goahead web服务器(后端).和前端一起实现通过PC端浏览器管理和�
 1.将 `conf/goahead.conf` webs服务器配置文件通过ftp工具上传到终端的 `/mnt/nor/conf` 目录下。
 
 <a name="conf_2"></a>
-2.将 `conf/monparam_name.conf` 网络监视端口名称配置信息文件上传到终端 `/mnt/nor/conf` 目录下.如果有必要,打开并按照文件内容指示修改内容使之与终端端口名称相符。
+2.1.根据终端类型,把 `conf/monparam_name_HA.conf` 或 `conf/monparam_name_JD.conf` 重命名为 `conf/monparam_name.conf`。
+2.2.将 `conf/monparam_name.conf` 网络监视端口名称配置信息文件上传到终端 `/mnt/nor/conf` 目录下.如果有必要,打开并按照文件内容指示修改内容使之与终端端口名称相符。
 
 <a name="www"></a>
 3.将整个 `www` 网页目录通过ftp工具上传到终端 `/mnt/nor` 目录下.(该目录是webs的前端项目目录)。
