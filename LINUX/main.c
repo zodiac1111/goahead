@@ -2011,38 +2011,8 @@ int webRece_syntime(webs_t wp)
  */
 int webSend_mtrparams(webs_t wp, int mtrnum)
 {
-	int no;
 	stMtr mtr;
 	memset(&mtr, 0x00, sizeof(stMtr));
-#if JSON==0
-	///@todo 使用JSON传递数据可以使格式更明确,前端处理字符串不难.
-	for (no = 0; no<mtrnum; no++) {
-		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		websWrite(wp, T("<tr>\n"));     //一行
-		(void) webWrite_mtrno(wp, no);
-		(void) webWrite_iv(wp, mtr);
-		(void) webWrite_line(wp, mtr);
-		(void) webWrite_mtraddr(wp, mtr);
-		(void) webWrite_pwd(wp, mtr);
-		(void) webWrite_uartport(wp, mtr);
-		(void) webWrite_uartPlan(wp, mtr);
-		(void) webWrite_mtr_protocol(wp, mtr);
-		(void) webWrite_factory(wp, mtr);
-		(void) webWrite_ph_wire(wp, mtr);
-		(void) webWrite_it_dot(wp, mtr);
-		(void) webWrite_xl_dot(wp, mtr);
-		(void) webWrite_v_dot(wp, mtr);
-		(void) webWrite_i_dot(wp, mtr);
-		(void) webWrite_p_dot(wp, mtr);
-		(void) webWrite_q_dot(wp, mtr);
-		(void) webWrite_ue(wp, mtr);
-		(void) webWrite_ie(wp, mtr);
-		websWrite(wp, T("</tr>\n"));
-	}
-#else
 	int i;
 	char tmp[256];
 	jsObj oAll = jsonNew();     //所有要传递的数据,包括一些表单名称
@@ -2112,7 +2082,6 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	jsonFree(&oMtrPara);
 	jsonFree(&aList);
 	jsonFree(&aMtrParaList);
-#endif
 	return 0;
 }
 /**
