@@ -75,6 +75,11 @@ char* u8toa(char* str, const char*format, uint8_t value)
 	sprintf(str, format, value);
 	return str;
 }
+char* ftoa(char* str, const char*format, double value)
+{
+	sprintf(str, format, value);
+	return str;
+}
 /**
  * 向json对象/数组最末尾中添加一个名/值对或对象.
  * 能过简单的自动区分是向(对象/数组)内添加(对象/数组/名值对).通过判断"{"

@@ -229,26 +229,26 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
  * @param path
  * @param query
  */
-void form_mtr_items(webs_t wp, char_t *path, char_t *query)
-{
-	PRINT_FORM_INFO;
-	websHeader_pure(wp);
-	char * item = websGetVar(wp, T("item"), T("null"));
-	if (strcmp(item, "sioplan")==0) {
-		webSend_mtr_sioplan(wp, sysparam);
-	} else if (strcmp(item, "procotol")==0) {
-		webSend_mtr_procotol(wp);
-	} else if (strcmp(item, "factory")==0) {
-		webSend_mtr_factory(wp);
-	} else if (strcmp(item, "type")==0) {
-		webSend_mtr_type(wp);
-		/* 在这里添加其他需要的项目类型 */
-	} else {
-		web_err_proc(EL);
-	}
-	websDone(wp, 200);
-	return;
-}
+//void form_mtr_items(webs_t wp, char_t *path, char_t *query)
+//{
+//	PRINT_FORM_INFO;
+//	websHeader_pure(wp);
+//	char * item = websGetVar(wp, T("item"), T("null"));
+//	if (strcmp(item, "sioplan")==0) {
+//		webSend_mtr_sioplan(wp, sysparam);
+//	} else if (strcmp(item, "procotol")==0) {
+//		webSend_mtr_procotol(wp);
+//	} else if (strcmp(item, "factory")==0) {
+//		webSend_mtr_factory(wp);
+//	} else if (strcmp(item, "type")==0) {
+//		webSend_mtr_type(wp);
+//		/* 在这里添加其他需要的项目类型 */
+//	} else {
+//		web_err_proc(EL);
+//	}
+//	websDone(wp, 200);
+//	return;
+//}
 /**
  * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
  * @param wp 页面
@@ -792,7 +792,7 @@ static int initWebs(void)
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
 	///@todo 表计参数的数据项,若使用json可以自描述就不需要描述项了
-	websFormDefine(T("mtr_items"), form_mtr_items);
+//	websFormDefine(T("mtr_items"), form_mtr_items);
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
@@ -1153,7 +1153,7 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		if (*errstr!='\0') {
 			e[i] |= 0x400;
 		}
-		amtr[i].ie = strtol(ie[i], &errstr, 10);
+		amtr[i].ie = 1000*atof(ie[i]);
 		if (*errstr!='\0') {
 			e[i] |= 0x800;
 		}
@@ -2048,7 +2048,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	}
 	jsonAdd(&oAll, "procotol", aList);
 	jsonClear(&aList);
-	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
+	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表","待添加" };
 	for (i = 0; i<(int)(sizeof(fact)/sizeof(fact[0])); i++) {
 		jsonAdd(&aList, NULL, fact[i]);
 	}
@@ -2081,7 +2081,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "p_dot", u8toa(tmp, "%d", mtr.p_dot));
 		jsonAdd(&oMtrPara, "q_dot", u8toa(tmp, "%d", mtr.q_dot));
 		jsonAdd(&oMtrPara, "ue", u8toa(tmp, "%d", mtr.ue));
-		jsonAdd(&oMtrPara, "ie", u8toa(tmp, "%d", mtr.ie));
+		jsonAdd(&oMtrPara, "ie", ftoa(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
 		jsonClear(&oMtrPara);
@@ -2325,7 +2325,7 @@ int webRece_txtfile(webs_t wp, char_t *query, const char* file)
 int webSend_txtfile(webs_t wp, const char*file)
 {
 	websHeader_pure(wp);
-	char buf[1024] = { 0 };
+	char buf[256] = { 0 };
 	int ret;
 	FILE*fp = fopen(file, "r");
 	if (fp==NULL ) {
@@ -2333,9 +2333,10 @@ int webSend_txtfile(webs_t wp, const char*file)
 		goto WEB_END;
 	}
 	while (1) {
-		ret = fread(&buf, sizeof(char), 1024, fp);
+		ret = fread(&buf, sizeof(char), 255, fp);
 		if (ret>0) {
 			websWrite(wp, T("%s"), buf);
+			memset(buf,0x0,256);
 		} else {
 			break;
 		}

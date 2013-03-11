@@ -70,7 +70,7 @@ extern stCfg webs_cfg;
 //webs服务器错误文件相关
 #define ERR_LOG "./err.log" ///<错误日志文件
 #define MAX_ERR_LOG_LINE_LENTH 1024 ///<日志文件单行最大长度(字节)
-#define MAX_ERR_LOG_FILE_SIZE (100*1024) ///<错误日志文件最大尺寸(字节)
+#define MAX_ERR_LOG_FILE_SIZE (10*1024) ///<错误日志文件最大尺寸(字节)
 //conf配置相关文件
 #define CFG_DIR "../para/"///<参数路径
 #define FILE_SYSPARA "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
