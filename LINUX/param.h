@@ -22,7 +22,7 @@ extern const char *PROTOROL[2];
 extern const char *UART_P[3];
 extern const char *UART_DAT_BIT[3];
 extern const char *UART_STOP[2];
-extern const char *UART_BAUD[6];
+extern const char *UART_BAUD[7];
 extern const char *UART_COMM_TYPE[2];
 extern const char* SAVE_CYCLE[12];
 /**

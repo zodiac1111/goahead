@@ -22,7 +22,7 @@ const char *UART_P[3] = { [0]=CSTR_NO_PARITY,
 const char *UART_DAT_BIT[] = { [0]="7", [1]="8", [2]="9" };
 const char *UART_STOP[] = { [0]="0", [1]="1" };
 const char *UART_BAUD[] = { [0]="300", [1]="600", [2]="1200", [3]="2400", [4
-		]="4800", [5]="9600" };
+		]="4800", [5]="9600",[6]="19200" };
 //串口通讯方式
 const char *UART_COMM_TYPE[] = { [0]=CSTR_UART_SYN, [1]=CSTR_UART_ASYN,};
 ///@todo  硬编码!可以使用配置文件读取/写入

@@ -326,6 +326,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 #define RET_WEB 2
 #define RET_SAMPLE_PROC 3
 #define RET_RTU 4
+#define RET_CLEARDATA 5
 #define RET_TEST 10
 #define WEBS_REQ_TEST 12
 	PRINT_FORM_INFO;
@@ -377,6 +378,15 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		system("echo \"reboot ok\"");
 #else
 		system("reboot");
+		//websDone(wp, 200);
+#endif
+		break;
+	case RET_CLEARDATA:
+#if __i386 == 1
+		//调试不要重启PC系统...
+		system("echo \"clear data ok\"");
+#else
+		system("rm /mnt/nand/*.* -f");
 		//websDone(wp, 200);
 #endif
 		break;
@@ -1367,7 +1377,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 	jsonAdd(&aList,NULL,"1");
 	jsonAdd(&oSioPlan,"stop",aList);
 	jsonClear(&aList);
-	jsonAdd(&oSioPlan,"baud","[300,600,1200,2400,4800,9600]");
+	jsonAdd(&oSioPlan,"baud","[300,600,1200,2400,4800,9600,19200]");
 	jsonClear(&aList);
 	jsonAdd(&oSioPlan,"commtype","[\"异步\",\"同步\"]");
 	jsonClear(&aList);
