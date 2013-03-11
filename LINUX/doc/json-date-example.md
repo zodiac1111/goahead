@@ -2,6 +2,7 @@ json数据格式示例 {#json-date-example}
 ==============
 
 列举前后端交互时的数据格式.用于调试和对照.
+<http://jsoneditoronline.org/>
 
 ## 系统参数
 
@@ -174,3 +175,127 @@ json数据格式示例 {#json-date-example}
 	        }
 	    ]
 	}
+
+#表计参数
+
+{
+    "portplan": [
+        "0",
+        "1",
+        "2"
+    ],
+    "port": [
+        "485-1",
+        "485-2",
+        "485-3",
+        "485-4",
+        "COM5",
+        "COM6",
+        "COM7"
+    ],
+    "procotol": [
+        "645_97",
+        "645_07",
+        "weisheng",
+        "Mk3",
+        "Mk6",
+        "IEC1107",
+        "SL7000",
+        "Email",
+        "ABBAlpha",
+        "645_97ZF",
+        "sx102",
+        "HL102",
+        "GX102",
+        "hb102",
+        "df102",
+        "BJ102s",
+        "Dl719ss",
+        "C61850",
+        "376.1",
+        "lje-dlms",
+        "gs102",
+        "dd",
+        "nx102",
+        "nm376",
+        "elster-d",
+        "mbap",
+        "sd102",
+        "cw102",
+        "cw102zf"
+    ],
+    "factory": [
+        "华立",
+        "威盛",
+        "兰吉尔",
+        "红相",
+        "other"
+    ],
+    "type": [
+        "3相3线",
+        "3相4线"
+    ],
+    "items": [
+        {
+            "mtrno": "0",
+            "iv": "0",
+            "line": "000001",
+            "addr": "000000000120",
+            "pwd": "01233123",
+            "port": "0",
+            "portplan": "0",
+            "protocol": "2",
+            "factory": "1",
+            "ph_wire": "1",
+            "it_dot": "3",
+            "xl_dot": "3",
+            "v_dot": "3",
+            "i_dot": "1",
+            "p_dot": "2",
+            "q_dot": "1",
+            "ue": "2",
+            "ie": "0"
+        },
+        {
+            "mtrno": "1",
+            "iv": "0",
+            "line": "000001",
+            "addr": "000000000120",
+            "pwd": "00000000",
+            "port": "0",
+            "portplan": "0",
+            "protocol": "2",
+            "factory": "0",
+            "ph_wire": "1",
+            "it_dot": "0",
+            "xl_dot": "3",
+            "v_dot": "3",
+            "i_dot": "1",
+            "p_dot": "2",
+            "q_dot": "1",
+            "ue": "2",
+            "ie": "0"
+        },
+        {
+            "mtrno": "2",
+            "iv": "0",
+            "line": "000001",
+            "addr": "000000000120",
+            "pwd": "00000000",
+            "port": "0",
+            "portplan": "0",
+            "protocol": "2",
+            "factory": "0",
+            "ph_wire": "1",
+            "it_dot": "0",
+            "xl_dot": "3",
+            "v_dot": "0",
+            "i_dot": "1",
+            "p_dot": "0",
+            "q_dot": "0",
+            "ue": "0",
+            "ie": "0"
+        }
+    ]
+}
+
