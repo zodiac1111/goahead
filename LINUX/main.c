@@ -2048,8 +2048,20 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	}
 	jsonAdd(&oAll, "procotol", aList);
 	jsonClear(&aList);
-	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表","待添加" };
-	for (i = 0; i<(int)(sizeof(fact)/sizeof(fact[0])); i++) {
+
+	char *fact_HA[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表","待添加" };
+	char *fact_JD[] = { "华立", "威盛", "哈表",
+			"ABB", "浩宁达","华隆","红相","东方","许继","龙电" };
+	char **fact;
+	int len;
+	if(0){
+		fact=fact_HA;
+		len=sizeof(fact_HA)/sizeof(fact_HA[0]);
+	}else{
+		fact=fact_JD;
+		len=sizeof(fact_JD)/sizeof(fact_JD[0]);
+	}
+	for (i = 0; i<len; i++) {
 		jsonAdd(&aList, NULL, fact[i]);
 	}
 	jsonAdd(&oAll, "factory", aList);
@@ -2080,7 +2092,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "i_dot", u8toa(tmp, "%d", mtr.i_dot));
 		jsonAdd(&oMtrPara, "p_dot", u8toa(tmp, "%d", mtr.p_dot));
 		jsonAdd(&oMtrPara, "q_dot", u8toa(tmp, "%d", mtr.q_dot));
-		jsonAdd(&oMtrPara, "ue", u8toa(tmp, "%d", mtr.ue));
+		jsonAdd(&oMtrPara, "ue", ftoa(tmp, "%.0f", mtr.ue));
 		jsonAdd(&oMtrPara, "ie", ftoa(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
