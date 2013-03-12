@@ -1,3 +1,8 @@
+/** @file json.c
+ * 简单的json对象生成库,仅用于生成json对象,不能分解json对象.
+ * 主要用于服务端将数据构造成json格式,传递给客户端;
+ * 客户端解析json对象成为js对象(这很简单).实现只传递数据,与样式(css)和行为(js)分离.
+ */
 #include "json.h"
 #include <malloc.h>
 #include <string.h>
@@ -65,6 +70,16 @@ int jsonFree(jsObj*obj)
 	}
 	return -1;
 }
+///自定义的sprintf,与系统相比就多一个返回字符串.
+/// @note str需要足够大的空间放置格式化后的字符串.
+char* toStr(char *str,const char*format,...)
+{
+	va_list ap;
+	va_start(ap,format);
+	vsprintf( str,format, ap);
+	va_end(ap);
+	return str;
+}
 /**向str中按照format格式打印value,并且放回str的指针.
  * 参考系统的sprintf,多了返回指针的功能.
  * 多了限制:str必须已经分配足够的内存用于打印.
@@ -86,9 +101,9 @@ char* ftoa(char* str, const char*format, double value)
  * 原始对象可以是一个空对象: {}   => {"n2":"v2"}
  * 也可以是个有内容的对象 : {"n1":"v1"}   => {"n1":"v1","n2":"v2"}
  * (注意逗号分割多个名/值对)
- * @param dobj 对象或者数组.
- * @param name
- * @param value
+ * @param dobj 对象或者数组.(名值对被加到这个对象)
+ * @param name 名值对时的名字,或者数组时取NULL,数组不需要名字
+ * @param value 名值对中的值,或者其他json对象/数组
  * @retval 返回添加到的对象的地址,方便链式调用.
  * @retval NULL 错误.
  */
@@ -110,14 +125,13 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 	int dlen=strlen(*dobj);
 	int isObj=(value[0]=='{'||value[0]=='[')?1:0;
 	int isFirst=((dlen==2)?1:0); //原始对象为空则不需要加逗号.
-
 	char end ;//区分是像对象还是向数组添加名/值对.
 	end=(*dobj)[0]+2;
 	*dobj=realloc(*dobj,
 			strlen(*dobj) //原来对象长度
 			+(isFirst?0:1) //可能存在的逗号.如果空对象,则新增的名/值对不需要逗号
 			+(isArray?0:strlen("\"\":"))//名/值对的可格式 "名":
-			+(isObj?0:2) //图过不是对象则要加一对引号
+			+(isObj?0:2) //如果不是对象则要加一对引号
 			+(isArray?0:strlen(name)) //数组不需要name字段.
 			+strlen(value)// 名/值对的长度
 			+1);// \0
@@ -173,6 +187,8 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
  */
 void jsonDemo(void)
 {
+	char tmp[233];
+	toStr(tmp,"%d%d",1,2);
 	printf(JSON_DEMO"在线解析 Online JSON Editor: "
 			GREEN"http://jsoneditoronline.org/"_COLOR"\n");
 	printf(JSON_DEMO RED" /------------ Card ------------\\\n"_COLOR

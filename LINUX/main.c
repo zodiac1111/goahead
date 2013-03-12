@@ -1947,24 +1947,9 @@ int webSend_syspara(webs_t wp)
 	jsonAdd(&oSysPara, "sioports_num", tmp);
 	sprintf(tmp, "%u", sysparam.control_ports);
 	jsonAdd(&oSysPara, "control_ports", tmp);
-	websWrite(wp, T("%s"), oSysPara);
+	wpsend(wp,oSysPara);
+	//websWrite(wp, T("%s"), oSysPara);
 	jsonFree(&oSysPara);
-	/*
-	 websWrite(wp, T("{"
-	 "\"meter_num\":%u,"
-	 "\"sioplan_num\":%u,"
-	 "\"monitor_ports\":%u,"
-	 "\"netports_num\":%u,"
-	 "\"sioports_num\":%u,"
-	 "\"control_ports\":%u"
-	 "}"),
-	 sysparam.meter_num,
-	 sysparam.sioplan_num,
-	 sysparam.monitor_ports,
-	 sysparam.netports_num,
-	 sysparam.sioports_num,
-	 sysparam.control_ports
-	 ); */
 	return 0;
 }
 /**
@@ -2091,8 +2076,8 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "v_dot", u8toa(tmp, "%d", mtr.v_dot));
 		jsonAdd(&oMtrPara, "i_dot", u8toa(tmp, "%d", mtr.i_dot));
 		jsonAdd(&oMtrPara, "p_dot", u8toa(tmp, "%d", mtr.p_dot));
-		jsonAdd(&oMtrPara, "q_dot", u8toa(tmp, "%d", mtr.q_dot));
-		jsonAdd(&oMtrPara, "ue", ftoa(tmp, "%.0f", mtr.ue));
+		jsonAdd(&oMtrPara, "q_dot", toStr(tmp, "%d", mtr.q_dot));
+		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%.d", mtr.ue));
 		jsonAdd(&oMtrPara, "ie", ftoa(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
