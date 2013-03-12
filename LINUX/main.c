@@ -2078,7 +2078,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "p_dot", u8toa(tmp, "%d", mtr.p_dot));
 		jsonAdd(&oMtrPara, "q_dot", toStr(tmp, "%d", mtr.q_dot));
 		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%.d", mtr.ue));
-		jsonAdd(&oMtrPara, "ie", ftoa(tmp, "%.1f", mtr.ie/1000.0));
+		jsonAdd(&oMtrPara, "ie", toStr(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
 		jsonClear(&oMtrPara);
