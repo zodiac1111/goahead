@@ -62,6 +62,7 @@ struct sembuf sb;     ///<信号量操作
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
 stCfg webs_cfg;
+char * webdir;
 #define JSON 1
 //#pragma  GCC diagnostic warning  "-Wunused-parameter"
 /**
@@ -149,6 +150,20 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 		webSend_syspara(wp);
 	} else {
 		webRece_syspara(wp, &sysparam);
+	}
+	websDone(wp, 200);
+	return;
+}
+///客户端读取服务器配置信息
+void form_info(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	websHeader_pure(wp);
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "get")==0) {
+		webSend_info(wp);
+	} else {
+		web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -673,7 +688,7 @@ static int initWebs(void)
 	struct hostent *hp;
 	struct in_addr intaddr;
 	char host[128];
-	char * webdir;
+
 	char *cp;
 	char_t wbuf[128];
 	//Initialize the socket subsystem
@@ -745,8 +760,7 @@ static int initWebs(void)
 	chdir(webdir);
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
-	if (webdir!=NULL )     //不使用了就尽早释放.
-		free(webdir);
+
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
@@ -808,6 +822,7 @@ static int initWebs(void)
 	websFormDefine(T("save_procotol_cfg"), form_save_procotol_cfgfile);
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
+	websFormDefine(T("info"), form_info);
 #ifdef USER_MANAGEMENT_SUPPORT
 	//Create the Form handlers for the User Management pages
 	formDefineUserMgmt();
@@ -1908,6 +1923,30 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	response_ok(wp);
 	return 0;
 }
+int webSend_info(webs_t wp)
+{
+	char dir[128] = { 0 };
+	int count = readlink("/proc/self/exe", dir, 128);
+	if (count<0||count>128) {
+		PRINT_RET(count);
+		printf(WEBS_ERR"%s\n", __FUNCTION__);
+	}
+	char* oInfo = jsonNew();
+	char tmp[128] = { 0 };
+	jsonAdd(&oInfo, "info_webbin", dir);
+	jsonAdd(&oInfo, "info_webconf", CONF_FILE);
+	jsonAdd(&oInfo, "info_weblog", webs_cfg.errlog);
+	jsonAdd(&oInfo, "info_rtuconf", webs_cfg.confdir);
+	jsonAdd(&oInfo, "info_rtupara", webs_cfg.paradir);
+	jsonAdd(&oInfo, "info_wwwroot", webdir);
+	jsonAdd(&oInfo, "major", toStr(tmp,"%d",MAJOR));
+	jsonAdd(&oInfo, "minor", toStr(tmp,"%d",MINOR));
+	jsonAdd(&oInfo, "patchlevel", toStr(tmp,"%d",PATCHLEVEL));
+	jsonAdd(&oInfo, "git_version", GIT_VERSION);
+	wpsend(wp,oInfo);
+	jsonFree(&oInfo);
+	return 0;
+}
 /**
  * 向页面写系统参数,各项数据以json对象形式,客户端解析并添加到指定的框中
  * @param wp
@@ -2454,6 +2493,8 @@ void init_semun(void)
 void webs_free(void)
 {
 	int i;
+	if (webdir!=NULL )     //不使用了就尽早释放.
+		free(webdir);
 	//配置文件项 WEBS_DEFAULT_PORT
 	if (webs_cfg.port!=NULL &&
 	                //如果使用了备用的端口号,分配在静态区,不能/需要释放.

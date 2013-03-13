@@ -48,6 +48,7 @@ void form_save_log(webs_t wp, char_t *path, char_t *query);
 void form_load_log(webs_t wp, char_t *path, char_t *query);
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
+void form_info(webs_t wp, char_t *path, char_t *query);
 //各类大相
 int webRece_syspara(webs_t wp,stSysParam* sysparam);
 int webSend_syspara(webs_t wp);
@@ -66,6 +67,7 @@ int webSend_netparas(webs_t wp, int netParamNum);
 int webRece_netparas(webs_t wp);
 int webSend_monparas(webs_t wp, stSysParam sysparam);
 int webRece_monparas(webs_t wp);
+int webSend_info(webs_t wp);
 int webSend_txtfile(webs_t wp, const char*file);
 int webRece_txtfile(webs_t wp, char_t *query, const char* file);
 
