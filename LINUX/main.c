@@ -856,23 +856,23 @@ char* webWrite_rtu_addr(char* tmp, stMonparam monport)
 	return tmp;
 }
 ///主站规约类型
-static int webWrite_porttype(webs_t wp)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-端口类型?:%x\n", monport.sioplan);
-#endif
-	int i;
-	websWrite(wp, T("\"protocol\":["));
-	for (i = 0; i<procotol_num; i++) {
-		websWrite(wp, T("\"%s\""), procotol_name[i]);
-		if (i!=procotol_num-1) {
-			websWrite(wp, T(","));
-		}
-	}
-	websWrite(wp, T("]"));
-	return 0;
-
-}
+//static int webWrite_porttype(webs_t wp)
+//{
+//#if DEBUG_PRINT_MONPARAM
+//	printf("监视参数-端口类型?:%x\n", monport.sioplan);
+//#endif
+//	int i;
+//	websWrite(wp, T("\"protocol\":["));
+//	for (i = 0; i<procotol_num; i++) {
+//		websWrite(wp, T("\"%s\""), procotol_name[i]);
+//		if (i!=procotol_num-1) {
+//			websWrite(wp, T(","));
+//		}
+//	}
+//	websWrite(wp, T("]"));
+//	return 0;
+//
+//}
 char* webWrite_listen_port(char* tmp, stMonparam monport)
 {
 	int i;
@@ -889,23 +889,23 @@ char* webWrite_listen_port(char* tmp, stMonparam monport)
 	return tmp;
 }
 
-static int webWrite_commportList(webs_t wp)
-{
-#if DEBUG_PRINT_MONPARAM
-	printf("监视参数-使用端口:%x\n", monport.comm_port);
-#endif
-	int i;
-	websWrite(wp, T("\"commport\":["));
-	for (i = 0; i<mon_port_num; i++) {
-		websWrite(wp, T("\"%s\""), mon_port_name[i]);
-		if (i!=mon_port_num-1) {
-			websWrite(wp, T(","));
-		}
-	}
-	websWrite(wp, T("]"));
-	return 0;
-
-}
+//static int webWrite_commportList(webs_t wp)
+//{
+//#if DEBUG_PRINT_MONPARAM
+//	printf("监视参数-使用端口:%x\n", monport.comm_port);
+//#endif
+//	int i;
+//	websWrite(wp, T("\"commport\":["));
+//	for (i = 0; i<mon_port_num; i++) {
+//		websWrite(wp, T("\"%s\""), mon_port_name[i]);
+//		if (i!=mon_port_num-1) {
+//			websWrite(wp, T(","));
+//		}
+//	}
+//	websWrite(wp, T("]"));
+//	return 0;
+//
+//}
 /**
  * 填写形如 "ip":"111.222.333.444" 的json字符串
  * @param[out] wp 写入到这个页面
@@ -2129,51 +2129,51 @@ int webRece_mtrparams(webs_t wp)
 //	}
 //	return 0;
 //}
-int webSend_mtr_factory(webs_t wp)
-{
-	u32 i;
-	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-	//printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
-	websWrite(wp, T("<select name=all_factory "));
-	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
-	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
-		websWrite(wp, T("<option value=\"%d\">%s</option>"), i,
-		                fact[i]);
-	}
-	return 0;
-}
-int webSend_mtr_procotol(webs_t wp)
-{
-	int i;
-	websWrite(wp, T("<select name=all_protocol "
-			"onchange=\"changeall_mtr_protocol(event);\">\n"));
-	for (i = 0; i<procotol_num; i++) {
-		websWrite(wp, T(" <option value=\"%d\" >%s</option>"), i,
-		                procotol_name[i]);
-	}
-	websWrite(wp, T("</td>\n"));
-	return 0;
-}
+//int webSend_mtr_factory(webs_t wp)
+//{
+//	u32 i;
+//	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
+//	//printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
+//	websWrite(wp, T("<select name=all_factory "));
+//	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
+//	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
+//		websWrite(wp, T("<option value=\"%d\">%s</option>"), i,
+//		                fact[i]);
+//	}
+//	return 0;
+//}
+//int webSend_mtr_procotol(webs_t wp)
+//{
+//	int i;
+//	websWrite(wp, T("<select name=all_protocol "
+//			"onchange=\"changeall_mtr_protocol(event);\">\n"));
+//	for (i = 0; i<procotol_num; i++) {
+//		websWrite(wp, T(" <option value=\"%d\" >%s</option>"), i,
+//		                procotol_name[i]);
+//	}
+//	websWrite(wp, T("</td>\n"));
+//	return 0;
+//}
 /**
  * 向客户端页面发送串口数据
  * @param[out] wp
  * @param[in] sysparam
  * @return
  */
-int webSend_mtr_sioplan(webs_t wp, stSysParam sysparam)
-{
-	int i;
-	websWrite(wp, T("<select name=all_portplan "
-			"onchange=\"changeall_sioplan(event);\">\n"));
-	for (i = 0; i<sysparam.sioplan_num; i++) {
-		websWrite(
-		                wp,
-		                T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
-		                i,
-		                i);
-	}
-	return 0;
-}
+//int webSend_mtr_sioplan(webs_t wp, stSysParam sysparam)
+//{
+//	int i;
+//	websWrite(wp, T("<select name=all_portplan "
+//			"onchange=\"changeall_sioplan(event);\">\n"));
+//	for (i = 0; i<sysparam.sioplan_num; i++) {
+//		websWrite(
+//		                wp,
+//		                T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
+//		                i,
+//		                i);
+//	}
+//	return 0;
+//}
 
 /**
  * 从页面获取储存周期参数,保存到本地文件中

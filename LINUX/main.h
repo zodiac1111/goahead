@@ -76,9 +76,9 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
 //网口参数
 static int webWrite_ip(webs_t wp, char *name, u8* value);
 //监视端口参数
-static int webWrite_commportList(webs_t wp);
+//static int webWrite_commportList(webs_t wp);
 char* webWrite_listen_port(char* tmp, stMonparam monport);
-static int webWrite_porttype(webs_t wp);
+//static int webWrite_porttype(webs_t wp);
 char* webWrite_rtu_addr(char* tmp, stMonparam monport);
 //存储周期
 char *addItem(char **oItem,stSave_cycle sav);
