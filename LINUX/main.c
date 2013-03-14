@@ -233,40 +233,10 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
- * 表计参数项目表头表单提交函数.
- * 列举:
- *  所有的规约名称(用于规约选择)
- *  所有的串口方案名称(用于选择串口方案)
- *  所有的生产厂家名称(用于选择表计的厂家)
- * @param wp
- * @param path
- * @param query
- */
-//void form_mtr_items(webs_t wp, char_t *path, char_t *query)
-//{
-//	PRINT_FORM_INFO;
-//	websHeader_pure(wp);
-//	char * item = websGetVar(wp, T("item"), T("null"));
-//	if (strcmp(item, "sioplan")==0) {
-//		webSend_mtr_sioplan(wp, sysparam);
-//	} else if (strcmp(item, "procotol")==0) {
-//		webSend_mtr_procotol(wp);
-//	} else if (strcmp(item, "factory")==0) {
-//		webSend_mtr_factory(wp);
-//	} else if (strcmp(item, "type")==0) {
-//		webSend_mtr_type(wp);
-//		/* 在这里添加其他需要的项目类型 */
-//	} else {
-//		web_err_proc(EL);
-//	}
-//	websDone(wp, 200);
-//	return;
-//}
-/**
- * 表计参数设置表单提交触发事件,由meterpara.asp页面触发
- * @param wp 页面
- * @param path 路径
- * @param query 提交POST的字符串值
+ * 表计参数设置表单提交触发事件,由meterpara.html页面post触发
+ * @param[in] wp 页面
+ * @param[in] path 路径
+ * @param[in] query 提交POST的字符串值
  */
 void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 {
@@ -755,8 +725,7 @@ static int initWebs(void)
 	                webs_cfg.confdir,
 	                MON_PORT_NAME_FILE);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
-	///必须使用绝对路径启动程序,传入argv[0]的是/mnt/nor/bin/webs这样的路径
-	///因为web根目录需要
+	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.
 	chdir(webdir);
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
@@ -821,6 +790,7 @@ static int initWebs(void)
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
 	websFormDefine(T("info"), form_info);
+
 #ifdef USER_MANAGEMENT_SUPPORT
 	//Create the Form handlers for the User Management pages
 	formDefineUserMgmt();
@@ -848,31 +818,18 @@ char* webWrite_rtu_addr(char* tmp, stMonparam monport)
 			monport.prot_addr[3]);
 #endif
 	int i;
-	//websWrite(wp, T("\"rtu_addr\":\""));
 	for (i = 0; i<4; i++) {
 		sprintf(tmp+i, "%1d", monport.prot_addr[i]);
 	}
 	return tmp;
 }
-///主站规约类型
-//static int webWrite_porttype(webs_t wp)
-//{
-//#if DEBUG_PRINT_MONPARAM
-//	printf("监视参数-端口类型?:%x\n", monport.sioplan);
-//#endif
-//	int i;
-//	websWrite(wp, T("\"protocol\":["));
-//	for (i = 0; i<procotol_num; i++) {
-//		websWrite(wp, T("\"%s\""), procotol_name[i]);
-//		if (i!=procotol_num-1) {
-//			websWrite(wp, T(","));
-//		}
-//	}
-//	websWrite(wp, T("]"));
-//	return 0;
-//
-//}
-char* webWrite_listen_port(char* tmp, stMonparam monport)
+/**
+ * 构造监听端口,写道tmp数组中,tmp必须已经被分配空间.
+ * @param[out] tmp
+ * @param[in] monport
+ * @return
+ */
+char* webWrite_listen_port(char* tmp,const stMonparam  monport)
 {
 	int i;
 #if DEBUG_PRINT_MONPARAM
@@ -888,23 +845,6 @@ char* webWrite_listen_port(char* tmp, stMonparam monport)
 	return tmp;
 }
 
-//static int webWrite_commportList(webs_t wp)
-//{
-//#if DEBUG_PRINT_MONPARAM
-//	printf("监视参数-使用端口:%x\n", monport.comm_port);
-//#endif
-//	int i;
-//	websWrite(wp, T("\"commport\":["));
-//	for (i = 0; i<mon_port_num; i++) {
-//		websWrite(wp, T("\"%s\""), mon_port_name[i]);
-//		if (i!=mon_port_num-1) {
-//			websWrite(wp, T(","));
-//		}
-//	}
-//	websWrite(wp, T("]"));
-//	return 0;
-//
-//}
 /**
  * 填写形如 "ip":"111.222.333.444" 的json字符串
  * @param[out] wp 写入到这个页面
@@ -1285,7 +1225,7 @@ int mtr_param_print_item(webs_t wp)
 }
 
 /**
- * 串口方案:从页面接收串口方案,保存到服务器文件中
+ * 串口方案:从页面接收串口方案,保存到服务器(终端)文件中
  * @param wp
  * @return
  */
@@ -1522,9 +1462,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	}
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	jsonAdd(&oMonPara, "item", aItemList);
-	//printf(WEBS_DBG"%s\n",oMonPara);
 	wpsend(wp, oMonPara);
-	//websWrite(wp, T("%s"), oMonPara);
 	jsonFree(&oItem);
 	jsonFree(&aItemList);
 	jsonFree(&aCommList);
@@ -1692,7 +1630,8 @@ int portstr2u8(const char * str, u8* val)
  * @param[out] wp 客户端页面结构体
  * @param[in] netParamNum 网口的个数
  * @return
- * @note 使用json格式传输数据,使数据与样式无关,示例格式参见/doc下 @ref json-date-example
+ * @note 使用json格式传输数据,使数据与样式无关,
+ *   示例格式参见/doc下 @ref json-date-example
  */
 int webSend_netparas(webs_t wp, int netParamNum)
 {
@@ -1733,7 +1672,7 @@ int webRece_netparas(webs_t wp)
 	stNetparam netparam;
 	memset(&netparam, 0x0, sizeof(stNetparam));
 	int n;
-	int param_no = 0;		///参数序号,即数据库的主键,base 0.没有物理意义
+	int param_no = 0;///参数序号,即数据库的主键,base 0.没有物理意义
 	char * net_no = websGetVar(wp, T("net_no"), T("null"));
 	char * eth = websGetVar(wp, T("eth"), T("null"));
 	char * ip = websGetVar(wp, T("ip"), T("null"));
@@ -1882,16 +1821,17 @@ int webSend_syspara(webs_t wp)
 		web_err_proc(EL);
 		return -1;
 	}
-	/*JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,串口个数等6个名称/值对
+	/**JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,
+	 串口个数等6个名称/值对
 	 在线解析网站: http://jsoneditoronline.org/
 	 前端使用eval 或者JSON.parse即可解析.传递类似下面的文本
 	 {
-	 "meter_num": 1 ,
-	 "sioplan_num": 2 ,
-	 "monitor_ports": 3 ,
-	 "netports_num": 4 ,
-	 "sioports_num": 5 ,
-	 "control_ports": 6
+	 	 "meter_num": "1" ,
+	 	 "sioplan_num": "2" ,
+	 	 "monitor_ports": "3" ,
+	 	 "netports_num": "4" ,
+	 	 "sioports_num": "5" ,
+	 	 "control_ports": "6"
 	 }
 	 */
 	char* oSysPara = jsonNew();
@@ -2051,7 +1991,8 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	return 0;
 }
 /**
- * 将纯数值数值转化为jsObj对象.并返回指向这个对象的指针
+ * 将纯数值数组转化为jsObj对象.并返回指向这个对象的指针
+ * 一个元素一位0~9.
  * @param tmp
  * @param array
  * @param n
@@ -2116,63 +2057,6 @@ int webRece_mtrparams(webs_t wp)
 	}
 	return 0;
 }
-
-//int webSend_mtr_type(webs_t wp)
-//{
-//	u32 i;     //就一个选择列表框.
-//	websWrite(wp, T("<select name=ph_wire_all "
-//			"onchange=\"type_all_changed(event);\">\n"));
-//	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
-//		websWrite(wp, T("<option value=\"%d\" >%s</option>"), i,
-//		                PW[i]);
-//	}
-//	return 0;
-//}
-//int webSend_mtr_factory(webs_t wp)
-//{
-//	u32 i;
-//	char *fact[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "other" };
-//	//printf("加载所有生产厂家:共%d个\n", sizeof(fact)/sizeof(fact[0]));
-//	websWrite(wp, T("<select name=all_factory "));
-//	websWrite(wp, T("onchange=\"setall_factory(event);\">\n"));
-//	for (i = 0; i<sizeof(fact)/sizeof(fact[0]); i++) {
-//		websWrite(wp, T("<option value=\"%d\">%s</option>"), i,
-//		                fact[i]);
-//	}
-//	return 0;
-//}
-//int webSend_mtr_procotol(webs_t wp)
-//{
-//	int i;
-//	websWrite(wp, T("<select name=all_protocol "
-//			"onchange=\"changeall_mtr_protocol(event);\">\n"));
-//	for (i = 0; i<procotol_num; i++) {
-//		websWrite(wp, T(" <option value=\"%d\" >%s</option>"), i,
-//		                procotol_name[i]);
-//	}
-//	websWrite(wp, T("</td>\n"));
-//	return 0;
-//}
-/**
- * 向客户端页面发送串口数据
- * @param[out] wp
- * @param[in] sysparam
- * @return
- */
-//int webSend_mtr_sioplan(webs_t wp, stSysParam sysparam)
-//{
-//	int i;
-//	websWrite(wp, T("<select name=all_portplan "
-//			"onchange=\"changeall_sioplan(event);\">\n"));
-//	for (i = 0; i<sysparam.sioplan_num; i++) {
-//		websWrite(
-//		                wp,
-//		                T(" <option value=\"%d\" >"CSTR_PLAN"%d</option>"),
-//		                i,
-//		                i);
-//	}
-//	return 0;
-//}
 
 /**
  * 从页面获取储存周期参数,保存到本地文件中
