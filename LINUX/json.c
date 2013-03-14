@@ -83,8 +83,7 @@ char* toStr(char *str,const char*format,...)
 /**向str中按照format格式打印value,并且放回str的指针.
  * 参考系统的sprintf,多了返回指针的功能.
  * 多了限制:str必须已经分配足够的内存用于打印.
- * @todo 改成标准的不定参数传递,提高可重用性,注意安全性.
- * @todo 已经使用了toStr函数,安全的去掉这个函数
+ * @note 已经废弃,正在从代码中剔除,使用toStr()函数代替
  * */
 char* u8toa(char* str, const char*format, uint8_t value)
 {

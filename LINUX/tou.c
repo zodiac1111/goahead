@@ -58,7 +58,7 @@ void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
  * @param[in] ptou
  * @param[out] wp 写入到这个页面
  * @return
- * @todo 分解
+ * @todo 分解,流程较为复杂
  */
 int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 {
@@ -156,7 +156,7 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
 
 		if (ftell(fp)>=flen) {
-			printf(WEBS_INF"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
+			printf(WEBS_WAR"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
 			                ftell(fp), file);
 			t2 += (minCycle_t*60);
 			fclose(fp);
@@ -222,6 +222,7 @@ char * float2string(u8 const float_array[4], char * strval)
 }
 /**
  * 写一条正向有功或者正向无功之类的电量的"总尖峰平谷"5个数值
+ * @todo 使用json传输数据,不要传输样式和行为!
  * @param wp
  * @param ti
  * @return
@@ -264,7 +265,7 @@ int webWrite1Tou(webs_t wp, const stTou tou)
 	return 0;
 }
 /**
- * 比较文件头中的
+ * 通过比较文件头中的日期字节和请求的日期,判断是否是正确的日期,没有差几个月
  * @param filehead
  * @param t
  * @return

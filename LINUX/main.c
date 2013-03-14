@@ -3,8 +3,8 @@
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
  * Copyright (c) GoAhead Software Inc., 1995-2010. All Rights Reserved.
  * See the file "license.txt" for usage and redistribution license requirements
- * @todo 尽量只操作处理数据,样式和行为应该交给前端控制.[表计参数和储存周期部分未完成]
- * @todo 给前端发送的数据可以使用JSON.接收前端的数据就还是使用goahead的getVal吧.
+ * @note 尽量只操作处理数据,样式和行为应该交给前端控制.[历史电量数据部分未完成]
+ * @note 给前端发送的数据可以使用JSON.接收前端的数据就还是使用goahead的getVal吧.
  * 	后端仅进行一些必要的数值合法性验证.
  */
 #include "../uemf.h"
@@ -238,7 +238,6 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
  *  所有的规约名称(用于规约选择)
  *  所有的串口方案名称(用于选择串口方案)
  *  所有的生产厂家名称(用于选择表计的厂家)
- * @todo 数据格式化
  * @param wp
  * @param path
  * @param query
@@ -279,8 +278,8 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(action, "set")==0) {
 		webRece_mtrparams(wp);
 	} else {     //其他未知命令一律忽略
-	             //web_errno=mtr_form;
-	             //web_err_proc(EL);
+	       //web_errno=mtr_form;
+	       //web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -329,7 +328,9 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 客户端发送重启表单,分类重启.
- * @todo 配合的更好一些,参考路由器的页面行为设计.前端一个更舒适的行为反馈.
+ * @todo 配合的更好一些,参考路由器的页面行为设计.
+ *   前端一个更舒适的行为反馈(终端重启前端交互基本可行).
+ *   进行较为科学的分类,待整理.
  * @param wp
  * @param path
  * @param query
@@ -512,7 +513,8 @@ void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 报文监视(执行指令) 表单提交处理函数.
- * @todo:未实现,执行命令的输出还不能读取.前后端可能需要频繁交互.
+ * @todo 未实现,执行命令的输出还不能读取.前后端可能需要频繁交互.
+ *       创建进程有问题,ps看到很多webs,销毁进程有问题!
  * @param wp
  * @param path
  * @param query
@@ -578,7 +580,7 @@ void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 int printf_webs_app_dir(void)
 {
 	char dir[128] = { 0 };
-	///@todo 像其他服务器一样使用配置文件配置web服务器的根目录.
+	//需要proc文件系统支持
 	int count = readlink("/proc/self/exe", dir, 128);
 	if (count<0||count>128) {
 		PRINT_RET(count);
@@ -676,10 +678,9 @@ char *mkFullPath(const char *path, const char *name)
 /**
  * Initialize the web server.
  * 初始化web服务的一些操作:
- * * 配置套接字
- * * 修改运行目录和配置www根目录
- * * 注册asp和form函数
- * @todo:(doing)分解成较短的函数
+ *   配置套接字
+ *   修改运行目录和配置www根目录
+ *   注册asp和form函数
  * @return
  */
 static int initWebs(void)
@@ -804,8 +805,6 @@ static int initWebs(void)
 	//注册表单post函数. form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
 	websFormDefine(T("mtrparams"), form_mtrparams);
-	///@todo 表计参数的数据项,若使用json可以自描述就不需要描述项了
-//	websFormDefine(T("mtr_items"), form_mtr_items);
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
@@ -1700,7 +1699,7 @@ int webSend_netparas(webs_t wp, int netParamNum)
 	int i;
 	stNetparam netparam;
 	///@note eth_num 或许和下面的数据元素个数冗余,待定
-	///@todo 使用库函数构造
+	///@todo 使用库函数构造和wpsend()函数
 	websWrite(wp, T("{\"eth_num\":\"%d\","), netParamNum);
 	websWrite(wp, T("\"item\":["));
 	for (i = 0; i<netParamNum; i++) {
@@ -2208,7 +2207,6 @@ int webRece_savecycle(webs_t wp)
  * 从文件读取储存周期,发送(写)到页面 .
  * @param wp
  * @return
- * @todo 发送的数据格式修改,需要与前端配置修改格式.
  */
 int webSend_savecycle(webs_t wp)
 {
@@ -2238,7 +2236,8 @@ int webSend_savecycle(webs_t wp)
 #if DEBUG_PRINT_SAVE_CYCLE
 	printf(WEBS_DBG"oSavCycle:%s\n",oSavCycle);
 #endif
-	websWrite(wp, T("%s"), oSavCycle);     //发送给客户端页面
+	wpsend(wp,oSavCycle);
+	//websWrite(wp, T("%s"), oSavCycle);     //发送给客户端页面
 	jsonFree(&oItemArray);
 	jsonFree(&oItem);
 	jsonFree(&oCycleList);
@@ -2356,6 +2355,14 @@ static void sigintHandler(int unused __attribute__ ((unused)))
 {
 	finished = 1;
 }
+/**
+ * 储存周期,较为简单,
+ * @todo 使用json构造库构造,统一方便.
+ * @param wp
+ * @param name
+ * @param sav
+ * @return
+ */
 int jsonSavCycle(webs_t wp, const char* name, const stSave_cycle sav)
 {
 	websWrite(wp, T("\"%s\":{"), name);

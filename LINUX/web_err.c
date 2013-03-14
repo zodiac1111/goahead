@@ -88,8 +88,8 @@ const char *myweberrstr[] = {
 };
 /**
  * 服务器错误处理函数.
- * 处理web_errno错误号,控制台打印,文件打印.清除web_errno.
- * @todo 保存到文件中格式不要有颜色的代码，且使用cvs样式
+ * 处理web_errno错误号,控制台打印,清除web_errno.
+ * 以较为简单的形式保存到文件.
  */
 void web_err_proc(EL_ARGS)
 {

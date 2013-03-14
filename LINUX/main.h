@@ -105,7 +105,7 @@ static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
 static void sigintHandler(int);
 void init_semun(void);
-///@todo 实现一个json数据格式生成器,
+
 int jsonSavCycle(webs_t wp,const char* name,const stSave_cycle sav);
 union semun
 {
