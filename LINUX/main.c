@@ -234,7 +234,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 表计参数设置表单提交触发事件,由meterpara.html页面post触发
- * @param[in] wp 页面
+ * @param[in] wp 页面 输入/输出
  * @param[in] path 路径
  * @param[in] query 提交POST的字符串值
  */
@@ -256,7 +256,7 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 监视端口 表单提交触发函数
- * @param wp
+ * @param wp 输入/输出
  * @param path
  * @param query
  */
@@ -277,7 +277,7 @@ void form_monparas(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 表单提交函数,储存周期.
- * @param wp
+ * @param wp 输入/输出
  * @param path
  * @param query
  */
@@ -459,7 +459,7 @@ void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 }
 /**
  * 加载日志文件到客户端
- * @param wp
+ * @param[out] wp 发送/写到这个页面
  * @param path
  * @param query
  */
@@ -469,12 +469,14 @@ void form_load_log(webs_t wp, char_t *path, char_t *query)
 	webSend_txtfile(wp, webs_cfg.errlog);
 	return;
 }
+///加载规约文件,同上
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
 	webSend_txtfile(wp, webs_cfg.protocol);
 	return;
 }
+///加载监视端口名称描述文件.
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
@@ -1473,7 +1475,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 }
 /**
  * 从页面获取监视参数,保存到文件
- * @param wp
+ * @param[in]wp
  * @return
  */
 int webRece_monparas(webs_t wp)
@@ -1554,9 +1556,9 @@ int webRece_monparas(webs_t wp)
 
 /**
  * 将"255","1"这样的字符串转化成 "0255","0001"这样的字符数组.终端地址.
- * @param str
- * @param a
- * @return
+ * @param[in] str
+ * @param[out] a
+ * @retval 指针后移的数量
  */
 int rtu_addr_str2array(const char* str, u8 a[4])
 {
@@ -1578,8 +1580,8 @@ int rtu_addr_str2array(const char* str, u8 a[4])
 }
 /**
  * 将"10000 10002 9999"这样的字符串中5位的端口号,不足前面补0,返回原指针偏移数
- * @param str
- * @param a
+ * @param[in] str
+ * @param[out] a
  * @return
  */
 int listen_port_str2array(const char* str, u8 a[5])
@@ -1664,7 +1666,7 @@ int webSend_netparas(webs_t wp, int netParamNum)
 }
 /**
  * 从页面获取所有网络参数,保存到文件中.
- * @param wp
+ * @param[in] wp
  * @return
  */
 int webRece_netparas(webs_t wp)
@@ -1781,8 +1783,8 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 }
 /**
  * 向页面发送配置信息,版本号,各种目录等.
- * @param wp
- * @return
+ * @param[out] wp
+ * @retval 0
  */
 int webSend_info(webs_t wp)
 {
@@ -1824,15 +1826,8 @@ int webSend_syspara(webs_t wp)
 	/**JSON 简单使用,将系统参数抽象为一个对象,其有表计参数个数,
 	 串口个数等6个名称/值对
 	 在线解析网站: http://jsoneditoronline.org/
-	 前端使用eval 或者JSON.parse即可解析.传递类似下面的文本
-	 {
-	 	 "meter_num": "1" ,
-	 	 "sioplan_num": "2" ,
-	 	 "monitor_ports": "3" ,
-	 	 "netports_num": "4" ,
-	 	 "sioports_num": "5" ,
-	 	 "control_ports": "6"
-	 }
+	 前端使用eval 或者JSON.parse(IE不支持)即可解析.
+	 数据格式参考 @ref json-date-example
 	 */
 	char* oSysPara = jsonNew();
 	char tmp[128] = { 0 };
@@ -2121,25 +2116,29 @@ int webSend_savecycle(webs_t wp)
 	printf(WEBS_DBG"oSavCycle:%s\n",oSavCycle);
 #endif
 	wpsend(wp,oSavCycle);
-	//websWrite(wp, T("%s"), oSavCycle);     //发送给客户端页面
 	jsonFree(&oItemArray);
 	jsonFree(&oItem);
 	jsonFree(&oCycleList);
 	jsonFree(&oSavCycle);
 	return 0;
 }
+/**
+ *  存储周期的小项目json名&值对
+ * @param oItem
+ * @param sav
+ * @return
+ */
 char *addItem(char **oItem, stSave_cycle sav)
 {
 	char value[256] = { 0 };
-	sprintf(value, "%d", sav.enable);
-	jsonAdd(oItem, "en", value);
-	sprintf(value, "%d", sav.cycle);
-	jsonAdd(oItem, "t", value);
+	jsonAdd(oItem, "en", toStr(value, "%d", sav.enable));
+	jsonAdd(oItem, "t", toStr(value, "%d", sav.cycle));
 	return *oItem;
 }
 
 /**
  * 从页面中获取文本,保存到本地文本文件中.
+ * @note 暂时不知道长度的限制,200k以下(左右)的文本文件是经过测试的
  * @param wp
  * @param query
  * @param file
@@ -2169,7 +2168,7 @@ int webSend_txtfile(webs_t wp, const char*file)
 	int ret;
 	FILE*fp = fopen(file, "r");
 	if (fp==NULL ) {
-		websWrite(wp, T("No info."));
+		websWrite(wp, T("No Error."));
 		goto WEB_END;
 	}
 	while (1) {
@@ -2242,7 +2241,7 @@ static void sigintHandler(int unused __attribute__ ((unused)))
 /**
  * 储存周期,较为简单,
  * @todo 使用json构造库构造,统一方便.
- * @param wp
+ * @param[out] wp
  * @param name
  * @param sav
  * @return
@@ -2260,7 +2259,7 @@ int jsonSavCycle(webs_t wp, const char* name, const stSave_cycle sav)
  * 去除输入数组中的前导空白符和后导空白符
  * @param[in] in 待修改的数组,会被修改
  * @param[in] len 数组构成的字符串长度.
- * @return 指向修改好的字符串首地址指针
+ * @retval 指向修改好的字符串首地址指针
  */
 char *trim(char in[], int len)
 {
