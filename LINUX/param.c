@@ -1,5 +1,7 @@
 /**
- * @file param.c
+ * @file param.c 参数读写
+ * 主要是(/mnt/nor/para/ *)文件,
+ * 其次 /mnt/nor/conf下面也有两个配置文件读取.
  *  Created on: 2012-12-19
  *      Author: lee
  */
@@ -100,11 +102,11 @@ int read_protocol_file(char *protocol_names[], int *max, const char* file)
 /**
  * 从file(默认位置/mnt/nor/conf/monparam_config.txt)文本文件中读取监视端口描述,
  * 如 COM1,ETH1,Master-0 等等.
- * 如果打开默认文件错误,则从代码中的硬编码数组MON_PORT[]读入做为默认值.
+ * 如果打开默认文件错误,则返回错误
  * @param[out] port_name 端口名称字符串数组.
  * @param[out] num 输入实际端口数量,输入最大端口数量
- * @param[in] file 配置文件
- * @return 0 成功, 非0 失败
+ * @param[in] file 配置文件绝对路径
+ * @retval 0 成功, 非0 失败
  */
 int init_monparam_port_name(char *port_name[], int *num, const char* file)
 {
@@ -141,10 +143,12 @@ int init_monparam_port_name(char *port_name[], int *num, const char* file)
 		i++;
 	}
 	*num = i;
-	//printf("init_monparam_port_name: fact_num=%d\n", i);
+#if 0
+	printf("init_monparam_port_name: fact_num=%d\n", i);
 	for (i = 0; i < *num; i++) {
-		//printf("\t[%d]: %s\n", i, port_name[i]);
+		printf("\t[%d]: %s\n", i, port_name[i]);
 	}
+#endif
 	fclose(fp);
 	return 0;
 }

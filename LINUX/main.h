@@ -56,7 +56,7 @@ int webRece_syntime(webs_t wp);
 int webSend_mtr_sioplan(webs_t wp,stSysParam sysparam);
 int webSend_mtr_procotol(webs_t wp);
 int webSend_mtr_factory(webs_t wp);
-int webSend_mtr_type(webs_t wp);
+//int webSend_mtr_type(webs_t wp);
 int webSend_savecycle(webs_t wp);
 int webRece_savecycle(webs_t wp);
 int webRece_mtrparams(webs_t wp);

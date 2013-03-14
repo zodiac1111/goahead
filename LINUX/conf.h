@@ -68,11 +68,11 @@ extern stCfg webs_cfg;
 
 ///@todo 这些项目可以放到配置文件中.程序中需要一些修改
 //webs服务器错误文件相关
-#define ERR_LOG "./err.log" ///<错误日志文件
+//#define ERR_LOG "./err.log" ///<错误日志文件
 #define MAX_ERR_LOG_LINE_LENTH 1024 ///<日志文件单行最大长度(字节)
 #define MAX_ERR_LOG_FILE_SIZE (10*1024) ///<错误日志文件最大尺寸(字节)
 //conf配置相关文件
-#define CFG_DIR "../para/"///<参数路径
+//#define CFG_DIR "../para/"///<参数路径
 #define FILE_SYSPARA "sysspara.cfg"///<系统参数文件,关系到下面的其他参数
 #define CFG_MTR "mtrspara.cfg"///<表计参数配置文件
 #define CFG_SIOPALN "sioplan.cfg"///<串口方案配置文件
@@ -81,7 +81,7 @@ extern stCfg webs_cfg;
 #define CFG_FORWARD_TABLE "retranTable.cfg"///<转发表信息文件
 #define CFG_SAVE_CYCLE "stspara.cfg"///<采集保存周期和项目配置文件
 //para参数相关文件.
-#define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
+//#define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
 #define PORC_FILE "protocol_config.txt"///<主站规约配置文件
 #define MAX_PROCOTOL_NUM 128 ///<规约文件中最大规约条目开始时分配这么多
 #define MON_PORT_NAME_FILE "monparam_name.conf"///<监视端口描述文件

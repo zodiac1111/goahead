@@ -32,40 +32,40 @@ jsObj jsonNewArray(void)
 	}
 	return obj;
 }
-///清空对象/数组内的内容.不是删除!
-jsObj jsonClear(jsObj* obj)
+///清空对象/数组内的内容.不是删除/释放对象!
+jsObj jsonClear(jsObj* pobj)
 {
-	if(obj==NULL){
+	if(pobj==NULL){
 		return NULL;
 	}
 	char s ;
 	char e ;//区分是像对象还是向数组添加名/值对.
-	s=(*obj)[0];
-	e=(*obj)[strlen(*obj)-1];
+	s=(*pobj)[0];
+	e=(*pobj)[strlen(*pobj)-1];
 #if DEBUG_JSON_CLEAR ==1
-	printf(JSON_DBG"%s s=%c e=%c \n",*obj,s,e);
+	printf(JSON_DBG"%s s=%c e=%c \n",*pobj,s,e);
 #endif
 	if((s!='{' && s!='[') //只能是{ 或者 [开头
 			||(e!=s+2)){ //同时要求括号匹配
 		perror("jsonClear-not obj or array");
 		return NULL;
 	}
-	*obj=realloc(*obj,2+1);
-	if(obj==NULL){
+	*pobj=realloc(*pobj,2+1);
+	if(pobj==NULL){
 		perror("jsonClear-realloc");
 		return NULL;
 	}
-	(*obj)[0]=s;
-	(*obj)[1]=e;
-	(*obj)[2]='\0';
-	return *obj;
+	(*pobj)[0]=s;
+	(*pobj)[1]=e;
+	(*pobj)[2]='\0';
+	return *pobj;
 }
 ///删除对象/数组 (free掉堆内存)
-int jsonFree(jsObj*obj)
+int jsonFree(jsObj*pobj)
 {
-	if(*obj!=NULL){
-		free(*obj);
-		*obj=NULL;
+	if(*pobj!=NULL){
+		free(*pobj);
+		*pobj=NULL;
 		return 0;
 	}
 	return -1;
@@ -84,6 +84,7 @@ char* toStr(char *str,const char*format,...)
  * 参考系统的sprintf,多了返回指针的功能.
  * 多了限制:str必须已经分配足够的内存用于打印.
  * @todo 改成标准的不定参数传递,提高可重用性,注意安全性.
+ * @todo 已经使用了toStr函数,安全的去掉这个函数
  * */
 char* u8toa(char* str, const char*format, uint8_t value)
 {
@@ -114,7 +115,7 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 		return NULL;
 	}
 	int isArray=((*dobj)[0]=='[')?1:0;//是否是向数组内添加.
-	if(name==NULL && !isArray){ //添加数组原书不需要name.设置成空.
+	if(name==NULL && !isArray){ //添加数组元素不需要name.设置成空.
 		perror("jsonAdd-null name");
 		return NULL;
 	}
@@ -182,7 +183,7 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
  * 	姓名:Bob [基本的名/值对]
  * 	电话:89300405,133****8628 [数组的使用]
  * 	地址:浙江省 杭州市 A路810号 [以对象为值]
- * 用于开发参考 :)
+ * 用于开发参考,通过 conf.h 中 DEBUG_JSON_DEMO 宏可以开/关.
  * 在线解析:http://jsoneditoronline.org/
  */
 void jsonDemo(void)

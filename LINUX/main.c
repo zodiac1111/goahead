@@ -39,9 +39,8 @@
 #include	"../um.h"
 void formDefineUserMgmt(void);
 #endif
-//Change configuration here
+//Change configuration here and conf.h file
 static char_t *password = T(""); /* Security password */
-//static int port = WEBS_DEFAULT_PORT;/* Server port */
 static int retries = 5; /* Server port retries */
 static int finished = 0; /* Finished flag */
 #ifdef B_STATS
@@ -58,7 +57,7 @@ static int procotol_num = MAX_PROCOTOL_NUM;
 static char *mon_port_name[MAX_MON_PORT_NUM];
 ///规约文件中的实际规约数,初始化为最大
 static int mon_port_num = MAX_MON_PORT_NUM;
-struct sembuf sb;     ///<信号量操作
+struct sembuf sb;     ///<信号量操作,该功能完善中.
 union semun sem;     ///<用于控制报文监视停止的信号量.0停止监视程序,1运行监视程序
 int semid;     ///<信号量id
 stCfg webs_cfg;
@@ -1363,15 +1362,13 @@ int webRece_sioplans(webs_t wp)
 	return 0;
 }
 /**
- * 从文件中读取串口方案,向页面写串口方案.
+ * 从文件中读取串口方案,构造json对象,向页面写串口方案.
  * @param[out] wp 向这个页面输出数据
  * @param[in] sp 系统参数
- * @todo  使用json库函数处理字串
  */
 int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
-#if JSON==1
 	char tmp[256]={0};
 	stUart_plan plan;
 	jsObj oSioPlan= jsonNew();
@@ -1417,48 +1414,15 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 	jsonFree(&aList);
 	jsonFree(&aItems);
 	jsonFree(&oItem);
-
-#else
-	websWrite(wp, T("{"));
-	websWrite(wp, T("\"parity\":[\"无\",\"偶\",\"奇\"],"));     //3种奇偶校验方式
-	websWrite(wp, T("\"data\":[\"7\",\"8\",\"9\"],"));     //三种数据位
-	websWrite(wp, T("\"stop\":[\"0\",\"1\"],"));     //2中停止位 0 1
-	websWrite(wp, T("\"baud\":[300,600,1200,2400,4800,9600],"));
-	websWrite(wp, T("\"commtype\":[\"异步\",\"同步\"],"));
-	websWrite(wp, T("\"item\":["));     //下面是串口数组,每个元素为一个串口配置
-	for (no = 0; no<sp.sioplan_num; no++) {
-		if (-1==load_sioplan(&plan, webs_cfg.sioplan, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		websWrite(wp, T("{"));
-		websWrite(wp, T("\"no\":\"%d\""), no);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"parity\":\"%u\""), plan.parity);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"data\":\"%u\""), plan.data);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"stop\":\"%d\""), plan.stop);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"baud\":\"%d\""), plan.baud);
-		websWrite(wp, T(","));
-		websWrite(wp, T("\"commtype\":\"%d\""), plan.Commtype);
-		websWrite(wp, T("}"));
-		if (no!=sp.sioplan_num-1) {     //末尾的对象不用加逗号
-			websWrite(wp, T(","));
-		}
-	}
-	websWrite(wp, T("]}"));
-#endif
 	return 0;
 }
 /**
  * 把ip地址字符串如"192.168.0.1"转化成为"192.168.000.001"的12字节文件标准格式.
- * 只转换最开始一个ip地址,完成即停止,返回使用过的ipstr字符的个数.
+ * 只转换最开始一个ip地址,完成即停止,返回使用过的ipstr字符的个数(指针后移数目).
  * 比如输入"192.168.0.1 192.168.111.2",则转换192.168.0.1为"192.168.000.001",
  * 并且返回 11.
  * @param[in] ipstr 字符串,输入输出!
- * @param ipfile
+ * @param[out] ipfile
  * @return
  */
 int ipstr2ipfile(char *ipstr, u8 ipfile[12])
@@ -1506,7 +1470,7 @@ char* itoa(char* str, const char*format, int value)
 
 /**
  * 从文件读取监视参数,显示到页面
- * @param wp
+ * @param[out] wp 写到这个页面
  * @param sysparam
  * @return
  */
@@ -1514,7 +1478,6 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 {
 	int no;
 	stMonparam monpara;
-	//jsonlib start
 	char tmp[256] = { 0 };
 	char* oMonPara = jsonNew();
 	char* aCommList = jsonNewArray();
@@ -1522,18 +1485,17 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	char* aItemList = jsonNewArray();
 	char* oItem = jsonNew();
 	int i;
-	jsonAdd(
-	                &oMonPara,
-	                "sioplan_num",
+	jsonAdd(&oMonPara,"sioplan_num",
 	                u8toa(tmp, "%d", sysparam.sioplan_num));
+
 	for (i = 0; i<mon_port_num; i++) {
 		jsonAdd(&aCommList, NULL, mon_port_name[i]);
 	}
 	jsonAdd(&oMonPara, "commport", aCommList);
+
 	for (i = 0; i<procotol_num; i++) {
 		jsonAdd(&aProcList, NULL, procotol_name[i]);
 	}
-	//printf(WEBS_DBG"%s\n",oMonPara);
 	jsonAdd(&oMonPara, "protocol", aProcList);
 
 	for (no = 0; no<sysparam.monitor_ports; no++) {
@@ -1542,29 +1504,19 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 			continue;
 		}
 		jsonAdd(&oItem, "mon_no", u8toa(tmp, "%d", no));
-		jsonAdd(
-		                &oItem,
-		                "commport",
+		jsonAdd(&oItem,"commport",
 		                u8toa(tmp, "%d", monpara.comm_port));
 		webWrite_listen_port(tmp, monpara);
 		jsonAdd(&oItem, "listenport", tmp);
 		jsonAdd(&oItem, "sioplan", u8toa(tmp, "%d", monpara.sioplan));
-		jsonAdd(
-		                &oItem,
-		                "protocol",
+		jsonAdd( &oItem,"protocol",
 		                u8toa(tmp, "%d", monpara.port_type));
 		jsonAdd(&oItem, "rtu_addr", webWrite_rtu_addr(tmp, monpara));
-		jsonAdd(
-		                &oItem,
-		                "time_syn_chk",
+		jsonAdd( &oItem,"time_syn_chk",
 		                u8toa(tmp, "%d", monpara.bTimeSyn));
-		jsonAdd(
-		                &oItem,
-		                "forward_chk",
+		jsonAdd( &oItem,"forward_chk",
 		                u8toa(tmp, "%d", monpara.bForward));
-		jsonAdd(
-		                &oItem,
-		                "forward_mtr_num",
+		jsonAdd(&oItem,"forward_mtr_num",
 		                u8toa(tmp, "%d", monpara.forwardNum));
 		jsonAdd(&aItemList, NULL, oItem);
 		jsonClear(&oItem);
@@ -1572,7 +1524,6 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	jsonAdd(&oMonPara, "item", aItemList);
 	//printf(WEBS_DBG"%s\n",oMonPara);
-	///@todo  @bug 数据太长必须分开传输
 	wpsend(wp, oMonPara);
 	//websWrite(wp, T("%s"), oMonPara);
 	jsonFree(&oItem);
@@ -1581,40 +1532,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	jsonFree(&aProcList);
 	jsonFree(&oMonPara);
 	return 0;
-	//jsonlib end
 
-	websWrite(wp, T("{"));
-	webWrite_commportList(wp);
-	websWrite(wp, T(","));
-	webWrite_porttype(wp);
-	websWrite(wp, T(",\"sioplan_num\":\"%d\","), sysparam.sioplan_num);
-	websWrite(wp, T("\"item\":["));
-	for (no = 0; no<sysparam.monitor_ports; no++) {
-		if (-1==load_monparam(&monpara, webs_cfg.monpara, no)) {
-			web_err_proc(EL);
-			continue;
-		}
-		websWrite(wp, T("{"));
-		websWrite(wp, T("\"mon_no\":\"%d\","), no);
-		websWrite(wp, T("\"commport\":\"%d\","), monpara.comm_port);
-		//webWrite_listen_port(wp, monpara);
-		websWrite(wp, T(",\"sioplan\":\"%d\","), monpara.sioplan);
-		;
-		websWrite(wp, T("\"protocol\":\"%d\","), monpara.port_type);
-		//webWrite_rtu_addr(wp, monpara);
-		websWrite(wp, T(",\"time_syn_chk\":\"%d\","), monpara.bTimeSyn);
-		websWrite(wp, T("\"forward_chk\":\"%d\","), monpara.bForward);
-		websWrite(
-		                wp,
-		                T("\"forward_mtr_num\":\"%d\""),
-		                monpara.forwardNum);
-		websWrite(wp, T("}"));
-		if (no!=sysparam.monitor_ports-1) {
-			websWrite(wp, T(","));
-		}
-	}
-	websWrite(wp, T("]}"));
-	return 0;
 }
 /**
  * 从页面获取监视参数,保存到文件
@@ -1636,7 +1554,7 @@ int webRece_monparas(webs_t wp)
 	char * forward = websGetVar(wp, T("forward"), T("null"));
 	char * forward_mtr_num = websGetVar(wp, T("forward_mtr_num"),
 	                T("null"));
-	int param_no = 0;		///参数序号,即数据库的主键,base 0.没有物理意义
+	int param_no = 0;		///<参数序号,即数据库的主键,base 0.没有物理意义
 	while (1) {
 		//监视参数序号
 		n = sscanf(mon_no, "%d", &param_no);
@@ -1781,8 +1699,8 @@ int webSend_netparas(webs_t wp, int netParamNum)
 {
 	int i;
 	stNetparam netparam;
-	//使用json,仅传输数据.样式和行为交由前端控制,易于扩展
 	///@note eth_num 或许和下面的数据元素个数冗余,待定
+	///@todo 使用库函数构造
 	websWrite(wp, T("{\"eth_num\":\"%d\","), netParamNum);
 	websWrite(wp, T("\"item\":["));
 	for (i = 0; i<netParamNum; i++) {
@@ -1923,16 +1841,21 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	response_ok(wp);
 	return 0;
 }
+/**
+ * 向页面发送配置信息,版本号,各种目录等.
+ * @param wp
+ * @return
+ */
 int webSend_info(webs_t wp)
 {
-	char dir[128] = { 0 };
+	char dir[256] = { 0 };
 	int count = readlink("/proc/self/exe", dir, 128);
-	if (count<0||count>128) {
+	if (count<0||count>256) {
 		PRINT_RET(count);
 		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
 	char* oInfo = jsonNew();
-	char tmp[128] = { 0 };
+	char tmp[256] = { 0 };
 	jsonAdd(&oInfo, "info_webbin", dir);
 	jsonAdd(&oInfo, "info_webconf", CONF_FILE);
 	jsonAdd(&oInfo, "info_weblog", webs_cfg.errlog);
@@ -1974,20 +1897,13 @@ int webSend_syspara(webs_t wp)
 	 */
 	char* oSysPara = jsonNew();
 	char tmp[128] = { 0 };
-	sprintf(tmp, "%u", sysparam.meter_num);
-	jsonAdd(&oSysPara, "meter_num", tmp);
-	sprintf(tmp, "%u", sysparam.sioplan_num);
-	jsonAdd(&oSysPara, "sioplan_num", tmp);
-	sprintf(tmp, "%u", sysparam.monitor_ports);
-	jsonAdd(&oSysPara, "monitor_ports", tmp);
-	sprintf(tmp, "%u", sysparam.netports_num);
-	jsonAdd(&oSysPara, "netports_num", tmp);
-	sprintf(tmp, "%u", sysparam.sioports_num);
-	jsonAdd(&oSysPara, "sioports_num", tmp);
-	sprintf(tmp, "%u", sysparam.control_ports);
-	jsonAdd(&oSysPara, "control_ports", tmp);
+	jsonAdd(&oSysPara, "meter_num",toStr(tmp,"%u",sysparam.meter_num));
+	jsonAdd(&oSysPara, "sioplan_num", toStr(tmp, "%u", sysparam.sioplan_num));
+	jsonAdd(&oSysPara, "monitor_ports", toStr(tmp, "%u", sysparam.monitor_ports));
+	jsonAdd(&oSysPara, "netports_num", toStr(tmp, "%u", sysparam.netports_num));
+	jsonAdd(&oSysPara, "sioports_num", toStr(tmp, "%u", sysparam.sioports_num));
+	jsonAdd(&oSysPara, "control_ports", toStr(tmp, "%u", sysparam.control_ports));
 	wpsend(wp,oSysPara);
-	//websWrite(wp, T("%s"), oSysPara);
 	jsonFree(&oSysPara);
 	return 0;
 }
@@ -2041,7 +1957,6 @@ int webRece_syntime(webs_t wp)
  * @param wp 页面
  * @param mtrnum 一共有的表计个数
  * @return
- * @todo 数据格式修改,只发送数据,不发送格式(样式)和行为(js函数).
  */
 int webSend_mtrparams(webs_t wp, int mtrnum)
 {
@@ -2053,11 +1968,13 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	jsObj aList = jsonNewArray();     //所有要传递的列表,如所有表计规约名称/监视端口
 	jsObj aMtrParaList = jsonNewArray();     //所有表计参数的集合,是一个数组
 	jsObj oMtrPara = jsonNew();     //一个表计参数
+	//串口方案
 	for (i = 0; i<sysparam.sioplan_num; i++) {
 		jsonAdd(&aList, NULL, u8toa(tmp, "%d", i));
 	}
 	jsonAdd(&oAll, "portplan", aList);
 	jsonClear(&aList);
+	//监视端口(端口)
 	if (mon_port_num<sysparam.sioports_num) {
 		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
 		web_err_proc(EL);
@@ -2067,13 +1984,15 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	}
 	jsonAdd(&oAll, "port", aList);
 	jsonClear(&aList);
+	//规约名称
 	for (i = 0; i<procotol_num; i++) {
 		jsonAdd(&aList, NULL, procotol_name[i]);
 	}
 	jsonAdd(&oAll, "procotol", aList);
 	jsonClear(&aList);
-
-	char *fact_HA[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表","待添加" };
+	//表计类型 JD/HA不一样
+	///@todo 去掉硬编码!
+	char *fact_HA[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表" };
 	char *fact_JD[] = { "华立", "威盛", "哈表",
 			"ABB", "浩宁达","华隆","红相","东方","许继","龙电" };
 	char **fact;
@@ -2090,31 +2009,33 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	}
 	jsonAdd(&oAll, "factory", aList);
 	jsonClear(&aList);
+	//电表类型,几相几线制
 	for (i = 0; i<(int)(sizeof(PW)/sizeof(PW[0])); i++) {
 		jsonAdd(&aList, NULL, PW[i]);
 	}
 	jsonAdd(&oAll, "type", aList);
 	jsonClear(&aList);
+	//表计参数对象数组循环赋值
 	for (i = 0; i<mtrnum; i++) {
 		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, i)) {
 			web_err_proc(EL);
 			continue;
 		}
-		jsonAdd(&oMtrPara, "mtrno", u8toa(tmp, "%d", i));
-		jsonAdd(&oMtrPara, "iv", u8toa(tmp, "%d", mtr.iv));
+		jsonAdd(&oMtrPara, "mtrno", toStr(tmp, "%d", i));
+		jsonAdd(&oMtrPara, "iv", toStr(tmp, "%d", mtr.iv));
 		jsonAdd(&oMtrPara, "line", a2jsObj(tmp, mtr.line, LINE_LEN));
 		jsonAdd(&oMtrPara, "addr", a2jsObj(tmp, mtr.addr, ADDR_LEN));
 		jsonAdd(&oMtrPara, "pwd", a2jsObj(tmp, mtr.pwd, PWD_LEN));
-		jsonAdd(&oMtrPara, "port", u8toa(tmp, "%d", mtr.port));
-		jsonAdd(&oMtrPara, "portplan", u8toa(tmp, "%d", mtr.portplan));
-		jsonAdd(&oMtrPara, "protocol", u8toa(tmp, "%d", mtr.protocol));
-		jsonAdd(&oMtrPara, "factory", u8toa(tmp, "%d", mtr.fact));
-		jsonAdd(&oMtrPara, "ph_wire", u8toa(tmp, "%d", mtr.p3w4));
-		jsonAdd(&oMtrPara, "it_dot", u8toa(tmp, "%d", mtr.it_dot));
-		jsonAdd(&oMtrPara, "xl_dot", u8toa(tmp, "%d", mtr.xl_dot));
-		jsonAdd(&oMtrPara, "v_dot", u8toa(tmp, "%d", mtr.v_dot));
-		jsonAdd(&oMtrPara, "i_dot", u8toa(tmp, "%d", mtr.i_dot));
-		jsonAdd(&oMtrPara, "p_dot", u8toa(tmp, "%d", mtr.p_dot));
+		jsonAdd(&oMtrPara, "port", toStr(tmp, "%d", mtr.port));
+		jsonAdd(&oMtrPara, "portplan", toStr(tmp, "%d", mtr.portplan));
+		jsonAdd(&oMtrPara, "protocol", toStr(tmp, "%d", mtr.protocol));
+		jsonAdd(&oMtrPara, "factory", toStr(tmp, "%d", mtr.fact));
+		jsonAdd(&oMtrPara, "ph_wire", toStr(tmp, "%d", mtr.p3w4));
+		jsonAdd(&oMtrPara, "it_dot", toStr(tmp, "%d", mtr.it_dot));
+		jsonAdd(&oMtrPara, "xl_dot", toStr(tmp, "%d", mtr.xl_dot));
+		jsonAdd(&oMtrPara, "v_dot", toStr(tmp, "%d", mtr.v_dot));
+		jsonAdd(&oMtrPara, "i_dot", toStr(tmp, "%d", mtr.i_dot));
+		jsonAdd(&oMtrPara, "p_dot", toStr(tmp, "%d", mtr.p_dot));
 		jsonAdd(&oMtrPara, "q_dot", toStr(tmp, "%d", mtr.q_dot));
 		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%.d", mtr.ue));
 		jsonAdd(&oMtrPara, "ie", toStr(tmp, "%.1f", mtr.ie/1000.0));
@@ -2177,10 +2098,10 @@ int webRece_mtrparams(webs_t wp)
 	int saveret = -1;
 	int i = 0;
 	///错误项
-	u32 e[MAX_MTR_NUM] = { 0 };
+	u32 err[MAX_MTR_NUM] = { 0 };
 	///表计数目
 	int mtr_num = 0;
-	mtr_num = getmtrparams(amtr, wp, e);
+	mtr_num = getmtrparams(amtr, wp, err);
 	printf("get param from clint ret %d \n", mtr_num);
 	if (mtr_num>0) {     //只有所有输入都合法
 		for (i = 0; i<mtr_num; i++) {
@@ -2197,17 +2118,17 @@ int webRece_mtrparams(webs_t wp)
 	return 0;
 }
 
-int webSend_mtr_type(webs_t wp)
-{
-	u32 i;     //就一个选择列表框.
-	websWrite(wp, T("<select name=ph_wire_all "
-			"onchange=\"type_all_changed(event);\">\n"));
-	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
-		websWrite(wp, T("<option value=\"%d\" >%s</option>"), i,
-		                PW[i]);
-	}
-	return 0;
-}
+//int webSend_mtr_type(webs_t wp)
+//{
+//	u32 i;     //就一个选择列表框.
+//	websWrite(wp, T("<select name=ph_wire_all "
+//			"onchange=\"type_all_changed(event);\">\n"));
+//	for (i = 0; i<sizeof(PW)/sizeof(PW[0]); i++) {
+//		websWrite(wp, T("<option value=\"%d\" >%s</option>"), i,
+//		                PW[i]);
+//	}
+//	return 0;
+//}
 int webSend_mtr_factory(webs_t wp)
 {
 	u32 i;
