@@ -43,7 +43,7 @@ DASW	= -DDIGEST_ACCESS_SUPPORT
 #
 ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
-	-Winline -Wdisabled-optimization -DDEBUG -DUSER_MANAGEMENT_SUPPORT \
+	-Winline -Wdisabled-optimization -DDEBUG \
 	 -Wno-unused-parameter \
 	 -Wunreachable-code \
 	# -Wshadow
