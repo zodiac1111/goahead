@@ -232,6 +232,8 @@ char * float2string( u8 const float_array[4], char * strval)
 	f.tmp[2]=float_array[2];
 	f.tmp[3]=float_array[3];
 	sprintf(strval, "%g", f.fot);
+	//float f2=*(float*) (&float_array[0]);
+	//sprintf(strval, "%g", f2);
 #else
 	sprintf(strval, "%g", *(float*) (&float_array[0]));
 #endif
