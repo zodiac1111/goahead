@@ -215,9 +215,26 @@ int webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
  * @param strval
  * @return
  */
-char * float2string(u8 const float_array[4], char * strval)
+char * float2string( u8 const float_array[4], char * strval)
 {
+#if __arm__ ==1
+	/*arm-linux-gcc会优化掉下面的 #else 的方式. - -
+	 * 而且是优化掉第二次调用,第一次调用得出的数值还是对的
+	 * 所以只能使用这种不优雅的方式防止优化掉强制类型转换
+	*/
+	typedef union kf{
+	 char tmp[4];
+	 float fot;
+	}stFloat;
+	stFloat f;
+	f.tmp[0]=float_array[0];
+	f.tmp[1]=float_array[1];
+	f.tmp[2]=float_array[2];
+	f.tmp[3]=float_array[3];
+	sprintf(strval, "%g", f.fot);
+#else
 	sprintf(strval, "%g", *(float*) (&float_array[0]));
+#endif
 	return strval;
 }
 /**
