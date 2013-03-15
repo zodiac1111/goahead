@@ -58,7 +58,7 @@ extern stCfg webs_cfg;
 #define  AUTO_UPDATE 1
 #if AUTO_UPDATE
   #if __arm__ ==1
-    #define PROG_NAME "/mnt/nor/webs"
+    #define PROG_NAME "/mnt/nor/bin/webs"
     #define UPDATE_FILE_NAME  PROG_NAME".update"
   #else
     #define PROG_NAME "/home/lee/workspace/goahead/LINUX/webs"
