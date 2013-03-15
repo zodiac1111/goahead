@@ -74,20 +74,19 @@ int main(int argc __attribute__ ((unused)),
 
 #if AUTO_UPDATE
 	printf(WEBS_INF"checking Update...\n");
-	printf(WEBS_INF"oldname: %s\n",PROG_NAME);
-	printf(WEBS_INF"nwename: %s\n",UPDATE_FILE_NAME);
+	//printf(WEBS_INF"oldname: %s\n",PROG_NAME);
+	//printf(WEBS_INF"nwename: %s\n",UPDATE_FILE_NAME);
 	int ret=access(UPDATE_FILE_NAME, 0);
-	printf(WEBS_INF" file acces %d \n",ret);
-	if(ret==-1){
-		perror("access file:");
-	}
-	if(0==access(UPDATE_FILE_NAME, 0)){
+	//printf(WEBS_INF" file acces %d \n",ret);
+	if(ret==0){
 		printf(WEBS_INF"Updating now...\n");
 		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
 		system("chmod +x "PROG_NAME);
-		printf(WEBS_INF"********************************\n");
-		printf(WEBS_INF"* Update OK.please reboot rtu. *\n");
-		printf(WEBS_INF"********************************\n");
+		printf(WEBS_INF"**********************************\n");
+		printf(WEBS_INF"*                                *\n");
+		printf(WEBS_INF"*  Update OK.please reboot rtu.  *\n");
+		printf(WEBS_INF"*                                *\n");
+		printf(WEBS_INF"**********************************\n");
 	}else{
 
 	}
