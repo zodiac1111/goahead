@@ -54,6 +54,18 @@ extern stCfg webs_cfg;
 //页面一次发送最大长度,超长则分多次发送.否则会截断.wpsend()函数调用
 #define WP_MAX_LEN (512)
 
+//服务器程序自动检查升级
+#define  AUTO_UPDATE 1
+#if AUTO_UPDATE
+  #if __arm__ ==1
+    #define PROG_NAME "/mnt/nor/webs"
+    #define UPDATE_FILE_NAME  PROG_NAME".update"
+  #else
+    #define PROG_NAME "/home/lee/workspace/goahead/LINUX/webs"
+    #define UPDATE_FILE_NAME  PROG_NAME".update"
+  #endif
+#endif
+
 //信息字符
 #define PREFIX "[webs]" ///<应用程序信息前缀
 #define WEBS_DBG PREFIX YELLOW"Debug>"_COLOR ///<调试信息

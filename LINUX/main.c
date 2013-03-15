@@ -70,6 +70,17 @@ char * webdir;
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
+
+
+#if AUTO_UPDATE
+	if(0==access(UPDATE_FILE_NAME, 0)){
+		printf(WEBS_INF"Updating now...\n");
+		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
+		printf(WEBS_INF"Update OK.please reboot rtu\n");
+	}else{
+
+	}
+#endif
 #if DEBUG_JSON_DEMO
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
 #endif
