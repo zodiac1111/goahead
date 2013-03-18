@@ -10,6 +10,7 @@
 #include "color.h"
 ///webs服务器配置参数.开始时加载到内存,结束时释放
 typedef struct cfg{
+	char *appname;//应用程序全路径
 	char *port;//默认端口
 	int default_port; //若使用了硬编码的端口,在webs_free()时不需要释放内存.
 	char *sslport;//ssl默认端口(ssl未启用)
@@ -57,12 +58,13 @@ extern stCfg webs_cfg;
 //服务器程序自动检查升级
 #define  AUTO_UPDATE 1
 #if AUTO_UPDATE
+  #define UP_SUFFIX ".update"//更新文件后缀
   #if __arm__ ==1
     #define PROG_NAME "/mnt/nor/bin/webs"
-    #define UPDATE_FILE_NAME  PROG_NAME".update"
+    #define UPDATE_FILE_NAME  PROG_NAME UP_SUFFIX
   #else
     #define PROG_NAME "/home/lee/workspace/goahead/LINUX/webs"
-    #define UPDATE_FILE_NAME  PROG_NAME".update"
+    #define UPDATE_FILE_NAME  PROG_NAME UP_SUFFIX
   #endif
 #endif
 

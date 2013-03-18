@@ -45,7 +45,7 @@ ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
 	-Winline -Wdisabled-optimization -DDEBUG \
 	 -Wno-unused-parameter \
-	 -Wunreachable-code \
+	 -Wunreachable-code  -Wno-empty-body\
 	# -Wshadow
 else
 CC=arm-linux-gcc

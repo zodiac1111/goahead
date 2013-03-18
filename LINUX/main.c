@@ -237,8 +237,8 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(action, "set")==0) {
 		webRece_mtrparams(wp);
 	} else {     //其他未知命令一律忽略
-	       //web_errno=mtr_form;
-	       //web_err_proc(EL);
+	             //web_errno=mtr_form;
+	             //web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -356,7 +356,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 #endif
 		break;
 	case RET_CLEARDATA:
-#if __i386 == 1
+		#if __i386 == 1
 		//调试不要重启PC系统...
 		system("echo \"clear data ok\"");
 #else
@@ -392,7 +392,7 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
 	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
 	char * strtz = websGetVar(wp, T("timezone"), T("0"));
-	int tz=0;
+	int tz = 0;
 	//printf("时间戳范围:%s~%s\n", stime_t, etime_t);
 	TimeRange tr;
 	int ret;
@@ -415,8 +415,8 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	if (ret!=1) {
 		web_err_proc(EL);
 	}
-	tr.s+=(tz*60);
-	tr.e+=(tz*60);
+	tr.s += (tz*60);
+	tr.e += (tz*60);
 	//printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
 	websHeader_pure(wp);
 	ret = load_tou_dat(mtr_no, tr, &tou, wp);
@@ -556,62 +556,83 @@ void form_info(webs_t wp, char_t *path, char_t *query)
  * add by gyr 2011.10.15
  */
 
- void form_upload_file(webs_t wp, char_t *path, char_t *query)
+void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
-    FILE *       fp;
-    char_t *     fn;
-    char_t *     bn = NULL;
-    int          locWrite;
-    int          numLeft;
-    int          numWrite;
+	//PRINT_FORM_INFO;
+	FILE * fp;
+	char_t * fn;
+	char_t * bn = NULL;
+	int locWrite;
+	int numLeft;
+	int numWrite;
+	a_assert(websValid(wp));
+	websHeader(wp);
+	fn = websGetVar(wp, T("filename"), T(""));
+	if (fn!=NULL &&*fn!='\0') {
+		if ((int) (bn = gstrrchr(fn, '/')+1)==1) {
+			if ((int) (bn = gstrrchr(fn, '\\')+1)==1) {
+				bn = fn;
+			}
+		}
+	}
+	char tmp[128]={0};
+	printf("fn=%s, bn=%s  \n", fn, bn);
+	websHeader_pure(wp);
+	jsObj oUpdate=jsonNew();
+	jsonAdd(&oUpdate,"filename",bn);
+	jsonAdd(&oUpdate,"size", toStr(tmp,"%d",wp->lenPostData));
+	char tmpfname[1024]={0};
+	char cmd[1024]={0};
+	sprintf(tmpfname,"%s%s%s",webs_cfg.appname,UP_SUFFIX,".tmp");
+	if ((fp = fopen((bn==NULL ? "errFileName" : tmpfname), "w+b"))==NULL ) {
+		jsonAdd(&oUpdate,"ret", "open file failed");
+	} else {
+		locWrite = 0;
+		numLeft = wp->lenPostData;
+		while (numLeft>0) {
+			numWrite = fwrite(
+			                &(wp->postData[locWrite]),
+			                sizeof(*(wp->postData)),
+			                numLeft,
+			                fp);
+			if (numWrite<numLeft) {
+				break;
+			}
+			locWrite += numWrite;
+			numLeft -= numWrite;
+		}
+		if (numLeft==0) {
+			if (fclose(fp)!=0) {
+				jsonAdd(&oUpdate,"ret", "close file failed");
+//				websWrite(
+//				                wp,
+//				                T("File close failed.<br>  errno=%d locWrite=%d numLeft=%d numWrite=%d Size=%d bytes<br>"),
+//				                errno,
+//				                locWrite,
+//				                numLeft,
+//				                numWrite,
+//				                wp->lenPostData);
+			} else {//完成传输
 
-	printf("\n...................formUploadFileTest...................\n\n");
-
-    a_assert(websValid(wp));
-    websHeader(wp);
-
-    fn = websGetVar(wp, T("filename"), T(""));
-    if (fn != NULL && *fn != '\0') {
-        if ((int)(bn = gstrrchr(fn, '/') + 1) == 1) {
-            if ((int)(bn = gstrrchr(fn, '\\') + 1) == 1) {
-                bn = fn;
-            }
-        }
-    }
-
-	printf("fn=%s, bn=%s  .......\n", fn, bn);
-
-    websWrite(wp, T("Filename = %s<br>Size = %d bytes<br>"), bn, wp->lenPostData);
-
-    if ((fp = fopen((bn == NULL ? "upldForm.bin" : bn), "w+b")) == NULL) {
-        websWrite(wp, T("File open failed!<br>"));
-    } else {
-        locWrite = 0;
-        numLeft = wp->lenPostData;
-        while (numLeft > 0) {
-            numWrite = fwrite(&(wp->postData[locWrite]), sizeof(*(wp->postData)), numLeft, fp);
-            if (numWrite < numLeft) {
-                websWrite(wp, T("File write failed.<br>  ferror=%d locWrite=%d numLeft=%d numWrite=%d Size=%d bytes<br>"), ferror(fp), locWrite, numLeft, numWrite, wp->lenPostData);
-            break;
-            }
-            locWrite += numWrite;
-            numLeft -= numWrite;
-        }
-
-        if (numLeft == 0) {
-            if (fclose(fp) != 0) {
-                websWrite(wp, T("File close failed.<br>  errno=%d locWrite=%d numLeft=%d numWrite=%d Size=%d bytes<br>"), errno, locWrite, numLeft, numWrite, wp->lenPostData);
-            } else {
-                websWrite(wp, T("File Size Written = %d bytes<br>"), wp->lenPostData);
-            }
-        } else {
-            websWrite(wp, T("numLeft=%d locWrite=%d Size=%d bytes<br>"), numLeft, locWrite, wp->lenPostData);
-        }
-    }
-
-    websFooter(wp);
-    websDone(wp, 200);
-
+				system(toStr(cmd,"mv %s %s",tmpfname,UPDATE_FILE_NAME));
+				jsonAdd(&oUpdate,"ret", "ok");
+//				websWrite(
+//				                wp,
+//				                T("File Size Written = %d bytes<br>"),
+//				                wp->lenPostData);
+			}
+		} else {
+			jsonAdd(&oUpdate,
+					"ret",
+					toStr(tmp,"numLeft=%d locWrite=%d Size=%d bytes",
+						 numLeft,
+								                locWrite,
+								                wp->lenPostData));
+		}
+	}
+	//wpsend(wp,oUpdate);
+	jsonFree(&oUpdate);
+	websDone(wp, 200);
 }
 /**
  * 打印服务器应用程序运行路径,依赖proc文件系统.
@@ -619,14 +640,16 @@ void form_info(webs_t wp, char_t *path, char_t *query)
  */
 int printf_webs_app_dir(void)
 {
-	char dir[128] = { 0 };
+	char dir[256] = { 0 };
 	//需要proc文件系统支持
-	int count = readlink("/proc/self/exe", dir, 128);
-	if (count<0||count>128) {
+	int count = readlink("/proc/self/exe", dir, 256);
+	if (count<0||count>256) {
 		PRINT_RET(count);
 		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
 	printf(WEBS_INF"App dir\t:"GREEN"%s"_COLOR"\n", dir);
+	webs_cfg.appname =malloc(strlen(dir)+1);
+	strcpy(webs_cfg.appname,dir);
 	return 0;
 }
 
@@ -899,7 +922,7 @@ char* webWrite_rtu_addr(char* tmp, stMonparam monport)
  * @param[in] monport
  * @return
  */
-char* webWrite_listen_port(char* tmp,const stMonparam  monport)
+char* webWrite_listen_port(char* tmp, const stMonparam monport)
 {
 	int i;
 #if DEBUG_PRINT_MONPARAM
@@ -1378,47 +1401,47 @@ int webRece_sioplans(webs_t wp)
 int webSend_sioplans(webs_t wp, stSysParam sp)
 {
 	int no;
-	char tmp[256]={0};
+	char tmp[256] = { 0 };
 	stUart_plan plan;
-	jsObj oSioPlan= jsonNew();
-	jsObj aList=jsonNewArray();
-	jsObj aItems=jsonNewArray();
-	jsObj oItem=jsonNew();
-	jsonAdd(&aList,NULL,"无");
-	jsonAdd(&aList,NULL,"偶");
-	jsonAdd(&aList,NULL,"奇");
-	jsonAdd(&oSioPlan,"parity",aList);
+	jsObj oSioPlan = jsonNew();
+	jsObj aList = jsonNewArray();
+	jsObj aItems = jsonNewArray();
+	jsObj oItem = jsonNew();
+	jsonAdd(&aList, NULL, "无");
+	jsonAdd(&aList, NULL, "偶");
+	jsonAdd(&aList, NULL, "奇");
+	jsonAdd(&oSioPlan, "parity", aList);
 	jsonClear(&aList);
-	jsonAdd(&aList,NULL,"7");
-	jsonAdd(&aList,NULL,"8");
-	jsonAdd(&aList,NULL,"9");
-	jsonAdd(&oSioPlan,"data",aList);
+	jsonAdd(&aList, NULL, "7");
+	jsonAdd(&aList, NULL, "8");
+	jsonAdd(&aList, NULL, "9");
+	jsonAdd(&oSioPlan, "data", aList);
 	jsonClear(&aList);
-	jsonAdd(&aList,NULL,"0");
-	jsonAdd(&aList,NULL,"1");
-	jsonAdd(&oSioPlan,"stop",aList);
+	jsonAdd(&aList, NULL, "0");
+	jsonAdd(&aList, NULL, "1");
+	jsonAdd(&oSioPlan, "stop", aList);
 	jsonClear(&aList);
-	jsonAdd(&oSioPlan,"baud","[300,600,1200,2400,4800,9600,19200]");
+	jsonAdd(&oSioPlan, "baud", "[300,600,1200,2400,4800,9600,19200]");
 	jsonClear(&aList);
-	jsonAdd(&oSioPlan,"commtype","[\"异步\",\"同步\"]");
+	jsonAdd(&oSioPlan, "commtype", "[\"异步\",\"同步\"]");
 	jsonClear(&aList);
 	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, webs_cfg.sioplan, no)) {
 			web_err_proc(EL);
 			continue;
 		}
-		jsonAdd(&oItem,"no",u8toa(tmp,"%d",no));
-		jsonAdd(&oItem,"parity",u8toa(tmp,"%d",plan.parity));
-		jsonAdd(&oItem,"data",u8toa(tmp,"%d",plan.data));
-		jsonAdd(&oItem,"stop",u8toa(tmp,"%d",plan.stop));
-		jsonAdd(&oItem,"baud",u8toa(tmp,"%d",plan.baud));
-		jsonAdd(&oItem,"commtype",u8toa(tmp,"%d",plan.Commtype));
-		jsonAdd(&aItems,NULL,oItem);
+		jsonAdd(&oItem, "no", u8toa(tmp, "%d", no));
+		jsonAdd(&oItem, "parity", u8toa(tmp, "%d", plan.parity));
+		jsonAdd(&oItem, "data", u8toa(tmp, "%d", plan.data));
+		jsonAdd(&oItem, "stop", u8toa(tmp, "%d", plan.stop));
+		jsonAdd(&oItem, "baud", u8toa(tmp, "%d", plan.baud));
+		jsonAdd(&oItem, "commtype", u8toa(tmp, "%d", plan.Commtype));
+		jsonAdd(&aItems, NULL, oItem);
 		jsonClear(&oItem);
 
 	}
-	jsonAdd(&oSioPlan,"item",aItems);
-	wpsend(wp,oSioPlan);
+	jsonAdd(&oSioPlan, "item", aItems);
+	wpsend(wp, oSioPlan);
 	jsonFree(&oSioPlan);
 	jsonFree(&aList);
 	jsonFree(&aItems);
@@ -1494,7 +1517,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	char* aItemList = jsonNewArray();
 	char* oItem = jsonNew();
 	int i;
-	jsonAdd(&oMonPara,"sioplan_num",
+	jsonAdd(&oMonPara, "sioplan_num",
 	                u8toa(tmp, "%d", sysparam.sioplan_num));
 
 	for (i = 0; i<mon_port_num; i++) {
@@ -1513,19 +1536,19 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 			continue;
 		}
 		jsonAdd(&oItem, "mon_no", u8toa(tmp, "%d", no));
-		jsonAdd(&oItem,"commport",
+		jsonAdd(&oItem, "commport",
 		                u8toa(tmp, "%d", monpara.comm_port));
 		webWrite_listen_port(tmp, monpara);
 		jsonAdd(&oItem, "listenport", tmp);
 		jsonAdd(&oItem, "sioplan", u8toa(tmp, "%d", monpara.sioplan));
-		jsonAdd( &oItem,"protocol",
+		jsonAdd(&oItem, "protocol",
 		                u8toa(tmp, "%d", monpara.port_type));
 		jsonAdd(&oItem, "rtu_addr", webWrite_rtu_addr(tmp, monpara));
-		jsonAdd( &oItem,"time_syn_chk",
+		jsonAdd(&oItem, "time_syn_chk",
 		                u8toa(tmp, "%d", monpara.bTimeSyn));
-		jsonAdd( &oItem,"forward_chk",
+		jsonAdd(&oItem, "forward_chk",
 		                u8toa(tmp, "%d", monpara.bForward));
-		jsonAdd(&oItem,"forward_mtr_num",
+		jsonAdd(&oItem, "forward_mtr_num",
 		                u8toa(tmp, "%d", monpara.forwardNum));
 		jsonAdd(&aItemList, NULL, oItem);
 		jsonClear(&oItem);
@@ -1742,7 +1765,7 @@ int webRece_netparas(webs_t wp)
 	stNetparam netparam;
 	memset(&netparam, 0x0, sizeof(stNetparam));
 	int n;
-	int param_no = 0;///参数序号,即数据库的主键,base 0.没有物理意义
+	int param_no = 0;	///参数序号,即数据库的主键,base 0.没有物理意义
 	char * net_no = websGetVar(wp, T("net_no"), T("null"));
 	char * eth = websGetVar(wp, T("eth"), T("null"));
 	char * ip = websGetVar(wp, T("ip"), T("null"));
@@ -1870,12 +1893,12 @@ int webSend_info(webs_t wp)
 	jsonAdd(&oInfo, "info_rtuconf", webs_cfg.confdir);
 	jsonAdd(&oInfo, "info_rtupara", webs_cfg.paradir);
 	jsonAdd(&oInfo, "info_wwwroot", webdir);
-	jsonAdd(&oInfo, "major", toStr(tmp,"%d",MAJOR));
-	jsonAdd(&oInfo, "minor", toStr(tmp,"%d",MINOR));
-	jsonAdd(&oInfo, "patchlevel", toStr(tmp,"%d",PATCHLEVEL));
+	jsonAdd(&oInfo, "major", toStr(tmp, "%d", MAJOR));
+	jsonAdd(&oInfo, "minor", toStr(tmp, "%d", MINOR));
+	jsonAdd(&oInfo, "patchlevel", toStr(tmp, "%d", PATCHLEVEL));
 	jsonAdd(&oInfo, "git_version", GIT_VERSION);
 	jsonAdd(&oInfo, "build_time", __DATE__" " __TIME__);
-	wpsend(wp,oInfo);
+	wpsend(wp, oInfo);
 	jsonFree(&oInfo);
 	return 0;
 }
@@ -1900,13 +1923,28 @@ int webSend_syspara(webs_t wp)
 	 */
 	char* oSysPara = jsonNew();
 	char tmp[128] = { 0 };
-	jsonAdd(&oSysPara, "meter_num",toStr(tmp,"%u",sysparam.meter_num));
-	jsonAdd(&oSysPara, "sioplan_num", toStr(tmp, "%u", sysparam.sioplan_num));
-	jsonAdd(&oSysPara, "monitor_ports", toStr(tmp, "%u", sysparam.monitor_ports));
-	jsonAdd(&oSysPara, "netports_num", toStr(tmp, "%u", sysparam.netports_num));
-	jsonAdd(&oSysPara, "sioports_num", toStr(tmp, "%u", sysparam.sioports_num));
-	jsonAdd(&oSysPara, "control_ports", toStr(tmp, "%u", sysparam.control_ports));
-	wpsend(wp,oSysPara);
+	jsonAdd(&oSysPara, "meter_num", toStr(tmp, "%u", sysparam.meter_num));
+	jsonAdd(
+	                &oSysPara,
+	                "sioplan_num",
+	                toStr(tmp, "%u", sysparam.sioplan_num));
+	jsonAdd(
+	                &oSysPara,
+	                "monitor_ports",
+	                toStr(tmp, "%u", sysparam.monitor_ports));
+	jsonAdd(
+	                &oSysPara,
+	                "netports_num",
+	                toStr(tmp, "%u", sysparam.netports_num));
+	jsonAdd(
+	                &oSysPara,
+	                "sioports_num",
+	                toStr(tmp, "%u", sysparam.sioports_num));
+	jsonAdd(
+	                &oSysPara,
+	                "control_ports",
+	                toStr(tmp, "%u", sysparam.control_ports));
+	wpsend(wp, oSysPara);
 	jsonFree(&oSysPara);
 	return 0;
 }
@@ -1997,15 +2035,15 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	///@todo 去掉硬编码!
 	char *fact_HA[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表" };
 	char *fact_JD[] = { "华立", "威盛", "哈表",
-			"ABB", "浩宁达","华隆","红相","东方","许继","龙电" };
+	                "ABB", "浩宁达", "华隆", "红相", "东方", "许继", "龙电" };
 	char **fact;
 	int len;
-	if(0){
-		fact=fact_HA;
-		len=sizeof(fact_HA)/sizeof(fact_HA[0]);
-	}else{
-		fact=fact_JD;
-		len=sizeof(fact_JD)/sizeof(fact_JD[0]);
+	if (0) {
+		fact = fact_HA;
+		len = sizeof(fact_HA)/sizeof(fact_HA[0]);
+	} else {
+		fact = fact_JD;
+		len = sizeof(fact_JD)/sizeof(fact_JD[0]);
 	}
 	for (i = 0; i<len; i++) {
 		jsonAdd(&aList, NULL, fact[i]);
@@ -2013,7 +2051,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	jsonAdd(&oAll, "factory", aList);
 	jsonClear(&aList);
 	//电表类型,几相几线制
-	for (i = 0; i<(int)(sizeof(PW)/sizeof(PW[0])); i++) {
+	for (i = 0; i<(int) (sizeof(PW)/sizeof(PW[0])); i++) {
 		jsonAdd(&aList, NULL, PW[i]);
 	}
 	jsonAdd(&oAll, "type", aList);
@@ -2184,7 +2222,7 @@ int webSend_savecycle(webs_t wp)
 #if DEBUG_PRINT_SAVE_CYCLE
 	printf(WEBS_DBG"oSavCycle:%s\n",oSavCycle);
 #endif
-	wpsend(wp,oSavCycle);
+	wpsend(wp, oSavCycle);
 	jsonFree(&oItemArray);
 	jsonFree(&oItem);
 	jsonFree(&oCycleList);
@@ -2244,7 +2282,7 @@ int webSend_txtfile(webs_t wp, const char*file)
 		ret = fread(&buf, sizeof(char), 255, fp);
 		if (ret>0) {
 			websWrite(wp, T("%s"), buf);
-			memset(buf,0x0,256);
+			memset(buf, 0x0, 256);
 		} else {
 			break;
 		}
@@ -2375,6 +2413,11 @@ void webs_free(void)
 	int i;
 	if (webdir!=NULL )     //不使用了就尽早释放.
 		free(webdir);
+	//应用程序名称
+	if (webs_cfg.appname!=NULL ) {
+			free(webs_cfg.appname);
+			webs_cfg.appname = NULL;
+		}
 	//配置文件项 WEBS_DEFAULT_PORT
 	if (webs_cfg.port!=NULL &&
 	                //如果使用了备用的端口号,分配在静态区,不能/需要释放.
@@ -2460,15 +2503,12 @@ void response_ok(webs_t wp)
 {
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
-///服务器自动升级
+///服务器自动升级 移动 webs.update 到 webs 完成升级
 int autoUpdate(void)
 {
 	printf(WEBS_INF"checking Update...\n");
-	//printf(WEBS_INF"oldname: %s\n",PROG_NAME);
-	//printf(WEBS_INF"nwename: %s\n",UPDATE_FILE_NAME);
-	int ret=access(UPDATE_FILE_NAME, 0);
-	//printf(WEBS_INF" file acces %d \n",ret);
-	if(ret==0){
+	int ret = access(UPDATE_FILE_NAME, 0);
+	if (ret==0) {
 		printf(WEBS_INF"Updating now...\n");
 		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
 		system("chmod +x "PROG_NAME);
@@ -2477,9 +2517,13 @@ int autoUpdate(void)
 		printf(WEBS_INF" *  Update OK.please reboot RTU.  *\n");
 		printf(WEBS_INF" *                                *\n");
 		printf(WEBS_INF" **********************************\n");
-		system(PROG_NAME);
-		system("killall webs");
-	}else{
+		if(fork()==0){
+			//system(PROG_NAME);
+		}else{
+			//system("killall webs");
+			exit(0);
+		}
+	} else {
 		return -1;
 	}
 	return 0;

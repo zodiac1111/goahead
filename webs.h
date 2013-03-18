@@ -199,15 +199,16 @@ extern char_t	*websGetRequestType(webs_t wp);
 extern int 		 websGetRequestWritten(webs_t wp);
 extern char_t 	*websGetVar(webs_t wp, char_t *var, char_t *def);
 extern int 		 websCompareVar(webs_t wp, char_t *var, char_t *value);
-extern void 	 websHeader(webs_t wp);
-extern int		 websOpenListen(int port, int retries);
-extern int 		 websPageOpen(webs_t wp, char_t *lpath, char_t *path,
+extern void websHeader(webs_t wp);
+extern void websHeader_pure(webs_t wp);
+extern int websOpenListen(int port, int retries);
+extern int  websPageOpen(webs_t wp, char_t *lpath, char_t *path,
 					int mode, int perm);
-extern void 	 websPageClose(webs_t wp);
-extern int 		 websPublish(char_t *urlPrefix, char_t *path);
-extern void		 websRedirect(webs_t wp, char_t *url);
-extern void 	 websSecurityDelete();
-extern int 		 websSecurityHandler(webs_t wp, char_t *urlPrefix,
+extern void websPageClose(webs_t wp);
+extern int websPublish(char_t *urlPrefix, char_t *path);
+extern void websRedirect(webs_t wp, char_t *url);
+extern void websSecurityDelete();
+extern int websSecurityHandler(webs_t wp, char_t *urlPrefix,
 					char_t *webDir, int arg, char_t *url, char_t *path,
 					char_t *query);
 extern void 	websSetDefaultDir(char_t *dir);
