@@ -1832,7 +1832,7 @@ int webSend_info(webs_t wp)
 	jsonAdd(&oInfo, "minor", toStr(tmp,"%d",MINOR));
 	jsonAdd(&oInfo, "patchlevel", toStr(tmp,"%d",PATCHLEVEL));
 	jsonAdd(&oInfo, "git_version", GIT_VERSION);
-	jsonAdd(&oInfo, "build_time", __DATE__ __TIME__);
+	jsonAdd(&oInfo, "build_time", __DATE__" " __TIME__);
 	wpsend(wp,oInfo);
 	jsonFree(&oInfo);
 	return 0;
