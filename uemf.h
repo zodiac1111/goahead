@@ -12,7 +12,7 @@
 
 /******************************** Description *********************************/
 
-/*
+/* 
  *	GoAhead Web Server header. This defines the Web public APIs
  */
 
@@ -70,7 +70,7 @@
 	#include	<netinet/in.h>
 #endif /* NW */
 
-#ifdef SCOV5
+#ifdef SCOV5 
 	#include	<sys/types.h>
 	#include	<stdio.h>
 	#include	"sys/socket.h"
@@ -289,8 +289,8 @@ struct timeval
 #endif /* NW */
 
 /********************************** Unicode ***********************************/
-/*
- *	Constants and limits. Also FNAMESIZE and PATHSIZE are currently defined
+/* 
+ *	Constants and limits. Also FNAMESIZE and PATHSIZE are currently defined 
  *	in param.h to be 128 and 512
  */
 #define TRACE_MAX			(4096 - 48)
@@ -310,7 +310,7 @@ struct timeval
 #define	LF_BUF_MAX		BUF_MAX
 #define LF_PATHSIZE		PATHSIZE
 #define UPPATHSIZE		PATHSIZE
-#endif /* LITTLEFOOT || WEBS */
+#endif /* LITTLEFOOT || WEBS */ 
 #ifndef CHAR_T_DEFINED
 #define CHAR_T_DEFINED 1
 #ifdef UNICODE
@@ -324,8 +324,8 @@ typedef unsigned short 		char_t;
 typedef unsigned short		uchar_t;
 
 /*
- *	Text size of buffer macro. A buffer bytes will hold (size / char size)
- *	characters.
+ *	Text size of buffer macro. A buffer bytes will hold (size / char size) 
+ *	characters. 
  */
 #define	TSZ(x)				(sizeof(x) / sizeof(char_t))
 
@@ -604,7 +604,7 @@ typedef struct stat gstat_t;
 #if (defined (ASSERT) || defined (ASSERT_CE))
 	#define a_assert(C)		if (C) ; else error(E_L, E_ASSERT, T("%s"), T(#C))
 #else
-	#define a_assert(C)		if (1) ; else {}
+	#define a_assert(C)		if (1) ; else
 #endif /* ASSERT || ASSERT_CE */
 
 #define elementsof(X) sizeof(X) / sizeof(X[0])
@@ -621,10 +621,10 @@ typedef enum {
 	byteint		= 1,
 	shortint	= 2,
 	integer		= 3,
-	hex		= 4,
+	hex			= 4,
 	percent 	= 5,
 	octal		= 6,
-	big		= 7,
+	big			= 7,
 	flag		= 8,
 	floating	= 9,
 	string 		= 10,
@@ -667,7 +667,7 @@ typedef struct {
 #endif /* __NO_PACK */
 
 /*
- *	Allocation flags
+ *	Allocation flags 
  */
 #define VALUE_ALLOCATE		0x1
 
@@ -705,7 +705,7 @@ typedef struct {
  *    ^                           ^                       ^               ^
  *    |                           |                       |               |
  *  rq->buf                    rq->servp               rq->endp      rq->enduf
- *
+ *     
  *	The queue is empty when servp == endp.  This means that the queue will hold
  *	at most rq->buflen -1 bytes.  It is the fillers responsibility to ensure
  *	the ringq is never filled such that servp == endp.
@@ -741,8 +741,8 @@ typedef struct {
 #endif /* B_STATS */
 
 /*
- *	Block classes are: 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192,
- *					   16384, 32768, 65536
+ *	Block classes are: 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 
+ *					   16384, 32768, 65536 
  */
 typedef struct {
 	union {
@@ -775,10 +775,10 @@ typedef struct {
  */
 
 typedef struct sym_t {
-	struct sym_t	*forw;			/* Pointer to next hash list */
-	value_t			name;	/* Name of symbol */
-	value_t			content;/* Value of symbol */
-	int				arg;	/* Parameter value */
+	struct sym_t	*forw;					/* Pointer to next hash list */
+	value_t			name;					/* Name of symbol */
+	value_t			content;				/* Value of symbol */
+	int				arg;					/* Parameter value */
 } sym_t;
 
 typedef int sym_fd_t;						/* Returned by symOpen */
@@ -826,7 +826,7 @@ extern int		cronFree(cron_t *cp);
 /*                                 SOCKET                                     */
 /******************************************************************************/
 /*
- *	Socket flags
+ *	Socket flags 
  */
 
 #if ((defined (WIN) || defined (CE)) && defined (WEBS) && !defined(WIN32))
@@ -870,7 +870,7 @@ extern int		cronFree(cron_t *cp);
 /*
  *	Handler event masks
  */
-#define SOCKET_READABLE			0x2		/* Make socket readable */
+#define SOCKET_READABLE			0x2		/* Make socket readable */ 
 #define SOCKET_WRITABLE			0x4		/* Make socket writable */
 #define SOCKET_EXCEPTION		0x8		/* Interested in exceptions */
 #define EMF_SOCKET_MESSAGE		(WM_USER+13)
@@ -884,7 +884,7 @@ extern int		cronFree(cron_t *cp);
 #endif /* LITTLEFOOT */
 
 typedef void 	(*socketHandler_t)(int sid, int mask, void* data);
-typedef int		(*socketAccept_t)(int sid, char *ipaddr, int port,
+typedef int		(*socketAccept_t)(int sid, char *ipaddr, int port, 
 					int listenSid);
 typedef struct {
 	char			host[64];				/* Host name */
@@ -932,6 +932,7 @@ extern char *bstrdupANoBalloc(char *s);
 #define bstrdup(B_ARGS, s) bstrdupNoBalloc(s)
 #define bstrdupA(B_ARGS, s) bstrdupANoBalloc(s)
 #define gstrdup(B_ARGS, s) bstrdupNoBalloc(s)
+#define bmemdup(B_ARGS, p, s) bmemdupNoBalloc(p, s)     /* Added by LohCT to support binary file upload. */
 
 #else /* BALLOC */
 
@@ -941,6 +942,7 @@ extern char *bstrdupANoBalloc(char *s);
 #define bfreeSafe(B_ARGS, p) bfreeSafe(p)
 #define brealloc(B_ARGS, p, size) brealloc(p, size)
 #define bstrdup(B_ARGS, p) bstrdup(p)
+#define bmemdup(B_ARGS, p, s) bmemdup(p, s)             /* Added by LohCT to support binary file upload. */
 
 #ifdef UNICODE
 #define bstrdupA(B_ARGS, p) bstrdupA(p)
@@ -956,6 +958,7 @@ extern void		bfree(B_ARGS_DEC, void *mp);
 extern void		bfreeSafe(B_ARGS_DEC, void *mp);
 extern void		*brealloc(B_ARGS_DEC, void *buf, int newsize);
 extern char_t	*bstrdup(B_ARGS_DEC, char_t *s);
+extern char_t   *bmemdup(B_ARGS_DEC, char_t *s, int size);      /* Added by LohCT to support binary file upload. */
 
 #ifdef UNICODE
 extern char *bstrdupA(B_ARGS_DEC, char *s);
@@ -1038,7 +1041,7 @@ extern int		scriptEval(int engine, char_t *cmd, char_t **rslt, void* chan);
 
 extern void		socketClose();
 extern void		socketCloseConnection(int sid);
-extern void		socketCreateHandler(int sid, int mask, socketHandler_t
+extern void		socketCreateHandler(int sid, int mask, socketHandler_t 
 					handler, void* arg);
 extern void		socketDeleteHandler(int sid);
 extern int		socketEof(int sid);
@@ -1049,7 +1052,7 @@ extern int		socketGets(int sid, char_t **buf);
 extern int		socketGetPort(int sid);
 extern int		socketInputBuffered(int sid);
 extern int		socketOpen();
-extern int 		socketOpenConnection(char *host, int port,
+extern int 		socketOpenConnection(char *host, int port, 
 					socketAccept_t accept, int flags);
 extern void 	socketProcess(int hid);
 extern int		socketRead(int sid, char *buf, int len);
@@ -1060,7 +1063,7 @@ extern int 		socketSelect(int hid, int timeout);
 extern int 		socketGetHandle(int sid);
 extern int 		socketSetBlock(int sid, int flags);
 extern int 		socketGetBlock(int sid);
-extern int 		socketAlloc(char *host, int port, socketAccept_t accept,
+extern int 		socketAlloc(char *host, int port, socketAccept_t accept, 
 					int flags);
 extern void 	socketFree(int sid);
 extern int		socketGetError();
@@ -1073,6 +1076,8 @@ extern char_t	*strlower(char_t *string);
 extern char_t	*strupper(char_t *string);
 
 extern char_t	*stritoa(int n, char_t *string, int width);
+
+extern char_t   *xmemstr(char_t *memBlk, char_t *find, int memSize);        /* Added by LohCT to support binary file upload. */
 
 extern sym_fd_t	symOpen(int hash_size);
 extern void		symClose(sym_fd_t sd);
@@ -1087,9 +1092,9 @@ extern void 	symSubClose();
 
 extern void		trace(int lev, char_t *fmt, ...);
 extern void		traceRaw(char_t *buf);
-extern void		(*traceSetHandler(void (*function)(int level, char_t *buf)))
+extern void		(*traceSetHandler(void (*function)(int level, char_t *buf))) 
 					(int level, char_t *buf);
-
+ 
 extern value_t 	valueInteger(long value);
 extern value_t	valueString(char_t *value, int flags);
 extern value_t	valueErrmsg(char_t *value);

@@ -263,6 +263,54 @@ char_t *stritoa(int n, char_t *string, int width)
 	return string;
 }
 
+
+/******************************************************************************/
+/*
+ *  Find the first occurrence of a pattern in memory.
+ *  Added by LohCT to support binary file upload.
+ */
+
+char_t *xmemstr(char_t *memBlk, char_t *find, int memSize)
+{
+    char_t      chFind;
+    char_t      chMem;
+    char_t      firstFindCh;
+    char_t *    locFind;
+    char_t *    locMem;
+    int         szMem;
+
+    if ((firstFindCh = *find++) == 0) {
+        return memBlk;
+    }
+
+    while (memSize-- > 0) {
+        chMem = *memBlk++;
+        if (chMem == firstFindCh) {
+            locFind = find;
+            locMem = memBlk;
+            szMem = memSize;
+
+            while ((chFind = *locFind++) != 0) {
+                if (szMem-- <= 0) {
+                    return NULL;
+                }
+                chMem = *locMem++;
+
+                if (chMem != chFind) {
+                    break;
+                }
+            }
+
+            if (chFind == 0) {
+                return (memBlk - 1);
+            }
+        }
+    }
+
+    return NULL;
+}
+
+
 /******************************************************************************/
 /*
  *	Default error and trace	

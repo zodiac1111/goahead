@@ -550,18 +550,68 @@ void form_info(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 ///客户端上传文件到服务器 调试中
-void form_upload_file(webs_t wp, char_t *path, char_t *query)
+/******************************************************************************/
+/*
+ * for test html upload file to web server
+ * add by gyr 2011.10.15
+ */
+
+ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
-	PRINT_FORM_INFO;
-	websHeader_pure(wp);
-//	char * action = websGetVar(wp, T("action"), T("null"));
-//	if (strcmp(action, "get")==0) {
-//		webSend_info(wp);
-//	} else {
-//		web_err_proc(EL);
-//	}
-	websDone(wp, 200);
-	return;
+    FILE *       fp;
+    char_t *     fn;
+    char_t *     bn = NULL;
+    int          locWrite;
+    int          numLeft;
+    int          numWrite;
+
+	printf("\n...................formUploadFileTest...................\n\n");
+
+    a_assert(websValid(wp));
+    websHeader(wp);
+
+    fn = websGetVar(wp, T("filename"), T(""));
+    if (fn != NULL && *fn != '\0') {
+        if ((int)(bn = gstrrchr(fn, '/') + 1) == 1) {
+            if ((int)(bn = gstrrchr(fn, '\\') + 1) == 1) {
+                bn = fn;
+            }
+        }
+    }
+
+	printf("fn=%s, bn=%s  .......\n", fn, bn);
+
+    websWrite(wp, T("Filename = %s<br>Size = %d bytes<br>"), bn, wp->lenPostData);
+
+    if ((fp = fopen((bn == NULL ? "upldForm.bin" : bn), "w+b")) == NULL) {
+        websWrite(wp, T("File open failed!<br>"));
+    } else {
+        locWrite = 0;
+        numLeft = wp->lenPostData;
+        while (numLeft > 0) {
+            numWrite = fwrite(&(wp->postData[locWrite]), sizeof(*(wp->postData)), numLeft, fp);
+            if (numWrite < numLeft) {
+                websWrite(wp, T("File write failed.<br>  ferror=%d locWrite=%d numLeft=%d numWrite=%d Size=%d bytes<br>"), ferror(fp), locWrite, numLeft, numWrite, wp->lenPostData);
+            break;
+            }
+            locWrite += numWrite;
+            numLeft -= numWrite;
+        }
+
+        if (numLeft == 0) {
+            if (fclose(fp) != 0) {
+                websWrite(wp, T("File close failed.<br>  errno=%d locWrite=%d numLeft=%d numWrite=%d Size=%d bytes<br>"), errno, locWrite, numLeft, numWrite, wp->lenPostData);
+            } else {
+                websWrite(wp, T("File Size Written = %d bytes<br>"), wp->lenPostData);
+            }
+        } else {
+            websWrite(wp, T("numLeft=%d locWrite=%d Size=%d bytes<br>"), numLeft, locWrite, wp->lenPostData);
+        }
+    }
+
+    websFooter(wp);
+    websDone(wp, 200);
+
 }
 /**
  * 打印服务器应用程序运行路径,依赖proc文件系统.
