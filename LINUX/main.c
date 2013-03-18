@@ -64,13 +64,8 @@ stCfg webs_cfg;
 char * webdir;
 #define JSON 1
 //#pragma  GCC diagnostic warning  "-Wunused-parameter"
-/**
- * webs主函数,所有业务逻辑在此实现.
- */
-int main(int argc __attribute__ ((unused)),
-        char** argv __attribute__ ((unused)))
+int autoUpdate(void)
 {
-#if AUTO_UPDATE
 	printf(WEBS_INF"checking Update...\n");
 	//printf(WEBS_INF"oldname: %s\n",PROG_NAME);
 	//printf(WEBS_INF"nwename: %s\n",UPDATE_FILE_NAME);
@@ -80,15 +75,26 @@ int main(int argc __attribute__ ((unused)),
 		printf(WEBS_INF"Updating now...\n");
 		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
 		system("chmod +x "PROG_NAME);
-		printf(WEBS_INF"**********************************\n");
-		printf(WEBS_INF"*                                *\n");
-		printf(WEBS_INF"*  Update OK.please reboot rtu.  *\n");
-		printf(WEBS_INF"*                                *\n");
-		printf(WEBS_INF"**********************************\n");
-
+		printf(WEBS_INF" **********************************\n");
+		printf(WEBS_INF" *                                *\n");
+		printf(WEBS_INF" *  Update OK.please reboot RTU.  *\n");
+		printf(WEBS_INF" *                                *\n");
+		printf(WEBS_INF" **********************************\n");
 		system(PROG_NAME);
 		system("killall webs");
+	}else{
+		return -1;
 	}
+	return 0;
+}
+/**
+ * webs主函数,所有业务逻辑在此实现.
+ */
+int main(int argc __attribute__ ((unused)),
+        char** argv __attribute__ ((unused)))
+{
+#if AUTO_UPDATE
+	autoUpdate();
 #endif
 #if DEBUG_JSON_DEMO
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
@@ -1826,6 +1832,7 @@ int webSend_info(webs_t wp)
 	jsonAdd(&oInfo, "minor", toStr(tmp,"%d",MINOR));
 	jsonAdd(&oInfo, "patchlevel", toStr(tmp,"%d",PATCHLEVEL));
 	jsonAdd(&oInfo, "git_version", GIT_VERSION);
+	jsonAdd(&oInfo, "build_time", __DATE__ __TIME__);
 	wpsend(wp,oInfo);
 	jsonFree(&oInfo);
 	return 0;
