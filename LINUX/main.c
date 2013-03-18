@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <sys/time.h>
+#include <signal.h>
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
@@ -71,7 +72,10 @@ int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
 #if AUTO_UPDATE
-	autoUpdate();
+	//自动升级
+	if(autoUpdate()==0){
+
+	}
 #endif
 #if DEBUG_JSON_DEMO
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
@@ -559,6 +563,7 @@ void form_info(webs_t wp, char_t *path, char_t *query)
 void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
 	//PRINT_FORM_INFO;
+	printf(WEBS_INF"%s",__FUNCTION__);
 	FILE * fp;
 	char_t * fn;
 	char_t * bn = NULL;
@@ -576,7 +581,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	char tmp[128]={0};
-	printf("fn=%s, bn=%s  \n", fn, bn);
+	printf(WEBS_INF"file update fn=%s, bn=%s\n", fn, bn);
 	websHeader_pure(wp);
 	jsObj oUpdate=jsonNew();
 	jsonAdd(&oUpdate,"filename",bn);
@@ -630,7 +635,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 								                wp->lenPostData));
 		}
 	}
-	//wpsend(wp,oUpdate);
+	wpsend(wp,oUpdate);
 	jsonFree(&oUpdate);
 	websDone(wp, 200);
 }
@@ -2510,22 +2515,22 @@ int autoUpdate(void)
 	int ret = access(UPDATE_FILE_NAME, 0);
 	if (ret==0) {
 		printf(WEBS_INF"Updating now...\n");
+		printf(WEBS_INF" **********************************\n");
+		printf(WEBS_INF" *                                *\n");
+		printf(WEBS_INF" *            Update OK.          *\n");
+		printf(WEBS_INF" *                                *\n");
+		printf(WEBS_INF" **********************************\n");
 		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
 		system("chmod +x "PROG_NAME);
-		printf(WEBS_INF" **********************************\n");
-		printf(WEBS_INF" *                                *\n");
-		printf(WEBS_INF" *  Update OK.please reboot RTU.  *\n");
-		printf(WEBS_INF" *                                *\n");
-		printf(WEBS_INF" **********************************\n");
-		if(fork()==0){
-			//system(PROG_NAME);
+		/*if(fork()==0){
+			system(PROG_NAME);
 		}else{
-			//system("killall webs");
-			exit(0);
-		}
-	} else {
-		return -1;
+			//exit(1);
+		}*/
+		exit(1);
+	}else{
+		return 1;
 	}
-	return 0;
+	return 1;
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"
