@@ -64,29 +64,6 @@ stCfg webs_cfg;
 char * webdir;
 #define JSON 1
 //#pragma  GCC diagnostic warning  "-Wunused-parameter"
-int autoUpdate(void)
-{
-	printf(WEBS_INF"checking Update...\n");
-	//printf(WEBS_INF"oldname: %s\n",PROG_NAME);
-	//printf(WEBS_INF"nwename: %s\n",UPDATE_FILE_NAME);
-	int ret=access(UPDATE_FILE_NAME, 0);
-	//printf(WEBS_INF" file acces %d \n",ret);
-	if(ret==0){
-		printf(WEBS_INF"Updating now...\n");
-		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
-		system("chmod +x "PROG_NAME);
-		printf(WEBS_INF" **********************************\n");
-		printf(WEBS_INF" *                                *\n");
-		printf(WEBS_INF" *  Update OK.please reboot RTU.  *\n");
-		printf(WEBS_INF" *                                *\n");
-		printf(WEBS_INF" **********************************\n");
-		system(PROG_NAME);
-		system("killall webs");
-	}else{
-		return -1;
-	}
-	return 0;
-}
 /**
  * webs主函数,所有业务逻辑在此实现.
  */
@@ -175,20 +152,6 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 		webSend_syspara(wp);
 	} else {
 		webRece_syspara(wp, &sysparam);
-	}
-	websDone(wp, 200);
-	return;
-}
-///客户端读取服务器配置信息
-void form_info(webs_t wp, char_t *path, char_t *query)
-{
-	PRINT_FORM_INFO;
-	websHeader_pure(wp);
-	char * action = websGetVar(wp, T("action"), T("null"));
-	if (strcmp(action, "get")==0) {
-		webSend_info(wp);
-	} else {
-		web_err_proc(EL);
 	}
 	websDone(wp, 200);
 	return;
@@ -509,6 +472,7 @@ void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 	webSend_txtfile(wp, webs_cfg.monparam_name);
 	return;
 }
+
 /**
  * 报文监视(执行指令) 表单提交处理函数.
  * @todo 未实现,执行命令的输出还不能读取.前后端可能需要频繁交互.
@@ -570,6 +534,34 @@ void form_msg_stop(webs_t wp, char_t *path, char_t *query)
 	printf("信号量 s :%d \n", semctl(semid, 0, GETVAL, 0));
 	websWrite(wp, T("ok"));
 	websDone(wp, 200);
+}
+///客户端读取服务器配置信息
+void form_info(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	websHeader_pure(wp);
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "get")==0) {
+		webSend_info(wp);
+	} else {
+		web_err_proc(EL);
+	}
+	websDone(wp, 200);
+	return;
+}
+///客户端上传文件到服务器 调试中
+void form_upload_file(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	websHeader_pure(wp);
+//	char * action = websGetVar(wp, T("action"), T("null"));
+//	if (strcmp(action, "get")==0) {
+//		webSend_info(wp);
+//	} else {
+//		web_err_proc(EL);
+//	}
+	websDone(wp, 200);
+	return;
 }
 /**
  * 打印服务器应用程序运行路径,依赖proc文件系统.
@@ -818,7 +810,7 @@ static int initWebs(void)
 	websFormDefine(T("msg"), form_msg);
 	websFormDefine(T("msg_stop"), form_msg_stop);
 	websFormDefine(T("info"), form_info);
-
+	websFormDefine(T("upload_file"), form_upload_file);
 #ifdef USER_MANAGEMENT_SUPPORT
 	//Create the Form handlers for the User Management pages
 	formDefineUserMgmt();
@@ -2417,5 +2409,29 @@ void webs_free(void)
 void response_ok(webs_t wp)
 {
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
+}
+///服务器自动升级
+int autoUpdate(void)
+{
+	printf(WEBS_INF"checking Update...\n");
+	//printf(WEBS_INF"oldname: %s\n",PROG_NAME);
+	//printf(WEBS_INF"nwename: %s\n",UPDATE_FILE_NAME);
+	int ret=access(UPDATE_FILE_NAME, 0);
+	//printf(WEBS_INF" file acces %d \n",ret);
+	if(ret==0){
+		printf(WEBS_INF"Updating now...\n");
+		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
+		system("chmod +x "PROG_NAME);
+		printf(WEBS_INF" **********************************\n");
+		printf(WEBS_INF" *                                *\n");
+		printf(WEBS_INF" *  Update OK.please reboot RTU.  *\n");
+		printf(WEBS_INF" *                                *\n");
+		printf(WEBS_INF" **********************************\n");
+		system(PROG_NAME);
+		system("killall webs");
+	}else{
+		return -1;
+	}
+	return 0;
 }
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"

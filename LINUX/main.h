@@ -49,6 +49,7 @@ void form_load_log(webs_t wp, char_t *path, char_t *query);
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_info(webs_t wp, char_t *path, char_t *query);
+void form_upload_file(webs_t wp, char_t *path, char_t *query);
 //各类大相
 int webRece_syspara(webs_t wp,stSysParam* sysparam);
 int webSend_syspara(webs_t wp);
@@ -88,7 +89,9 @@ int listen_port_str2array(const char* str, u8 a[5]);
 int rtu_addr_str2array(const char* str, u8 a[4]);
 int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
-////设置函数
+////杂类函数,全系统相关
+int autoUpdate(void);
+void init_semun(void);
 int wpsend(webs_t wp,jsObj oJson);
 char* a2jsObj(char *tmp, uint8_t * array,int n);
 char* getconf(const char const* name,char** value);
@@ -102,8 +105,6 @@ static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
 static void sigintHandler(int);
-void init_semun(void);
-
 int jsonSavCycle(webs_t wp,const char* name,const stSave_cycle sav);
 union semun
 {

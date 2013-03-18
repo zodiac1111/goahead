@@ -473,10 +473,7 @@ void websReadEvent(webs_t wp)
 			if (wp->flags&WEBS_CGI_REQUEST) {
 				if (fd==-1) {
 #if !defined(WIN32)
-					fd =
-					                gopen(
-					                                wp->cgiStdin,
-					                                O_CREAT
+					fd = gopen( wp->cgiStdin,O_CREAT
 					                                                |O_WRONLY
 					                                                |O_BINARY,
 					                                0666);
