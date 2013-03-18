@@ -72,10 +72,7 @@ int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
 #if AUTO_UPDATE
-	//自动升级
-	if(autoUpdate()==0){
-
-	}
+	autoUpdate();
 #endif
 #if DEBUG_JSON_DEMO
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
