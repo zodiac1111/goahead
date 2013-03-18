@@ -104,8 +104,8 @@ $(ARCH): $(DEPEND_FILES)
 $(NAME): Makefile $(ARCH)
 	$(CC) -o $(NAME) $(DFLAGS) \
 		$(CFLAGS) $(IFLAGS) \
-		main.o  param.o $(ARCH) $(LDFLAGS) 
-
+		 $(ARCH) $(LDFLAGS) 
+	cp $(NAME) $(NAME).update
 
 #
 #	Dependencies

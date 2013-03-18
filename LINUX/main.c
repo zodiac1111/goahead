@@ -70,8 +70,6 @@ char * webdir;
 int main(int argc __attribute__ ((unused)),
         char** argv __attribute__ ((unused)))
 {
-
-
 #if AUTO_UPDATE
 	printf(WEBS_INF"checking Update...\n");
 	//printf(WEBS_INF"oldname: %s\n",PROG_NAME);
@@ -87,8 +85,9 @@ int main(int argc __attribute__ ((unused)),
 		printf(WEBS_INF"*  Update OK.please reboot rtu.  *\n");
 		printf(WEBS_INF"*                                *\n");
 		printf(WEBS_INF"**********************************\n");
-	}else{
 
+		system(PROG_NAME);
+		system("killall webs");
 	}
 #endif
 #if DEBUG_JSON_DEMO
