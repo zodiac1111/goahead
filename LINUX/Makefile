@@ -49,6 +49,7 @@ DFLAGS  = -g -Wall -Wextra \
 	# -Wshadow
 else
 CC=arm-linux-gcc
+CXX=arm-linux-g++
 DFLAGS  = -Os
 endif
 
@@ -86,8 +87,9 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../webrom.o ../webs.o ../websuemf.o \
 	       	param.o main.o web_err.o tou.o json.o
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
+CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 OTHERS	= -DB_STATS -DB_FILL 
-IFLAGS 	= -I.. 
+IFLAGS 	= -I..
 LDFLAGS	= $(SSLLIB) $(IFMODLIB)
 
 compile: $(NAME)

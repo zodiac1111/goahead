@@ -25,10 +25,7 @@
 #define MTR_DEL  2
 #define MTR_SEARCH  3
 #define MTR_UPDATE  4
-#define MAX_MTR_NUM 256 ///<最大表计个数
-#define PAGE_RESET "/um/Reset.asp"///重启页面
-//#define INPUT_CLASS " class=ntx "
-#define CHKBOX_ONCLICK " onclick=\"chk_change(event);\" "
+#define MAX_MTR_NUM 128 ///<最大表计个数
 //提交表单函数定义
 void form_server_time(webs_t wp, char_t *path, char_t *query);
 void form_sysparam(webs_t wp, char_t *path, char_t *query);
@@ -94,7 +91,7 @@ int autoUpdate(void);
 void init_semun(void);
 int wpsend(webs_t wp,jsObj oJson);
 char* a2jsObj(char *tmp, uint8_t * array,int n);
-char* getconf(const char const* name,char** value);
+char* getconf(const char * const name,char** value);
 void webs_free(void);
 void response_ok(webs_t wp);
 int printf_webs_app_dir(void);

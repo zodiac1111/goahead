@@ -2,6 +2,7 @@
  * @file web_err.c
  * 服务器错误字符串输出
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>

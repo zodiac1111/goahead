@@ -6,7 +6,7 @@
  */
 #ifndef CONF_H_
 #define CONF_H_
-#include <version.h>
+#include "../version.h"
 #include "color.h"
 ///webs服务器配置参数.开始时加载到内存,结束时释放
 typedef struct cfg{

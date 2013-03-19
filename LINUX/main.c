@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <signal.h>
+//#include "sys_utl.h"
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
@@ -650,7 +651,7 @@ int printf_webs_app_dir(void)
 		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
 	printf(WEBS_INF"App dir\t:"GREEN"%s"_COLOR"\n", dir);
-	webs_cfg.appname = malloc(strlen(dir)+1);
+	webs_cfg.appname =(char*) malloc(strlen(dir)+1);
 	strcpy(webs_cfg.appname, dir);
 	return 0;
 }
@@ -671,7 +672,7 @@ int printf_webs_app_dir(void)
  * @retval 其他 指向一个字符串的指针.这个字符串即项的值
  * @return
  */
-char* getconf(const char const* name, char** value)
+char* getconf(const char * const name, char** value)
 {
 	//配置文件定义为 一行一条, 以 变量名=变量值的形式
 	/** @bug 为了方便起见在栈上分配固定大小内存用于存储配置字符串.
