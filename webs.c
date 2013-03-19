@@ -2722,14 +2722,14 @@ static char_t* extractUploadedFileContent(webs_t wp, int * lenContent)
     }    /* if (wp->multiPartBoundary == NULL) */
 
     firstUploadFile = FALSE;
-    while ((endPart != NULL) && ((part = gstrstr(endPart, wp->multiPartBoundary)) != NULL)) {
-		part = gstrchr(part, '\n');
+    while ((endPart != NULL) && ((part = strstr(endPart, wp->multiPartBoundary)) != NULL)) {
+	part = gstrchr(part, '\n');
         if (part == NULL) {
             endPart = part;
         } else {
             part++;
             /* supposed to be the Content-Disposition line */
-            if (gstrstr(part, "Content-Disposition") == NULL) {
+            if (strstr(part, "Content-Disposition") == NULL) {
                 endPart = part;
             } else {
                 endLine = gstrchr(part, '\n');

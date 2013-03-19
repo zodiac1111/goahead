@@ -577,18 +577,22 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 			}
 		}
 	}
-	char tmp[128] = { 0 };
 	printf(WEBS_INF"file update fn=%s, bn=%s\n", fn, bn);
+	char tmp[128] = { 0 };
 	websHeader_pure(wp);
 	jsObj oUpdate = jsonNew();
-	jsonAdd(&oUpdate, "filename", bn);
-	jsonAdd(&oUpdate, "size", toStr(tmp, "%d", wp->lenPostData));
 	char tmpfname[1024] = { 0 };
 	char cmd[1024] = { 0 };
-	if (strcmp(bn, "webs.update")!=0) {
-		jsonAdd(&oUpdate, "ret", "文件名称错误,应该是webs.update");
+	if(bn==NULL){
+		jsonAdd(&oUpdate, "ret", "filename must no-void");
 		goto SEND;
 	}
+	if (strcmp(bn, "webs.update")!=0) {
+		jsonAdd(&oUpdate, "ret", "filename must be webs.update");
+		goto SEND;
+	}
+	jsonAdd(&oUpdate, "filename", bn);
+	jsonAdd(&oUpdate, "size", toStr(tmp, "%d", wp->lenPostData));
 	sprintf(tmpfname, "%s%s%s", webs_cfg.appname, UP_SUFFIX, ".tmp");
 	if ((fp = fopen(tmpfname, "w+b"))==NULL ) {
 		jsonAdd(&oUpdate, "ret", "open file failed");
