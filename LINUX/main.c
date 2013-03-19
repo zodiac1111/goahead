@@ -585,7 +585,12 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	jsonAdd(&oUpdate,"size", toStr(tmp,"%d",wp->lenPostData));
 	char tmpfname[1024]={0};
 	char cmd[1024]={0};
-	sprintf(tmpfname,"%s%s%s",webs_cfg.appname,UP_SUFFIX,".tmp");
+	if(strcmp(bn,"webs.update")==0){
+		sprintf(tmpfname,"%s%s%s",webs_cfg.appname,UP_SUFFIX,".tmp");
+	}else{
+		sprintf(tmpfname,"%s",bn);
+	}
+
 	if ((fp = fopen((bn==NULL ? "errFileName" : tmpfname), "w+b"))==NULL ) {
 		jsonAdd(&oUpdate,"ret", "open file failed");
 	} else {
@@ -2508,10 +2513,10 @@ void response_ok(webs_t wp)
 ///服务器自动升级 移动 webs.update 到 webs 完成升级
 int autoUpdate(void)
 {
-	printf(WEBS_INF"checking Update...\n");
+	printf(WEBS_INF"Checking Update.\n");
 	int ret = access(UPDATE_FILE_NAME, 0);
 	if (ret==0) {
-		printf(WEBS_INF"Updating now...\n");
+		printf(WEBS_INF" Updating now...\n");
 		printf(WEBS_INF" **********************************\n");
 		printf(WEBS_INF" *                                *\n");
 		printf(WEBS_INF" *            Update OK.          *\n");
@@ -2519,12 +2524,11 @@ int autoUpdate(void)
 		printf(WEBS_INF" **********************************\n");
 		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
 		system("chmod +x "PROG_NAME);
-		/*if(fork()==0){
-			system(PROG_NAME);
-		}else{
-			//exit(1);
-		}*/
-		exit(1);
+		//execl直接覆盖本进程/变成其他进程(这里是自己)
+		//不知道有什么潜在危险,使用很实用 :)
+		execl(PROG_NAME,PROG_NAME,NULL);
+		//kill(getpid(),SIGTSTP);
+		//exit(1);
 	}else{
 		return 1;
 	}
