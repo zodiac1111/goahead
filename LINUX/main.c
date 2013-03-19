@@ -552,15 +552,15 @@ void form_info(webs_t wp, char_t *path, char_t *query)
 }
 ///客户端上传文件到服务器 调试中
 /******************************************************************************/
-/*
+/** 文件上传补丁由 http://velep.com/archives/321.html 下载.
+ * 仅适用goahead2.5和2.1.1(老版本)现在该公司已经被收购,维护需要靠自己.
  * for test html upload file to web server
  * add by gyr 2011.10.15
  */
-
 void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
 	//PRINT_FORM_INFO;
-	printf(WEBS_INF"%s",__FUNCTION__);
+	printf(WEBS_INF"%s\n", __FUNCTION__);
 	FILE * fp;
 	char_t * fn;
 	char_t * bn = NULL;
@@ -577,67 +577,58 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 			}
 		}
 	}
-	char tmp[128]={0};
+	char tmp[128] = { 0 };
 	printf(WEBS_INF"file update fn=%s, bn=%s\n", fn, bn);
 	websHeader_pure(wp);
-	jsObj oUpdate=jsonNew();
-	jsonAdd(&oUpdate,"filename",bn);
-	jsonAdd(&oUpdate,"size", toStr(tmp,"%d",wp->lenPostData));
-	char tmpfname[1024]={0};
-	char cmd[1024]={0};
-	if(strcmp(bn,"webs.update")==0){
-		sprintf(tmpfname,"%s%s%s",webs_cfg.appname,UP_SUFFIX,".tmp");
-	}else{
-		sprintf(tmpfname,"%s",bn);
+	jsObj oUpdate = jsonNew();
+	jsonAdd(&oUpdate, "filename", bn);
+	jsonAdd(&oUpdate, "size", toStr(tmp, "%d", wp->lenPostData));
+	char tmpfname[1024] = { 0 };
+	char cmd[1024] = { 0 };
+	if (strcmp(bn, "webs.update")!=0) {
+		jsonAdd(&oUpdate, "ret", "文件名称错误,应该是webs.update");
+		goto SEND;
 	}
-
-	if ((fp = fopen((bn==NULL ? "errFileName" : tmpfname), "w+b"))==NULL ) {
-		jsonAdd(&oUpdate,"ret", "open file failed");
-	} else {
-		locWrite = 0;
-		numLeft = wp->lenPostData;
-		while (numLeft>0) {
-			numWrite = fwrite(
-			                &(wp->postData[locWrite]),
-			                sizeof(*(wp->postData)),
-			                numLeft,
-			                fp);
-			if (numWrite<numLeft) {
-				break;
-			}
-			locWrite += numWrite;
-			numLeft -= numWrite;
-		}
-		if (numLeft==0) {
-			if (fclose(fp)!=0) {
-				jsonAdd(&oUpdate,"ret", "close file failed");
-//				websWrite(
-//				                wp,
-//				                T("File close failed.<br>  errno=%d locWrite=%d numLeft=%d numWrite=%d Size=%d bytes<br>"),
-//				                errno,
-//				                locWrite,
-//				                numLeft,
-//				                numWrite,
-//				                wp->lenPostData);
-			} else {//完成传输
-
-				system(toStr(cmd,"mv %s %s",tmpfname,UPDATE_FILE_NAME));
-				jsonAdd(&oUpdate,"ret", "ok");
-//				websWrite(
-//				                wp,
-//				                T("File Size Written = %d bytes<br>"),
-//				                wp->lenPostData);
-			}
-		} else {
-			jsonAdd(&oUpdate,
-					"ret",
-					toStr(tmp,"numLeft=%d locWrite=%d Size=%d bytes",
-						 numLeft,
-								                locWrite,
-								                wp->lenPostData));
-		}
+	sprintf(tmpfname, "%s%s%s", webs_cfg.appname, UP_SUFFIX, ".tmp");
+	if ((fp = fopen(tmpfname, "w+b"))==NULL ) {
+		jsonAdd(&oUpdate, "ret", "open file failed");
+		goto SEND;
 	}
-	wpsend(wp,oUpdate);
+	locWrite = 0;
+	numLeft = wp->lenPostData;
+	while (numLeft>0) {
+		numWrite = fwrite(
+		                &(wp->postData[locWrite]),
+		                sizeof(*(wp->postData)),
+		                numLeft,
+		                fp);
+		if (numWrite<numLeft) {
+			break;
+		}
+		locWrite += numWrite;
+		numLeft -= numWrite;
+	}
+	if (numLeft!=0) {
+		jsonAdd(&oUpdate, "ret",
+			toStr(tmp,
+		                "不完整 numLeft=%d locWrite=%d Size=%d bytes",
+		                numLeft,
+		                locWrite,
+		                wp->lenPostData));
+		fclose(fp);
+		goto SEND;
+
+	}
+	if (fclose(fp)!=0) {
+		jsonAdd(&oUpdate, "ret", "close file failed");
+		goto SEND;
+	}
+	//完成传输
+	system(toStr(cmd, "mv %s %s", tmpfname, UPDATE_FILE_NAME));
+	jsonAdd(&oUpdate, "ret", "ok");
+
+	SEND:
+	wpsend(wp, oUpdate);
 	jsonFree(&oUpdate);
 	websDone(wp, 200);
 }
@@ -655,8 +646,8 @@ int printf_webs_app_dir(void)
 		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
 	printf(WEBS_INF"App dir\t:"GREEN"%s"_COLOR"\n", dir);
-	webs_cfg.appname =malloc(strlen(dir)+1);
-	strcpy(webs_cfg.appname,dir);
+	webs_cfg.appname = malloc(strlen(dir)+1);
+	strcpy(webs_cfg.appname, dir);
 	return 0;
 }
 
@@ -2422,9 +2413,9 @@ void webs_free(void)
 		free(webdir);
 	//应用程序名称
 	if (webs_cfg.appname!=NULL ) {
-			free(webs_cfg.appname);
-			webs_cfg.appname = NULL;
-		}
+		free(webs_cfg.appname);
+		webs_cfg.appname = NULL;
+	}
 	//配置文件项 WEBS_DEFAULT_PORT
 	if (webs_cfg.port!=NULL &&
 	                //如果使用了备用的端口号,分配在静态区,不能/需要释放.
@@ -2526,10 +2517,10 @@ int autoUpdate(void)
 		system("chmod +x "PROG_NAME);
 		//execl直接覆盖本进程/变成其他进程(这里是自己)
 		//不知道有什么潜在危险,使用很实用 :)
-		execl(PROG_NAME,PROG_NAME,NULL);
+		execl(PROG_NAME, PROG_NAME, NULL );
 		//kill(getpid(),SIGTSTP);
 		//exit(1);
-	}else{
+	} else {
 		return 1;
 	}
 	return 1;
