@@ -90,7 +90,7 @@ CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)
 OTHERS	= -DB_STATS -DB_FILL 
 IFLAGS 	= -I..
-LDFLAGS	= $(SSLLIB) $(IFMODLIB) -ldl
+LDFLAGS	= $(SSLLIB) $(IFMODLIB) -ldl /home/lee/test/mycheckout/hl3104/trunk/hl3104jd/软件/hl3104/lib/libsys_utl.so
 
 compile: $(NAME)
 
