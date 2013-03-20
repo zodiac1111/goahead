@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <dlfcn.h>
 //#include "sys_utl.h"
 #include "param.h"
 #include "main.h"
@@ -77,6 +78,17 @@ int main(int argc __attribute__ ((unused)),
 #endif
 #if DEBUG_JSON_DEMO
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
+#endif
+
+#define DLINK_TEST 0
+#if DLINK_TEST
+	#define SOFILE "sys_utl.so"
+	unsigned char (*Bcd2Hex_Byte)(const unsigned char);
+	void *dp;
+	dp=dlopen(SOFILE,RTLD_LAZY);
+	Bcd2Hex_Byte=dlsym(dp,"Bcd2Hex_Byte");
+	Bcd2Hex_Byte(0x10);
+	//printf(WEBS_WAR"%X \n",Bcd2Hex_Byte(0x10));
 #endif
 	memset(&webs_cfg, 0x0, sizeof(stCfg));
 	PRINT_WELCOME
