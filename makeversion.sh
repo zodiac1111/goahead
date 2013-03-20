@@ -24,7 +24,7 @@ if [ $LOCALVER \> 1 ]  ; then
     GIT_VERSION=r$VER
 else
     PATHLEVEL=
-    GIT_VERSION=
+    GIT_VERSION= "err no git find"
     VER="x"
 fi
 rm -f config.git-hash
