@@ -66,7 +66,7 @@
 #define WEBS_BUFSIZE			960		/* websWrite max output string */
 #define WEBS_MAX_HEADER			(5 * 1024)	/* Sanity check header */
 #define WEBS_MAX_URL			2048		/* Maximum URL size for sanity */
-#define WEBS_SOCKET_BUFSIZ		256			/* Bytes read from socket */
+#define WEBS_SOCKET_BUFSIZ		8192/*256*/		/* Bytes read from socket */
 
 
 

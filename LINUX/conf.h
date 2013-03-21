@@ -40,7 +40,7 @@ extern stCfg webs_cfg;
 #define DEBUG_SIOPLAN_INFO 0 ///<打印串口方案相关调试信息
 #define DEBUG_PRINT_NETPARAM 0 ///<打印网口参数相关调试信息
 #define DEBUG_PRINT_MONPARAM 0 ///<打印监视参数相关调试信息
-#define DEBUG_PRINT_MTRPARAM 0 ///<打印表计参数相关调试信息
+#define DEBUG_PRINT_MTRPARAM 1 ///<打印表计参数相关调试信息
 #define DEBUG_PRINT_SAVE_CYCLE 0 ///<打印储存周期调试信息
 #define DEBUG_CONF_FULLPATH 0 ///<解析配置文件合并成为完整的绝对路径(打印调试信息)
 #define DEBUG_JSON_DEMO 0 ///<json生成器(不包括解析器)的使用demo示例

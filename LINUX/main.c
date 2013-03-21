@@ -7,6 +7,7 @@
  * @note 给前端发送的数据可以使用JSON.接收前端的数据就还是使用goahead的getVal吧.
  * 	后端仅进行一些必要的数值合法性验证.
  */
+#define DLINK_TEST 0
 #include "../uemf.h"
 #include "../wsIntrn.h"
 #include <signal.h>
@@ -29,6 +30,11 @@
 #include <signal.h>
 #include <dlfcn.h>
 //#include "sys_utl.h"
+
+#if DLINK_TEST
+#include "struct.h"
+#endif
+
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
@@ -80,14 +86,16 @@ int main(int argc __attribute__ ((unused)),
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
 #endif
 
-#define DLINK_TEST 0
 #if DLINK_TEST
-	#define SOFILE "sys_utl.so"
-	unsigned char (*Bcd2Hex_Byte)(const unsigned char);
+#define SOFILE "sys_utl.so"
+	struct stMeter_Run_data* (*GetData)(void);
 	void *dp;
 	dp=dlopen(SOFILE,RTLD_LAZY);
-	Bcd2Hex_Byte=dlsym(dp,"Bcd2Hex_Byte");
-	Bcd2Hex_Byte(0x10);
+	GetData=dlsym(dp,"GetData");
+	//struct stMeter_Run_data mtrs;
+	struct stMeter_Run_data* mtrs= GetData();
+	printf(WEBS_DBG"电压 A相=%f\n",mtrs->m_wU[0]);
+	printf(WEBS_DBG"软件版本 %s\n",GetSoftVersion());
 	//printf(WEBS_WAR"%X \n",Bcd2Hex_Byte(0x10));
 #endif
 	memset(&webs_cfg, 0x0, sizeof(stCfg));
@@ -244,6 +252,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
+	//printf(WEBS_DBG" %s\n",);
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "get")==0) {
@@ -596,7 +605,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	jsObj oUpdate = jsonNew();
 	char tmpfname[1024] = { 0 };
 	char cmd[1024] = { 0 };
-	if(bn==NULL){
+	if (bn==NULL ) {
 		jsonAdd(&oUpdate, "ret", "filename must no-void");
 		goto SEND;
 	}
@@ -626,12 +635,15 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		numLeft -= numWrite;
 	}
 	if (numLeft!=0) {
-		jsonAdd(&oUpdate, "ret",
-			toStr(tmp,
-		                "不完整 numLeft=%d locWrite=%d Size=%d bytes",
-		                numLeft,
-		                locWrite,
-		                wp->lenPostData));
+		jsonAdd(
+		                &oUpdate,
+		                "ret",
+		                toStr(
+		                                tmp,
+		                                "不完整 numLeft=%d locWrite=%d Size=%d bytes",
+		                                numLeft,
+		                                locWrite,
+		                                wp->lenPostData));
 		fclose(fp);
 		goto SEND;
 
@@ -663,7 +675,7 @@ int printf_webs_app_dir(void)
 		printf(WEBS_ERR"%s\n", __FUNCTION__);
 	}
 	printf(WEBS_INF"App dir\t:"GREEN"%s"_COLOR"\n", dir);
-	webs_cfg.appname =(char*) malloc(strlen(dir)+1);
+	webs_cfg.appname = (char*) malloc(strlen(dir)+1);
 	strcpy(webs_cfg.appname, dir);
 	return 0;
 }
@@ -1006,7 +1018,8 @@ static int is_all_equ(int n[], int num)
 	int i;
 	for (i = 1; i<num; i++) {
 		if (n[i]!=n[0]) {
-			printf("POST数量[%d]=%d,表数目=%d\n", i, n[i], n[0]);
+			printf("表计项目序号:i,%d,表数目=%d\n", i, n[i], n[0]);
+			web_err_proc(EL);
 			return -2000;
 		}
 	}
@@ -1045,84 +1058,128 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 	char * factory[MAX_MTR_NUM];
 	char * iv[MAX_MTR_NUM] = { 0 };
 	if (websTestVar(wp, T("mtrno"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("mtrno= %s\n", websGetVar(wp, T("mtrno"), T("null")));
+#endif
 		n[0] = split(no, websGetVar(wp, T("mtrno"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1000;
 	}
 	if (websTestVar(wp, T("line"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("line= %s\n", websGetVar(wp, T("line"), T("null")));
+#endif
 		n[1] = split(line, websGetVar(wp, T("line"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1010;
 	}
 	if (websTestVar(wp, T("addr"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("addr= %s\n", websGetVar(wp, T("addr"), T("null")));
+#endif
 		n[2] = split(addr, websGetVar(wp, T("addr"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1020;
 	}
 	if (websTestVar(wp, T("pwd"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("pwd= %s\n", websGetVar(wp, T("pwd"), T("null")));
+#endif
 		n[3] = split(pwd, websGetVar(wp, T("pwd"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1030;
 	}
 	if (websTestVar(wp, T("it_dot"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("it_dot= %s\n", websGetVar(wp, T("it_dot"), T("null")));
+#endif
 		n[4] = split(it_dot, websGetVar(wp, T("it_dot"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1040;
 	}
 	if (websTestVar(wp, T("v_dot"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("v_dot= %s\n", websGetVar(wp, T("v_dot"), T("null")));
+#endif
 		n[5] = split(v_dot, websGetVar(wp, T("v_dot"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1050;
 	}
 	if (websTestVar(wp, T("p_dot"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("p_dot= %s\n", websGetVar(wp, T("p_dot"), T("null")));
+#endif
 		n[6] = split(p_dot, websGetVar(wp, T("p_dot"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1060;
 	}
 	if (websTestVar(wp, T("q_dot"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("q_dot= %s\n", websGetVar(wp, T("q_dot"), T("null")));
+#endif
 		n[7] = split(q_dot, websGetVar(wp, T("q_dot"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1070;
 	}
 	if (websTestVar(wp, T("i_dot"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("i_dot= %s\n", websGetVar(wp, T("i_dot"), T("null")));
+#endif
 		n[8] = split(i_dot, websGetVar(wp, T("i_dot"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1080;
 	}
 	if (websTestVar(wp, T("xl_dot"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("xl_dot= %s\n", websGetVar(wp, T("xl_dot"), T("null")));
+#endif
 		n[9] = split(xl_dot, websGetVar(wp, T("xl_dot"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1090;
 	}
 	if (websTestVar(wp, T("ue"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("ue= %s\n", websGetVar(wp, T("ue"), T("null")));
+#endif
 		n[10] = split(ue, websGetVar(wp, T("ue"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1090;
 	}
 	if (websTestVar(wp, T("ie"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("ie= %s\n", websGetVar(wp, T("ie"), T("null")));
+#endif
 		n[11] = split(ie, websGetVar(wp, T("ie"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1100;
 	}
 	if (websTestVar(wp, T("port"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("port= %s\n", websGetVar(wp, T("port"), T("null")));
+#endif
 		n[12] = split(port, websGetVar(wp, T("port"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1110;
 	}
 	if (websTestVar(wp, T("portplan"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf(
+		                "portplan= %s\n",
+		                websGetVar(wp, T("portplan"), T("null")));
+#endif
 		n[13] = split(portplan,
 		                websGetVar(wp, T("portplan"), T("null")));
 	} else {
@@ -1130,6 +1187,11 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		return -1120;
 	}
 	if (websTestVar(wp, T("protocol"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf(
+		                "protocol= %s\n",
+		                websGetVar(wp, T("protocol"), T("null")));
+#endif
 		n[14] = split(protocol,
 		                websGetVar(wp, T("protocol"), T("null")));
 	} else {
@@ -1137,21 +1199,33 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		return -1130;
 	}
 	if (websTestVar(wp, T("ph_wire"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf(
+		                "ph_wire= %s\n",
+		                websGetVar(wp, T("ph_wire"), T("null")));
+#endif
 		n[15] = split(ph_wire, websGetVar(wp, T("ph_wire"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1140;
 	}
+
 	if (websTestVar(wp, T("factory"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf(
+		                "factory= %s\n",
+		                websGetVar(wp, T("factory"), T("null")));
+#endif
 		n[16] = split(factory, websGetVar(wp, T("factory"), T("null")));
 	} else {
 		PRINT_HERE
 		return -1150;
 	}
-#if DEBUG_PRINT_MTRPARAM
-	printf("iv= %s\n", websGetVar(wp, T("iv"), T("0")));
-#endif
+
 	if (websTestVar(wp, T("iv"))) {
+#if DEBUG_PRINT_MTRPARAM
+		printf("iv= %s\n", websGetVar(wp, T("iv"), T("0")));
+#endif
 		n[17] = split(iv, websGetVar(wp, T("iv"), T("0")));
 	} else {
 		PRINT_HERE
@@ -2093,7 +2167,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "i_dot", toStr(tmp, "%d", mtr.i_dot));
 		jsonAdd(&oMtrPara, "p_dot", toStr(tmp, "%d", mtr.p_dot));
 		jsonAdd(&oMtrPara, "q_dot", toStr(tmp, "%d", mtr.q_dot));
-		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%.d", mtr.ue));
+		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%d", mtr.ue));//单位伏特,没有小数
 		jsonAdd(&oMtrPara, "ie", toStr(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
