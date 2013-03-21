@@ -252,7 +252,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
-	//printf(WEBS_DBG" %s\n",);
+	//printf(WEBS_DBG" %s\n",wp->postData);
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "get")==0) {

@@ -650,7 +650,7 @@ static int websGetInput(webs_t wp, char_t **ptext, int *pnbytes)
  *	of bytes to read so we use socketRead().
  */
 	if (wp->state == WEBS_POST_CLEN) {
-		len = (wp->clen > WEBS_SOCKET_BUFSIZ) ? WEBS_SOCKET_BUFSIZ : wp->clen;
+		len =(wp->clen > WEBS_SOCKET_BUFSIZ) ? WEBS_SOCKET_BUFSIZ : wp->clen;
 	} else {
 		len = 0;
 	}
@@ -1339,7 +1339,7 @@ void websSetEnv(webs_t wp)
  *			been stored.
  */
 			if ((valCheck = websGetVar(wp, keyword, NULL)) != 0) {
-				fmtAlloc(&valNew, 8192, T("%s %s"), valCheck, value);
+				fmtAlloc(&valNew, GET_VAL_LEN, T("%s %s"), valCheck, value);
 				websSetVar(wp, keyword, valNew);
 				bfreeSafe(B_L, valNew);
 			} else {
