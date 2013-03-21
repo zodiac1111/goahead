@@ -1018,7 +1018,8 @@ static int is_all_equ(int n[], int num)
 	int i;
 	for (i = 1; i<num; i++) {
 		if (n[i]!=n[0]) {
-			printf("表计项目序号:i,%d,表数目=%d\n", i, n[i], n[0]);
+			printf("表计项目序号:%d,项目数量%d,表数目=%d\n"
+					, i, n[i], n[0]);
 			web_err_proc(EL);
 			return -2000;
 		}
