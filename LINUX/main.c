@@ -939,7 +939,7 @@ char* webWrite_rtu_addr(char* tmp, stMonparam monport)
 #endif
 	int i;
 	for (i = 0; i<4; i++) {
-		sprintf(tmp+i, "%1d", monport.prot_addr[i]);
+		sprintf(tmp+i, "%1X", monport.prot_addr[i]);
 	}
 	return tmp;
 }
@@ -1707,7 +1707,9 @@ int webRece_monparas(webs_t wp)
 		}
 		protocol = point2next(&protocol, ' ');
 		//终端地址
-		rtu_addr_str2array(rtu_addr, &monparam.prot_addr[0]);
+		if(rtu_addr_str2array(rtu_addr, &monparam.prot_addr[0])<0){
+			web_err_proc(EL);
+		}
 		rtu_addr = point2next(&rtu_addr, ' ');
 		//是否对时
 		n = sscanf(time_syn, "%hhu", &monparam.bTimeSyn);
@@ -1736,7 +1738,8 @@ int webRece_monparas(webs_t wp)
 }
 
 /**
- * 将"255","1"这样的字符串转化成 "0255","0001"这样的字符数组.终端地址.
+ * 将"255","1","ff"这样的字符串转化成 "0255","0001","00ff"这样的字符数组.终端地址.
+ *
  * @param[in] str
  * @param[out] a
  * @retval 指针后移的数量
@@ -1746,17 +1749,28 @@ int rtu_addr_str2array(const char* str, u8 a[4])
 	int i = 0;		//查找的个数,
 	int val = 0;
 	while (*str!='\0'&&*str!=' ') {
-		if (*str<'0'||*str>'9') {
-			return -2;
+		if (*str>='0'&& *str<='9') {
+			val = val*16+(*str-'0');
+			goto OK;
 		}
-		val = val*10+(*str-'0');
+		if (*str>='A'&& *str<='F') {
+			val = val*16+(*str-'A'+10);
+			goto OK;
+		}
+		if (*str>='a'&& *str<='f') {
+			val = val*16+(*str-'a'+10);
+			goto OK;
+		}
+		return -2;
+	OK:
 		str++;
 		i++;
 	}
-	a[0] = (val/1000)%10;
-	a[1] = (val/100)%10;
-	a[2] = (val/10)%10;
-	a[3] = (val/1)%10;
+	//change int(0~0xFFFF) to a number(0~15)
+	a[0] = val&0xF000>>(8*3);
+	a[1] = val&0x0F00>>(8*2);
+	a[2] = val&0x00F0>>(8*1);
+	a[3] = val&0x000F>>(8*0);
 	return i+1;
 }
 /**
