@@ -1767,10 +1767,13 @@ int rtu_addr_str2array(const char* str, u8 a[4])
 		i++;
 	}
 	//change int(0~0xFFFF) to a number(0~15)
-	a[0] = val&0xF000>>(8*3);
-	a[1] = val&0x0F00>>(8*2);
-	a[2] = val&0x00F0>>(8*1);
-	a[3] = val&0x000F>>(8*0);
+	a[0] = (val&0xF000)>>(4*3);
+	a[1] = (val&0x0F00)>>(4*2);
+	a[2] = (val&0x00F0)>>(4*1);
+	a[3] = (val&0x000F)>>(4*0);
+	printf("0xabcd&0xf000 = %X\n",0xabcd&0xf000);
+	printf("0xabcd&0xf000,>>24 = %X\n",(0xabcd&0xf000) >>24);
+	printf("%X %X %X %X [val=%X]\n",a[0],a[1],a[2],a[3],val);
 	return i+1;
 }
 /**
