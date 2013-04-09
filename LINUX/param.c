@@ -37,10 +37,11 @@ const char* SAVE_CYCLE[]={
 		[5]="60"CSTR_MIN,
 		[6]="120"CSTR_MIN,
 		[7]="180"CSTR_MIN,
-		[8]="360"CSTR_MIN,
-		[9]="480"CSTR_MIN,
-		[10]="720"CSTR_MIN,
-		[11]="1440"CSTR_MIN,
+		[8]="240"CSTR_MIN,
+		[9]="360"CSTR_MIN,
+		[10]="480"CSTR_MIN,
+		[11]="720"CSTR_MIN,
+		[12]="1440"CSTR_MIN,
 };
 /**
  * 从文本格式的配置文件中读取规约名称字符串.

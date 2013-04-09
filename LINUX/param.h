@@ -24,7 +24,7 @@ extern const char *UART_DAT_BIT[3];
 extern const char *UART_STOP[2];
 extern const char *UART_BAUD[7];
 extern const char *UART_COMM_TYPE[2];
-extern const char* SAVE_CYCLE[12];
+extern const char *SAVE_CYCLE[13];
 /**
  *  打印输出当前位置的文件,函数,代码行数
  */
