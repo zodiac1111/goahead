@@ -4,7 +4,7 @@
 # 1. /samba_folder 生成的包保存的路径
 # 2. '/home/lee/Aptana Studio 3 Workspace/' 前端项目根目录
 # 3. '/home/lee/workspace' 后端项目根目录
-# 4. '/home/lee/文档/说明.txt' 说明文档
+# 4. '/home/lee/README.txt' 说明文档
 # 最后打包成如下结构
 # ./goahead/		<-目录
 # ./wwwdemo/		<-目录

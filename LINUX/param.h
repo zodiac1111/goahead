@@ -7,7 +7,8 @@
 #ifndef PARAM_H_
 #define PARAM_H_
 #include "type.h"
-#pragma pack(1)
+//#pragma pack(1) 尽量少设置原则,使用__attribute__((packed, aligned(1)))指定
+// gcc 3.3.2不支持 pack(1)
 #include "conf.h"
 #define MAX_MON_PORT_NUM 64U ///<监视参数端口描述字符串最大数量.如COM1 ETH1 等
 #define IPV4_LEN 12U ///<ipv4占用4个字节,表示成12个字符
@@ -46,7 +47,7 @@ typedef struct
 	u8 monitor_ports;
 	u8 control_ports;
 	u8 sioplan_num;
-} stSysParam;
+} __attribute__((packed, aligned(1))) stSysParam;
 /**
  * 程序中操作的表参数结构体,具体size大小不重要,只要能容纳就行
  * 存进文件时转化成为_File类型.从文件读出时转化为本结构体类型
@@ -71,7 +72,7 @@ typedef struct
 	u32 ue; ///<电压 百十个位 (000~999)  乘以 10V
 	u32 ie; ///< 千,百位 00~99 乘以 100mA
 	u8 iv;    ///有效标志位:位7= 1-有效 0 无效,位[0,6]保留为0
-} stMtr;
+} __attribute__((packed, aligned(1))) stMtr;
 /// mtrspara.cfg 文件中储存的表参数格式结构体,
 typedef struct
 {
@@ -92,7 +93,7 @@ typedef struct
 	u8 ue[3]; ///<电压 百十个位
 	u8 ie[2]; ///< 千,百位
 	u8 iv; ///<有效标志位:位7= 1-有效 0 无效,位[0,6]保留为0
-} stMtr_File;
+} __attribute__((packed, aligned(1))) stMtr_File;
 ///串口方案配置信息 等同配置文件 sioplan.cfg 结构
 typedef struct
 {
@@ -101,7 +102,7 @@ typedef struct
 	u8 stop; ///<停止位 1:1位停止位 2:2位停止位
 	u8 baud; ///<波特率 300*2^b 0~5=300~9600
 	u8 Commtype; ///<端口类型 0 异步 1 同步
-} stUart_plan;
+} __attribute__((packed, aligned(1))) stUart_plan;
 ///网络参数
 typedef struct
 {
@@ -110,7 +111,7 @@ typedef struct
 	u8 mask[IPV4_LEN];
 	u8 gateway[IPV4_LEN];
 	u8 port[5];
-} stNetparam;
+} __attribute__((packed, aligned(1))) stNetparam;
 /// 监视参数文件结构
 typedef struct{
 	u8 comm_port;//端口类型COM ETH Master等
@@ -121,12 +122,12 @@ typedef struct{
 	u8 bTimeSyn;
 	u8 bForward;
 	u8 forwardNum;
-}stMonparam;
+}__attribute__((packed, aligned(1)))stMonparam;
 /// 存储周期参数文件结构
 typedef struct{
 	u8 enable;///<0无效,1有效
 	u8 cycle;///<存储周期
-}stSave_cycle;
+} __attribute__((packed, aligned(1))) stSave_cycle;
 
 //加载(一条)参数
 int load_sysparam(stSysParam * param, const char * file);

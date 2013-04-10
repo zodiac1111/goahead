@@ -885,6 +885,7 @@ static int initWebs(void)
 	}
 	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
 	                webs_cfg.monparam_name)) {
+		printf("* %s\n",webs_cfg.monparam_name);
 		web_err_proc(EL);
 	}
 	/*

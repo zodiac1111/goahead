@@ -63,7 +63,7 @@ extern stCfg webs_cfg;
     #define PROG_NAME "/mnt/nor/bin/webs"
     #define UPDATE_FILE_NAME  PROG_NAME UP_SUFFIX
   #else
-    #define PROG_NAME "/home/lee/workspace/goahead/LINUX/webs"
+    #define PROG_NAME "/home/zodiac1111/workspace/goahead/LINUX/webs"
     #define UPDATE_FILE_NAME  PROG_NAME UP_SUFFIX
   #endif
 #endif
@@ -81,7 +81,7 @@ extern stCfg webs_cfg;
 #if __arm__  	//运行在终端平台arm上.
 	#define CONF_FILE "/mnt/nor/conf/goahead.conf"
 #else 		//运行在i368,host调试平台上.
-	#define CONF_FILE "/home/lee/workspace/goahead/conf-host/goahead.conf"
+	#define CONF_FILE "/home/zodiac1111/workspace/goahead/conf-host/goahead.conf"
 #endif
 
 //webs服务器错误文件相关
@@ -90,7 +90,7 @@ extern stCfg webs_cfg;
 #if __arm__
 	#define BACKUP_ERR_FILE "/mnt/nor/goahead-backup.log"
 #else
-	#define BACKUP_ERR_FILE "/home/lee/workspace/goahead/goahead-backup.log"
+	#define BACKUP_ERR_FILE "/home/zodiac1111/workspace/goahead/goahead-backup.log"
 #endif
 #define MAX_ERR_LOG_LINE_LENTH 1024 ///<日志文件单行最大长度(字节)
 #define MAX_ERR_LOG_FILE_SIZE (10*1024) ///<错误日志文件最大尺寸(字节)
