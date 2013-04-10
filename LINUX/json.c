@@ -140,9 +140,15 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 		return *dobj;
 	}
 	///@note 用三个bit分别表示,若gcc版本过低不能识别0b开头的二进制表达方式.
-	/// 换成0x开头的十六进制表示就可以了.这里用二进制表示更形象 XD
-	//int cs=isArray*0b100+isFirst*0b10+isObj*0b1;
+	/// 换成0x开头的十六进制表示就可以了.这里用二进制表示更形象 XD /
+	///较低版本的gcc不支持二进制
+#if defined (__GNUC__) && \
+	defined (__GNUC_MINOR__) && \
+	__GNUC__ >= 4 && __GNUC_MINOR__ >= 3
+	int cs=isArray*0b100+isFirst*0b10+isObj*0b1;
+#else
 	int cs=isArray*0x04+isFirst*0x02+isObj*0x01;
+#endif
 	switch(cs){
 	//添加到不是数组的对象中
 	case 0x00/*0b000*/:	//不是首个元素(需要逗号),不是对象(需要引号).

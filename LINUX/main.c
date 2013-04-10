@@ -799,15 +799,20 @@ static int initWebs(void)
 		return -1;
 	}
 
-	/** @bug ! gcc 3.3.2 早期的系统?不支持 gethostbyname 暂时注销,硬编码!
+	/// @bug ! gcc 3.3.2 早期的系统?不支持 gethostbyname 暂时注销,硬编码!
+#if defined (__GNUC__) && \
+	defined (__GNUC_MINOR__) && \
+	__GNUC__ >= 4 && __GNUC_MINOR__ >= 3
 	if ((hp = gethostbyname(host))==NULL ) {
 		error(E_L, E_LOG, T("Can't get host address"));
 		return -1;
 	}
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
-	                (size_t) hp->h_length); */
+	                (size_t) hp->h_length);
+#else
 	memcpy((char *) &intaddr, (char *)"127.0.0.1",
-	                        strlen("127.0.0.1"));
+		strlen("127.0.0.1"));
+#endif
 
 	(void) printf_webs_app_dir();
 	printf(WEBS_INF"Config file\t:"GREEN CONF_FILE _COLOR "\n");
