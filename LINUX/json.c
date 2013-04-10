@@ -141,32 +141,33 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 	}
 	///@note 用三个bit分别表示,若gcc版本过低不能识别0b开头的二进制表达方式.
 	/// 换成0x开头的十六进制表示就可以了.这里用二进制表示更形象 XD
-	int cs=isArray*0b100+isFirst*0b10+isObj*0b1;
+	//int cs=isArray*0b100+isFirst*0b10+isObj*0b1;
+	int cs=isArray*0x04+isFirst*0x02+isObj*0x01;
 	switch(cs){
 	//添加到不是数组的对象中
-	case 0b000:	//不是首个元素(需要逗号),不是对象(需要引号).
+	case 0x00/*0b000*/:	//不是首个元素(需要逗号),不是对象(需要引号).
 		sprintf(*dobj+dlen-1,",\"%s\":\"%s\"%c",name,value,end);
 		break;
-	case 0b001:	//不是首个元素(需要逗号),是对象(不需要引号)
+	case 0x01/*0b001*/:	//不是首个元素(需要逗号),是对象(不需要引号)
 		sprintf(*dobj+dlen-1,",\"%s\":%s%c",name,value,end);
 		break;
-	case 0b010:	//是首个元素(不需要逗号),不是对象(需要引号).
+	case 0x02/*0b010*/:	//是首个元素(不需要逗号),不是对象(需要引号).
 		sprintf(*dobj+dlen-1,"\"%s\":\"%s\"%c",name,value,end);
 		break;
-	case 0b011:	//是首个元素(不需要逗号),是对象(不需要引号).
+	case 0x03/*0b011*/:	//是首个元素(不需要逗号),是对象(不需要引号).
 		sprintf(*dobj+dlen-1,"\"%s\":%s%c",name,value,end);
 		break;
 	//添加到一个数组对象中,不需要name
-	case 0b100:	//不是首个元素(需要逗号),不是对象(需要引号).
+	case 0x04/*0b100*/:	//不是首个元素(需要逗号),不是对象(需要引号).
 		sprintf(*dobj+dlen-1,",\"%s\"%c",value,end);
 		break;
-	case 0b101:	//不是首个元素(需要逗号),是对象(不需要引号)
+	case 0x05/*0b101*/:	//不是首个元素(需要逗号),是对象(不需要引号)
 		sprintf(*dobj+dlen-1,",%s%c",value,end);
 		break;
-	case 0b110:	//是首个元素(不需要逗号),不是对象(需要引号).
+	case 0x06/*0b110*/:	//是首个元素(不需要逗号),不是对象(需要引号).
 		sprintf(*dobj+dlen-1,"\"%s\"%c",value,end);
 		break;
-	case 0b111:	//是首个元素(不需要逗号),是对象(不需要引号).
+	case 0x07/*0b111*/:	//是首个元素(不需要逗号),是对象(不需要引号).
 		sprintf(*dobj+dlen-1,"%s%c",value,end);
 		break;
 	default:

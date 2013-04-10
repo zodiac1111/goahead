@@ -55,7 +55,7 @@ typedef struct {
 typedef struct{
 	time_t s;
 	time_t e;
-}  __attribute__((packed, aligned(1)))TimeRange;
+}  __attribute__((packed, aligned(1))) TimeRange;
 //
 int load_tou_dat(u32 mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
 int webWrite1Tou(webs_t wp,const stTou tou);
