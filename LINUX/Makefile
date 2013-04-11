@@ -24,7 +24,7 @@ DFLAGS  = -g -Wall -Wextra \
 else
 CC=arm-linux-gcc
 CXX=arm-linux-g++
-DFLAGS  = -Os -Wall
+DFLAGS  = -Os -Wall 
 endif
 
 default:  debug

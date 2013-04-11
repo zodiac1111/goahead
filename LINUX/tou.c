@@ -253,8 +253,8 @@ int webWriteOneTI(webs_t wp, Ti_Category ti)
 	const char *valid = " class=\"valid\" ";
 	///保存是否无效字串的数组
 	const char *isInvalid[2] = {
-	                [0]=valid,     ///<有效
-	                [1]=iv,     ///<无效
+	                valid,     ///<有效
+	                iv,     ///<无效
 	                };
 	//总 尖 峰 平 谷
 	websWrite(wp, T("<td %s>%s</td>"),

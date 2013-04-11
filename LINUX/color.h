@@ -8,7 +8,7 @@
  * 	printf("这是"RED UNDERLINE"红色下划线"_COLOR"特效显示");
  * 参考:
  * 	<http://basiccoder.com/output-colorful-words-in-terminal.html>
- * \033 = \e = Escape
+ * \033 = \033 = Escape
  * \033[0m	关闭所有属性
  * \033[1m	设置高亮度
  * \033[4m	下划线
@@ -34,11 +34,11 @@
  *     30:黑 31:红 32:绿 33:黄 34:蓝色 35:紫色 36:深绿 37:白色
  */
 #ifndef _COLOR_H_
-#define RED "\e[31m" //颜色
-#define GREEN "\e[32m"
-#define YELLOW "\e[33m"
-#define BLUE "\e[34m"
-#define PURPLE "\e[35m"
+#define RED "\033[31m" //颜色
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define PURPLE "\033[35m"
 //效果
 
 #define CLEAR "\033[2J" //清屏
@@ -49,6 +49,6 @@
 #define FLASH "\033[5m" //闪烁
 #define HIDE "\033[8m" //隐藏
 
-#define _COLOR "\e[0m" //一次性关闭所有颜色和特效 类似xml的标签闭合.不需嵌套
+#define _COLOR "\033[0m" //一次性关闭所有颜色和特效 类似xml的标签闭合.不需嵌套
 #define _COLOR_H
 #endif

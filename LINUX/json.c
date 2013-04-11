@@ -7,7 +7,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "color.h"
-#define DEBUG_JSON_CLEAR 0 //调试选项
+#define DEBUG_JSON_CLEAR 0 /* 调试选项 */
 #define JSON_DEMO GREEN"JSON DEMO"_COLOR">"
 #define JSON_DBG YELLOW"JSON ERR"_COLOR">"
 #define JSON_ERR RED"JSON ERR"_COLOR">"
@@ -35,11 +35,11 @@ jsObj jsonNewArray(void)
 ///清空对象/数组内的内容.不是删除/释放对象!
 jsObj jsonClear(jsObj* pobj)
 {
+	char s ;
+	char e ;//区分是像对象还是向数组添加名/值对.
 	if(pobj==NULL){
 		return NULL;
 	}
-	char s ;
-	char e ;//区分是像对象还是向数组添加名/值对.
 	s=(*pobj)[0];
 	e=(*pobj)[strlen(*pobj)-1];
 #if DEBUG_JSON_CLEAR ==1
@@ -142,13 +142,8 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 	///@note 用三个bit分别表示,若gcc版本过低不能识别0b开头的二进制表达方式.
 	/// 换成0x开头的十六进制表示就可以了.这里用二进制表示更形象 XD /
 	///较低版本的gcc不支持二进制
-#if defined (__GNUC__) && \
-	defined (__GNUC_MINOR__) && \
-	__GNUC__ >= 4 && __GNUC_MINOR__ >= 3
-	int cs=isArray*0b100+isFirst*0b10+isObj*0b1;
-#else
+	//int cs=isArray*0b100+isFirst*0b10+isObj*0b1; //不使用gcc二进制的扩展
 	int cs=isArray*0x04+isFirst*0x02+isObj*0x01;
-#endif
 	switch(cs){
 	//添加到不是数组的对象中
 	case 0x00/*0b000*/:	//不是首个元素(需要逗号),不是对象(需要引号).
