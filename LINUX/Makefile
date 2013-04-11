@@ -1,20 +1,21 @@
-#
 # Makefile for the GoAhead web server reference source base
 #  for the Linux OS
 #
 # Copyright (c) GoAhead Software, Inc. 1995-2010
 # Copyright (c) PeerSec Networks, Inc. 2010
-#
 
+#配置头文件,库目录和库文件
 include_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/include
 lib_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/lib
-lib_obj = 
-lib_obj += -lsys_utl
+lib_obj = -lsys_utl
 lib_obj += -lexternCShm
-#用于上传到终端的ip
+#用于上传到终端的ip,指定ftp的用户名,密码,ftp上传文件夹路径
 rtu_ip_for_update=192.168.1.189 
+username=anonymous
+passwd=holley
+update_dir=nor/bin/
 
-# This is set by the debug target below 设置发布版和开发版区别
+# This is set by the debug target below 设置发布版和开发版区别(现在耦合,实时数据)
 ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
 	-Winline -Wdisabled-optimization -DDEBUG \
@@ -55,18 +56,15 @@ NAME	= webs
 # Digest Access switch
 DASW	= -DDIGEST_ACCESS_SUPPORT
 
-
-
 debug:
 	@$(MAKE) compile "WEBS_DEBUG = 1"
 
 gold:
 	@$(MAKE) compile
 
-#
+
 #   Enable SSL build if MatrixSSL package found in root source directory
 #   (if automation is not working, simply define SSLINC, SSLLIB, and SSLSW)
-#
 matrixsslDir:=$(shell ls -d ../matrixssl-3-1*/)
 ifdef matrixsslDir
 SSLINC = $(matrixsslDir)
@@ -95,7 +93,6 @@ CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_ar
 OTHERS	= -DB_STATS -DB_FILL 
 IFLAGS 	= -I.. -I$(include_dir)
 
-
 #ifdef WEBS_DEBUG
 LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj) 
 #else
@@ -105,106 +102,66 @@ LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj)
 # -W,-R. 
 #endif
 
-
 compile: $(NAME)
 
-#
 #	Build archive of objects
-#
 $(ARCH): $(DEPEND_FILES)
 	$(AR) $(ARFLAGS) $(ARCH) $?
 
-#
 #	Primary link
-#
 $(NAME): Makefile $(ARCH)
 	$(CC) -o $(NAME) $(DFLAGS) \
 		$(CFLAGS) $(IFLAGS) \
 		 $(ARCH) $(LDFLAGS) 
-	cp $(NAME) $(NAME).update #复制一份用于升级
+	#复制一份用于升级
+	cp $(NAME) $(NAME).update 
 
-#安装即上传到终端
+# 安装即上传到终端指定目录
 install:all
-	lftp -u anonymous,holley $(rtu_ip_for_update) \
-	-e "put $(NAME).update  -o nor/bin/;quit"
-#
-#	Dependencies
-#
+	lftp -u $(username),$(passwd) $(rtu_ip_for_update) \
+	-e "put $(NAME).update  -o $(update_dir);quit" && \
+	echo -e "\033[32mSuccess\033[0m"
+
+# 依赖(webs的)
+main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h conf.h 
+param.o: param.c param.h web_err.h conf.h
+web_err.o: web_err.c web_err.h conf.h
+tou.o:tou.c tou.h conf.h
+json.o:json.c json.h
+# Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../balloc.o: ../balloc.c ../uemf.h
-
 ../mime64.o:  ../mime64.c ../webs.h ../wsIntrn.h  ../ej.h ../ejIntrn.h ../uemf.h
-
 ../cgi.o:  ../webs.h ../wsIntrn.h ../uemf.h
-
 ../default.o:  ../default.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../ejlex.o:  ../ejlex.c ../ej.h ../ejIntrn.h ../uemf.h
-
 ../ejparse.o:  ../ejparse.c ../ej.h ../ejIntrn.h ../uemf.h
-
 ../emfdb.o:  ../emfdb.h ../wsIntrn.h ../uemf.h
-
 ../form.o:  ../form.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../h.o:  ../h.c ../uemf.h
-
 ../handler.o:  ../handler.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../md5c.o:  ../md5.h ../wsIntrn.h ../uemf.h
-
 ../mime.o:  ../mime.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../misc.o:  ../misc.c ../uemf.h
-
 ../page.o:  ../page.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../ringq.o:  ../ringq.c ../uemf.h
-
 ../rom.o:  ../rom.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../security.o:  ../security.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../sock.o:  ../sock.c ../uemf.h
-
 ../sockGen.o:  ../sockGen.c ../uemf.h
-
 ../sym.o:  ../sym.c ../uemf.h
-
 ../uemf.o:  ../uemf.c ../uemf.h
-
 ../um.o:  ../webs.h ../wsIntrn.h ../um.h ../uemf.h
-
 ../umui.o:  ../webs.h ../wsIntrn.h ../um.h ../uemf.h
-
 ../url.o:  ../url.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../value.o:  ../value.c ../uemf.h
-
 ../webrom.o:  ../webrom.c ../webs.h ../wsIntrn.h ../uemf.h
-
 ../webs.o:  ../webs.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../websda.o:  ../webs.h ../wsIntrn.h ../websda.h ../uemf.h
-
 ../websuemf.o:  ../websuemf.c ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../websSSL.o:  ../websSSL.c ../websSSL.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
-
 ../matrixSSLSocket.o:  ../matrixSSLSocket.c ../matrixSSLSocket.h
 
-main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h conf.h 
-
-param.o: param.c param.h web_err.h conf.h
-
-web_err.o: web_err.c web_err.h conf.h
-
-tou.o:tou.c tou.h conf.h
-
-json.o:json.c json.h
-#
 #	Transition rules (add -o to put object in right directory)
-#
 .c.o:
 	$(CC) -c -o $@ $(DFLAGS) $(CFLAGS) $(IFLAGS) $<

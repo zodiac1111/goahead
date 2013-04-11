@@ -783,6 +783,11 @@ static int initWebs(void)
 
 	char *cp;
 	char_t wbuf[128];
+	//先打开各种配置文件,主要是使能错误日志
+	int ret = load_webs_conf_info();
+	if (ret<0) {
+		return ret;
+	}
 	//Initialize the socket subsystem
 	socketOpen();
 #ifdef USER_MANAGEMENT_SUPPORT
@@ -797,28 +802,22 @@ static int initWebs(void)
 	 *	root web directory.
 	 */
 	if (gethostname(host, sizeof(host))<0) {
+		perror("gethostname");
 		error(E_L, E_LOG, T("Can't get hostname"));
+		web_err_proc(EL);
 		return -1000;
 	}
-
-	/// @bug ! gcc 3.3.2 早期的系统?不支持 gethostbyname 暂时注销,硬编码!
-#if defined (__GNUC__) && \
-	defined (__GNUC_MINOR__) && \
-	__GNUC__ >= 4 && __GNUC_MINOR__ >= 3
+	/// @note gethostbyname系统调佣需要hostname命令执行成功,老版本文件只读
 	if ((hp = gethostbyname(host))==NULL ) {
+		herror(WEBS_ERR"gethostbyname");
+		printf(WEBS_WAR"Try to use the IP 127.0.0.1 instead.");
 		error(E_L, E_LOG, T("Can't get host address"));
-		return -1001;
-	}
-	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
-	                (size_t) hp->h_length);
-#else
-	memcpy((char *) &intaddr, (char *)"127.0.0.1",
-			strlen("127.0.0.1"));
-#endif
-
-	int ret= load_webs_conf_info();
-	if(ret<0){
-		return ret;
+		web_err_proc(EL);
+		memcpy((char *) &intaddr, (char *)"127.0.0.1",
+					strlen("127.0.0.1"));
+	}else{
+		memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
+			                (size_t) hp->h_length);
 	}
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.

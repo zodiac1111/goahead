@@ -87,6 +87,7 @@ int rtu_addr_str2array(const char* str, u8 a[4]);
 int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
 ////杂类函数,全系统相关
+int load_webs_conf_info(void);
 int autoUpdate(void);
 void init_semun(void);
 int wpsend(webs_t wp,jsObj oJson);
