@@ -1,15 +1,17 @@
 # Makefile for the GoAhead web server reference source base
 #  for the Linux OS
-#
-# Copyright (c) GoAhead Software, Inc. 1995-2010
-# Copyright (c) PeerSec Networks, Inc. 2010
+# Copyright (c) 华立电力
 
 #配置头文件,库目录和库文件
+my_cc=arm-linux-gcc
+my_cxx=arm-linux-g++
 include_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/include
 lib_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/lib
 lib_obj = -lsys_utl
 lib_obj += -lexternCShm
-#用于上传到终端的ip,指定ftp的用户名,密码,ftp上传文件夹路径
+
+#用于上传到终端的ip,指定ftp的用户名,密码,ftp上传文件夹路径(需要lftp支持,CentOS自带)
+#老版本root,linux,ftp服务器根目录需要注意,可能是 / /mnt /mnt/nor 这几种
 rtu_ip_for_update=192.168.1.189 
 username=anonymous
 passwd=holley
@@ -23,8 +25,8 @@ DFLAGS  = -g -Wall -Wextra \
 	 -Wunreachable-code  -Wno-empty-body\
 	# -Wshadow
 else
-CC=arm-linux-gcc
-CXX=arm-linux-g++
+CC=$(my_cc)
+CXX=$(my_cxx)
 DFLAGS  = -Os -Wall 
 endif
 
