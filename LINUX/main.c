@@ -116,8 +116,9 @@ int main(int argc __attribute__ ((unused)),
 	signal(SIGINT, sigintHandler);
 	signal(SIGTERM, sigintHandler);
 	//Initialize the web server 初始化web服务器
-	if (initWebs()<0) {
-		printf(WEBS_ERR"init Webs.\n");
+	int ret_webs = initWebs();
+	if (ret_webs<0) {
+		printf(WEBS_ERR"init Webs.ret:[%d]\n", ret_webs);
 		return -1;
 	}
 #ifdef WEBS_SSL_SUPPORT
@@ -797,7 +798,7 @@ static int initWebs(void)
 	 */
 	if (gethostname(host, sizeof(host))<0) {
 		error(E_L, E_LOG, T("Can't get hostname"));
-		return -1;
+		return -1000;
 	}
 
 	/// @bug ! gcc 3.3.2 早期的系统?不支持 gethostbyname 暂时注销,硬编码!
@@ -806,60 +807,24 @@ static int initWebs(void)
 	__GNUC__ >= 4 && __GNUC_MINOR__ >= 3
 	if ((hp = gethostbyname(host))==NULL ) {
 		error(E_L, E_LOG, T("Can't get host address"));
-		return -1;
+		return -1001;
 	}
 	memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
 	                (size_t) hp->h_length);
 #else
 	memcpy((char *) &intaddr, (char *)"127.0.0.1",
-		strlen("127.0.0.1"));
+			strlen("127.0.0.1"));
 #endif
 
-	(void) printf_webs_app_dir();
-	printf(WEBS_INF"Config file\t:"GREEN CONF_FILE _COLOR "\n");
-	if (getconf("wwwroot", &webdir)==NULL )
-		return -2;
-	if (getconf("errlog", &webs_cfg.errlog)==NULL ) {
-		webs_cfg.errlog = BACKUP_ERR_FILE;
-		webs_cfg.default_errlog = 1;
-		web_errno = use_backup_err_log;
-		web_err_proc(EL);
+	int ret= load_webs_conf_info();
+	if(ret<0){
+		return ret;
 	}
-	if (getconf("paradir", &webs_cfg.paradir)==NULL )
-		return -3;
-	if (getconf("confdir", &webs_cfg.confdir)==NULL )
-		return -4;
-	if (getconf("port", &webs_cfg.port)==NULL ) {
-		webs_cfg.port = WEBS_DEFAULT_PORT;
-		webs_cfg.default_port = 1;
-		web_errno = use_backup_port;
-		web_err_proc(EL);
-	}
-#ifdef WEBS_SSL_SUPPORT
-	if (getconf("sslport", &webs_cfg.sslport)==NULL ) {
-		webs_cfg.sslport=WEBS_DEFAULT_SSL_PORT;
-		webs_cfg.default_sslport=1;
-		web_errno=use_backup_sslport;
-		web_err_proc(EL);
-	}
-#endif
-	webs_cfg.syspara = mkFullPath(webs_cfg.paradir, FILE_SYSPARA);
-	webs_cfg.mtrspara = mkFullPath(webs_cfg.paradir, CFG_MTR);
-	webs_cfg.sioplan = mkFullPath(webs_cfg.paradir, CFG_SIOPALN);
-	webs_cfg.netpara = mkFullPath(webs_cfg.paradir, CFG_NET);
-	webs_cfg.monpara = mkFullPath(webs_cfg.paradir, CFG_MON_PARAM);
-	webs_cfg.retranTable = mkFullPath(webs_cfg.paradir, CFG_FORWARD_TABLE);
-	webs_cfg.stspara = mkFullPath(webs_cfg.paradir, CFG_SAVE_CYCLE);
-	webs_cfg.protocol = mkFullPath(webs_cfg.confdir, PORC_FILE);
-	webs_cfg.monparam_name = mkFullPath(
-	                webs_cfg.confdir,
-	                MON_PORT_NAME_FILE);
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.
 	chdir(webdir);
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
-
 	cp = inet_ntoa(intaddr);
 	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
 	websSetIpaddr(wbuf);
@@ -895,7 +860,7 @@ static int initWebs(void)
 	}
 	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
 	                webs_cfg.monparam_name)) {
-		printf("* %s\n",webs_cfg.monparam_name);
+		printf("* %s\n", webs_cfg.monparam_name);
 		web_err_proc(EL);
 	}
 	/*
@@ -933,6 +898,70 @@ static int initWebs(void)
 		web_err_proc(EL);
 		//return -1;
 	}
+	return 0;
+}
+
+/**
+ * 从配置文件和动态库中加载配置信息
+ */
+int load_webs_conf_info(void)
+{
+	(void) printf_webs_app_dir();
+	printf(WEBS_INF"Config file\t:"GREEN CONF_FILE _COLOR "\n");
+	if (getconf("wwwroot", &webdir)==NULL ) {
+		webs_cfg.errlog = BACKUP_ERR_FILE;	//记录到备用文件
+		webs_cfg.default_errlog = 1;
+		web_err_proc(EL);
+		return -2000;
+	}
+	if (getconf("errlog", &webs_cfg.errlog)==NULL ) {
+		webs_cfg.errlog = BACKUP_ERR_FILE;	//记录到备用文件
+		webs_cfg.default_errlog = 1;
+		web_errno = use_backup_err_log;
+		web_err_proc(EL);
+		//从这里开始可以记录错误日志到文件了.
+	}
+	if (getconf("paradir", &webs_cfg.paradir)==NULL ) {
+		web_err_proc(EL);
+		return -2001;
+	}
+	if (getconf("confdir", &webs_cfg.confdir)==NULL ) {
+		web_err_proc(EL);
+		return -2002;
+	}
+	if (getconf("port", &webs_cfg.port)==NULL ) {
+		webs_cfg.port = WEBS_DEFAULT_PORT;
+		webs_cfg.default_port = 1;
+		web_errno = use_backup_port;
+		web_err_proc(EL);
+	}
+#ifdef WEBS_SSL_SUPPORT
+	if (getconf("sslport", &webs_cfg.sslport)==NULL ) {
+		webs_cfg.sslport=WEBS_DEFAULT_SSL_PORT;
+		webs_cfg.default_sslport=1;
+		web_errno=use_backup_sslport;
+		web_err_proc(EL);
+	}
+#endif
+	webs_cfg.syspara = mkFullPath(webs_cfg.paradir, FILE_SYSPARA);
+	webs_cfg.mtrspara = mkFullPath(webs_cfg.paradir, CFG_MTR);
+	webs_cfg.sioplan = mkFullPath(webs_cfg.paradir, CFG_SIOPALN);
+	webs_cfg.netpara = mkFullPath(webs_cfg.paradir, CFG_NET);
+	webs_cfg.monpara = mkFullPath(webs_cfg.paradir, CFG_MON_PARAM);
+	webs_cfg.retranTable = mkFullPath(webs_cfg.paradir, CFG_FORWARD_TABLE);
+	webs_cfg.stspara = mkFullPath(webs_cfg.paradir, CFG_SAVE_CYCLE);
+	webs_cfg.protocol = mkFullPath(webs_cfg.confdir, PORC_FILE);
+	webs_cfg.monparam_name = mkFullPath(
+	                webs_cfg.confdir,
+	                MON_PORT_NAME_FILE);
+	//版本信息字符串
+	webs_cfg.main_version_string =
+	                (char*) malloc(MAIN_PROGRAM_VERSION_STRING_MAX_LENGTH);
+	unsigned char * v = GetSoftVersion();
+	sprintf(webs_cfg.main_version_string,
+	                "%d.%d %d.%02d.%02d %c%c",
+	                v[0], v[1], v[2], v[3], v[4], v[5], v[6]);
+	//printf("%s\n",webs_cfg.main_version_string);
 	return 0;
 }
 /**
@@ -1030,7 +1059,7 @@ static int is_all_equ(int n[], int num)
 	for (i = 1; i<num; i++) {
 		if (n[i]!=n[0]) {
 			printf("表计项目序号:%d,项目数量%d,表数目=%d\n"
-					, i, n[i], n[0]);
+			                , i, n[i], n[0]);
 			web_err_proc(EL);
 			return -2000;
 		}
@@ -1718,7 +1747,7 @@ int webRece_monparas(webs_t wp)
 		}
 		protocol = point2next(&protocol, ' ');
 		//终端地址
-		if(rtu_addr_str2array(rtu_addr, &monparam.prot_addr[0])<0){
+		if (rtu_addr_str2array(rtu_addr, &monparam.prot_addr[0])<0) {
 			web_err_proc(EL);
 		}
 		rtu_addr = point2next(&rtu_addr, ' ');
@@ -1760,20 +1789,20 @@ int rtu_addr_str2array(const char* str, u8 a[4])
 	int i = 0;		//查找的个数,
 	int val = 0;
 	while (*str!='\0'&&*str!=' ') {
-		if (*str>='0'&& *str<='9') {
+		if (*str>='0'&&*str<='9') {
 			val = val*16+(*str-'0');
 			goto OK;
 		}
-		if (*str>='A'&& *str<='F') {
+		if (*str>='A'&&*str<='F') {
 			val = val*16+(*str-'A'+10);
 			goto OK;
 		}
-		if (*str>='a'&& *str<='f') {
+		if (*str>='a'&&*str<='f') {
 			val = val*16+(*str-'a'+10);
 			goto OK;
 		}
 		return -2;
-	OK:
+		OK:
 		str++;
 		i++;
 	}
@@ -1782,9 +1811,9 @@ int rtu_addr_str2array(const char* str, u8 a[4])
 	a[1] = (val&0x0F00)>>(4*2);
 	a[2] = (val&0x00F0)>>(4*1);
 	a[3] = (val&0x000F)>>(4*0);
-	printf("0xabcd&0xf000 = %X\n",0xabcd&0xf000);
-	printf("0xabcd&0xf000,>>24 = %X\n",(0xabcd&0xf000) >>24);
-	printf("%X %X %X %X [val=%X]\n",a[0],a[1],a[2],a[3],val);
+	printf("0xabcd&0xf000 = %X\n", 0xabcd&0xf000);
+	printf("0xabcd&0xf000,>>24 = %X\n", (0xabcd&0xf000)>>24);
+	printf("%X %X %X %X [val=%X]\n", a[0], a[1], a[2], a[3], val);
 	return i+1;
 }
 /**
@@ -1991,7 +2020,9 @@ int webRece_syspara(webs_t wp, stSysParam * sysparam)
 	return 0;
 }
 /**
- * 向页面发送配置信息,版本号,各种目录等.
+ * 向页面发送
+ * 1. webs的配置信息,版本号,各种目录
+ * 2. 主程序(hl3104_com)版本信息
  * @param[out] wp
  * @retval 0
  */
@@ -2005,6 +2036,7 @@ int webSend_info(webs_t wp)
 	}
 	char* oInfo = jsonNew();
 	char tmp[256] = { 0 };
+	jsonAdd(&oInfo, "main_version_string", webs_cfg.main_version_string);
 	jsonAdd(&oInfo, "info_webbin", dir);
 	jsonAdd(&oInfo, "info_webconf", CONF_FILE);
 	jsonAdd(&oInfo, "info_weblog", webs_cfg.errlog);
@@ -2196,7 +2228,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "i_dot", toStr(tmp, "%d", mtr.i_dot));
 		jsonAdd(&oMtrPara, "p_dot", toStr(tmp, "%d", mtr.p_dot));
 		jsonAdd(&oMtrPara, "q_dot", toStr(tmp, "%d", mtr.q_dot));
-		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%d", mtr.ue));//单位伏特,没有小数
+		jsonAdd(&oMtrPara, "ue", toStr(tmp, "%d", mtr.ue));	//单位伏特,没有小数
 		jsonAdd(&oMtrPara, "ie", toStr(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
@@ -2531,6 +2563,11 @@ void webs_free(void)
 	int i;
 	if (webdir!=NULL )     //不使用了就尽早释放.
 		free(webdir);
+	//
+	if (webs_cfg.main_version_string!=NULL ) {
+		free(webs_cfg.main_version_string);
+		webs_cfg.main_version_string = NULL;
+	}
 	//应用程序名称
 	if (webs_cfg.appname!=NULL ) {
 		free(webs_cfg.appname);

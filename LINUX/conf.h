@@ -10,6 +10,7 @@
 #include "color.h"
 ///webs服务器配置参数.开始时加载到内存,结束时释放
 typedef struct cfg{
+	char *main_version_string;//主程序版本字符串
 	char *appname;//应用程序全路径
 	char *port;//默认端口
 	int default_port; //若使用了硬编码的端口,在webs_free()时不需要释放内存.
@@ -52,9 +53,10 @@ extern stCfg webs_cfg;
 #define WEBS_DEFAULT_PORT	"8080" //默认HTTP端口,仅root有权限访问1000以下端口
 #define WEBS_DEFAULT_SSL_PORT	"4433" // Default HTTPS port
 
+//一些限制定义宏
 //页面一次发送最大长度,超长则分多次发送.否则会截断.wpsend()函数调用
 #define WP_MAX_LEN (512)
-
+#define MAIN_PROGRAM_VERSION_STRING_MAX_LENGTH (128) //主程序版本字符串最大长度
 //服务器程序自动检查升级
 #define  AUTO_UPDATE 1
 #if AUTO_UPDATE
@@ -103,7 +105,8 @@ extern stCfg webs_cfg;
 #define CFG_NET "netpara.cfg"///<网络參數配置文件
 #define CFG_MON_PARAM "monpara.cfg"///<监视参数数配置文件
 #define CFG_FORWARD_TABLE "retranTable.cfg"///<转发表信息文件
-#define CFG_SAVE_CYCLE "stspara.cfg"///<采集保存周期和项目配置文件
+#define CFG_SAVE_CYCLE "stspara.cfg"///<保存周期和项目配置文件
+#define CFG_COLLECT_CYCLE "ctspara.cfg"///<采集周期和项目配置文件
 
 //para参数相关文件.
 //#define PROC_CFG_DIR "../conf/" ///<规约文本文件目录

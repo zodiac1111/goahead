@@ -5,42 +5,16 @@
 # Copyright (c) GoAhead Software, Inc. 1995-2010
 # Copyright (c) PeerSec Networks, Inc. 2010
 #
-#
-#默认目标:开发版本/发布版本
-default:  debug
 
-#所有,包括发布版本和文档
-all:gold
+include_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/include
+lib_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/lib
+lib_obj = 
+lib_obj += -lsys_utl
+lib_obj += -lexternCShm
+#用于上传到终端的ip
+rtu_ip_for_update=192.168.1.189 
 
-#清除
-clean:
-	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
-	rm -f err.log log.txt trace.txt ../trace.txt 
-	rm -f ../log.txt 
-distclean:clean
-	rm -rf html
-	rm -rf ../version.h
-	rm -rf *~ ../*~
-#文档(简化的文档,主要给使用人员阅读)	
-doc-simple:UPDATE-EVERY-TIME
-	doxygen Doxyfile
-#给开发人员的更详细的文档
-doc:UPDATE-EVERY-TIME
-	doxygen Doxyfile-dev
-#"伪"目标,每次都强制更新
-UPDATE-EVERY-TIME:
-
-ARCH	= libwebs.a
-NAME	= webs
-# User Management switch
-#UMSW	= -DUSER_MANAGEMENT_SUPPORT
-
-# Digest Access switch
-DASW	= -DDIGEST_ACCESS_SUPPORT
-
-#
 # This is set by the debug target below 设置发布版和开发版区别
-#
 ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
 	-Winline -Wdisabled-optimization -DDEBUG \
@@ -50,8 +24,38 @@ DFLAGS  = -g -Wall -Wextra \
 else
 CC=arm-linux-gcc
 CXX=arm-linux-g++
-DFLAGS  = -Os
+DFLAGS  = -Os -Wall
 endif
+
+default:  debug
+
+all: gold
+
+clean:
+	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
+	rm -f err.log log.txt trace.txt ../trace.txt 
+	rm -f ../log.txt 
+distclean:clean
+	rm -rf html
+	rm -rf ../version.h
+	rm -rf *~ ../*~
+	
+#文档(简化的文档,主要给使用人员阅读)	
+doc-simple::
+	doxygen Doxyfile
+#给开发人员的更详细的文档
+doc::
+	doxygen Doxyfile-dev
+
+ARCH	= libwebs.a
+NAME	= webs
+# User Management switch
+#UMSW	= -DUSER_MANAGEMENT_SUPPORT
+
+# Digest Access switch
+DASW	= -DDIGEST_ACCESS_SUPPORT
+
+
 
 debug:
 	@$(MAKE) compile "WEBS_DEBUG = 1"
@@ -89,10 +93,11 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 OTHERS	= -DB_STATS -DB_FILL 
-IFLAGS 	= -I.. -I/home/zodiac1111/hl3104/trunk/hl3104-v1.3/include
+IFLAGS 	= -I.. -I$(include_dir)
+
 
 #ifdef WEBS_DEBUG
-LDFLAGS	= $(SSLLIB) $(IFMODLIB) 
+LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj) 
 #else
 #LDFLAGS	= $(SSLLIB) $(IFMODLIB) -ldl \
 # /home/lee/test/mycheckout/hl3104/trunk/hl3104jd/软件/hl3104/lib/libsys_utl.so \
@@ -116,8 +121,12 @@ $(NAME): Makefile $(ARCH)
 	$(CC) -o $(NAME) $(DFLAGS) \
 		$(CFLAGS) $(IFLAGS) \
 		 $(ARCH) $(LDFLAGS) 
-	cp $(NAME) $(NAME).update
+	cp $(NAME) $(NAME).update #复制一份用于升级
 
+#安装即上传到终端
+install:all
+	lftp -u anonymous,holley $(rtu_ip_for_update) \
+	-e "put $(NAME).update  -o nor/bin/;quit"
 #
 #	Dependencies
 #

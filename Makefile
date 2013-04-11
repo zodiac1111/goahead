@@ -1,6 +1,8 @@
 #主目录的Makefile文件,用于总体掌控,各项实现均在/LINUX下的Makefile实现.
 all:
 	make -C ./LINUX all
+install:
+	make -C ./LINUX install
 debug:
 	make -C ./LINUX debug
 clean:
