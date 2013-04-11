@@ -89,7 +89,7 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 OTHERS	= -DB_STATS -DB_FILL 
-IFLAGS 	= -I.. -I/home/lee/test/mycheckout/hl3104/trunk/hl3104jd/软件/hl3104/include
+IFLAGS 	= -I.. -I/home/zodiac1111/hl3104/trunk/hl3104-v1.3/include
 
 #ifdef WEBS_DEBUG
 LDFLAGS	= $(SSLLIB) $(IFMODLIB) 

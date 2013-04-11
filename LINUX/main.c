@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <dlfcn.h>
+#include "externCShm.h" //主程序共享内存的道出接口
 //#include "sys_utl.h"
 
 #if DLINK_TEST
