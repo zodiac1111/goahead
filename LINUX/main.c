@@ -380,7 +380,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 			//printf(WEBS_INF"子进程-结束webs进程\n");
 			//readlink("/proc/self/exe", app, 128);
 			//printf(WEBS_INF"子进程app:%s\n",app);
-			system("killall webs");
+			system("killall -9 webs");
 			execl(app, app, NULL );
 			exit(0);
 		}
@@ -693,7 +693,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	printf(WEBS_INF"rm(rename) cmd : %s\n",cmd);
 	system(cmd);
 	//解压文件
-	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f",
+	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f && echo \"ok\"",
 		full_fname,full_fname);
 	printf(WEBS_INF"tar cmd : %s\n",cmd);
 	system(cmd);
