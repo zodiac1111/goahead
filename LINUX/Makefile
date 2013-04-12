@@ -2,11 +2,12 @@
 #  for the Linux OS
 # Copyright (c) 华立电力
 
+HL3104_HOME=/home/zodiac1111/hl3104/trunk/hl3104-v1.3
 #配置头文件,库目录和库文件
 my_cc=arm-linux-gcc
 my_cxx=arm-linux-g++
-include_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/include
-lib_dir=/home/zodiac1111/hl3104/trunk/hl3104-v1.3/lib
+include_dir=$(HL3104_HOME)/include
+lib_dir=$(HL3104_HOME)/lib
 lib_obj = -lsys_utl
 lib_obj += -lexternCShm
 

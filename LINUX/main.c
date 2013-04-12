@@ -311,6 +311,27 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
+ * 表单提交函数,储存周期.
+ * @param wp 输入/输出
+ * @param path
+ * @param query
+ */
+void form_collect_cycle(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	websHeader_pure(wp);
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "get")==0) {
+		webSend_collect_cycle(wp);
+	} else if (strcmp(action, "set")==0) {
+		webRece_collect_cycle(wp);
+	} else {
+		web_err_proc(EL);
+	}
+	websDone(wp, 200);
+	return;
+}
+/**
  * 客户端发送重启表单,分类重启.
  * @todo 配合的更好一些,参考路由器的页面行为设计.
  *   前端一个更舒适的行为反馈(终端重启前端交互基本可行).
@@ -874,6 +895,7 @@ static int initWebs(void)
 	websFormDefine(T("netpara"), form_netparas);
 	websFormDefine(T("monparas"), form_monparas);
 	websFormDefine(T("savecycle"), form_savecycle);
+	websFormDefine(T("collectcycle"), form_collect_cycle);
 	websFormDefine(T("reset"), form_reset);
 	websFormDefine(T("get_tou"), form_history_tou);
 	websFormDefine(T("save_log"), form_save_log);
@@ -949,6 +971,7 @@ int load_webs_conf_info(void)
 	webs_cfg.monpara = mkFullPath(webs_cfg.paradir, CFG_MON_PARAM);
 	webs_cfg.retranTable = mkFullPath(webs_cfg.paradir, CFG_FORWARD_TABLE);
 	webs_cfg.stspara = mkFullPath(webs_cfg.paradir, CFG_SAVE_CYCLE);
+	webs_cfg.ctspara = mkFullPath(webs_cfg.paradir, CFG_COLLECT_CYCLE);
 	webs_cfg.protocol = mkFullPath(webs_cfg.confdir, PORC_FILE);
 	webs_cfg.monparam_name = mkFullPath(
 	                webs_cfg.confdir,
@@ -2379,12 +2402,94 @@ int webSend_savecycle(webs_t wp)
 	return 0;
 }
 /**
+ * 从文件读取采集周期,发送(写)到页面 .
+ * @param wp
+ * @return
+ */
+int webSend_collect_cycle(webs_t wp)
+{
+	stCollect_cycle sav[COLLECT_CYCLE_ITEM];
+	int ret = load_collect_cycle(sav, webs_cfg.ctspara);
+	if (ret==-1) {
+		web_err_proc(EL);
+		return -1;
+	}
+	char* oCollectCycle = jsonNew();
+	char* oCycleList = jsonNewArray();
+	char* oItem = jsonNew();
+	char* oItemArray = jsonNewArray();
+	uint j;
+	for (j = 0; j<sizeof(COLLECT_CYCLE)/sizeof(COLLECT_CYCLE[0]); j++) {
+		jsonAdd(&oCycleList, NULL, COLLECT_CYCLE[j]);
+	}
+	for (j = 0; j<COLLECT_CYCLE_ITEM; j++) {
+		jsonAdd(&oItemArray, NULL,addCollectItem(&oItem, sav[j]));
+#if DEBUG_PRINT_COLLECT_CYCLE
+		printf(WEBS_DBG"oItem:%s\n",oItemArray);
+#endif
+		jsonClear(&oItem);
+	}
+	jsonAdd(&oCollectCycle, "cycle", oCycleList);
+	jsonAdd(&oCollectCycle, "item", oItemArray);
+#if DEBUG_PRINT_COLLECT_CYCLE
+	printf(WEBS_DBG"oCollectCycle:%s\n",oCollectCycle);
+#endif
+	wpsend(wp, oCollectCycle);
+	jsonFree(&oItemArray);
+	jsonFree(&oItem);
+	jsonFree(&oCycleList);
+	jsonFree(&oCollectCycle);
+	return 0;
+}
+/**
+ * 从页面获取采样周期参数,保存到本地文件中
+ * @param wp
+ * @return
+ */
+int webRece_collect_cycle(webs_t wp)
+{
+	uint i;
+	int n;
+	stCollect_cycle sav[COLLECT_CYCLE_ITEM];
+	char *flags = websGetVar(wp, T("flag"), T("null"));
+	char *cycle = websGetVar(wp, T("cycle"), T("null"));
+	for (i = 0; i<COLLECT_CYCLE_ITEM; i++) {
+		n = sscanf(flags, "%hhu", &sav[i].enable);
+		if (n!=1) {
+			web_err_proc(EL);
+			break;
+		}
+		flags = point2next(&flags, ' ');
+		n = sscanf(cycle, "%hhu", &sav[i].cycle);
+		if (n!=1) {
+			web_err_proc(EL);
+			break;
+		}
+		cycle = point2next(&cycle, ' ');
+	}
+	load_collect_cycle(sav, webs_cfg.ctspara);
+	return 0;
+}
+/**
  *  存储周期的小项目json名&值对
  * @param oItem
  * @param sav
  * @return
  */
 char *addItem(char **oItem, stSave_cycle sav)
+{
+	char value[256] = { 0 };
+	jsonAdd(oItem, "en", toStr(value, "%d", sav.enable));
+	jsonAdd(oItem, "t", toStr(value, "%d", sav.cycle));
+	return *oItem;
+}
+/**
+ * 采集周期的小项目json名&值对
+ * @param oItem
+ * @param sav
+ * @return
+ */
+char *addCollectItem(char **oItem, stCollect_cycle sav)
 {
 	char value[256] = { 0 };
 	jsonAdd(oItem, "en", toStr(value, "%d", sav.enable));
@@ -2621,6 +2726,10 @@ void webs_free(void)
 	if (webs_cfg.stspara!=NULL ) {
 		free(webs_cfg.stspara);
 		webs_cfg.stspara = NULL;
+	}
+	if (webs_cfg.ctspara!=NULL ) {
+		free(webs_cfg.ctspara);
+		webs_cfg.ctspara = NULL;
 	}
 	if (webs_cfg.confdir!=NULL ) {
 		free(webs_cfg.confdir);

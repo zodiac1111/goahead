@@ -53,6 +53,12 @@ enum e_errno {
 	savecycle_cfgfile_size_err,
 	read_savecycle_cfgfile_err,
 	write_savecycle_cfgfile_err,
+	//collect cycle item:
+	open_collect_cycle_cfgfile_err,
+	collect_cycle_cfgfile_size_err,
+	read_collect_cycle_cfgfile_err,
+	write_collect_cycle_cfgfile_err,
+	collect_cycle_savecycle_cfgfile_err,
 	//initialize protocol
 	open_protocolfile_err,
 	toomany_protocol_err,

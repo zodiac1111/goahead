@@ -43,6 +43,21 @@ const char* SAVE_CYCLE[]={
 		[11]="720"CSTR_MIN,
 		[12]="1440"CSTR_MIN,
 };
+const char* COLLECT_CYCLE[]={
+		[0]="1"CSTR_MIN,
+		[1]="5"CSTR_MIN,
+		[2]="10"CSTR_MIN,
+		[3]="15"CSTR_MIN,
+		[4]="30"CSTR_MIN,
+		[5]="60"CSTR_MIN,
+		[6]="120"CSTR_MIN,
+		[7]="180"CSTR_MIN,
+		[8]="240"CSTR_MIN,
+		[9]="360"CSTR_MIN,
+		[10]="480"CSTR_MIN,
+		[11]="720"CSTR_MIN,
+		[12]="1440"CSTR_MIN,
+};
 /**
  * 从文本格式的配置文件中读取规约名称字符串.
  * 传入protocol_names数组后为其赋值,并传出.
@@ -720,12 +735,91 @@ int load_monparam(stMonparam * monparam, const char * file, int no)
 	return 0;
 }
 /**
+ * 读取/加载 COLLECT_CYCLE_ITEM 条采集周期记录
+ * @param[out] sav 存储周期记录,
+ * @param[in] file 存储周期配置文件
+ * @return
+ */
+int load_collect_cycle(stCollect_cycle collect[], const char * file)
+{
+	FILE* fp;
+	int ret = 0;
+	fp = fopen(file, "rb");
+	if (fp == NULL ) {
+		perror("open");
+		PRINT_HERE
+		web_errno = open_collect_cycle_cfgfile_err;
+		return -1;
+	}
+	fseek(fp, 0, SEEK_END);
+	int flen = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	if (flen != sizeof(stCollect_cycle) * COLLECT_CYCLE_ITEM) {
+		PRINT_HERE
+		printf("flen=%d sizeof(stCollect_cycle)=%d * %d",
+			flen, sizeof(stCollect_cycle),COLLECT_CYCLE_ITEM);
+		web_errno = collect_cycle_cfgfile_size_err;
+		fclose(fp);
+		return -1;
+	}
+	ret = fread(collect, sizeof(stCollect_cycle)* COLLECT_CYCLE_ITEM, 1, fp);
+	if (ret != 1) {
+		perror("read");
+		PRINT_HERE
+		web_errno = read_collect_cycle_cfgfile_err;
+		fclose(fp);
+		return -1;
+	}
+	fclose(fp);
+	return 0;
+}
+/**
+ * 保存"采集周期".
+ * @param sav
+ * @param file
+ * @return
+ */
+int save_collect_cycle(const stCollect_cycle sav[], const char * file)
+{
+	FILE* fp;
+	int ret = 0;
+	fp = fopen(file, "r+");
+	if (fp == NULL ) {
+		perror("open");
+		PRINT_HERE
+		web_errno = open_collect_cycle_cfgfile_err;
+		return (-1);
+	}
+	fseek(fp, 0, SEEK_END);
+	int flen = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	if (flen != sizeof(stCollect_cycle) * COLLECT_CYCLE_ITEM) {
+		int fd = fileno(fp);
+		ret = ftruncate(fd, sizeof(stCollect_cycle) * COLLECT_CYCLE_ITEM);
+		if(ret!=0){
+			web_errno= collect_cycle_cfgfile_size_err;
+			fclose(fp);
+			return (-1);
+		}
+	}
+	ret = fwrite(sav, sizeof(stCollect_cycle)* COLLECT_CYCLE_ITEM, 1, fp);		//写入
+	if (ret != 1) {
+		perror("write");
+		PRINT_HERE
+		web_errno= write_collect_cycle_cfgfile_err;
+		fclose(fp);
+		return (-1);
+	}
+	fclose(fp);
+	return 0;
+}
+/**
  * 读取/加载 SAVE_CYCLE_ITEM 条存储周期记录
  * @param[out] sav 存储周期记录,
  * @param[in] file 存储周期配置文件
  * @return
  */
-int load_savecycle(stSave_cycle sav[], const char * file)
+int load_savecycle(stSave_cycle collect[], const char * file)
 {
 	FILE* fp;
 	int ret = 0;
@@ -745,7 +839,7 @@ int load_savecycle(stSave_cycle sav[], const char * file)
 		fclose(fp);
 		return -1;
 	}
-	ret = fread(sav, sizeof(stSave_cycle)* SAVE_CYCLE_ITEM, 1, fp);
+	ret = fread(collect, sizeof(stSave_cycle)* SAVE_CYCLE_ITEM, 1, fp);
 	if (ret != 1) {
 		perror("read");
 		PRINT_HERE
@@ -780,6 +874,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 		int fd = fileno(fp);
 		ret = ftruncate(fd, sizeof(stSave_cycle) * SAVE_CYCLE_ITEM);
 		if(ret!=0){
+			web_errno= write_savecycle_cfgfile_err;
 			fclose(fp);
 			return (-1);
 		}
@@ -788,7 +883,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 	if (ret != 1) {
 		perror("write");
 		PRINT_HERE
-		web_errno= write_netparam_cfgfile_err;
+		web_errno= write_savecycle_cfgfile_err;
 		fclose(fp);
 		return (-1);
 	}

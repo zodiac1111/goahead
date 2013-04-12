@@ -21,13 +21,13 @@ version:
 
 #用于打包(发布版 尽量保留少量东西,文档被简化)
 publish:clean version all 
-	make -C ./LINUX doc;
+	#make -C ./LINUX doc;
 	./publish.sh
 
 #用于打包 开发板.去除全部可以由代码生成的文件.
 #使用时需要 git awk sed doxygen 这些工具用于重建.
 publish-dev:distclean version 
-	make -C ./LINUX doc;
+	#make -C ./LINUX doc;
 	./publish.sh dev
 log:
 	echo "生成开发日志 dev.log "

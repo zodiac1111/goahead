@@ -16,8 +16,11 @@
 #define ADDR_LEN 12U
 #define PWD_LEN 8U
 ///<储存周期项目,目前(6项):
-///1. 总电量 2. 分时电量	3.相线无功电能 4.最大需量 5.实时遥测量 6.失压断相
+///1. 总电量 2. 分时电量	3.象限无功电能 4.最大需量 5.实时遥测量 6.失压断相
 #define SAVE_CYCLE_ITEM 6U
+///采集周期项目,6相
+///1. 总电量 2. 分时电量	3.象限无功电能 4.最大需量 5.瞬时量 6.失压断相
+#define COLLECT_CYCLE_ITEM 6U
 extern const char *PW[2];
 extern const char *PROTOROL[2];
 extern const char *UART_P[3];
@@ -26,6 +29,7 @@ extern const char *UART_STOP[2];
 extern const char *UART_BAUD[7];
 extern const char *UART_COMM_TYPE[2];
 extern const char *SAVE_CYCLE[13];
+extern const char *COLLECT_CYCLE[13];
 /**
  *  打印输出当前位置的文件,函数,代码行数
  */
@@ -129,6 +133,12 @@ typedef struct{
 	u8 cycle;///<存储周期
 } __attribute__((packed, aligned(1))) stSave_cycle;
 
+/// 采集周期参数文件结构
+typedef struct{
+	u8 enable;///<0无效,1有效
+	u8 cycle;///<存储周期
+} __attribute__((packed, aligned(1))) stCollect_cycle;
+
 //加载(一条)参数
 int load_sysparam(stSysParam * param, const char * file);
 int load_mtrparam(stMtr* pmtr, const char * file, int no);
@@ -136,6 +146,7 @@ int load_sioplan(stUart_plan * plan, const char * file, int no);
 int load_netparam(stNetparam * netparam, const char * file, int no);
 int load_monparam(stMonparam * monparam, const char * file, int no);
 int load_savecycle(stSave_cycle sav[], const char * file);//全部储存周期
+int load_collect_cycle(stCollect_cycle collect[], const char * file);//采集周期
 //保存(一条)参数
 int save_sysparam(const stSysParam * param, const char * file);
 int save_mtrparam(const stMtr * mtr, const char * file, int no);
@@ -143,6 +154,7 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no);
 int save_netport(const stNetparam * net, const char * file, int no);
 int save_monparam(const stMonparam * mon, const char * file, int no);
 int save_savecycle(const stSave_cycle sav[], const char * file);//全部储存周期
+int save_collect_cycle(const stCollect_cycle sav[], const char * file);//采集周期
 //由系统参数触发的其他参数的修改
 int update_mtrfile(const stSysParam param);
 int update_siofile(const stSysParam param);

@@ -33,8 +33,8 @@ typedef struct {
 		struct{
 			u8 res:7;///<保留 取0
 			u8 iv:1;///<有效标志,1-有效
-		};
-	};
+		} __attribute__((packed, aligned(1)));
+	} __attribute__((packed, aligned(1)));
 }  __attribute__((packed, aligned(1))) Ti;
 ///tou 总尖峰平谷
 typedef struct {

@@ -35,6 +35,7 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query);
 void form_netparas(webs_t wp, char_t *path, char_t *query);
 void form_monparas(webs_t wp, char_t *path, char_t *query);
 void form_savecycle(webs_t wp, char_t *path, char_t *query);
+void form_collect_cycle(webs_t wp, char_t *path, char_t *query);
 void form_reset(webs_t wp, char_t *path, char_t *query);
 void form_history_tou(webs_t wp, char_t *path, char_t *query);
 void form_msg(webs_t wp, char_t *path, char_t *query);
@@ -56,6 +57,8 @@ int webSend_mtr_procotol(webs_t wp);
 int webSend_mtr_factory(webs_t wp);
 //int webSend_mtr_type(webs_t wp);
 int webSend_savecycle(webs_t wp);
+int webSend_collect_cycle(webs_t wp);
+int webRece_collect_cycle(webs_t wp);
 int webRece_savecycle(webs_t wp);
 int webRece_mtrparams(webs_t wp);
 int webSend_mtrparams(webs_t wp, int mtrnum);
@@ -78,6 +81,8 @@ char* webrite_listen_port(char* tmp, const stMonparam monport);
 char* webWrite_rtu_addr(char* tmp, stMonparam monport);
 //存储周期
 char *addItem(char **oItem,stSave_cycle sav);
+//采集周期
+char *addCollectItem(char **oItem, stCollect_cycle sav);
 ///其他
 static int split(char **ret, char* in);
 static int is_all_equ(int n[], int num);
