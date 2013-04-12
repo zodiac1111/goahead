@@ -3,6 +3,10 @@
  */
 #ifndef _RTIT_H_
 #define _RTIT_H_
+#include <time.h>
 #include "struct.h"
 #include "externCShm.h"
+
+int f1(void);
+
 #endif
