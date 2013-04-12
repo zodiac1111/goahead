@@ -626,23 +626,32 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	char tmp[128] = { 0 };
 	websHeader_pure(wp);
 	jsObj oUpdate = jsonNew();
-	char tmpfname[1024] = { 0 };
+	char full_fname[1024] = { 0 };//全路径的压缩包名
+	char tmpfname[1024] = { 0 };//保存到服务器的临时文件名
 	char cmd[1024] = { 0 };
+	//简单验证试图更新文件的正确性
 	if (bn==NULL ) {
 		jsonAdd(&oUpdate, "ret", "filename must no-void");
+		web_err_proc(EL);
 		goto SEND;
 	}
-	if (strcmp(bn, "webs.update")!=0) {
-		jsonAdd(&oUpdate, "ret", "filename must be webs.update");
+	if (strcmp(bn, "webs-binary.tar.gz")==0) {
+		web_err_proc(EL);
+		jsonAdd(&oUpdate, "ret", "filename must be webs-binary.tar.gz");
 		goto SEND;
 	}
 	jsonAdd(&oUpdate, "filename", bn);
 	jsonAdd(&oUpdate, "size", toStr(tmp, "%d", wp->lenPostData));
-	sprintf(tmpfname, "%s%s%s", webs_cfg.appname, UP_SUFFIX, ".tmp");
+	sprintf(full_fname, "/tmp/%s", bn);
+	sprintf(tmpfname, "%s%s", full_fname, ".tmp");
+	jsonAdd(&oUpdate, "savename", tmpfname);
+	//开始将文件保存到服务器,打开本地文件
 	if ((fp = fopen(tmpfname, "w+b"))==NULL ) {
 		jsonAdd(&oUpdate, "ret", "open file failed");
+		web_err_proc(EL);
 		goto SEND;
 	}
+	//写临时文件 .tmp
 	locWrite = 0;
 	numLeft = wp->lenPostData;
 	while (numLeft>0) {
@@ -657,26 +666,37 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		locWrite += numWrite;
 		numLeft -= numWrite;
 	}
+	//检查 临时文件
 	if (numLeft!=0) {
-		jsonAdd(
-		                &oUpdate,
-		                "ret",
-		                toStr(
+		jsonAdd(&oUpdate, "ret", toStr(
 		                                tmp,
 		                                "不完整 numLeft=%d locWrite=%d Size=%d bytes",
 		                                numLeft,
 		                                locWrite,
 		                                wp->lenPostData));
 		fclose(fp);
+		web_err_proc(EL);
 		goto SEND;
 
 	}
+	//关闭文件,此时会刷新缓冲区到文件,真正的保存成为文件.(*.tmp)
 	if (fclose(fp)!=0) {
 		jsonAdd(&oUpdate, "ret", "close file failed");
+		web_err_proc(EL);
 		goto SEND;
 	}
 	//完成传输
-	system(toStr(cmd, "mv %s %s", tmpfname, UPDATE_FILE_NAME));
+	//去掉tmp后缀
+	printf(WEBS_INF"full_fname : %s\n",full_fname);
+	printf(WEBS_INF"tmpfname : %s\n",tmpfname);
+	toStr(cmd,"mv %s %s",tmpfname,full_fname);
+	printf(WEBS_INF"rm(rename) cmd : %s\n",cmd);
+	system(cmd);
+	//解压文件
+	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f",
+		full_fname,full_fname);
+	printf(WEBS_INF"tar cmd : %s\n",cmd);
+	system(cmd);
 	jsonAdd(&oUpdate, "ret", "ok");
 
 	SEND:
