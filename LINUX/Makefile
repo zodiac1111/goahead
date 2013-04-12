@@ -90,20 +90,14 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../security.o ../sym.o ../uemf.o ../url.o ../value.o \
 		../um.o ../umui.o ../websda.o ../emfdb.o \
 		../webrom.o ../webs.o ../websuemf.o \
-	       	param.o main.o web_err.o tou.o json.o
+	       	param.o main.o web_err.o tou.o json.o rtit.o
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 OTHERS	= -DB_STATS -DB_FILL 
 IFLAGS 	= -I.. -I$(include_dir)
 
-#ifdef WEBS_DEBUG
+#链接
 LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj) 
-#else
-#LDFLAGS	= $(SSLLIB) $(IFMODLIB) -ldl \
-# /home/lee/test/mycheckout/hl3104/trunk/hl3104jd/软件/hl3104/lib/libsys_utl.so \
-# /home/lee/test/mycheckout/hl3104/trunk/hl3104jd/软件/hl3104/include/libmtrdata_c.so \
-# -W,-R. 
-#endif
 
 compile: $(NAME)
 
@@ -131,6 +125,7 @@ param.o: param.c param.h web_err.h conf.h
 web_err.o: web_err.c web_err.h conf.h
 tou.o:tou.c tou.h conf.h
 json.o:json.c json.h
+rtit.o:rtit.h
 # Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
 ../balloc.o: ../balloc.c ../uemf.h
