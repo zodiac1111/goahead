@@ -311,7 +311,7 @@ void form_savecycle(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
- * 表单提交函数,储存周期.
+ * 表单提交函数,采集周期
  * @param wp 输入/输出
  * @param path
  * @param query
@@ -2358,7 +2358,9 @@ int webRece_savecycle(webs_t wp)
 		}
 		cycle = point2next(&cycle, ' ');
 	}
-	save_savecycle(sav, webs_cfg.stspara);
+	if(save_savecycle(sav, webs_cfg.stspara)<0){
+		web_err_proc(EL);
+	}
 	return 0;
 }
 /**
@@ -2448,7 +2450,7 @@ int webSend_collect_cycle(webs_t wp)
  */
 int webRece_collect_cycle(webs_t wp)
 {
-	uint i;
+	int i;
 	int n;
 	stCollect_cycle sav[COLLECT_CYCLE_ITEM];
 	char *flags = websGetVar(wp, T("flag"), T("null"));
@@ -2467,7 +2469,9 @@ int webRece_collect_cycle(webs_t wp)
 		}
 		cycle = point2next(&cycle, ' ');
 	}
-	load_collect_cycle(sav, webs_cfg.ctspara);
+	if(load_collect_cycle(sav, webs_cfg.ctspara)<0){
+		web_err_proc(EL);
+	}
 	return 0;
 }
 /**
