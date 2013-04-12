@@ -28,7 +28,7 @@ DFLAGS  = -g -Wall -Wextra \
 else
 CC=$(my_cc)
 CXX=$(my_cxx)
-DFLAGS  = -Os -Wall 
+DFLAGS  = -Os -Wall -Wextra
 endif
 
 default:  debug

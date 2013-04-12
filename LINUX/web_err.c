@@ -56,10 +56,16 @@ const char *myweberrstr[] = {
         		CFG_MON_PARAM".",
         [write_monparam_cfgfile_err]="Write Monitor Paramter file err:"
         		CFG_MON_PARAM".",
-        ///储存周期
+        //储存周期
         [open_savecycle_cfgfile_err]="Err when open the save cycle cfg file.",
         [savecycle_cfgfile_size_err]="Save cycle cfg file size is error.",
+        [read_savecycle_cfgfile_err]="Read save cycle config file",
         [write_savecycle_cfgfile_err]="Write save cycle cfg file error.",
+        //采集周期
+        [open_collect_cycle_cfgfile_err]="Err when open the collect cycle conf file.",
+        [collect_cycle_cfgfile_size_err]="Save collect cfg file size is error.",
+        [read_collect_cycle_cfgfile_err]="Read collect cycle config file",
+        [write_collect_cycle_cfgfile_err]="Write collect cycle cfg file error.",
         ///规约初始化
         [open_protocolfile_err]="Open Protocol file err:"PORC_FILE,
         [toomany_protocol_err]="Too many Protocol in "PORC_FILE"."\

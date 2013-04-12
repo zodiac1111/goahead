@@ -58,7 +58,7 @@ static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
 ///内存中的系统参数结构体.全局使用.
-stSysParam sysparam = { 0 };
+stSysParam sysparam = { 0,0,0,0,0,0,0 };
 ///规约文件中的规约名称.
 static char *procotol_name[MAX_PROCOTOL_NUM];
 ///规约文件中的实际规约数,初始化为最大
@@ -2456,6 +2456,7 @@ int webRece_collect_cycle(webs_t wp)
 	char *flags = websGetVar(wp, T("flag"), T("null"));
 	char *cycle = websGetVar(wp, T("cycle"), T("null"));
 	for (i = 0; i<COLLECT_CYCLE_ITEM; i++) {
+		printf(WEBS_DBG"i=%d\n",i);
 		n = sscanf(flags, "%hhu", &sav[i].enable);
 		if (n!=1) {
 			web_err_proc(EL);
@@ -2469,7 +2470,7 @@ int webRece_collect_cycle(webs_t wp)
 		}
 		cycle = point2next(&cycle, ' ');
 	}
-	if(load_collect_cycle(sav, webs_cfg.ctspara)<0){
+	if(save_collect_cycle(sav, webs_cfg.ctspara)<0){
 		web_err_proc(EL);
 	}
 	return 0;

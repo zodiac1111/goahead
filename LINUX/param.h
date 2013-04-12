@@ -17,10 +17,10 @@
 #define PWD_LEN 8U
 ///<储存周期项目,目前(6项):
 ///1. 总电量 2. 分时电量	3.象限无功电能 4.最大需量 5.实时遥测量 6.失压断相
-#define SAVE_CYCLE_ITEM 6U
+#define SAVE_CYCLE_ITEM (6)
 ///采集周期项目,6相
 ///1. 总电量 2. 分时电量	3.象限无功电能 4.最大需量 5.瞬时量 6.失压断相
-#define COLLECT_CYCLE_ITEM 6U
+#define COLLECT_CYCLE_ITEM (6)
 extern const char *PW[2];
 extern const char *PROTOROL[2];
 extern const char *UART_P[3];
