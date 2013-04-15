@@ -116,6 +116,11 @@ $(NAME): Makefile $(ARCH)
 # 安装即上传到终端指定目录
 install:all
 	lftp -u $(username),$(passwd) $(rtu_ip_for_update) \
+	-e "put $(NAME)  -o $(update_dir);quit" && \
+	echo -e "\033[32mSuccess\033[0m"
+#升级,原来已经有webs的情况下,上传.update文件可以,之后重启,可以自动升级.
+update:all
+	lftp -u $(username),$(passwd) $(rtu_ip_for_update) \
 	-e "put $(NAME).update  -o $(update_dir);quit" && \
 	echo -e "\033[32mSuccess\033[0m"
 

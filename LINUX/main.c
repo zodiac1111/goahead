@@ -367,6 +367,8 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		}
 		break;
 	case RET_WEB:
+		autoUpdate();
+		/*
 		readlink("/proc/self/exe", app, 128);
 		pid = fork();
 		if (pid==-1) {
@@ -386,7 +388,7 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		}
 		if (pid>0) {     //父进程
 		                 //printf(WEBS_INF"父进程-结束webs进程\n");
-		}
+		} */
 		break;
 	case RET_SAMPLE_PROC:		///@待定
 		system("killall hl3104_com");

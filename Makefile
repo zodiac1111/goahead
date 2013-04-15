@@ -3,6 +3,8 @@ all:
 	make -C ./LINUX all
 install:
 	make -C ./LINUX install
+update:
+	make -C ./LINUX update
 debug:
 	make -C ./LINUX debug
 clean:
@@ -13,7 +15,8 @@ doc:
 	make -C ./LINUX doc
 distclean:
 	make -C ./LINUX distclean
-	
+binary:
+	/home/zodiac1111/workspace/package-make/mkpkg.sh
 #以下用于发布，必须有git软件支持，否则版本号不会更新
 #生成版本号	
 version:
