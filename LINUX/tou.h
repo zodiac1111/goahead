@@ -3,6 +3,7 @@
 #include <time.h>
 #include "../uemf.h"
 #include "../wsIntrn.h"
+#include <stdint.h>
 #include "type.h"
 #define DATA_DIR "../../nand" //数据目录
 #if __i386 == 1
@@ -13,26 +14,26 @@
 #define TOU_DAT_SUFFIX "tou" //电量数据文件后缀名
 ///tou 文件头
 typedef struct {
-	u8 year; //+2000
-	u8 month;
-	u8 day;
-	u8 save_cycle_lo;///<存储周期[分钟]
-	u8 save_cycle_hi;///<存储周期[分钟]
-	u8 save_number;
-	u8 save_flag1;
-	u8 save_flag2;
-	u8 save_flag3;
-	u8 save_flag4;
+	uint8_t year; //+2000
+	uint8_t month;
+	uint8_t day;
+	uint8_t save_cycle_lo;///<存储周期[分钟]
+	uint8_t save_cycle_hi;///<存储周期[分钟]
+	uint8_t save_number;
+	uint8_t save_flag1;
+	uint8_t save_flag2;
+	uint8_t save_flag3;
+	uint8_t save_flag4;
 }  __attribute__((packed, aligned(1))) stTouFilehead;
 ///某单独电量结构,如 总电量 或者 谷电量
 typedef struct {
 	///以4个字节型组织的假装的浮点型,注意读取时顺序
-	u8 fake_float_val[4];
+	uint8_t fake_float_val[4];
 	union{
-		u8 byte;
+		uint8_t byte;
 		struct{
-			u8 res:7;///<保留 取0
-			u8 iv:1;///<有效标志,1-有效
+			uint8_t res:7;///<保留 取0
+			uint8_t iv:1;///<有效标志,1-有效
 		} __attribute__((packed, aligned(1)));
 	} __attribute__((packed, aligned(1)));
 }  __attribute__((packed, aligned(1))) Ti;

@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <dlfcn.h>
+#include "rtit.h"
 #include "externCShm.h" //主程序共享内存的道出接口
 //#include "sys_utl.h"
 
@@ -368,30 +369,9 @@ void form_reset(webs_t wp, char_t *path, char_t *query)
 		break;
 	case RET_WEB:
 		autoUpdate();
-		/*
-		readlink("/proc/self/exe", app, 128);
-		pid = fork();
-		if (pid==-1) {
-			printf(WEBS_ERR"重启webs错误\n");
-			web_err_proc(EL);
-			fprintf(stderr, "fork() error.errno:%d error:%s\n",
-			                errno, strerror(errno));
-			break;
-		}
-		if (pid==0) {     //子进程.
-			//printf(WEBS_INF"子进程-结束webs进程\n");
-			//readlink("/proc/self/exe", app, 128);
-			//printf(WEBS_INF"子进程app:%s\n",app);
-			system("killall -9 webs");
-			execl(app, app, NULL );
-			exit(0);
-		}
-		if (pid>0) {     //父进程
-		                 //printf(WEBS_INF"父进程-结束webs进程\n");
-		} */
 		break;
 	case RET_SAMPLE_PROC:		///@待定
-		system("killall hl3104_com");
+		system("killall -9 hl3104_com");
 		break;
 	case RET_RTU:
 		//reflash_this_wp(wp, PAGE_RESET);
@@ -474,6 +454,7 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
+
 
 /// 接收客户端的日志文件
 void form_save_log(webs_t wp, char_t *path, char_t *query)
@@ -911,15 +892,16 @@ static int initWebs(void)
 	 */
 	//注册表单post函数. form define/用于post
 	websFormDefine(T("srv_time"), form_server_time);
-	websFormDefine(T("mtrparams"), form_mtrparams);
 	websFormDefine(T("sysparam"), form_sysparam);
 	websFormDefine(T("sioplan"), form_sioplans);
 	websFormDefine(T("netpara"), form_netparas);
 	websFormDefine(T("monparas"), form_monparas);
 	websFormDefine(T("savecycle"), form_savecycle);
 	websFormDefine(T("collectcycle"), form_collect_cycle);
-	websFormDefine(T("reset"), form_reset);
+	websFormDefine(T("mtrparams"), form_mtrparams);
 	websFormDefine(T("get_tou"), form_history_tou);
+	websFormDefine(T("realtime_tou"), form_realtime_tou);
+	websFormDefine(T("reset"), form_reset);
 	websFormDefine(T("save_log"), form_save_log);
 	websFormDefine(T("load_log"), form_load_log);
 	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);

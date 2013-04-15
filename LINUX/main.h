@@ -15,12 +15,7 @@
 #include "tou.h"
 #include "conf.h"
 #include "json.h"
-#if DEBUG_INFO_FORM
-///打印form表单提交函数的入口信息:函数名,传递进来的队列
-#define PRINT_FORM_INFO printf(WEBS_INF"%s:%s\n", __FUNCTION__,query)
-#else
-#define PRINT_FORM_INFO
-#endif
+
 #define MTR_ADD 1 //增删查改?...
 #define MTR_DEL  2
 #define MTR_SEARCH  3
@@ -36,8 +31,8 @@ void form_netparas(webs_t wp, char_t *path, char_t *query);
 void form_monparas(webs_t wp, char_t *path, char_t *query);
 void form_savecycle(webs_t wp, char_t *path, char_t *query);
 void form_collect_cycle(webs_t wp, char_t *path, char_t *query);
-void form_reset(webs_t wp, char_t *path, char_t *query);
 void form_history_tou(webs_t wp, char_t *path, char_t *query);
+void form_reset(webs_t wp, char_t *path, char_t *query);
 void form_msg(webs_t wp, char_t *path, char_t *query);
 void form_msg_stop(webs_t wp, char_t *path, char_t *query);
 void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);

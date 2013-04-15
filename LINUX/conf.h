@@ -133,4 +133,11 @@ extern stCfg webs_cfg;
 		 __DATE__, __TIME__);		\
 	}
 
+#if DEBUG_INFO_FORM
+///打印form表单提交函数的入口信息:函数名,传递进来的队列
+	#define	PRINT_FORM_INFO printf(WEBS_INF"%s:%s\n", __FUNCTION__,query)
+#else
+	#define	PRINT_FORM_INFO
+#endif
+
 #endif /* CONF_H_ */
