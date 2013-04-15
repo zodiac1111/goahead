@@ -17,7 +17,7 @@ rtu_ip_for_update=192.168.1.189
 username=anonymous
 passwd=holley
 update_dir=nor/bin/
-
+build_dir=build
 # This is set by the debug target below 设置发布版和开发版区别(现在耦合,实时数据)
 ifdef WEBS_DEBUG
 DFLAGS  = -g -Wall -Wextra \
@@ -81,7 +81,9 @@ endif
 # If-Modified-Support switches (requires math library, libm.a)
 # IFMODSW = -DWEBS_IF_MODIFIED_SUPPORT
 # IFMODLIB = /usr/lib/libm.a
-
+#本实例需要的依赖
+my_obj=param.o main.o web_err.o tou.o json.o \
+	       	src/rtit.o src/wpsend.o
 # Dependencies
 DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../cgi.o ../default.o  ../ejlex.o ../ejparse.o ../form.o \
@@ -89,8 +91,8 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 	 	../ringq.o ../rom.o  ../sock.o ../sockGen.o \
 		../security.o ../sym.o ../uemf.o ../url.o ../value.o \
 		../um.o ../umui.o ../websda.o ../emfdb.o \
-		../webrom.o ../webs.o ../websuemf.o \
-	       	param.o main.o web_err.o tou.o json.o rtit.o src/wpsend.o
+		../webrom.o ../webs.o ../websuemf.o $(my_obj)
+	       	
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 OTHERS	= -DB_STATS -DB_FILL 
@@ -130,7 +132,7 @@ param.o: param.c param.h web_err.h conf.h
 web_err.o: web_err.c web_err.h conf.h
 tou.o:tou.c tou.h conf.h
 json.o:json.c json.h
-rtit.o:rtit.h
+src/rtit.o: include/rtit.h src/rtit.c
 src/wpsend.o:src/wpsend.c include/wpsend.h
 # Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
