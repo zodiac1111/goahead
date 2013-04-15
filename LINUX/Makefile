@@ -90,11 +90,11 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../security.o ../sym.o ../uemf.o ../url.o ../value.o \
 		../um.o ../umui.o ../websda.o ../emfdb.o \
 		../webrom.o ../webs.o ../websuemf.o \
-	       	param.o main.o web_err.o tou.o json.o rtit.o
+	       	param.o main.o web_err.o tou.o json.o rtit.o src/wpsend.o
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 OTHERS	= -DB_STATS -DB_FILL 
-IFLAGS 	= -I.. -I$(include_dir)
+IFLAGS 	= -I.. -I. -Iinclude -I$(include_dir)
 
 #链接
 LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj) 
@@ -131,6 +131,7 @@ web_err.o: web_err.c web_err.h conf.h
 tou.o:tou.c tou.h conf.h
 json.o:json.c json.h
 rtit.o:rtit.h
+src/wpsend.o:src/wpsend.c include/wpsend.h
 # Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
 ../balloc.o: ../balloc.c ../uemf.h

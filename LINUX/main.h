@@ -90,7 +90,6 @@ char * point2next(char** s, const char split);
 int load_webs_conf_info(void);
 int autoUpdate(void);
 void init_semun(void);
-int wpsend(webs_t wp,jsObj oJson);
 char* a2jsObj(char *tmp, uint8_t * array,int n);
 char* getconf(const char * const name,char** value);
 void webs_free(void);

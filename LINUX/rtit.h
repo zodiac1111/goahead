@@ -11,6 +11,5 @@
 #include "define.h"
 extern void form_realtime_tou(webs_t wp, char_t *path, char_t *query);
 //
-static int webRece_realtime_tou(webs_t wp);
-static int parse_item(uint8_t *bTou,uint8_t *bQR,webs_t wp);
+
 #endif
