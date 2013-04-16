@@ -597,7 +597,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	int numLeft;
 	int numWrite;
 	a_assert(websValid(wp));
-	websHeader(wp);
+	websHeader_pure(wp);
 	fn = websGetVar(wp, T("filename"), T(""));
 	if (fn!=NULL &&*fn!='\0') {
 		if ((int) (bn = gstrrchr(fn, '/')+1)==1) {
@@ -607,8 +607,8 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	printf(WEBS_INF"file update fn=%s, bn=%s\n", fn, bn);
+	websWrite(wp, T("file update fn=%s, bn=%s<br>"), fn, bn);
 	char tmp[128] = { 0 };
-	websHeader_pure(wp);
 	jsObj oUpdate = jsonNew();
 	char full_fname[1024] = { 0 };//全路径的压缩包名
 	char tmpfname[1024] = { 0 };//保存到服务器的临时文件名
@@ -624,12 +624,14 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		jsonAdd(&oUpdate, "ret", "filename must be webs-binary.tar.gz");
 		goto SEND;
 	}
+	websWrite(wp,"文件名正确<br>");
 	jsonAdd(&oUpdate, "filename", bn);
 	jsonAdd(&oUpdate, "size", toStr(tmp, "%d", wp->lenPostData));
 	sprintf(full_fname, "/tmp/%s", bn);
 	sprintf(tmpfname, "%s%s", full_fname, ".tmp");
 	jsonAdd(&oUpdate, "savename", tmpfname);
 	//开始将文件保存到服务器,打开本地文件
+	websWrite(wp,T("上传到服务器..<br>"));
 	if ((fp = fopen(tmpfname, "w+b"))==NULL ) {
 		jsonAdd(&oUpdate, "ret", "open file failed");
 		web_err_proc(EL);
@@ -663,6 +665,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		goto SEND;
 
 	}
+	websWrite(wp,"上传结束<br>");
 	//关闭文件,此时会刷新缓冲区到文件,真正的保存成为文件.(*.tmp)
 	if (fclose(fp)!=0) {
 		jsonAdd(&oUpdate, "ret", "close file failed");
@@ -670,6 +673,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		goto SEND;
 	}
 	//完成传输
+	websWrite(wp,"复制文件到临时目录<br>");
 	//去掉tmp后缀
 	printf(WEBS_INF"full_fname : %s\n",full_fname);
 	printf(WEBS_INF"tmpfname : %s\n",tmpfname);
@@ -677,6 +681,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	printf(WEBS_INF"rm(rename) cmd : %s\n",cmd);
 	system(cmd);
 	//解压文件
+	websWrite(wp,"解压文件<br>");
 	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f && echo \"ok\"",
 		full_fname,full_fname);
 	printf(WEBS_INF"tar cmd : %s\n",cmd);
@@ -686,6 +691,9 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	SEND:
 	wpsend(wp, oUpdate);
 	jsonFree(&oUpdate);
+	websWrite(wp,"重启服务器...<br>");
+	websWrite(wp,T("更新完成.<br>"));
+	autoUpdate();//自动重启
 	websDone(wp, 200);
 }
 /**

@@ -92,6 +92,8 @@ const char *myweberrstr[] = {
         	",use " RED WEBS_DEFAULT_SSL_PORT _COLOR
         	" as a backup sslport number.",
           [syn_time]="Set system datatime error.",
+          [eno_realtime_tou_mtrnum_too_small]="Realtime tou mtrnum too small.",
+          [eno_realtime_tou_mtrnum_too_big]="Realtime tou mtrnum too big.",
 };
 /**
  * 服务器错误处理函数.

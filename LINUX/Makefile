@@ -127,7 +127,8 @@ update:all
 	echo -e "\033[32mSuccess\033[0m"
 
 # 依赖(webs的)
-main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h web_err.h conf.h ../version.h
+main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h \
+	web_err.h conf.h ../version.h
 param.o: param.c param.h web_err.h conf.h
 web_err.o: web_err.c web_err.h conf.h
 tou.o:tou.c tou.h conf.h
