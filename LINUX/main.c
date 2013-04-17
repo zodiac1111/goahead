@@ -334,7 +334,7 @@ void form_collect_cycle(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 /**
- * 客户端发送重启表单,分类重启.
+ * 客户端发送重启表单,分类重启,一些系统功能
  * @todo 配合的更好一些,参考路由器的页面行为设计.
  *   前端一个更舒适的行为反馈(终端重启前端交互基本可行).
  *   进行较为科学的分类,待整理.
@@ -342,7 +342,7 @@ void form_collect_cycle(webs_t wp, char_t *path, char_t *query)
  * @param path
  * @param query
  */
-void form_reset(webs_t wp, char_t *path, char_t *query)
+void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 {
 #define REINIT_PROTOCOL_FILE 1
 #define RET_WEB 2
@@ -681,18 +681,19 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	printf(WEBS_INF"rm(rename) cmd : %s\n",cmd);
 	system(cmd);
 	//解压文件
-	websWrite(wp,"解压文件<br>");
+	websWrite(wp,"正在解压文件(可能需要1~2分钟)<br>");
 	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f && echo \"ok\"",
 		full_fname,full_fname);
 	printf(WEBS_INF"tar cmd : %s\n",cmd);
 	system(cmd);
+	websWrite(wp,"文件解压成功<br>");
 	jsonAdd(&oUpdate, "ret", "ok");
 
 	SEND:
 	wpsend(wp, oUpdate);
 	jsonFree(&oUpdate);
 	websWrite(wp,"重启服务器...<br>");
-	websWrite(wp,T("更新完成.<br>"));
+	websWrite(wp,T("更新完成.请<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"));
 	autoUpdate();//自动重启
 	websDone(wp, 200);
 }
@@ -910,7 +911,7 @@ static int initWebs(void)
 	websFormDefine(T("mtrparams"), form_mtrparams);
 	websFormDefine(T("get_tou"), form_history_tou);
 	websFormDefine(T("realtime_tou"), form_realtime_tou);
-	websFormDefine(T("reset"), form_reset);
+	websFormDefine(T("reset"), form_sysFunction);
 	websFormDefine(T("save_log"), form_save_log);
 	websFormDefine(T("load_log"), form_load_log);
 	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
