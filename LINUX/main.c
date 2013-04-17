@@ -2768,22 +2768,19 @@ void response_ok(webs_t wp)
 ///服务器自动升级 移动 webs.update 到 webs 完成升级
 int autoUpdate(void)
 {
-	printf(WEBS_INF"Checking Update.\n");
 	int ret = access(UPDATE_FILE_NAME, 0);
 	if (ret==0) {
-		printf(WEBS_INF" Updating now...\n");
+		printf(WEBS_INF" Being upgraded...\n");
+		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
+		system("chmod +x "PROG_NAME);
 		printf(WEBS_INF" **********************************\n");
 		printf(WEBS_INF" *                                *\n");
 		printf(WEBS_INF" *            Update OK.          *\n");
 		printf(WEBS_INF" *                                *\n");
 		printf(WEBS_INF" **********************************\n");
-		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
-		system("chmod +x "PROG_NAME);
 		//execl直接覆盖本进程/变成其他进程(这里是自己)
 		//不知道有什么潜在危险,使用很实用 :)
 		execl(PROG_NAME, PROG_NAME, NULL );
-		//kill(getpid(),SIGTSTP);
-		//exit(1);
 	} else {
 		return 1;
 	}
