@@ -9,7 +9,6 @@
 #include "wpsend.h"
 #include "json.h"
 static int webRece_realtime_tou(webs_t wp);
-static int parse_item(uint8_t* bMtr, uint8_t* bTou,webs_t wp);
 static int check_mtrnum(int mtrnum);
 static int check_itemnum(int itemnum);
 ///实时电度量
@@ -26,15 +25,15 @@ void form_realtime_tou(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
-///实时电量查询,json格式参考doc/json-date-example.md 实时数据-电量
+/**
+ * 实时电量查询,json格式参考doc/json-date-example.md 实时数据-电量
+ * 发送数据到客户端
+ */
 static int webRece_realtime_tou(webs_t wp)
 {
-	uint8_t bMtr[MAXMETER];
-	uint8_t bTou[TOUNUM];
 	struct stMeter_Run_data *mtr;
 	char tmpstr[128];
 	int i,j;
-	parse_item(bMtr,bTou,wp);
 	char * mtrArray = websGetVar(wp, T("mtrArray"), T("0"));
 	char * itemArray = websGetVar(wp, T("itemArray"), T("0"));
 	int mtrnum=strlen(mtrArray);
@@ -55,8 +54,10 @@ static int webRece_realtime_tou(webs_t wp)
 		if(mtrArray[i]!='1'){
 			continue;
 		}
+#if DEBUG_PRINT_REALTIME_TOU_DAT
 		printf("-无效标识tou:0x%04X qr 0x%04X 抄表时间:%ld,\n"
 			,mtr[i].Flag_TOU,mtr[i].Flag_QR,mtr[i].Meter_ReadTime);
+#endif
 		for(j=0;j<TOUNUM;j++){//电量
 			if(itemArray[j]=='1'){
 				jsonAdd(&aOneDate,NULL,
@@ -67,8 +68,8 @@ static int webRece_realtime_tou(webs_t wp)
 				jsonAdd(&aIt,NULL,aOneDate);//电量
 				jsonClear(&aOneDate);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
-				//printf("--aOneDate(TOUNUM) %s\n",aOneDate);
-				//printf("--aOneMtr(TOUNUM) %s\n",oOneMtr);
+				printf("--aOneDate(TOUNUM) %s\n",aOneDate);
+				printf("--aOneMtr(TOUNUM) %s\n",aIt);
 #endif
 			}
 		}
@@ -83,8 +84,8 @@ static int webRece_realtime_tou(webs_t wp)
 				jsonAdd(&aIt,NULL,aOneDate);
 				jsonClear(&aOneDate);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
-				//printf("--aOneDate(itemnum) %s\n",aOneDate);
-				//printf("--aOneMtr(itemnum) %s\n",oOneMtr);
+				printf("--aOneDate(itemnum) %s\n",aOneDate);
+				printf("--aOneMtr(itemnum) %s\n",aIt);
 #endif
 			}
 		}
@@ -132,19 +133,5 @@ static int check_mtrnum(int mtrnum)
 		web_err_proc(EL);
 		return -1002;
 	}
-	return 0;
-}
-/**
- * 从wp中解析出选择的表,需要采集的电量,象限无功,0表示不采集,1表示采集
- * @param bMtr 表
- * @param bTou 电量
- * @param bQR 象限无功
- * @param wp
- * @return
- */
-static int parse_item(uint8_t* bMtr, uint8_t* bTou,webs_t wp)
-{
-	char * mtr = websGetVar(wp, T("mtrArray"), T("null"));
-	char * tou = websGetVar(wp, T("itemArray"), T("null"));
 	return 0;
 }

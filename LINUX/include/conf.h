@@ -98,7 +98,7 @@ extern stCfg webs_cfg;
 	#define BACKUP_ERR_FILE "/home/zodiac1111/workspace/goahead/goahead-backup.log"
 #endif
 #define MAX_ERR_LOG_LINE_LENTH 1024 ///<日志文件单行最大长度(字节)
-#define MAX_ERR_LOG_FILE_SIZE (10*1024) ///<错误日志文件最大尺寸(字节)
+#define MAX_ERR_LOG_FILE_SIZE (200*1024) ///<错误日志文件最大尺寸(字节)
 
 //conf配置相关文件
 //#define CFG_DIR "../para/"///<参数路径

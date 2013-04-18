@@ -11,11 +11,12 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include "type.h"
+#include <stdint.h>
 #include "tou.h"
 #include "conf.h"
 #include "json.h"
-
+#include "web_err.h"
+#include "autoUpdate.h"
 #define MTR_ADD 1 //增删查改?...
 #define MTR_DEL  2
 #define MTR_SEARCH  3
@@ -67,10 +68,10 @@ int webSend_info(webs_t wp);
 int webSend_txtfile(webs_t wp, const char*file);
 int webRece_txtfile(webs_t wp, char_t *query, const char* file);
 
-static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM]);
+static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_NUM]);
 //串口方案项目
 //网口参数
-static int webWrite_ip(webs_t wp, char *name, u8* value);
+static int webWrite_ip(webs_t wp, char *name, uint8_t* value);
 //监视端口参数
 char* webrite_listen_port(char* tmp, const stMonparam monport);
 char* webWrite_rtu_addr(char* tmp, stMonparam monport);
@@ -81,14 +82,14 @@ char *addCollectItem(char **oItem, stCollect_cycle sav);
 ///其他
 static int split(char **ret, char* in);
 static int is_all_equ(int n[], int num);
-int portstr2u8(const char * str, u8* val);
-int listen_port_str2array(const char* str, u8 a[5]);
-int rtu_addr_str2array(const char* str, u8 a[4]);
+int portstr2u8(const char * str, uint8_t* val);
+int listen_port_str2array(const char* str, uint8_t a[5]);
+int rtu_addr_str2array(const char* str, uint8_t a[4]);
 int reflash_this_wp(webs_t wp, const char *page);
 char * point2next(char** s, const char split);
 ////杂类函数,全系统相关
 int load_webs_conf_info(void);
-int autoUpdate(void);
+
 void init_semun(void);
 char* a2jsObj(char *tmp, uint8_t * array,int n);
 char* getconf(const char * const name,char** value);

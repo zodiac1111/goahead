@@ -20,14 +20,19 @@
 #include "../wsIntrn.h"
 #include "tou.h"
 #include "web_err.h"
-#include "type.h"
 #include "conf.h"
+///仅在本文件中使用的静态函数定义.
+static void timeToNextDayMorning(struct tm *stTime,time_t *time_t);
+static int
+webWrite_toudata(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
+static char * float2string( uint8_t const float_array[4], char * strval);
+static int webWriteOneTI(webs_t wp, Ti_Category ti);
 /**
  * 将时间推至次日凌晨0点,用于检索到下一个文件
  * @param stTime 时间结构体
  * @param time_t 时间戳(32位!bug Y2038)
  */
-void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
+static void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
 {
 	stTime->tm_hour = 0;
 	stTime->tm_min = 0;
@@ -60,7 +65,7 @@ void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
  * @return
  * @todo 分解,流程较为复杂
  */
-int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
+int load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 {
 	stTouFilehead filehead;
 	if (range.e<range.s) {
@@ -188,7 +193,8 @@ int load_tou_dat(u32 mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
  * @param mtr_no
  * @return
  */
-int webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
+static int
+webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
 {
 	struct tm t;
 #if __arm__ ==2
@@ -215,7 +221,7 @@ int webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
  * @param strval
  * @return
  */
-char * float2string( u8 const float_array[4], char * strval)
+static char * float2string( uint8_t const float_array[4], char * strval)
 {
 #if __arm__ ==1
 	/*arm-linux-gcc会优化掉下面的 #else 的方式. - -
@@ -246,7 +252,7 @@ char * float2string( u8 const float_array[4], char * strval)
  * @param ti
  * @return
  */
-int webWriteOneTI(webs_t wp, Ti_Category ti)
+static int webWriteOneTI(webs_t wp, Ti_Category ti)
 {
 	char strval[32];
 	const char *iv = " class=\"iv\" ";

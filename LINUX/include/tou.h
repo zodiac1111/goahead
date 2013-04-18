@@ -4,7 +4,6 @@
 #include "../uemf.h"
 #include "../wsIntrn.h"
 #include <stdint.h>
-#include "type.h"
 #define DATA_DIR "../../nand" //数据目录
 #if __i386 == 1
 #define TOU_DAT_DIR DATA_DIR"/tou" //电量Tou数据目录
@@ -58,9 +57,9 @@ typedef struct{
 	time_t e;
 }  __attribute__((packed, aligned(1))) TimeRange;
 //
-int load_tou_dat(u32 mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
+int load_tou_dat(uint32_t mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
 int webWrite1Tou(webs_t wp,const stTou tou);
-int webWrite_toudata(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
+
 int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
-int webWriteOneTI(webs_t wp, Ti_Category ti);
+
 #endif

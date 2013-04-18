@@ -13,6 +13,16 @@
 #include "param.h"
 #include "Chinese_string.h"
 #include "web_err.h"
+static void TransBcdArray2BinArray(uint8_t* srcbuf, uint8_t* desbuf, uint8_t flag);
+static void TransBinArray2BcdArray(uint8_t* srcbuf, uint8_t* desbuf, uint8_t flag);
+//由系统参数触发的其他参数的修改
+static int update_mtrfile(const stSysParam param);
+static int update_siofile(const stSysParam param);
+static int update_netparamfile(const stSysParam param);
+static int update_monparamfile(const stSysParam param);
+//表计参数转换
+static int mtr_file2men(stMtr* pmtr, const stMtr_File * pmtr_file);
+static int mtr_men2file(stMtr_File * pmtr_file, const stMtr* pmtr);
 //电表类型 几相几线制
 const char *PW[2] = { [0]=CSTR_3P3W,
 [1]=CSTR_3P4W
@@ -277,7 +287,7 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
  * @param[in] pmtr_file
  * @return
  */
-int mtr_file2men(stMtr* pmtr, const stMtr_File * pmtr_file)
+static int mtr_file2men(stMtr* pmtr, const stMtr_File * pmtr_file)
 {
 	memcpy((void*) pmtr->line, (void*) pmtr_file->line, LINE_LEN);
 	memcpy((void*) pmtr->addr, (void*) pmtr_file->addr, ADDR_LEN);
@@ -307,7 +317,7 @@ int mtr_file2men(stMtr* pmtr, const stMtr_File * pmtr_file)
  * @retval 0 正确
  * @retval !0 错误
  */
-int mtr_men2file(stMtr_File * pmtr_file, const stMtr* pmtr)
+static int mtr_men2file(stMtr_File * pmtr_file, const stMtr* pmtr)
 {
 	memcpy(pmtr_file->line, pmtr->line, LINE_LEN);
 #if DEBUG_PRINT_MTRPARAM
@@ -672,7 +682,7 @@ int load_netparam(stNetparam * netparam, const char * file, int no)
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
-	u32 flen = ftell(fp);
+	uint32_t flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	if (flen<sizeof(stNetparam)*(no+1)) {
 		PRINT_HERE
@@ -907,7 +917,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
  * @param[in] param 系统参数
  * @return
  */
-int update_mtrfile(const stSysParam param)
+static int update_mtrfile(const stSysParam param)
 {
 	int ret = -1;
 	FILE* fp = fopen(webs_cfg.mtrspara, "rb+");
@@ -930,7 +940,7 @@ int update_mtrfile(const stSysParam param)
  * @retval 0:成功
  * @retval -1:失败 web_errno中保存错误号.
  */
-int update_siofile(const stSysParam param)
+static int update_siofile(const stSysParam param)
 {
 	int ret = -1;
 	FILE* fp = fopen(webs_cfg.sioplan, "rb+");
@@ -952,7 +962,7 @@ int update_siofile(const stSysParam param)
  * @param[in] param 系统参数
  * @return
  */
-int update_netparamfile(const stSysParam param)
+static int update_netparamfile(const stSysParam param)
 {
 	int ret = -1;
 	FILE* fp = fopen(webs_cfg.netpara, "rb+");
@@ -975,7 +985,7 @@ int update_netparamfile(const stSysParam param)
  * @param[in] param 系统参数
  * @return
  */
-int update_monparamfile(const stSysParam param)
+static int update_monparamfile(const stSysParam param)
 {
 	int ret = -1;
 	FILE* fp = fopen(webs_cfg.monpara, "rb+");
@@ -993,7 +1003,7 @@ int update_monparamfile(const stSysParam param)
 	return 0;
 }
 
-void TransBcdArray2BinArray(u8* srcbuf, u8* desbuf, u8 flag)
+static void TransBcdArray2BinArray(uint8_t* srcbuf, uint8_t* desbuf, uint8_t flag)
 {
 	unsigned char i;
 	for (i = 0; i<flag; i++) {
@@ -1002,7 +1012,7 @@ void TransBcdArray2BinArray(u8* srcbuf, u8* desbuf, u8 flag)
 			*(desbuf+i) >>= 4;
 	}
 }
-void TransBinArray2BcdArray(u8* srcbuf, u8* desbuf, u8 flag)
+static void TransBinArray2BcdArray(uint8_t* srcbuf, uint8_t* desbuf, uint8_t flag)
 {
 	unsigned char i;
 	for (i = 0; i<flag; i++)

@@ -2,7 +2,6 @@
  * @file web_err.c
  * 服务器错误字符串输出
  */
-
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -13,6 +12,8 @@
 #include "web_err.h"
 #include "param.h"
 #include <time.h>
+static int
+save_log(const char *strtime,const char * errstring,const char*filename);
 int web_errno = 0;
 const char *myweberrstr[] = {
                 [no_error]="No Error.",
@@ -133,7 +134,7 @@ void web_err_proc(EL_ARGS)
  * @param[in] filename
  * @return
  */
-int save_log(const char *strtime,const char * errstring, const char*filename)
+static int save_log(const char *strtime,const char * errstring, const char*filename)
 {
 	FILE*fp = NULL;
 	fp = fopen(filename, "a");
@@ -148,7 +149,7 @@ int save_log(const char *strtime,const char * errstring, const char*filename)
 	fseek(fp, 0, SEEK_END);
 	int flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
-	if (flen>=MAX_ERR_LOG_FILE_SIZE) {     //文件过长,简单的截断为0
+	if (flen>=MAX_ERR_LOG_FILE_SIZE) { //文件过长,简单的截断为0
 		int fd = fileno(fp);
 		ftruncate(fd, 0);
 	}

@@ -41,9 +41,6 @@
 #include "param.h"
 #include "main.h"
 #include "Chinese_string.h"
-#include "web_err.h"
-#include "tou.h"
-#include "conf.h"
 #ifdef WEBS_SSL_SUPPORT
 #include	"../websSSL.h"
 #endif
@@ -1059,7 +1056,7 @@ char* webWrite_listen_port(char* tmp, const stMonparam monport)
  * @param[in] value 变量值,如上面的111.222.333.444
  * @retval 0 成功
  */
-static int webWrite_ip(webs_t wp, char *name, u8* value)
+static int webWrite_ip(webs_t wp, char *name, uint8_t* value)
 {
 	//printf("网口参数-IP\n");
 	uint i;
@@ -1122,7 +1119,7 @@ static int is_all_equ(int n[], int num)
  * @retval 大于0整数:参数数组个数
  * @retval 小于0 :错误代码
  */
-static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
+static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_NUM])
 {
 	int n[20] = { 0 };     //一共的记录条数
 	int i = 0;
@@ -1408,7 +1405,7 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, u32 e[MAX_MTR_NUM])
 		memset(amtr[i].line, '0', LINE_LEN);
 		memset(amtr[i].addr, '0', ADDR_LEN);
 		memset(amtr[i].pwd, '0', PWD_LEN);
-		u8 l;
+		uint8_t l;
 		int delta;
 		//PRINT_HERE
 		l = strlen(line[i]);
@@ -1634,7 +1631,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
  * @param[out] ipfile
  * @return
  */
-int ipstr2ipfile(char *ipstr, u8 ipfile[12])
+int ipstr2ipfile(char *ipstr, uint8_t ipfile[12])
 {
 	int sub = 0;
 	int j = 0;
@@ -1831,7 +1828,7 @@ int webRece_monparas(webs_t wp)
  * @param[out] a
  * @retval 指针后移的数量
  */
-int rtu_addr_str2array(const char* str, u8 a[4])
+int rtu_addr_str2array(const char* str, uint8_t a[4])
 {
 	int i = 0;		//查找的个数,
 	int val = 0;
@@ -1869,7 +1866,7 @@ int rtu_addr_str2array(const char* str, u8 a[4])
  * @param[out] a
  * @return
  */
-int listen_port_str2array(const char* str, u8 a[5])
+int listen_port_str2array(const char* str, uint8_t a[5])
 {
 	int i = 0;		//查找的个数,
 	int val = 0;
@@ -1895,7 +1892,7 @@ int listen_port_str2array(const char* str, u8 a[5])
  * @param val
  * @return
  */
-int portstr2u8(const char * str, u8* val)
+int portstr2u8(const char * str, uint8_t* val)
 {
 	int i = 0;		//查找的个数,
 	int tmp = 0;
@@ -2318,7 +2315,7 @@ int webRece_mtrparams(webs_t wp)
 	int saveret = -1;
 	int i = 0;
 	///错误项
-	u32 err[MAX_MTR_NUM] = { 0 };
+	uint32_t err[MAX_MTR_NUM] = { 0 };
 	///表计数目
 	int mtr_num = 0;
 	mtr_num = getmtrparams(amtr, wp, err);
@@ -2593,7 +2590,7 @@ static int websHomePageHandler(webs_t wp,
 	return 0;
 }
 ///打印数组
-void print_array(const u8 *a, const int len)
+void print_array(const uint8_t *a, const int len)
 {
 	int i;
 	printf("[%d] ", len);
@@ -2777,25 +2774,5 @@ void response_ok(webs_t wp)
 {
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
-///服务器自动升级 移动 webs.update 到 webs 完成升级
-int autoUpdate(void)
-{
-	int ret = access(UPDATE_FILE_NAME, 0);
-	if (ret==0) {
-		printf(WEBS_INF" Being upgraded...\n");
-		system("mv " UPDATE_FILE_NAME " " PROG_NAME);
-		system("chmod +x "PROG_NAME);
-		printf(WEBS_INF" **********************************\n");
-		printf(WEBS_INF" *                                *\n");
-		printf(WEBS_INF" *            Update OK.          *\n");
-		printf(WEBS_INF" *                                *\n");
-		printf(WEBS_INF" **********************************\n");
-		//execl直接覆盖本进程/变成其他进程(这里是自己)
-		//不知道有什么潜在危险,使用很实用 :)
-		execl(PROG_NAME, PROG_NAME, NULL );
-	} else {
-		return 1;
-	}
-	return 1;
-}
+
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"

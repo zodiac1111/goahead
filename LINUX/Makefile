@@ -28,7 +28,7 @@ DFLAGS  = -g -Wall -Wextra \
 else
 CC=$(my_cc)
 CXX=$(my_cxx)
-DFLAGS  = -Os -Wall -Wextra
+DFLAGS  = -Os -Wall -Wextra -Wno-unused-parameter -Wno-empty-body
 endif
 
 default:  debug
@@ -37,6 +37,7 @@ all: gold
 
 clean:
 	rm -f $(NAME) $(ARCH) $(DEPEND_FILES)
+	rm -f $(NAME).update
 	rm -f err.log log.txt trace.txt ../trace.txt 
 	rm -f ../log.txt 
 distclean:clean
@@ -82,8 +83,8 @@ endif
 # IFMODSW = -DWEBS_IF_MODIFIED_SUPPORT
 # IFMODLIB = /usr/lib/libm.a
 #本实例需要的依赖
-my_obj=param.o main.o web_err.o tou.o json.o \
-	       	src/rtit.o src/wpsend.o
+my_obj	=	main.o src/param.o src/web_err.o src/tou.o src/json.o \
+	       	src/rtit.o src/wpsend.o src/autoUpdate.o
 # Dependencies
 DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../cgi.o ../default.o  ../ejlex.o ../ejparse.o ../form.o \
@@ -128,11 +129,12 @@ update:all
 
 # 依赖(webs的)
 main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h \
-	web_err.h conf.h ../version.h
-param.o: param.c param.h web_err.h conf.h
-web_err.o: web_err.c web_err.h conf.h
-tou.o:tou.c tou.h conf.h
-json.o:json.c json.h
+	include/web_err.h include/conf.h ../version.h
+src/param.o: src/param.c include/param.h include/web_err.h include/conf.h
+src/autoUpdate.o :src/autoUpdate.c include/autoUpdate.h
+src/web_err.o: src/web_err.c include/web_err.h include/conf.h
+src/tou.o: src/tou.c include/tou.h include/conf.h
+src/json.o: src/json.c include/json.h
 src/rtit.o: include/rtit.h src/rtit.c
 src/wpsend.o:src/wpsend.c include/wpsend.h
 # Dependencies(goahead本身的)
