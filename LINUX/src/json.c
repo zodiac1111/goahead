@@ -6,6 +6,7 @@
 #include "json.h"
 #include <malloc.h>
 #include <string.h>
+#include "web_err.h"
 #include "color.h"
 #define DEBUG_JSON_CLEAR 0 /* 调试选项 */
 #define JSON_DEMO GREEN"JSON DEMO"_COLOR">"
@@ -20,6 +21,8 @@ jsObj jsonNew(void)
 	jsObj obj=malloc(strlen("{}")+1);
 	if(obj!=NULL){
 		strcpy(obj,"{}");
+	}else{
+		web_err_proc(EL);
 	}
 	return obj;
 }
@@ -29,6 +32,8 @@ jsObj jsonNewArray(void)
 	jsObj obj=malloc(strlen("[]")+1);
 	if(obj!=NULL){
 		strcpy(obj,"[]");
+	}else{
+		web_err_proc(EL);
 	}
 	return obj;
 }
@@ -48,11 +53,13 @@ jsObj jsonClear(jsObj* pobj)
 	if((s!='{' && s!='[') //只能是{ 或者 [开头
 			||(e!=s+2)){ //同时要求括号匹配
 		perror("jsonClear-not obj or array");
+		web_err_proc(EL);
 		return NULL;
 	}
 	*pobj=realloc(*pobj,2+1);
 	if(pobj==NULL){
 		perror("jsonClear-realloc");
+		web_err_proc(EL);
 		return NULL;
 	}
 	(*pobj)[0]=s;
@@ -76,7 +83,9 @@ char* toStr(char *str,const char*format,...)
 {
 	va_list ap;
 	va_start(ap,format);
-	vsprintf( str,format, ap);
+	if(vsprintf( str,format, ap)<0){
+		web_err_proc(EL);
+	}
 	va_end(ap);
 	return str;
 }
@@ -111,15 +120,18 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 {
 	if(dobj==NULL){
 		perror("jsonAdd-null dobj");
+		web_err_proc(EL);
 		return NULL;
 	}
 	int isArray=((*dobj)[0]=='[')?1:0;//是否是向数组内添加.
 	if(name==NULL && !isArray){ //添加数组元素不需要name.设置成空.
 		perror("jsonAdd-null name");
+		web_err_proc(EL);
 		return NULL;
 	}
 	if(value==NULL){
 		perror("jsonAdd- null value");
+		web_err_proc(EL);
 		return NULL;
 	}
 	int dlen=strlen(*dobj);
@@ -137,6 +149,7 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
 			+1);// \0
 	if(*dobj==NULL){
 		perror("jsonAddValue-realloc");
+		web_err_proc(EL);
 		return *dobj;
 	}
 	///@note 用三个bit分别表示,若gcc版本过低不能识别0b开头的二进制表达方式.
@@ -185,7 +198,8 @@ jsObj jsonAdd(jsObj* dobj, const char*name,const char*value)
  * 	电话:89300405,133****8628 [数组的使用]
  * 	地址:浙江省 杭州市 A路810号 [以对象为值]
  * 用于开发参考,通过 conf.h 中 DEBUG_JSON_DEMO 宏可以开/关.
- * 在线解析:http://jsoneditoronline.org/
+ * 在线解析:http://jsoneditoronline.org/ IDE:apanta Studio
+ * a=Array=[]		o=Object={}
  */
 void jsonDemo(void)
 {
@@ -279,6 +293,6 @@ void jsonDemo(void)
 	jsonFree(&aTemp);
 	printf(JSON_DEMO" Free aTemp "
 		RED"%s"_COLOR"\n",aTemp);
-
+	return;
 }
 

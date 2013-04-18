@@ -2,6 +2,7 @@
  * @file autoUpdate.c
  *
  */
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "web_err.h"
