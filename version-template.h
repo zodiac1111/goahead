@@ -7,7 +7,7 @@
 #ifndef _VERSION_H_
 #define _VERSION_H_
 #define MAJOR 1
-#define MINOR 1
+#define MINOR 2
 #define PATCHLEVEL $PATHLEAVE
 #define GIT_VERSION "$GIT_VERSION"
 #endif // VERSION_H

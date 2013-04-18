@@ -353,10 +353,10 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 #define WEBS_REQ_TEST 12
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
-	char app[256] = { 0 };
+	//char app[256] = { 0 };
 	int typ = 0;
 	int ret = -1;
-	pid_t pid;
+	//pid_t pid;
 	char * str_typ = websGetVar(wp, T("OpType"), T("null"));
 	typ = atoi(str_typ);
 	printf("type=%d\n", typ);
@@ -596,6 +596,11 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	int locWrite;
 	int numLeft;
 	int numWrite;
+	char tmp[128] = { 0 };
+	jsObj oUpdate = jsonNew();
+	char full_fname[1024] = { 0 };//全路径的压缩包名
+	char tmpfname[1024] = { 0 };//保存到服务器的临时文件名
+	char cmd[1024] = { 0 };
 	a_assert(websValid(wp));
 	websHeader_pure(wp);
 	fn = websGetVar(wp, T("filename"), T(""));
@@ -608,21 +613,16 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	}
 	printf(WEBS_INF"file update fn=%s, bn=%s\n", fn, bn);
 	websWrite(wp, T("file update fn=%s, bn=%s<br>"), fn, bn);
-	char tmp[128] = { 0 };
-	jsObj oUpdate = jsonNew();
-	char full_fname[1024] = { 0 };//全路径的压缩包名
-	char tmpfname[1024] = { 0 };//保存到服务器的临时文件名
-	char cmd[1024] = { 0 };
 	//简单验证试图更新文件的正确性
 	if (bn==NULL ) {
 		jsonAdd(&oUpdate, "ret", "filename must no-void");
 		web_err_proc(EL);
-		goto SEND;
+		goto SEND_ERROR;
 	}
 	if (strcmp(bn, "webs-binary.tar.gz")==0) {
 		web_err_proc(EL);
 		jsonAdd(&oUpdate, "ret", "filename must be webs-binary.tar.gz");
-		goto SEND;
+		goto SEND_ERROR;
 	}
 	websWrite(wp,"文件名正确<br>");
 	jsonAdd(&oUpdate, "filename", bn);
@@ -635,7 +635,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	if ((fp = fopen(tmpfname, "w+b"))==NULL ) {
 		jsonAdd(&oUpdate, "ret", "open file failed");
 		web_err_proc(EL);
-		goto SEND;
+		goto SEND_ERROR;
 	}
 	//写临时文件 .tmp
 	locWrite = 0;
@@ -662,7 +662,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		                                wp->lenPostData));
 		fclose(fp);
 		web_err_proc(EL);
-		goto SEND;
+		goto SEND_ERROR;
 
 	}
 	websWrite(wp,"上传结束<br>");
@@ -670,7 +670,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	if (fclose(fp)!=0) {
 		jsonAdd(&oUpdate, "ret", "close file failed");
 		web_err_proc(EL);
-		goto SEND;
+		goto SEND_ERROR;
 	}
 	//完成传输
 	websWrite(wp,"复制文件到临时目录<br>");
@@ -685,17 +685,28 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f && echo \"ok\"",
 		full_fname,full_fname);
 	printf(WEBS_INF"tar cmd : %s\n",cmd);
-	system(cmd);
-	websWrite(wp,"文件解压成功<br>");
+	if(system(cmd)<0){
+		websWrite(wp,"文件解压(%s)失败<br>",cmd);
+		web_err_proc(EL);
+		goto SEND_ERROR;
+	}else{
+		websWrite(wp,"文件解压成功<br>");
+	}
 	jsonAdd(&oUpdate, "ret", "ok");
-
-	SEND:
 	wpsend(wp, oUpdate);
 	jsonFree(&oUpdate);
 	websWrite(wp,"重启服务器...<br>");
-	websWrite(wp,T("更新完成.请<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"));
+	websWrite(wp,T("<font color=green>更新完成</font>.请<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"));
 	autoUpdate();//自动重启
 	websDone(wp, 200);
+	return;
+SEND_ERROR:
+	//wpsend(wp, oUpdate);
+	jsonFree(&oUpdate);
+	websWrite(wp,"<font color=red>升级失败<font>");
+	websDone(wp, 200);
+	return;
+
 }
 /**
  * 打印服务器应用程序运行路径,依赖proc文件系统.
