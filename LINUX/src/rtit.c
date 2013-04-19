@@ -35,7 +35,7 @@ static int webRece_realtime_tou(webs_t wp)
 	char tmpstr[128];
 	int i,j;
 	char * mtrArray = websGetVar(wp, T("mtrArray"), T(""));
-	char * itemArray = websGetVar(wp, T("itemArray"), T(""));
+	char * abTou = websGetVar(wp, T("tou"), T(""));
 	char * abV = websGetVar(wp, T("v"), T(""));
 	char * abI = websGetVar(wp, T("i"), T(""));
 	char * abP = websGetVar(wp, T("p"), T(""));
@@ -43,7 +43,7 @@ static int webRece_realtime_tou(webs_t wp)
 	char * abPF = websGetVar(wp, T("pf"), T(""));
 	char * abF = websGetVar(wp, T("f"), T(""));
 	int mtrnum=strlen(mtrArray);
-	int itemnum=strlen(itemArray);
+	int itemnum=strlen(abTou);
 	check_mtrnum(mtrnum);
 	check_itemnum(itemnum);
 	mtr =GetMeterAll_p();
@@ -65,7 +65,7 @@ static int webRece_realtime_tou(webs_t wp)
 			,mtr[i].Flag_TOU,mtr[i].Flag_QR,mtr[i].Meter_ReadTime);
 #endif
 		for(j=0;j<TOUNUM;j++){//电量
-			if(itemArray[j]=='1'){
+			if(abTou[j]=='1'){
 				jsonAdd(&aOneDate,NULL,
 					toStr(tmpstr,"%g",mtr[i].m_iTOU[j]));
 				iv = (mtr[i].Flag_TOU&(0x1<<j))>>j;
@@ -80,7 +80,7 @@ static int webRece_realtime_tou(webs_t wp)
 			}
 		}
 		for(j=TOUNUM;j<itemnum;j++){//象限无功
-			if(itemArray[j]=='1'){
+			if(abTou[j]=='1'){
 				int index=j-TOUNUM;
 				jsonAdd(&aOneDate,NULL,
 					toStr(tmpstr,"%g",mtr[i].m_iQR[index]));
@@ -105,7 +105,7 @@ static int webRece_realtime_tou(webs_t wp)
 	}
 	jsonAdd(&oTou,"rtu-info","this is rtu info,like version etc..");
 	jsonAdd(&oTou,"mtr_selected",mtrArray);
-	jsonAdd(&oTou,"item_selected",itemArray);
+	jsonAdd(&oTou,"item_selected",abTou);
 	jsonAdd(&oTou,"mtr",aMtr);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
 		printf("-oTou itemnum %s\n",oTou);

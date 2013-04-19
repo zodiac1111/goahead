@@ -662,7 +662,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		goto SEND_ERROR;
 
 	}
-	websWrite(wp,"上传结束<br>");
+	websWrite(wp,"上传完成<br>");
 	//关闭文件,此时会刷新缓冲区到文件,真正的保存成为文件.(*.tmp)
 	if (fclose(fp)!=0) {
 		jsonAdd(&oUpdate, "ret", "close file failed");
