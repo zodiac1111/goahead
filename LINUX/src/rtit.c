@@ -34,8 +34,14 @@ static int webRece_realtime_tou(webs_t wp)
 	struct stMeter_Run_data *mtr;
 	char tmpstr[128];
 	int i,j;
-	char * mtrArray = websGetVar(wp, T("mtrArray"), T("0"));
-	char * itemArray = websGetVar(wp, T("itemArray"), T("0"));
+	char * mtrArray = websGetVar(wp, T("mtrArray"), T(""));
+	char * itemArray = websGetVar(wp, T("itemArray"), T(""));
+	char * abV = websGetVar(wp, T("v"), T(""));
+	char * abI = websGetVar(wp, T("i"), T(""));
+	char * abP = websGetVar(wp, T("p"), T(""));
+	char * abQ = websGetVar(wp, T("q"), T(""));
+	char * abPF = websGetVar(wp, T("pf"), T(""));
+	char * abF = websGetVar(wp, T("f"), T(""));
 	int mtrnum=strlen(mtrArray);
 	int itemnum=strlen(itemArray);
 	check_mtrnum(mtrnum);
