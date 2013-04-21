@@ -22,7 +22,7 @@ binary:
 version:
 	./makeversion.sh
 
-#用于打包(发布版 尽量保留少量东西,文档被简化),废弃
+#用于打包(发布版 尽量保留少量东西,文档被简化),废弃,待删除
 publish:clean version all 
 	#make -C ./LINUX doc;
 	./publish.sh
