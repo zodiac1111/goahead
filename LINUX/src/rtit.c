@@ -91,8 +91,8 @@ static int webRece_realtime_tou(webs_t wp)
 {
 	struct stMeter_Run_data *mtr;
 	char tmpstr[128];
-	int i,j;
-	char * mtrArray = websGetVar(wp, T("mtrArray"), T(""));
+	int i;
+	char * abMtr = websGetVar(wp, T("abMtr"), T(""));
 	char * abTou = websGetVar(wp, T("tou"), T(""));
 	char * abQr = websGetVar(wp, T("qr"), T(""));
 	char * abV = websGetVar(wp, T("v"), T(""));
@@ -101,7 +101,7 @@ static int webRece_realtime_tou(webs_t wp)
 	char * abQ = websGetVar(wp, T("q"), T(""));
 	char * abPF = websGetVar(wp, T("pf"), T(""));
 	char * abF = websGetVar(wp, T("f"), T(""));
-	int mtrnum=strlen(mtrArray);
+	int mtrnum=strlen(abMtr);
 	int itemnum=strlen(abTou);
 	if(check_mtrnum(mtrnum)<0){
 		web_err_proc(EL);
@@ -116,9 +116,18 @@ static int webRece_realtime_tou(webs_t wp)
 	jsObj oMtr=jsonNew(); //{[it],表属性}
 	jsObj aIt=jsonNewArray(); //[正有,反有...四象限无功]
 	jsObj aOneDate=jsonNewArray();//一个电量数据=[电量,有效位...]
-	uint8_t iv;
+	jsonAdd(&oTou,"rtu-info","this is rtu info,like version etc..");
+	jsonAdd(&oTou,"abMtr",abMtr);
+	jsonAdd(&oTou,"abTou",abTou);
+	jsonAdd(&oTou,"abQr",abQr);
+	jsonAdd(&oTou,"abV",abV);
+	jsonAdd(&oTou,"abI",abI);
+	jsonAdd(&oTou,"abP",abP);
+	jsonAdd(&oTou,"abQ",abQ);
+	jsonAdd(&oTou,"abPF",abPF);
+	jsonAdd(&oTou,"abF",abF);
 	for(i=0;i<mtrnum;i++){//遍历所有表
-		if(mtrArray[i]!='1'){
+		if(abMtr[i]!='1'){
 			continue;
 		}
 #if 0
@@ -170,10 +179,7 @@ static int webRece_realtime_tou(webs_t wp)
 		jsonClear(&aIt);//循环利用
 		jsonClear(&oMtr);
 	}
-	jsonAdd(&oTou,"rtu-info","this is rtu info,like version etc..");
-	jsonAdd(&oTou,"mtr_selected",mtrArray);
-	jsonAdd(&oTou,"tou_selected",abTou);
-	jsonAdd(&oTou,"qr_selected",abQr);
+
 	jsonAdd(&oTou,"mtr",aMtr); //回传输入的参数,备用
 #if DEBUG_PRINT_REALTIME_TOU_DAT
 		printf("-oTou itemnum %s\n",oTou);
