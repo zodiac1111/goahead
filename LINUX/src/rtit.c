@@ -25,6 +25,64 @@ void form_realtime_tou(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
+//向一个表(mtr)中添加it对象,指示这个表中所有tou实时电量数据.
+int add_mtr_tou(jsObj *oMtr,struct stMeter_Run_data const mtr,char const *abTou)
+{
+	int j;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate=jsonNewArray();//一个电量数据=[电量,有效位...]
+	jsObj aTou=jsonNewArray(); //[正有,反有,正无,反无]
+	for(j=0;j<TOUNUM;j++){//电量 总尖峰平谷
+		if(abTou[j]=='1'){
+			jsonAdd(&aOneDate,NULL,
+				toStr(tmpstr,"%g",mtr.m_iTOU[j]));
+			iv = (mtr.Flag_TOU&(0x1<<j))>>j;
+			jsonAdd(&aOneDate,NULL,
+				toStr(tmpstr,"%u",iv));
+			jsonAdd(&aTou,NULL,aOneDate);//电量
+			jsonClear(&aOneDate);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+				printf("--aOneDate(TOUNUM) %s\n",aOneDate);
+				printf("--aOneMtr(TOUNUM) %s\n",aIt);
+#endif
+		}
+	}
+	jsonAdd(oMtr,"tou",aTou);
+	printf(WEBS_DBG"tou:%s\n",*oMtr);
+	jsonFree(&aOneDate);
+	jsonFree(&aTou);
+	return 0;
+}
+//向一个表(mtr)中添加it对象,指示这个表中所有tou实时电量数据.
+int add_mtr_qr(jsObj *oMtr,struct stMeter_Run_data const mtr,char const *abTou)
+{
+	int j;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate=jsonNewArray();//一个电量数据=[电量,有效位...]
+	jsObj aTou=jsonNewArray(); //[正有,反有,正无,反无]
+	for(j=0;j<TOUNUM;j++){//电量 总尖峰平谷
+		if(abTou[j]=='1'){
+			jsonAdd(&aOneDate,NULL,
+				toStr(tmpstr,"%g",mtr.m_iQR[j]));
+			iv = (mtr.Flag_QR&(0x1<<j))>>j;
+			jsonAdd(&aOneDate,NULL,
+				toStr(tmpstr,"%u",iv));
+			jsonAdd(&aTou,NULL,aOneDate);//电量
+			jsonClear(&aOneDate);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+				printf("--aOneDate(TOUNUM) %s\n",aOneDate);
+				printf("--aOneMtr(TOUNUM) %s\n",aIt);
+#endif
+		}
+	}
+	jsonAdd(oMtr,"qr",aTou);
+	printf(WEBS_DBG"qr:%s\n",*oMtr);
+	jsonFree(&aOneDate);
+	jsonFree(&aTou);
+	return 0;
+}
 /**
  * 实时电量查询,json格式参考doc/json-date-example.md 实时数据-电量
  * 发送数据到客户端
@@ -36,6 +94,7 @@ static int webRece_realtime_tou(webs_t wp)
 	int i,j;
 	char * mtrArray = websGetVar(wp, T("mtrArray"), T(""));
 	char * abTou = websGetVar(wp, T("tou"), T(""));
+	char * abQr = websGetVar(wp, T("qr"), T(""));
 	char * abV = websGetVar(wp, T("v"), T(""));
 	char * abI = websGetVar(wp, T("i"), T(""));
 	char * abP = websGetVar(wp, T("p"), T(""));
@@ -44,14 +103,16 @@ static int webRece_realtime_tou(webs_t wp)
 	char * abF = websGetVar(wp, T("f"), T(""));
 	int mtrnum=strlen(mtrArray);
 	int itemnum=strlen(abTou);
-	check_mtrnum(mtrnum);
+	if(check_mtrnum(mtrnum)<0){
+		web_err_proc(EL);
+	}
 	check_itemnum(itemnum);
 	mtr =GetMeterAll_p();
 	if(mtr==NULL){
 		web_err_proc(EL);
 	}
 	jsObj oTou=jsonNew();//{[{表1},{表2}],终端属性=xx,终端属性2=yy}
-	jsObj aMtr=jsonNewArray();//{[表0,表1...],表属性1=aa,表属性2=bb}
+	jsObj aMtr=jsonNewArray();//{[表0,表1...]}
 	jsObj oMtr=jsonNew(); //{[it],表属性}
 	jsObj aIt=jsonNewArray(); //[正有,反有...四象限无功]
 	jsObj aOneDate=jsonNewArray();//一个电量数据=[电量,有效位...]
@@ -60,6 +121,7 @@ static int webRece_realtime_tou(webs_t wp)
 		if(mtrArray[i]!='1'){
 			continue;
 		}
+#if 0
 #if DEBUG_PRINT_REALTIME_TOU_DAT
 		printf("-无效标识tou:0x%04X qr 0x%04X 抄表时间:%ld,\n"
 			,mtr[i].Flag_TOU,mtr[i].Flag_QR,mtr[i].Meter_ReadTime);
@@ -79,6 +141,7 @@ static int webRece_realtime_tou(webs_t wp)
 #endif
 			}
 		}
+
 		for(j=TOUNUM;j<itemnum;j++){//象限无功
 			if(abTou[j]=='1'){
 				int index=j-TOUNUM;
@@ -95,7 +158,11 @@ static int webRece_realtime_tou(webs_t wp)
 #endif
 			}
 		}
-		jsonAdd(&oMtr,"it",aIt);
+#else
+		add_mtr_tou(&oMtr,mtr[i],abTou);
+		add_mtr_qr(&oMtr,mtr[i],abQr);
+#endif
+		//jsonAdd(&oMtr,"it",aIt);
 		//抄表时刻
 		jsonAdd(&oMtr,"Meter_ReadTime"
 			,toStr(tmpstr,"%ld",mtr[i].Meter_ReadTime));
@@ -105,8 +172,9 @@ static int webRece_realtime_tou(webs_t wp)
 	}
 	jsonAdd(&oTou,"rtu-info","this is rtu info,like version etc..");
 	jsonAdd(&oTou,"mtr_selected",mtrArray);
-	jsonAdd(&oTou,"item_selected",abTou);
-	jsonAdd(&oTou,"mtr",aMtr);
+	jsonAdd(&oTou,"tou_selected",abTou);
+	jsonAdd(&oTou,"qr_selected",abQr);
+	jsonAdd(&oTou,"mtr",aMtr); //回传输入的参数,备用
 #if DEBUG_PRINT_REALTIME_TOU_DAT
 		printf("-oTou itemnum %s\n",oTou);
 #endif
@@ -131,12 +199,12 @@ static int check_mtrnum(int mtrnum)
 {
 	if(mtrnum<=0){
 		web_errno=eno_realtime_tou_mtrnum_too_small;
-		web_err_proc(EL);
+		//web_err_proc(EL);
 		return -1000;
 	}
 	if(mtrnum>MAXMETER){
 		web_errno=eno_realtime_tou_mtrnum_too_big;
-		web_err_proc(EL);
+		//web_err_proc(EL);
 		return -1002;
 	}
 	return 0;
