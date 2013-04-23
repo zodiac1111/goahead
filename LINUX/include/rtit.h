@@ -10,6 +10,4 @@
 #include "externCShm.h"
 #include "define.h"
 extern void form_realtime_tou(webs_t wp, char_t *path, char_t *query);
-//
-
 #endif

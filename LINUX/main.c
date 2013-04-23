@@ -678,7 +678,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	printf(WEBS_INF"rm(rename) cmd : %s\n",cmd);
 	system(cmd);
 	//解压文件
-	websWrite(wp,"正在解压文件(可能需要1~2分钟)<br>");
+	websWrite(wp,"正在解压文件(可能需要1~2分钟),请稍后...<br>");
 	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f && echo \"ok\"",
 		full_fname,full_fname);
 	printf(WEBS_INF"tar cmd : %s\n",cmd);
@@ -690,9 +690,10 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp,"文件解压成功<br>");
 	}
 	jsonAdd(&oUpdate, "ret", "ok");
+	websWrite(wp,"回传信息:");
 	wpsend(wp, oUpdate);
 	jsonFree(&oUpdate);
-	websWrite(wp,"重启服务器...<br>");
+	websWrite(wp,"<br>重启服务器...<br>");
 	websWrite(wp,T("<font color=green>更新完成</font>.请<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"));
 	autoUpdate();//自动重启
 	websDone(wp, 200);

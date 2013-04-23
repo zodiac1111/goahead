@@ -10,7 +10,14 @@
 #include "json.h"
 static int webRece_realtime_tou(webs_t wp);
 static int check_mtrnum(int mtrnum);
-static int check_itemnum(int itemnum);
+static int add_mtr_tou(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abTou);
+static int add_mtr_qr(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQr);
+static int add_mtr_v(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abV);
+static int add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abI);
+static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abP);
+static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQ);
+static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abPf);
+
 ///实时电度量
 void form_realtime_tou(webs_t wp, char_t *path, char_t *query)
 {
@@ -24,111 +31,6 @@ void form_realtime_tou(webs_t wp, char_t *path, char_t *query)
 	}
 	websDone(wp, 200);
 	return;
-}
-//向一个表(mtr)中添加it对象,指示这个表中所有tou实时电量数据.
-static int add_mtr_tou(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abTou)
-{
-	int j;
-	char tmpstr[128];
-	uint8_t iv;
-	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
-	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
-	for (j = 0; j<TOUNUM; j++) {     //电量 总尖峰平谷
-		if (abTou[j]=='1') {
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%g", mtr.m_iTOU[j]));
-			iv = (mtr.Flag_TOU&(0x1<<j))>>j;
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%u", iv));
-			jsonAdd(&aTou, NULL, aOneDate);     //电量
-			jsonClear(&aOneDate);
-		}
-	}
-	jsonAdd(oMtr, "tou", aTou);
-	//printf(WEBS_DBG"tou:%s\n",*oMtr);
-	jsonFree(&aOneDate);
-	jsonFree(&aTou);
-	return 0;
-}
-//向一个表(mtr)中添加qr四象限无功电量
-static int add_mtr_qr(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQr)
-{
-	int j;
-	char tmpstr[128];
-	uint8_t iv;
-	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
-	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
-	for (j = 0; j<TOUNUM; j++) {     //电量 总尖峰平谷
-		if (abQr[j]=='1') {
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%g", mtr.m_iQR[j]));
-			iv = (mtr.Flag_QR&(0x1<<j))>>j;
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%u", iv));
-			jsonAdd(&aTou, NULL, aOneDate);     //电量
-			jsonClear(&aOneDate);
-		}
-	}
-	jsonAdd(oMtr, "qr", aTou);
-#if DEBUG_PRINT_REALTIME_TOU_DAT
-	printf(WEBS_DBG"qr:%s\n",*oMtr);
-#endif
-	jsonFree(&aOneDate);
-	jsonFree(&aTou);
-	return 0;
-}
-
-static int add_mtr_v(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abV)
-{
-	int i;
-	char tmpstr[128];
-	uint8_t iv;
-	jsObj aOneDate = jsonNewArray();
-	jsObj aV = jsonNewArray();
-	for (i = 0; i<PHASENUM; i++) {
-		if (abV[i]=='1') {
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%g", mtr.m_wU[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%u", iv));
-			jsonAdd(&aV, NULL, aOneDate);     //电量
-			jsonClear(&aOneDate);
-		}
-	}
-	jsonAdd(oMtr, "v", aV);
-#if DEBUG_PRINT_REALTIME_TOU_DAT
-	printf(WEBS_DBG"v:%s\n",*oMtr);
-#endif
-	jsonFree(&aOneDate);
-	jsonFree(&aV);
-	return 0;
-}
-static int add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abI)
-{
-	int i;
-	char tmpstr[128];
-	uint8_t iv;
-	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
-	jsObj aI = jsonNewArray();     //[正有,反有,正无,反无]
-	for (i = 0; i<PHASENUM; i++) {     //电量 总尖峰平谷
-		if (abI[i]=='1') {
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%g", mtr.m_wI[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
-			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%u", iv));
-			jsonAdd(&aI, NULL, aOneDate);     //电量
-			jsonClear(&aOneDate);
-		}
-	}
-	jsonAdd(oMtr, "i", aI);
-#if DEBUG_PRINT_REALTIME_TOU_DAT
-	printf(WEBS_DBG"i:%s\n",*oMtr);
-#endif
-	jsonFree(&aOneDate);
-	jsonFree(&aI);
-	return 0;
 }
 /**
  * 实时电量查询,json格式参考doc/json-date-example.md 实时数据-电量
@@ -149,11 +51,9 @@ static int webRece_realtime_tou(webs_t wp)
 	char * abPf = websGetVar(wp, T("pf"), T(""));
 	char * abF = websGetVar(wp, T("f"), T(""));
 	int mtrnum = strlen(abMtr);
-	int itemnum = strlen(abTou);
 	if (check_mtrnum(mtrnum)<0) {
 		web_err_proc(EL);
 	}
-	check_itemnum(itemnum);
 	mtr = GetMeterAll_p();
 	if (mtr==NULL ) {
 		web_err_proc(EL);
@@ -181,6 +81,9 @@ static int webRece_realtime_tou(webs_t wp)
 		add_mtr_qr(&oMtr, mtr[i], abQr);
 		add_mtr_v(&oMtr, mtr[i], abV);
 		add_mtr_i(&oMtr, mtr[i], abI);
+		add_mtr_p(&oMtr, mtr[i], abP);
+		add_mtr_q(&oMtr, mtr[i], abQ);
+		add_mtr_pf(&oMtr, mtr[i], abPf);
 		jsonAdd(&aMtr, NULL, oMtr);
 		jsonClear(&oMtr);
 	}
@@ -193,13 +96,217 @@ static int webRece_realtime_tou(webs_t wp)
 	jsonFree(&oRealTimeData);
 	return 0;
 }
-///简单检查项目数量 应该为[4(象限)+4(正反有无)]*5(总尖峰平谷),共40个项目(0或1)
-static int check_itemnum(int itemnum)
+//向一个表(mtr)中添加it对象,指示这个表中所有tou实时电量数据.
+static int add_mtr_tou(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abTou)
 {
-	if (itemnum!=(TOUNUM+TOUNUM)) {
+	if(strlen(abTou)!=TOUNUM){
 		web_err_proc(EL);
-		return -1;
+		return -100;
 	}
+	int j;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
+	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
+	for (j = 0; j<TOUNUM; j++) {     //电量 总尖峰平谷
+		if (abTou[j]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_iTOU[j]));
+			iv = (mtr.Flag_TOU&(0x1<<j))>>j;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aTou, NULL, aOneDate);     //电量
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "tou", aTou);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"tou:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aTou);
+	return 0;
+}
+//向一个表(mtr)中添加qr四象限无功电量
+static int add_mtr_qr(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQr)
+{
+	if(strlen(abQr)!=TOUNUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int j;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aQr = jsonNewArray();
+	for (j = 0; j<TOUNUM; j++) {
+		if (abQr[j]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_iQR[j]));
+			iv = (mtr.Flag_QR&(0x1<<j))>>j;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aQr, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "qr", aQr);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"qr:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aQr);
+	return 0;
+}
+
+static int add_mtr_v(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abV)
+{
+	if(strlen(abV)!=PHASENUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int i;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aV = jsonNewArray();
+	for (i = 0; i<PHASENUM; i++) {
+		if (abV[i]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_wU[i]));
+			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aV, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "v", aV);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"v:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aV);
+	return 0;
+}
+static int add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abI)
+{
+	if(strlen(abI)!=PHASENUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int i;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aI = jsonNewArray();
+	for (i = 0; i<PHASENUM; i++) {
+		if (abI[i]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_wI[i]));
+			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aI, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "i", aI);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"i:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aI);
+	return 0;
+}
+static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abP)
+{
+	if(strlen(abP)!=PQCNUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int i;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aP = jsonNewArray();
+	for (i = 0; i<PQCNUM; i++) {
+		if (abP[i]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_iP[i]));
+			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aP, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "p", aP);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"p:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aP);
+	return 0;
+}
+static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQ)
+{
+	if(strlen(abQ)!=PQCNUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int i;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aQ = jsonNewArray();
+	for (i = 0; i<PQCNUM; i++) {
+		if (abQ[i]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_wQ[i]));
+			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aQ, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "q", aQ);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"q:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aQ);
+	return 0;
+}
+static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abPf)
+{
+	if(strlen(abPf)!=PQCNUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int i;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aPf = jsonNewArray();
+	for (i = 0; i<PQCNUM; i++) {
+		if (abPf[i]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_wPF[i]));
+			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u", iv));
+			jsonAdd(&aPf, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "pf", aPf);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"pf:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aPf);
 	return 0;
 }
 ///简单检查表数量合法性
