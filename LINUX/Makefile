@@ -31,7 +31,7 @@ CXX=$(my_cxx)
 DFLAGS  = -Os -Wall -Wextra -Wno-unused-parameter -Wno-empty-body
 endif
 
-default:  debug
+default:  gold
 
 all: gold
 
