@@ -678,7 +678,7 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	printf(WEBS_INF"rm(rename) cmd : %s\n",cmd);
 	system(cmd);
 	//解压文件
-	websWrite(wp,"正在解压文件(可能需要1~2分钟),请稍后...<br>");
+	websWrite(wp,"正在解压文件(可能需要1~2分钟),请稍候...<br>");
 	toStr(cmd, " gzip -dc %s | tar -xvf - -C / && rm %s -f && echo \"ok\"",
 		full_fname,full_fname);
 	printf(WEBS_INF"tar cmd : %s\n",cmd);
