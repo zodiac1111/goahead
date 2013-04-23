@@ -17,7 +17,7 @@ static int add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abP);
 static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQ);
 static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abPf);
-
+static int add_mtr_maxn(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abMaxn);
 ///实时电度量
 void form_realtime_tou(webs_t wp, char_t *path, char_t *query)
 {
@@ -166,6 +166,7 @@ static int add_mtr_v(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		return -100;
 	}
 	int i;
+	uint8_t offset=0;//有效标志在FLag_TA32位中的偏移
 	char tmpstr[128];
 	uint8_t iv;
 	jsObj aOneDate = jsonNewArray();
@@ -174,7 +175,7 @@ static int add_mtr_v(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		if (abV[i]=='1') {
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%g", mtr.m_wU[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%u", iv));
 			jsonAdd(&aV, NULL, aOneDate);
@@ -196,6 +197,7 @@ static int add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		return -100;
 	}
 	int i;
+	uint8_t offset=PHASENUM;
 	char tmpstr[128];
 	uint8_t iv;
 	jsObj aOneDate = jsonNewArray();
@@ -204,7 +206,7 @@ static int add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		if (abI[i]=='1') {
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%g", mtr.m_wI[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%u", iv));
 			jsonAdd(&aI, NULL, aOneDate);
@@ -226,6 +228,7 @@ static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		return -100;
 	}
 	int i;
+	uint8_t offset=PHASENUM+PHASENUM;
 	char tmpstr[128];
 	uint8_t iv;
 	jsObj aOneDate = jsonNewArray();
@@ -234,7 +237,7 @@ static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		if (abP[i]=='1') {
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%g", mtr.m_iP[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%u", iv));
 			jsonAdd(&aP, NULL, aOneDate);
@@ -256,6 +259,7 @@ static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		return -100;
 	}
 	int i;
+	uint8_t offset=PHASENUM+PHASENUM+PQCNUM;
 	char tmpstr[128];
 	uint8_t iv;
 	jsObj aOneDate = jsonNewArray();
@@ -264,7 +268,7 @@ static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		if (abQ[i]=='1') {
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%g", mtr.m_wQ[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%u", iv));
 			jsonAdd(&aQ, NULL, aOneDate);
@@ -286,6 +290,7 @@ static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const
 		return -100;
 	}
 	int i;
+	uint8_t offset=PHASENUM+PHASENUM+PQCNUM+PQCNUM;
 	char tmpstr[128];
 	uint8_t iv;
 	jsObj aOneDate = jsonNewArray();
@@ -294,7 +299,7 @@ static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const
 		if (abPf[i]=='1') {
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%g", mtr.m_wPF[i]));
-			iv = (mtr.FLag_TA&(0x1<<i))>>i;
+			iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 			jsonAdd(&aOneDate, NULL,
 			                toStr(tmpstr, "%u", iv));
 			jsonAdd(&aPf, NULL, aOneDate);
@@ -307,6 +312,38 @@ static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const
 #endif
 	jsonFree(&aOneDate);
 	jsonFree(&aPf);
+	return 0;
+}
+static int add_mtr_maxn(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abMaxn)
+{
+	if(strlen(abMaxn)!=TOUNUM){
+		web_err_proc(EL);
+		return -100;
+	}
+	int i;
+	char tmpstr[128];
+	uint8_t iv;
+	jsObj aOneDate = jsonNewArray();
+	jsObj aMaxn = jsonNewArray();
+	for (i = 0; i<TOUNUM; i++) {
+		if (abMaxn[i]=='1') {
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%g", mtr.m_iMaxN[i]));
+			iv = (mtr.Flag_MNT&(0x1<<i))>>i;
+			jsonAdd(&aOneDate, NULL,
+					toStr(tmpstr, "%u", iv));
+			jsonAdd(&aOneDate, NULL,
+			                toStr(tmpstr, "%u",mtr.m_iMaxNT[i]));
+			jsonAdd(&aMaxn, NULL, aOneDate);
+			jsonClear(&aOneDate);
+		}
+	}
+	jsonAdd(oMtr, "maxn", aMaxn);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"maxn:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aMaxn);
 	return 0;
 }
 ///简单检查表数量合法性
