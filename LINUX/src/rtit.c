@@ -49,7 +49,8 @@ static int webRece_realtime_tou(webs_t wp)
 	char * abP = websGetVar(wp, T("p"), T(""));
 	char * abQ = websGetVar(wp, T("q"), T(""));
 	char * abPf = websGetVar(wp, T("pf"), T(""));
-	char * abF = websGetVar(wp, T("f"), T(""));
+	char * abF = websGetVar(wp, T("f"), T(""));//频率貌似暂时没用
+	char * abMaxn = websGetVar(wp, T("maxn"), T(""));
 	int mtrnum = strlen(abMtr);
 	if (check_mtrnum(mtrnum)<0) {
 		web_err_proc(EL);
@@ -71,6 +72,7 @@ static int webRece_realtime_tou(webs_t wp)
 	jsonAdd(&oRealTimeData, "abQ", abQ);
 	jsonAdd(&oRealTimeData, "abPf", abPf);
 	jsonAdd(&oRealTimeData, "abF", abF);
+	jsonAdd(&oRealTimeData, "abMaxn", abMaxn);
 	for (i = 0; i<mtrnum; i++) {     //遍历所有表
 		if (abMtr[i]!='1') {
 			continue;
@@ -84,6 +86,7 @@ static int webRece_realtime_tou(webs_t wp)
 		add_mtr_p(&oMtr, mtr[i], abP);
 		add_mtr_q(&oMtr, mtr[i], abQ);
 		add_mtr_pf(&oMtr, mtr[i], abPf);
+		add_mtr_maxn(&oMtr, mtr[i], abMaxn);
 		jsonAdd(&aMtr, NULL, oMtr);
 		jsonClear(&oMtr);
 	}
