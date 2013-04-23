@@ -146,7 +146,7 @@ static int webRece_realtime_tou(webs_t wp)
 	char * abI = websGetVar(wp, T("i"), T(""));
 	char * abP = websGetVar(wp, T("p"), T(""));
 	char * abQ = websGetVar(wp, T("q"), T(""));
-	char * abPF = websGetVar(wp, T("pf"), T(""));
+	char * abPf = websGetVar(wp, T("pf"), T(""));
 	char * abF = websGetVar(wp, T("f"), T(""));
 	int mtrnum = strlen(abMtr);
 	int itemnum = strlen(abTou);
@@ -169,7 +169,7 @@ static int webRece_realtime_tou(webs_t wp)
 	jsonAdd(&oRealTimeData, "abI", abI);
 	jsonAdd(&oRealTimeData, "abP", abP);
 	jsonAdd(&oRealTimeData, "abQ", abQ);
-	jsonAdd(&oRealTimeData, "abPF", abPF);
+	jsonAdd(&oRealTimeData, "abPf", abPf);
 	jsonAdd(&oRealTimeData, "abF", abF);
 	for (i = 0; i<mtrnum; i++) {     //遍历所有表
 		if (abMtr[i]!='1') {
