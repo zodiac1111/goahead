@@ -2104,7 +2104,8 @@ int webSend_info(webs_t wp)
  */
 int webSend_syspara(webs_t wp)
 {
-	stSysParam sysparam;
+	//stSysParam sysparam;
+	//读取并更新内存中的 全局变量 sysparam 结构,保持一致
 	int ret = load_sysparam(&sysparam, webs_cfg.syspara);
 	if (ret==-1) {
 		web_err_proc(EL);
