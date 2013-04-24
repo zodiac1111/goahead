@@ -27,6 +27,8 @@ static int
 webWrite_toudata(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
 static char * float2string( uint8_t const float_array[4], char * strval);
 static int webWriteOneTI(webs_t wp, Ti_Category ti);
+static int webWrite1Tou(webs_t wp,const stTou tou);
+static int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
 /**
  * 将时间推至次日凌晨0点,用于检索到下一个文件
  * @param stTime 时间结构体
@@ -281,7 +283,7 @@ static int webWriteOneTI(webs_t wp, Ti_Category ti)
 	return 0;
 }
 //写一条电量Tou数据
-int webWrite1Tou(webs_t wp, const stTou tou)
+static int webWrite1Tou(webs_t wp, const stTou tou)
 {
 	webWriteOneTI(wp, tou.FA);     ///正向有功
 	webWriteOneTI(wp, tou.RA);     ///正向无功
@@ -295,7 +297,7 @@ int webWrite1Tou(webs_t wp, const stTou tou)
  * @param t
  * @return
  */
-int isRightDate(const stTouFilehead filehead, struct tm t)
+static int isRightDate(const stTouFilehead filehead, struct tm t)
 {
 	if (filehead.month!=t.tm_mon+1) {
 		return 0;

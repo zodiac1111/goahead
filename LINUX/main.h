@@ -17,6 +17,10 @@
 #include "json.h"
 #include "web_err.h"
 #include "autoUpdate.h"
+#include "rtit.h"
+#include "wpsend.h"
+#include "upload.h"
+#include "externCShm.h" //主程序共享内存的道出接口
 #define MTR_ADD 1 //增删查改?...
 #define MTR_DEL  2
 #define MTR_SEARCH  3
@@ -43,7 +47,7 @@ void form_load_log(webs_t wp, char_t *path, char_t *query);
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
 void form_info(webs_t wp, char_t *path, char_t *query);
-void form_upload_file(webs_t wp, char_t *path, char_t *query);
+
 //各类大相
 int webRece_syspara(webs_t wp,stSysParam* sysparam);
 int webSend_syspara(webs_t wp);

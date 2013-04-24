@@ -86,7 +86,7 @@ endif
 # IFMODLIB = /usr/lib/libm.a
 #本实例需要的依赖
 my_obj	=	main.o src/param.o src/web_err.o src/tou.o src/json.o \
-	       	src/rtit.o src/wpsend.o src/autoUpdate.o
+	       	src/rtit.o src/wpsend.o src/autoUpdate.o src/upload.o
 # Dependencies
 DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../cgi.o ../default.o  ../ejlex.o ../ejparse.o ../form.o \
@@ -139,6 +139,7 @@ src/tou.o: src/tou.c include/tou.h include/conf.h
 src/json.o: src/json.c include/json.h
 src/rtit.o: include/rtit.h src/rtit.c
 src/wpsend.o:src/wpsend.c include/wpsend.h
+src/upload.o:src/upload.c include/upload.h
 # Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
 ../balloc.o: ../balloc.c ../uemf.h
