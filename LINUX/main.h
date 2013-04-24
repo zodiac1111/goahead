@@ -36,7 +36,6 @@ void form_netparas(webs_t wp, char_t *path, char_t *query);
 void form_monparas(webs_t wp, char_t *path, char_t *query);
 void form_savecycle(webs_t wp, char_t *path, char_t *query);
 void form_collect_cycle(webs_t wp, char_t *path, char_t *query);
-void form_history_tou(webs_t wp, char_t *path, char_t *query);
 void form_sysFunction(webs_t wp, char_t *path, char_t *query);
 void form_msg(webs_t wp, char_t *path, char_t *query);
 void form_msg_stop(webs_t wp, char_t *path, char_t *query);

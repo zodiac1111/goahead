@@ -402,53 +402,7 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	//reflash_this_wp(wp, PAGE_RESET);
 }
-/**
- * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
- * @param wp
- * @param path
- * @param query
- */
-void form_history_tou(webs_t wp, char_t *path, char_t *query)
-{
-	PRINT_FORM_INFO;
-	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
-	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
-	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
-	char * strtz = websGetVar(wp, T("timezone"), T("0"));
-	int tz = 0;
-	//printf("时间戳范围:%s~%s\n", stime_t, etime_t);
-	TimeRange tr;
-	int ret;
-	int mtr_no = 0;
-	stTou tou;
-	memset(&tou, 0x00, sizeof(stTou));
-	ret = sscanf(strmtr_no, "%d", &mtr_no);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	ret = sscanf(stime_t, "%ld", &tr.s);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	ret = sscanf(etime_t, "%ld", &tr.e);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	ret = sscanf(strtz, "%d", &tz);
-	if (ret!=1) {
-		web_err_proc(EL);
-	}
-	tr.s += (tz*60);
-	tr.e += (tz*60);
-	//printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
-	websHeader_pure(wp);
-	ret = load_tou_dat(mtr_no, tr, &tou, wp);
-	if (ret==ERR) {
-		web_err_proc(EL);
-	}
-	websDone(wp, 200);
-	return;
-}
+
 
 
 /// 接收客户端的日志文件

@@ -57,9 +57,10 @@ typedef struct{
 	time_t e;
 }  __attribute__((packed, aligned(1))) TimeRange;
 //
+extern void form_history_tou(webs_t wp, char_t *path, char_t *query);
 int load_tou_dat(uint32_t mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
-int webWrite1Tou(webs_t wp,const stTou tou);
 
-int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
+
+
 
 #endif

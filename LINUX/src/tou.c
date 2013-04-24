@@ -29,6 +29,55 @@ static char * float2string( uint8_t const float_array[4], char * strval);
 static int webWriteOneTI(webs_t wp, Ti_Category ti);
 static int webWrite1Tou(webs_t wp,const stTou tou);
 static int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
+static int load_tou_dat(uint32_t mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
+/**
+ * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_history_tou(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	char * strmtr_no = websGetVar(wp, T("mtr_no"), T("0"));
+	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
+	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
+	char * strtz = websGetVar(wp, T("timezone"), T("0"));
+	int tz = 0;
+	//printf("时间戳范围:%s~%s\n", stime_t, etime_t);
+	TimeRange tr;
+	int ret;
+	int mtr_no = 0;
+	stTou tou;
+	memset(&tou, 0x00, sizeof(stTou));
+	ret = sscanf(strmtr_no, "%d", &mtr_no);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(stime_t, "%ld", &tr.s);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(etime_t, "%ld", &tr.e);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(strtz, "%d", &tz);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	tr.s += (tz*60);
+	tr.e += (tz*60);
+	//printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
+	websHeader_pure(wp);
+	ret = load_tou_dat(mtr_no, tr, &tou, wp);
+	if (ret==ERR) {
+		web_err_proc(EL);
+	}
+	websDone(wp, 200);
+	return;
+}
+
 /**
  * 将时间推至次日凌晨0点,用于检索到下一个文件
  * @param stTime 时间结构体
@@ -67,7 +116,8 @@ static void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
  * @return
  * @todo 分解,流程较为复杂
  */
-int load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
+static int
+load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 {
 	stTouFilehead filehead;
 	if (range.e<range.s) {
