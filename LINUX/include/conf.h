@@ -79,7 +79,8 @@ extern stCfg webs_cfg;
 #define WEBS_INF PREFIX GREEN"Info>"_COLOR ///<一般信息
 #define WEBS_WAR PREFIX YELLOW"Warning>"_COLOR ///<警告信息
 #define WEBS_ERR PREFIX RED BOLD"Error>"_COLOR///<错误信息
-
+#define TIME_ZONE (8) //定义时区东8区 :+8
+#define TIME_ZONE_SEC (TIME_ZONE*60*60) //时区对应的秒数
 //各种文件和路径,所有的相对路径都是相对webroot目录(www/wwwdemo)的相对路径.
 //而 webroot 则在下面的配置文件中指明.
 //webs服务器应用程序配置文件

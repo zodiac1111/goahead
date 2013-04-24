@@ -2,6 +2,7 @@
  * @file rtit.c real time 电量,实时电量
  */
 #include <string.h>
+#include <time.h>
 #include "define.h"
 #include "rtit.h"
 #include "conf.h"
@@ -18,6 +19,7 @@ static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQ);
 static int add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abPf);
 static int add_mtr_maxn(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abMaxn);
+static time_t toUnixTimestamp(unsigned int rtMaxnTime);
 ///实时电度量
 void form_realtime_tou(webs_t wp, char_t *path, char_t *query)
 {
@@ -336,7 +338,7 @@ static int add_mtr_maxn(jsObj *oMtr, struct stMeter_Run_data const mtr, char con
 			jsonAdd(&aOneDate, NULL,
 					toStr(tmpstr, "%u", iv));
 			jsonAdd(&aOneDate, NULL,
-			                toStr(tmpstr, "%u",mtr.m_iMaxNT[i]));
+			                toStr(tmpstr, "%ld",toUnixTimestamp(mtr.m_iMaxNT[i])));
 			jsonAdd(&aMaxn, NULL, aOneDate);
 			jsonClear(&aOneDate);
 		}
@@ -363,4 +365,45 @@ static int check_mtrnum(int mtrnum)
 		return -1002;
 	}
 	return 0;
+}
+/**
+ * 将规约形式的时间类型4字节,见下方 stRealTimeMaxNeedTime 类型.
+ * @param rtMaxnTime
+ * @return
+ */
+static time_t toUnixTimestamp(unsigned int rtMaxnTime)
+{
+	union stRealTimeMaxNeedTime{
+		unsigned int val;
+		struct{
+			uint32_t sec:6;
+			uint32_t min:6;
+			uint32_t hour:5;
+			uint32_t mday:5;//1-31
+			uint32_t mon:4;//1-12
+			uint32_t year:6;//从2000年到现在的年数
+		};
+	}rtTime;
+	if(rtMaxnTime<=0){
+		return 0;
+	}
+	time_t t;
+	struct tm tm;
+	rtTime.val=rtMaxnTime;
+	tm.tm_sec=rtTime.sec;
+	tm.tm_min=rtTime.min;
+	tm.tm_hour=rtTime.hour;
+	tm.tm_mday=rtTime.mday;//标准日 1-31
+	tm.tm_mon=rtTime.mon-1;//unix 标准月0~11
+	tm.tm_year=rtTime.year+100;
+#if 0
+	printf(WEBS_DBG"day %d,hour:%d \n",rtTime.mday,rtTime.hour);
+	printf(WEBS_DBG"day sys %d hour \n",tm.tm_mday);
+#endif
+	t=mktime(&tm);
+#if 0
+	printf(WEBS_DBG"sys time(struct): %s\n",asctime(&tm));
+	printf(WEBS_DBG"sys time(t): %s\n",ctime(&t));
+#endif
+	return t;
 }
