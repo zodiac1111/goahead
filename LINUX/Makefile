@@ -2,9 +2,9 @@
 #  for the Linux OS
 # Copyright (c) 华立电力
 
-HL3104_HOME=/home/zodiac1111/hl3104/trunk/hl3104-v2.3
+HL3104_HOME= "/home/zodiac1111/hl3104/trunk/hl3104-v2.3"
 #配置头文件,库目录和库文件
-my_cc=arm-linux-gcc
+my_cc=arm-linux-gcc-4.3.5
 my_cxx=arm-linux-g++
 include_dir=$(HL3104_HOME)/include
 lib_dir=$(HL3104_HOME)/lib
@@ -28,8 +28,9 @@ DFLAGS  = -g -Wall -Wextra \
 else
 CC=$(my_cc)
 CXX=$(my_cxx)
-DFLAGS  = -Os -Wall -Wextra -Wno-unused-parameter -Wno-empty-body
 endif
+DFLAGS  = -Os 
+DFLAGS  += -Wall -Wno-unused-parameter
 
 default:  gold
 
@@ -64,6 +65,7 @@ debug:
 	@$(MAKE) compile "WEBS_DEBUG = 1"
 
 gold:
+	echo $GCC_VERSION_3_3_2
 	@$(MAKE) compile
 
 
@@ -97,10 +99,10 @@ DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 CFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 CXXFLAGS	= -DWEBS -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW) -D_arm_cplusplus
 OTHERS	= -DB_STATS -DB_FILL 
-IFLAGS 	= -I.. -I. -Iinclude -I$(include_dir)
+IFLAGS 	=  -I.. -I. -Iinclude -I$(include_dir)
 
 #链接
-LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj) 
+LDFLAGS	= $(SSLLIB) $(IFMODLIB) -L$(lib_dir) $(lib_obj)  
 
 compile: $(NAME)
 
