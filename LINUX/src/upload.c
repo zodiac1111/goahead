@@ -121,12 +121,12 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	jsonFree(&oUpdate);
 	websWrite(wp, "<br>重启服务器...<br>");
 	websWrite(wp, T("<font color=green>更新完成</font>.请<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"));
-	autoUpdate();     //自动重启
+	autoUpdate();     //自动升级
 	websDone(wp, 200);
 	return;
 SEND_ERROR:
-	jsonFree(&oUpdate);
 	websWrite(wp, "<font color=red>升级失败<font>");
+	jsonFree(&oUpdate);
 	websDone(wp, 200);
 	return;
 }

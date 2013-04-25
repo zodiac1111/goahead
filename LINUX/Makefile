@@ -4,7 +4,7 @@
 
 HL3104_HOME= "/home/zodiac1111/hl3104/trunk/hl3104-v2.3"
 #配置头文件,库目录和库文件
-my_cc=arm-linux-gcc-4.3.5
+my_cc=arm-linux-gcc
 my_cxx=arm-linux-g++
 include_dir=$(HL3104_HOME)/include
 lib_dir=$(HL3104_HOME)/lib
