@@ -30,10 +30,8 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 #define WEBS_REQ_TEST 12
 	PRINT_FORM_INFO;
 	websHeader_pure(wp);
-	//char app[256] = { 0 };
 	int typ = 0;
 	int ret = -1;
-	//pid_t pid;
 	char * str_typ = websGetVar(wp, T("OpType"), T("null"));
 	typ = atoi(str_typ);
 	printf("type=%d\n", typ);
@@ -46,7 +44,10 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 		}
 		break;
 	case RET_WEB:
-		autoUpdate();
+		//重新运行自身
+		if (execl(PROG_NAME, PROG_NAME, NULL )<0) {
+			web_err_proc(EL);
+		}
 		break;
 	case RET_SAMPLE_PROC:		///@待定
 		system("killall -9 hl3104_com");
@@ -58,7 +59,6 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 		system("echo \"reboot ok\"");
 #else
 		system("reboot");
-		//websDone(wp, 200);
 #endif
 		break;
 	case RET_CLEARDATA:
@@ -67,23 +67,18 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 		system("echo \"clear data ok\"");
 #else
 		system("rm /mnt/nand/*.* -f");
-		//websDone(wp, 200);
 #endif
 		break;
 	case RET_TEST:
 		system("ls");
-		//websDone(wp, 200);
 		break;
 	case WEBS_REQ_TEST:
-		//websDone(wp, 200);
 		break;
 	default:
-		//websDone(wp, 200);
 		return;
 		break;
 	}
 	websDone(wp, 200);
-	//reflash_this_wp(wp, PAGE_RESET);
 }
 /// 接收客户端的日志文件
 void form_save_log(webs_t wp, char_t *path, char_t *query)

@@ -62,9 +62,6 @@ stSysParam sysparam = { 0,0,0,0,0,0,0 };
  char *mon_port_name[MAX_MON_PORT_NUM];
 ///规约文件中的实际规约数,初始化为最大
  int mon_port_num = MAX_MON_PORT_NUM;
-
-
-
 stCfg webs_cfg;
 
 #define JSON 1
@@ -451,7 +448,7 @@ static int initWebs(void)
 	char_t wbuf[128];
 	//先打开各种配置文件,主要是使能错误日志
 	int ret = load_webs_conf_info();
-	if (load_webs_conf_info()<0) {
+	if (ret<0) {
 		web_err_proc(EL);
 		return ret;
 	}
