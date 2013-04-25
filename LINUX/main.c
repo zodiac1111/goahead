@@ -55,13 +55,13 @@ static void memLeaks();
 ///内存中的系统参数结构体.全局使用.
 stSysParam sysparam = { 0,0,0,0,0,0,0 };
 ///规约文件中的规约名称.
-static char *procotol_name[MAX_PROCOTOL_NUM];
+ char *procotol_name[MAX_PROCOTOL_NUM];
 ///规约文件中的实际规约数,初始化为最大
-static int procotol_num = MAX_PROCOTOL_NUM;
+ int procotol_num = MAX_PROCOTOL_NUM;
 ///规约文件中的规约名称.
-static char *mon_port_name[MAX_MON_PORT_NUM];
+ char *mon_port_name[MAX_MON_PORT_NUM];
 ///规约文件中的实际规约数,初始化为最大
-static int mon_port_num = MAX_MON_PORT_NUM;
+ int mon_port_num = MAX_MON_PORT_NUM;
 
 
 
@@ -326,81 +326,7 @@ void form_collect_cycle(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
-/**
- * 客户端发送重启表单,分类重启,一些系统功能
- * @todo 配合的更好一些,参考路由器的页面行为设计.
- *   前端一个更舒适的行为反馈(终端重启前端交互基本可行).
- *   进行较为科学的分类,待整理.
- * @param wp
- * @param path
- * @param query
- */
-void form_sysFunction(webs_t wp, char_t *path, char_t *query)
-{
-#define REINIT_PROTOCOL_FILE 1
-#define RET_WEB 2
-#define RET_SAMPLE_PROC 3
-#define RET_RTU 4
-#define RET_CLEARDATA 5
-#define RET_TEST 10
-#define WEBS_REQ_TEST 12
-	PRINT_FORM_INFO;
-	websHeader_pure(wp);
-	//char app[256] = { 0 };
-	int typ = 0;
-	int ret = -1;
-	//pid_t pid;
-	char * str_typ = websGetVar(wp, T("OpType"), T("null"));
-	typ = atoi(str_typ);
-	printf("type=%d\n", typ);
-	switch (typ) {
-	case REINIT_PROTOCOL_FILE:
-		ret = read_protocol_file(procotol_name, &procotol_num,
-		                webs_cfg.protocol);
-		if (ret!=0) {
-			web_err_proc(EL);
-		}
-		break;
-	case RET_WEB:
-		autoUpdate();
-		break;
-	case RET_SAMPLE_PROC:		///@待定
-		system("killall -9 hl3104_com");
-		break;
-	case RET_RTU:
-		//reflash_this_wp(wp, PAGE_RESET);
-#if __i386 == 1
-		//调试不要重启PC系统...
-		system("echo \"reboot ok\"");
-#else
-		system("reboot");
-		//websDone(wp, 200);
-#endif
-		break;
-	case RET_CLEARDATA:
-		#if __i386 == 1
-		//调试不要重启PC系统...
-		system("echo \"clear data ok\"");
-#else
-		system("rm /mnt/nand/*.* -f");
-		//websDone(wp, 200);
-#endif
-		break;
-	case RET_TEST:
-		system("ls");
-		//websDone(wp, 200);
-		break;
-	case WEBS_REQ_TEST:
-		//websDone(wp, 200);
-		break;
-	default:
-		//websDone(wp, 200);
-		return;
-		break;
-	}
-	websDone(wp, 200);
-	//reflash_this_wp(wp, PAGE_RESET);
-}
+
 /******************************************************************************/
 
 /**

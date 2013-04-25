@@ -16,6 +16,12 @@
 #include "json.h"
 #include "wpsend.h"
 #include "web_err.h"
+#include "param.h"
+#include "autoUpdate.h"
+//这两个目前在主函数定义 TODO 分离
+extern char *procotol_name[MAX_PROCOTOL_NUM];
+extern int procotol_num ;
+
 extern char * webdir;
 //web shell 部分功能需要信号量
 extern struct sembuf sb;
