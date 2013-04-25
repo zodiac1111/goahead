@@ -141,5 +141,15 @@ extern stCfg webs_cfg;
 #else
 	#define	PRINT_FORM_INFO
 #endif
-
+/**
+ *  打印输出当前位置的文件,函数,代码行数
+ */
+#define PRINT_HERE {						\
+	printf(WEBS_ERR"[File:%s Line:%d] Fun:%s .\n",	\
+	__FILE__, __LINE__, __FUNCTION__);			\
+	}
+#define PRINT_RET(ret) {						\
+	printf(WEBS_ERR"[File:%s Line:%d] Fun:%s ret %d .\n",	\
+	__FILE__, __LINE__, __FUNCTION__,(ret));		 	\
+	}
 #endif /* CONF_H_ */

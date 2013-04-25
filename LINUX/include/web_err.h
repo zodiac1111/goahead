@@ -16,20 +16,20 @@ extern int web_errno;
 extern const char *myweberrstr[];
 ///错误描述枚举
 enum e_errno {
-	no_error=0,
-	open_sysparam_file = 1,
-	sysfile_size_err,
-	write_sysfile_size_err,
-	read_sysfile_err,
+	ErrNoError=0,
+	ErrOpen_sysparam_file = 1,
+	ErrSysfileSize,
+	ErrWriteSysParamFileSize,
+	ErrReadSysParamFile,
 	write_sysfile_err,
 	update_mtr_file_err,
-	update_sio_file_err,
-	update_netparam_file_err,
-	update_monparam_file_err,
+	ErrUpdateSioFile,
+	ErrUpdate_netparam_file_err,
+	ErrUpdate_monparam_file_err,
 	//表计参数方案
-	open_mtrcfgfile_err,
-	no_this_mtrparam,
-	read_mtrcfgfile_err,
+	ErrOpenMtrcfgFile,
+	ErrNoSuchMeterParam,
+	ErrReadMetercfgFile,
 	write_mtrcfgfile_err,
 	mtr_file2men_err,
 	//串口方案
@@ -48,7 +48,7 @@ enum e_errno {
 	no_this_monparam,
 	read_monparam_cfgfile_err,
 	write_monparam_cfgfile_err,
-	//save cycle item:
+	//储存周期
 	open_savecycle_cfgfile_err,
 	savecycle_cfgfile_size_err,
 	read_savecycle_cfgfile_err,

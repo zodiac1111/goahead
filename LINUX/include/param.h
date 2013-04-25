@@ -30,17 +30,7 @@ extern const char *UART_BAUD[7];
 extern const char *UART_COMM_TYPE[2];
 extern const char *SAVE_CYCLE[13];
 extern const char *COLLECT_CYCLE[13];
-/**
- *  打印输出当前位置的文件,函数,代码行数
- */
-#define PRINT_HERE {						\
-	printf(WEBS_ERR"[File:%s Line:%d] Fun:%s .\n",	\
-	__FILE__, __LINE__, __FUNCTION__);			\
-	}
-#define PRINT_RET(ret) {						\
-	printf(WEBS_ERR"[File:%s Line:%d] Fun:%s ret %d .\n",	\
-	__FILE__, __LINE__, __FUNCTION__,(ret));		 	\
-	}
+
 /// sysspara.cfg 文件/内存储存形式.
 typedef struct
 {

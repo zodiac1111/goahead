@@ -195,7 +195,7 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
-		web_errno = open_mtrcfgfile_err;
+		web_errno = ErrOpenMtrcfgFile;
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -205,7 +205,7 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
 	if (flen<sizeof(stMtr_File)*(no+1)) {
 		PRINT_HERE
 		printf("mtrparam num no=%d\n", no);
-		web_errno = no_this_mtrparam;
+		web_errno = ErrNoSuchMeterParam;
 		fclose(fp);
 		return -1;
 	}
@@ -214,7 +214,7 @@ int load_mtrparam(stMtr* pmtr, const char * file, int no)
 	if (ret!=1) {
 		perror("read");
 		PRINT_HERE
-		web_errno = read_mtrcfgfile_err;
+		web_errno = ErrReadMetercfgFile;
 		fclose(fp);
 		return -1;
 	}
@@ -251,7 +251,7 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
-		web_errno = open_mtrcfgfile_err;
+		web_errno = ErrOpenMtrcfgFile;
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -362,7 +362,7 @@ int load_sysparam(stSysParam * param, const char * file)
 	if (fp==NULL ) {
 		perror("open sysparam.cfg");
 		PRINT_HERE
-		web_errno = open_sysparam_file;
+		web_errno = ErrOpen_sysparam_file;
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -371,7 +371,7 @@ int load_sysparam(stSysParam * param, const char * file)
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen<(long int) sizeof(stSysParam)) {
 		PRINT_HERE
-		web_errno = sysfile_size_err;
+		web_errno = ErrSysfileSize;
 		fclose(fp);
 		return -1;
 	}
@@ -379,7 +379,7 @@ int load_sysparam(stSysParam * param, const char * file)
 	if (ret!=1) {
 		perror("read");
 		PRINT_HERE
-		web_errno = read_sysfile_err;
+		web_errno = ErrReadSysParamFile;
 		fclose(fp);
 		return -1;
 	}
@@ -402,7 +402,7 @@ int load_stsparam(stSysParam * param, const char * file)
 	if (fp==NULL ) {
 		perror("open sysparam.cfg");
 		PRINT_HERE
-		web_errno = open_sysparam_file;
+		web_errno = ErrOpen_sysparam_file;
 		return -1;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -411,7 +411,7 @@ int load_stsparam(stSysParam * param, const char * file)
 	//printf("sizeof struct=%d\n",sizeof(stMtr_File));
 	if (flen<sizeof(stSysParam)) {
 		PRINT_HERE
-		web_errno = sysfile_size_err;
+		web_errno = ErrSysfileSize;
 		fclose(fp);
 		return -1;
 	}
@@ -419,7 +419,7 @@ int load_stsparam(stSysParam * param, const char * file)
 	if (ret!=1) {
 		perror("read");
 		PRINT_HERE
-		web_errno = read_sysfile_err;
+		web_errno = ErrReadSysParamFile;
 		fclose(fp);
 		return -1;
 	}
@@ -442,7 +442,7 @@ int save_sysparam(const stSysParam * param, const char * file)
 	if (fp==NULL ) {
 		perror("open sysparam.cfg");
 		PRINT_HERE
-		web_errno = open_sysparam_file;
+		web_errno = ErrOpen_sysparam_file;
 		return -1;
 	}
 	int fd = fileno(fp);
@@ -452,7 +452,7 @@ int save_sysparam(const stSysParam * param, const char * file)
 	if (ret!=0) {
 		fclose(fp);
 		PRINT_HERE
-		web_errno = write_sysfile_size_err;
+		web_errno = ErrWriteSysParamFileSize;
 		return -1;
 	}
 	ret = fwrite(param, sizeof(stSysParam), 1, fp);
@@ -474,17 +474,17 @@ int save_sysparam(const stSysParam * param, const char * file)
 	}
 	ret = update_siofile(*param);     ///串口方案个数
 	if (ret!=0) {
-		web_errno = update_sio_file_err;
+		web_errno = ErrUpdateSioFile;
 		return -1;
 	}
 	ret = update_netparamfile(*param);     ///网口个数
 	if (ret!=0) {
-		web_errno = update_netparam_file_err;
+		web_errno = ErrUpdate_netparam_file_err;
 		return -1;
 	}
 	ret = update_monparamfile(*param);     ///监视端口数
 	if (ret!=0) {
-		web_errno = update_monparam_file_err;
+		web_errno = ErrUpdate_monparam_file_err;
 		return -1;
 	}
 	return 0;
@@ -922,7 +922,7 @@ static int update_mtrfile(const stSysParam param)
 	int ret = -1;
 	FILE* fp = fopen(webs_cfg.mtrspara, "rb+");
 	if (fp==NULL ) {
-		web_errno = open_mtrcfgfile_err;
+		web_errno = ErrOpenMtrcfgFile;
 		return -1;
 	}
 	//伸缩文件长度.变长添0,变短直接截断

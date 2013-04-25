@@ -18,6 +18,7 @@
 #include "web_err.h"
 #include "autoUpdate.h"
 #include "rtit.h"
+#include "sysfunction.h"
 #include "wpsend.h"
 #include "upload.h"
 #include "externCShm.h" //主程序共享内存的道出接口
@@ -36,16 +37,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query);
 void form_monparas(webs_t wp, char_t *path, char_t *query);
 void form_savecycle(webs_t wp, char_t *path, char_t *query);
 void form_collect_cycle(webs_t wp, char_t *path, char_t *query);
-void form_sysFunction(webs_t wp, char_t *path, char_t *query);
-void form_msg(webs_t wp, char_t *path, char_t *query);
-void form_msg_stop(webs_t wp, char_t *path, char_t *query);
-void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
-void form_save_procotol_cfgfile(webs_t wp, char_t *path, char_t *query);
-void form_save_log(webs_t wp, char_t *path, char_t *query);
-void form_load_log(webs_t wp, char_t *path, char_t *query);
-void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
-void form_save_monport_cfgfile(webs_t wp, char_t *path, char_t *query);
-void form_info(webs_t wp, char_t *path, char_t *query);
+
 
 //各类大相
 int webRece_syspara(webs_t wp,stSysParam* sysparam);
@@ -67,10 +59,6 @@ int webSend_netparas(webs_t wp, int netParamNum);
 int webRece_netparas(webs_t wp);
 int webSend_monparas(webs_t wp, stSysParam sysparam);
 int webRece_monparas(webs_t wp);
-int webSend_info(webs_t wp);
-int webSend_txtfile(webs_t wp, const char*file);
-int webRece_txtfile(webs_t wp, char_t *query, const char* file);
-
 static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_NUM]);
 //串口方案项目
 //网口参数
@@ -93,7 +81,6 @@ char * point2next(char** s, const char split);
 ////杂类函数,全系统相关
 int load_webs_conf_info(void);
 
-void init_semun(void);
 char* a2jsObj(char *tmp, uint8_t * array,int n);
 char* getconf(const char * const name,char** value);
 void webs_free(void);
@@ -107,11 +94,5 @@ static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
 static void sigintHandler(int);
 int jsonSavCycle(webs_t wp,const char* name,const stSave_cycle sav);
-union semun
-{
-	int val;
-	struct semid_ds *buf;
-	unsigned short int *array;
-	struct seminfo *__buf;
-};
+
 #endif /* MAIN_H_ */
