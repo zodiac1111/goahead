@@ -12,6 +12,7 @@
 #include "upload.h"
 #include "autoUpdate.h"
 static int webExport_conf(webs_t wp);
+static int webExport_sys(webs_t wp);
 void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
 	//PRINT_FORM_INFO;
@@ -185,7 +186,7 @@ webExport_conf(webs_t wp)
  * @return
  */
 static int
-webExport_conf(webs_t wp)
+webExport_sys(webs_t wp)
 {
 	char cmd[4096];
 	//保存到www根目录
