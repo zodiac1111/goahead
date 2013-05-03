@@ -150,6 +150,9 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(action, "export")==0) {
 		printf(WEBS_INF"配置文件导出\n");
 		webExport_conf(wp);
+	} else if (strcmp(action, "sys")==0) {
+		printf(WEBS_INF"导出系统(/mnt/nor/目录)\n");
+		webExport_sys(wp);
 	} else {
 		web_err_proc(EL);
 	}
@@ -170,6 +173,25 @@ webExport_conf(webs_t wp)
 	toStr(cmd, "tar cvf /mnt/nor/www/backup.tar %s ",
 		items);
 	printf(WEBS_INF"备份命令:%s\n",cmd);
+	if(system(cmd)<0){
+		web_err_proc(EL);
+	}
+	return 0;
+}
+
+/**
+ * 打包nor目录
+ * @param wp
+ * @return
+ */
+static int
+webExport_conf(webs_t wp)
+{
+	char cmd[4096];
+	//保存到www根目录
+	toStr(cmd, "tar cvf /tmp/sys.tar /mnt/nor && "
+		"mv /tmp/sys.tar /mnt/nor/www");
+	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){
 		web_err_proc(EL);
 	}
