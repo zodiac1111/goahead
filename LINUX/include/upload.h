@@ -13,5 +13,5 @@
 #include "wpsend.h"
 #include "web_err.h"
 extern void form_upload_file(webs_t wp, char_t *path, char_t *query);
-
+extern void form_conf_file(webs_t wp, char_t *path, char_t *query);
 #endif /* UPLOAD_H_ */

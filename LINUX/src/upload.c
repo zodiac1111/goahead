@@ -1,7 +1,8 @@
 /**
  * @file upload.c
- * 实现客户端上传文件功能,主要用于更新程序.
- * 在更新时非常实用.使用了goahead上传文件补丁
+ * 1. 实现客户端上传文件功能,主要用于更新程序.
+ *  在更新时非常实用.使用了goahead上传文件补丁
+ * 2. 实现配置文件的导入导出操作.
  */
 /** 文件上传补丁由 http://velep.com/archives/321.html 下载.
  * 仅适用goahead2.5和2.1.1(老版本)现在该公司已经被收购,维护需要靠自己.
@@ -10,6 +11,7 @@
  */
 #include "upload.h"
 #include "autoUpdate.h"
+static int webExport_conf(webs_t wp);
 void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
 	//PRINT_FORM_INFO;
@@ -124,9 +126,44 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	autoUpdate();     //自动升级
 	websDone(wp, 200);
 	return;
-SEND_ERROR:
+	SEND_ERROR:
 	websWrite(wp, "<font color=red>升级失败<font>");
 	jsonFree(&oUpdate);
 	websDone(wp, 200);
 	return;
+}
+/**
+ * 配置文件的操作,涉及倒入导出配置文件
+ * @todo 实现配置文件的倒入导出功能
+ * @param wp
+ * @param path
+ * @param query
+ */
+void form_conf_file(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	websHeader_pure(wp);
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "import")==0) {
+		//todo
+		printf(WEBS_WAR"未实现:配置文件导入");
+		webExport_conf(wp);
+	} else if (strcmp(action, "export")==0) {
+		//todo
+		printf(WEBS_WAR"未实现:配置文件导出");
+	} else {
+		web_err_proc(EL);
+	}
+	websDone(wp, 200);
+	return;
+}
+static int
+webExport_conf(webs_t wp)
+{
+	char cmd[4096];
+	char *items = websGetVar(wp, T("items"), T("null"));
+	toStr(cmd, "tar cvf /tmp/backup.tar %s ",
+		items);
+	system(cmd);
+	return 0;
 }

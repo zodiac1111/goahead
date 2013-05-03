@@ -552,6 +552,7 @@ static int initWebs(void)
 	websFormDefine(T("msg_stop"), form_msg_stop);
 	websFormDefine(T("info"), form_info);
 	websFormDefine(T("upload_file"), form_upload_file);
+	websFormDefine(T("form_conf_file"), form_upload_file);
 #ifdef USER_MANAGEMENT_SUPPORT
 	//Create the Form handlers for the User Management pages
 	formDefineUserMgmt();
