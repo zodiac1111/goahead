@@ -2,7 +2,7 @@
 #  for the Linux OS
 # Copyright (c) 华立电力
 
-HL3104_HOME= "/home/zodiac1111/hl3104/trunk/hl3104-v2.3"
+#HL3104_HOME= "/home/zodiac1111/hl3104/trunk/hl3104-v2.3"
 #配置头文件,库目录和库文件
 my_cc=arm-linux-gcc
 my_cxx=arm-linux-g++
