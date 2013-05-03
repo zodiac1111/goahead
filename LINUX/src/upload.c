@@ -146,11 +146,11 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "import")==0) {
 		//todo
-		printf(WEBS_WAR"未实现:配置文件导入");
-		webExport_conf(wp);
+		printf(WEBS_WAR"未实现:配置文件导入\n");
 	} else if (strcmp(action, "export")==0) {
 		//todo
-		printf(WEBS_WAR"未实现:配置文件导出");
+		printf(WEBS_WAR"未实现:配置文件导出\n");
+		webExport_conf(wp);
 	} else {
 		web_err_proc(EL);
 	}
@@ -162,7 +162,8 @@ webExport_conf(webs_t wp)
 {
 	char cmd[4096];
 	char *items = websGetVar(wp, T("items"), T("null"));
-	toStr(cmd, "tar cvf /tmp/backup.tar %s ",
+	//保存到www根目录
+	toStr(cmd, "tar cvf /mnt/nor/www/backup.tar %s ",
 		items);
 	system(cmd);
 	return 0;
