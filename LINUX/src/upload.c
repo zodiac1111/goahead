@@ -148,8 +148,7 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 		//todo
 		printf(WEBS_WAR"未实现:配置文件导入\n");
 	} else if (strcmp(action, "export")==0) {
-		//todo
-		printf(WEBS_WAR"未实现:配置文件导出\n");
+		printf(WEBS_INF"配置文件导出\n");
 		webExport_conf(wp);
 	} else {
 		web_err_proc(EL);
@@ -157,6 +156,11 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
+/**
+ * 打包配置文件
+ * @param wp
+ * @return
+ */
 static int
 webExport_conf(webs_t wp)
 {
@@ -165,6 +169,9 @@ webExport_conf(webs_t wp)
 	//保存到www根目录
 	toStr(cmd, "tar cvf /mnt/nor/www/backup.tar %s ",
 		items);
-	system(cmd);
+	printf(WEBS_INF"备份命令:%s\n",cmd);
+	if(system(cmd)<0){
+		web_err_proc(EL);
+	}
 	return 0;
 }
