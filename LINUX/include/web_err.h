@@ -77,5 +77,6 @@ enum e_errno {
 	syn_time,///<设置终端时间错误
 	eno_realtime_tou_mtrnum_too_small,
 	eno_realtime_tou_mtrnum_too_big,
+	ErrNotSupportHostNameFunction,
 };
 #endif

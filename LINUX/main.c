@@ -370,8 +370,8 @@ char* getconf(const char * const name, char** value)
 	 */
 	//char* value=NULL;
 	char line[256] = { 0 };
-	char n[256] = { 0 };
-	char v[256] = { 0 };
+	char n[256] = { 0 };//name
+	char v[256] = { 0 };//value
 	char *pname = NULL;
 	char *pvalue = NULL;
 	int strnum = 0;
@@ -476,6 +476,7 @@ static int initWebs(void)
 		herror(WEBS_ERR"gethostbyname");
 		printf(WEBS_WAR"Try to use the IP 127.0.0.1 instead.");
 		error(E_L, E_LOG, T("Can't get host address"));
+		web_errno = ErrNotSupportHostNameFunction;
 		web_err_proc(EL);
 		memcpy((char *) &intaddr, (char *)"127.0.0.1",
 					strlen("127.0.0.1"));

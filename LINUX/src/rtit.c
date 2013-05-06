@@ -386,21 +386,29 @@ static time_t toUnixTimestamp(unsigned int rtMaxnTime)
 			uint32_t year :6;     //从2000年到现在的年数
 		};
 	} rtTime;
-	if (rtMaxnTime<=0) {
+	if (rtMaxnTime<=0 ) {
 		return 0;
 	}
 	time_t t;
 	struct tm tm;
 	rtTime.val = rtMaxnTime;
-	tm.tm_sec = rtTime.sec;
+	if (rtTime.mon<=0 ) {
+		return 0;
+	}
+	tm.tm_sec = rtTime.sec; //不是实际秒.和表有关,前端忽略
 	tm.tm_min = rtTime.min;
 	tm.tm_hour = rtTime.hour;
 	tm.tm_mday = rtTime.mday;     //标准日 1-31
 	tm.tm_mon = rtTime.mon-1;     //unix 标准月0~11
-	tm.tm_year = rtTime.year+100;
-#if 0
-	printf(WEBS_DBG"day %d,hour:%d \n",rtTime.mday,rtTime.hour);
-	printf(WEBS_DBG"day sys %d hour \n",tm.tm_mday);
+	///@note 表计的年可能与表计有关,目前仅忽略之 可能会是@bug !
+	tm.tm_year = rtTime.year+100; //645-97表没有年,
+#if 1
+	printf(WEBS_DBG"sys: %04d-%02d-%02d %02d:%02d:%02d \n"
+		,rtTime.year+2000,rtTime.mon,rtTime.mday
+		,rtTime.hour,rtTime.min,rtTime.sec);
+	//printf(WEBS_DBG"unix: %04d-%02d-%02d %02d:%02d:%02d \n"
+	//	,tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday
+	//	,tm.tm_hour,tm.tm_min,tm.tm_sec);
 #endif
 	t = mktime(&tm);
 #if 0

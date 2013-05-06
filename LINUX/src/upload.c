@@ -190,7 +190,8 @@ webExport_sys(webs_t wp)
 {
 	char cmd[4096];
 	//保存到www根目录
-	toStr(cmd, "tar cvf /tmp/sys.tar /mnt/nor && "
+	toStr(cmd, "rm /mnt/nor/www/sys.tar -f;"
+		"tar cvf /tmp/sys.tar /mnt/nor && "
 		"mv /tmp/sys.tar /mnt/nor/www");
 	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){

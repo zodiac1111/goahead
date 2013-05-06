@@ -98,6 +98,7 @@ const char *myweberrstr[] = {
                 [syn_time]="Set system datatime error.",
                 [eno_realtime_tou_mtrnum_too_small]="Realtime tou mtrnum too small.",
                 [eno_realtime_tou_mtrnum_too_big]="Realtime tou mtrnum too big.",
+                [ErrNotSupportHostNameFunction]="1.5版本特殊:hostname函数错误,使用默认的127.0.0.1代替.",
         };
 /**
  * 服务器错误处理函数.
