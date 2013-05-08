@@ -14,6 +14,7 @@
 #define TOU_DAT_DIR DATA_DIR
 #endif
 #define TOU_DAT_SUFFIX "tou" //电量数据文件后缀名
+#define INSTANT_DAT_SUFFIX "ta" //瞬时量数据文件后缀名
 ///tou 文件头
 typedef struct {
 	uint8_t year; //+2000
@@ -26,7 +27,7 @@ typedef struct {
 	uint8_t save_flag2;
 	uint8_t save_flag3;
 	uint8_t save_flag4;
-}  __attribute__((packed, aligned(1))) stTouFilehead;
+}  __attribute__((packed, aligned(1))) stFilehead;
 ///某单独电量结构,如 总电量 或者 谷电量
 typedef struct {
 	///以4个字节型组织的假装的浮点型,注意读取时顺序
@@ -54,6 +55,14 @@ typedef struct {
 	 Ti_Category FR;///<正无
 	 Ti_Category RR;///<反无
 }  __attribute__((packed, aligned(1))) stTou;
+///一个瞬时量文件结构
+typedef struct {
+	Ti v[PHASENUM];
+	Ti i[PHASENUM];
+	Ti p[PQCNUM];
+	Ti q[PQCNUM];
+	Ti pf[PQCNUM];
+}  __attribute__((packed, aligned(1))) stInstant;
 ///时间跨度,开始时间和结束时间
 typedef struct{
 	time_t s;

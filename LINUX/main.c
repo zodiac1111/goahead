@@ -1588,7 +1588,7 @@ int webRece_netparas(webs_t wp)
 	int n;
 	int param_no = 0;	///参数序号,即数据库的主键,base 0.没有物理意义
 	char * net_no = websGetVar(wp, T("net_no"), T("null"));
-	char * eth = websGetVar(wp, T("eth"), T("null"));
+	//char * eth = websGetVar(wp, T("eth"), T("null"));
 	char * ip = websGetVar(wp, T("ip"), T("null"));
 	char * mask = websGetVar(wp, T("mask"), T("null"));
 	char * gateway = websGetVar(wp, T("gateway"), T("null"));
@@ -1601,14 +1601,15 @@ int webRece_netparas(webs_t wp)
 		if (n!=1) {		//正常完结
 			break;
 		}
+		param_no--;
 		net_no = point2next(&net_no, ' ');
-		//网口号
-		n = sscanf(eth, "%hhu", &netparam.no);
-		if (n!=1) {
-			web_err_proc(EL);
-			break;
-		}
-		eth = point2next(&eth, ' ');
+		//网口号 废弃
+		//n = sscanf(eth, "%hhu", &netparam.no);
+		//if (n!=1) {
+		//	web_err_proc(EL);
+		//	break;
+		//}
+		//eth = point2next(&eth, ' ');
 		//ip
 		ipstr2ipfile(ip, netparam.ip);
 		ip = point2next(&ip, ' ');
