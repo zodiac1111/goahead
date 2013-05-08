@@ -3,7 +3,10 @@
 #include <time.h>
 #include "../uemf.h"
 #include "../wsIntrn.h"
+#include "json.h"
+#include "struct.h"
 #include <stdint.h>
+#include "wpsend.h"
 #define DATA_DIR "../../nand" //数据目录
 #if __i386 == 1
 #define TOU_DAT_DIR DATA_DIR"/tou" //电量Tou数据目录

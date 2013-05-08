@@ -1,5 +1,5 @@
 /**
- * @file tou.c 电量历史数据文件
+ * @file tou.c 电量历史数据文件,=>所有历史数据,电量,瞬时量,需量
  * @param mtr_no
  * @param range
  * @param tou
@@ -21,15 +21,26 @@
 #include "tou.h"
 #include "web_err.h"
 #include "conf.h"
+#include "define.h"
 ///仅在本文件中使用的静态函数定义.
-static void timeToNextDayMorning(struct tm *stTime,time_t *time_t);
+static int webRece_history_data(webs_t wp);
+static int check_mtrnum(int mtrnum);
 static int
-webWrite_toudata(time_t t2, webs_t wp, const stTou tou,int i,int mtr_no);
-static char * float2string( uint8_t const float_array[4], char * strval);
-static int webWriteOneTI(webs_t wp, Ti_Category ti);
-static int webWrite1Tou(webs_t wp,const stTou tou);
-static int isRightDate(const stTouFilehead  filehead,  struct  tm   t);
-static int load_tou_dat(uint32_t mtr_no,TimeRange const range,stTou* ptou,webs_t wp);
+add_mtr_tou(jsObj *oMtr, int mtrNo, char const *abTou,
+	TimeRange const range,const char *enable);
+static void timeToNextDayMorning(struct tm *stTime, time_t *time_t);
+static int
+webWrite_toudata_json(jsObj *OneTimeTou, time_t t2, const stTou tou,
+	int i, int mtr_no,const char *enable);
+static int webWriteOneTI_json(jsObj *o, Ti_Category ti,const char *enable);
+static int webWrite1Tou_json(jsObj *o, const stTou tou,const char *enable);
+//
+static char * float2string(uint8_t const float_array[4], char * strval);
+static int isRightDate(const stTouFilehead filehead, struct tm t);
+static int
+load_tou_dat(jsObj *oMtr, uint32_t mtr_no,
+	TimeRange const range,const char* enable);
+#if 0
 /**
  * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
  * @param wp
@@ -77,19 +88,136 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
-
+#else
+void form_history_tou(webs_t wp, char_t *path, char_t *query)
+{
+	PRINT_FORM_INFO;
+	websHeader_pure(wp);
+	char * action = websGetVar(wp, T("action"), T("null"));
+	if (strcmp(action, "get")==0) {
+		webRece_history_data(wp);
+	} else {
+		web_err_proc(EL);
+	}
+	websDone(wp, 200);
+	return;
+}
+#endif
+static int webRece_history_data(webs_t wp)
+{
+	int i;int ret;
+	char * stime_t = websGetVar(wp, T("stime_stamp"), T("0"));
+	char * etime_t = websGetVar(wp, T("etime_stamp"), T("0"));
+	char * strtz = websGetVar(wp, T("timezone"), T("0"));
+	char * abMtr = websGetVar(wp, T("mtr"), T(""));
+	char * datatType =websGetVar(wp, T("type"), T(""));
+	char * abTou = websGetVar(wp, T("tou"), T(""));
+	char * abQr = websGetVar(wp, T("qr"), T(""));
+	char * abV = websGetVar(wp, T("v"), T(""));
+	char * abI = websGetVar(wp, T("i"), T(""));
+	char * abP = websGetVar(wp, T("p"), T(""));
+	char * abQ = websGetVar(wp, T("q"), T(""));
+	char * abPf = websGetVar(wp, T("pf"), T(""));
+	char * abF = websGetVar(wp, T("f"), T(""));     //频率貌似暂时没用
+	char * abMaxn = websGetVar(wp, T("maxn"), T(""));
+	int mtrnum = strlen(abMtr);
+	int tz = 0;
+	if (check_mtrnum(mtrnum)<0) {
+		web_err_proc(EL);
+	}
+	TimeRange tr;
+	ret = sscanf(stime_t, "%ld", &tr.s);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(etime_t, "%ld", &tr.e);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	ret = sscanf(strtz, "%d", &tz);
+	if (ret!=1) {
+		web_err_proc(EL);
+	}
+	tr.s += (tz);
+	tr.e += (tz);
+	jsObj oHistoryData = jsonNew();     //{[{表1},{表2}],终端属性=xx,终端属性2=yy}
+	jsObj aMtr = jsonNewArray();     //{[表0,表1...]}
+	jsObj oMtr = jsonNew();     //{[it],表属性}
+	//回显查询信息,增强可靠性
+	jsonAdd(&oHistoryData, "rtu_info",
+	                "this is rtu info,like version etc..");
+	jsonAdd(&oHistoryData, "abMtr", abMtr);     //将参数回传,保证不出错
+	jsonAdd(&oHistoryData, "abTou", abTou);
+	jsonAdd(&oHistoryData, "abQr", abQr);
+	jsonAdd(&oHistoryData, "abV", abV);
+	jsonAdd(&oHistoryData, "abI", abI);
+	jsonAdd(&oHistoryData, "abP", abP);
+	jsonAdd(&oHistoryData, "abQ", abQ);
+	jsonAdd(&oHistoryData, "abPf", abPf);
+	jsonAdd(&oHistoryData, "abF", abF);
+	jsonAdd(&oHistoryData, "abMaxn", abMaxn);
+	for (i = 0; i<mtrnum; i++) {     //遍历所有表
+		if (abMtr[i]!='1') {
+			continue;
+		}
+		add_mtr_tou(&oMtr, i, abTou, tr,abTou);
+		//
+		jsonAdd(&aMtr, NULL, oMtr);
+		jsonClear(&oMtr);
+	}
+	jsonAdd(&oHistoryData, "mtr", aMtr);     //添加整个表对象
+	printf(WEBS_DBG"历史数据:%s\n",oHistoryData);
+	wpsend(wp, oHistoryData);
+	jsonFree(&oMtr);
+	jsonFree(&aMtr);
+	jsonFree(&oHistoryData);
+	return 0;
+}
+//一个表(mtrNo)在一段时间范围(range)内特定电量项目(abTou)保存到oMtr json数组中.
+static int
+add_mtr_tou(jsObj *oMtr, int mtrNo, char const *abTou,
+	TimeRange const range,const char *enable)
+{
+	if (strlen(abTou)!=TOUNUM) {
+		web_err_proc(EL);
+		return -100;
+	}
+	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
+	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
+	load_tou_dat(&aTou, mtrNo, range,enable);
+	jsonAdd(oMtr, "tou", aTou);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"tou:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aTou);
+	return 0;
+}
 /**
  * 将时间推至次日凌晨0点,用于检索到下一个文件
  * @param stTime 时间结构体
  * @param time_t 时间戳(32位!bug Y2038)
  */
-static void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
+static void timeToNextDayMorning(struct tm *stTime, time_t *time_t)
 {
 	stTime->tm_hour = 0;
 	stTime->tm_min = 0;
 	stTime->tm_sec = 0;
 	*time_t = mktime(stTime);
 	*time_t += (60*60*24);
+}
+///简单检查表数量合法性
+static int check_mtrnum(int mtrnum)
+{
+	if (mtrnum<=0) {
+		web_errno = eno_realtime_tou_mtrnum_too_small;
+		return -1000;
+	}
+	if (mtrnum>MAXMETER) {
+		web_errno = eno_realtime_tou_mtrnum_too_big;
+		return -1002;
+	}
+	return 0;
 }
 /**
  * 读取一个电表的一段时间段的电量数据.
@@ -117,24 +245,25 @@ static void timeToNextDayMorning(struct tm *stTime,time_t *time_t)
  * @todo 分解,流程较为复杂
  */
 static int
-load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
+load_tou_dat(jsObj *oMtr, uint32_t mtr_no,
+	TimeRange const range,const char *enable)
 {
 	stTouFilehead filehead;
 	if (range.e<range.s) {
 		web_errno = tou_timerange_err;
 		return ERR;
 	}
-	if(range.e==0){
+	if (range.e==0) {
 		web_errno = tou_stime_err;
 		return ERR;
 	}
-	if(range.e==0){
+	if (range.e==0) {
 		web_errno = tou_etime_err;
 		return ERR;
 	}
 	char file[256] = { 0 };
 	struct tm stTime;
-	struct tm stToday_0;//今日凌晨00点00分
+	struct tm stToday_0;     //今日凌晨00点00分
 	time_t today_0_t;
 	time_t start_t = range.s;     //开始时刻
 	time_t end_t = range.e;     //结束时刻
@@ -161,13 +290,13 @@ load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
 		                stTime.tm_mday, TOU_DAT_SUFFIX);
 		fp = fopen(file, "r");
-		if (fp==NULL) {	//这一天没有数据,直接跳到次日零点,这不是错误
+		if (fp==NULL ) {     //这一天没有数据,直接跳到次日零点,这不是错误
 			printf(WEBS_INF"%d:%04d-%02d-%02d没有数据文件\n",
 			                mtr_no, stTime.tm_year+1900, stTime.tm_mon+1
 			                                , stTime.tm_mday);
 			web_errno = open_tou_file;
 			//到下一天的凌晨,即下一个文件.
-			timeToNextDayMorning(&stTime,&t2);
+			timeToNextDayMorning(&stTime, &t2);
 			continue;
 		}
 		fseek(fp, 0, SEEK_END);
@@ -177,13 +306,13 @@ load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 		if (n!=1) {
 			web_errno = read_tou_file_filehead;
 			fclose(fp);
-			timeToNextDayMorning(&stTime,&t2);
+			timeToNextDayMorning(&stTime, &t2);
 			continue;
 		}
 		///@note 检查文件头中是否和请求的日期相一致.
-		if (isRightDate(filehead, stTime)==0) { //这也不算错误,最多算信息.
+		if (isRightDate(filehead, stTime)==0) {     //这也不算错误,最多算信息.
 			fclose(fp);
-			timeToNextDayMorning(&stTime,&t2);
+			timeToNextDayMorning(&stTime, &t2);
 			continue;
 		}
 		int cycle = (filehead.save_cycle_hi*256)
@@ -228,25 +357,28 @@ load_tou_dat(uint32_t mtr_no, TimeRange const range, stTou* ptou, webs_t wp)
 				return ERR;
 			}
 			//成功
-			webWrite_toudata(t2, wp, tou, i, mtr_no);
+			webWrite_toudata_json(oMtr,t2, tou, i, mtr_no,enable);
 			i++;
 			t2 += (minCycle_t*60);
-		}// end while 在一个文件中
+		}     // end while 在一个文件中
 		fclose(fp);
-	}// end for
+	}     // end for
 	return 0;
 }
+
 /**
- * 像web页面写东西
+ *
+ * @param OneTimeTou
  * @param t2
- * @param wp
  * @param tou
  * @param i
  * @param mtr_no
+ * @param enable
  * @return
  */
 static int
-webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
+webWrite_toudata_json(jsObj *OneTimeTou, time_t t2, const stTou tou,
+	int i, int mtr_no,const char *enable)
 {
 	struct tm t;
 #if __arm__ ==2
@@ -254,18 +386,20 @@ webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
 #else
 	localtime_r(&t2, &t);
 #endif
-	websWrite(wp, T("<tr>"));
-	websWrite(wp, T("<td>%d</td>"), i);     //记录序号
-	websWrite(wp, T("<td>%d</td>"), mtr_no);     //表号
-	websWrite(wp,
-	                T("<td>%04d-%02d-%02d %02d:%02d:%02d %s</td>"),
-	                t.tm_year+1900,
-	                t.tm_mon+1, t.tm_mday, t.tm_hour,
-	                t.tm_min, t.tm_sec, t.tm_zone);
-	webWrite1Tou(wp, tou);
-	websWrite(wp, T("</tr>\n"));
+	jsObj oneRecord=jsonNewArray();//一条记录(某个表一个时刻所有电量)
+	char tmp[128];
+	jsonAdd(&oneRecord, NULL, toStr(tmp, "%d", mtr_no)); //表号
+	jsonAdd(&oneRecord, NULL,
+	                toStr(tmp, "%04d-%02d-%02d %02d:%02d:%02d",
+	                                t.tm_year+1900,
+	                                t.tm_mon+1, t.tm_mday, t.tm_hour,
+	                                t.tm_min, t.tm_sec, t.tm_zone));
+	webWrite1Tou_json(&oneRecord, tou,enable);
+	jsonAdd(OneTimeTou,NULL,oneRecord);
+	jsonClear(&oneRecord);
 	return 0;
 }
+
 /**
  * 将由4个字节型数组组成的浮点型转化为最短的字符输出.
  * 应为websWrite仅实现了%d和%s,所以必须转化成字符串.
@@ -273,16 +407,16 @@ webWrite_toudata(time_t t2, webs_t wp, const stTou tou, int i, int mtr_no)
  * @param strval
  * @return
  */
-static char * float2string( uint8_t const float_array[4], char * strval)
+static char * float2string(uint8_t const float_array[4], char * strval)
 {
 #if __arm__ ==1
 	/*arm-linux-gcc会优化掉下面的 #else 的方式. - -
 	 * 而且是优化掉第二次调用,第一次调用得出的数值还是对的
 	 * 所以只能使用这种不优雅的方式防止优化掉强制类型转换
-	*/
-	typedef union kf{
-	 char tmp[4];
-	 float fot;
+	 */
+	typedef union kf {
+		char tmp[4];
+		float fot;
 	}stFloat;
 	stFloat f;
 	f.tmp[0]=float_array[0];
@@ -298,47 +432,64 @@ static char * float2string( uint8_t const float_array[4], char * strval)
 	return strval;
 }
 /**
- * 写一条正向有功或者正向无功之类的电量的"总尖峰平谷"5个数值
- * @todo 使用json传输数据,不要传输样式和行为!
- * @param wp
+ *
+ * @param o
  * @param ti
+ * @param enable
  * @return
  */
-static int webWriteOneTI(webs_t wp, Ti_Category ti)
+static int webWriteOneTI_json(jsObj *o, Ti_Category ti,const char *enable)
 {
 	char strval[32];
-	const char *iv = " class=\"iv\" ";
-	const char *valid = " class=\"valid\" ";
-	///保存是否无效字串的数组
-	const char *isInvalid[2] = {
-	                valid,     ///<有效
-	                iv,     ///<无效
-	                };
-	//总 尖 峰 平 谷
-	websWrite(wp, T("<td %s>%s</td>"),
-	                isInvalid[ti.total.iv],
-	                float2string(ti.total.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                isInvalid[ti.tip.iv],
-	                float2string(ti.tip.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                isInvalid[ti.peak.iv],
-	                float2string(ti.peak.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                isInvalid[ti.flat.iv],
-	                float2string(ti.flat.fake_float_val, strval));
-	websWrite(wp, T("<td %s>%s</td>"),
-	                isInvalid[ti.valley.iv],
-	                float2string(ti.valley.fake_float_val, strval));
+	char tmp[32];
+	jsObj aTi=jsonNewArray();
+	printf(WEBS_DBG"使能:%s\n",enable);
+	if(enable[0]=='1'){
+		printf(WEBS_DBG"总采集\n");
+		jsonAdd(&aTi,NULL,float2string(ti.total.fake_float_val, strval));
+		jsonAdd(&aTi,NULL,toStr(tmp,"%d",ti.total.iv));
+		jsonAdd(o,NULL,aTi);
+		jsonClear(&aTi);
+	}
+	if(enable[1]=='1'){
+		printf(WEBS_DBG"尖采集\n");
+		jsonAdd(&aTi,NULL,float2string(ti.tip.fake_float_val, strval));
+		jsonAdd(&aTi,NULL,toStr(tmp,"%d",ti.tip.iv));
+		jsonAdd(o,NULL,aTi);
+		jsonClear(&aTi);
+	}
+	if(enable[2]=='1'){
+		printf(WEBS_DBG"峰采集\n");
+		jsonAdd(&aTi,NULL,float2string(ti.peak.fake_float_val, strval));
+		jsonAdd(&aTi,NULL,toStr(tmp,"%d",ti.peak.iv));
+		jsonAdd(o,NULL,aTi);
+		jsonClear(&aTi);
+	}
+	if(enable[3]=='1'){
+		printf(WEBS_DBG"平采集\n");
+		jsonAdd(&aTi,NULL,float2string(ti.flat.fake_float_val, strval));
+		jsonAdd(&aTi,NULL,toStr(tmp,"%d",ti.flat.iv));
+		jsonAdd(o,NULL,aTi);
+		jsonClear(&aTi);
+	}
+	if(enable[4]=='1'){
+		printf(WEBS_DBG"谷采集\n");
+		jsonAdd(&aTi,NULL,float2string(ti.valley.fake_float_val, strval));
+		jsonAdd(&aTi,NULL,toStr(tmp,"%d",ti.valley.iv));
+		jsonAdd(o,NULL,aTi);
+		jsonClear(&aTi);
+	}
+	jsonFree(&aTi);
 	return 0;
 }
+
 //写一条电量Tou数据
-static int webWrite1Tou(webs_t wp, const stTou tou)
+static int webWrite1Tou_json(jsObj *o, const stTou tou,const char *enable)
 {
-	webWriteOneTI(wp, tou.FA);     ///正向有功
-	webWriteOneTI(wp, tou.RA);     ///正向无功
-	webWriteOneTI(wp, tou.FR);     ///反向有功
-	webWriteOneTI(wp, tou.RR);     ///反向无功
+	webWriteOneTI_json(o, tou.FA,&enable[0]);     ///正向有功
+	webWriteOneTI_json(o, tou.RA,&enable[5]);     ///正向无功
+	webWriteOneTI_json(o, tou.FR,&enable[10]);     ///反向有功
+	webWriteOneTI_json(o, tou.RR,&enable[15]);     ///反向无功
 	return 0;
 }
 /**
@@ -352,7 +503,7 @@ static int isRightDate(const stTouFilehead filehead, struct tm t)
 	if (filehead.month!=t.tm_mon+1) {
 		return 0;
 	}
-	if(filehead.year+2000!=t.tm_year+1900){
+	if (filehead.year+2000!=t.tm_year+1900) {
 		return 0;
 	}
 	return 1;
