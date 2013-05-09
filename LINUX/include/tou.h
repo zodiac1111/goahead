@@ -99,8 +99,12 @@ typedef struct {
 	 touTi_Category FR;///<正无
 	 touTi_Category RR;///<反无
 }  __attribute__((packed, aligned(1))) stTou;
+///四象限无功,注意文件中数据保存的顺序
 typedef struct {
-	 touTi_Category qr[4];///
+	 touTi_Category ph1;///
+	 touTi_Category ph4;///
+	 touTi_Category ph2;///
+	 touTi_Category ph3;///
 }  __attribute__((packed, aligned(1))) stQr;
 ///一个瞬时量文件结构
 typedef struct {

@@ -953,10 +953,10 @@ static int mkTouDataArray(jsObj *a, const stTou tou, const char *en)
 }
 static int mkQrDataArray(jsObj *a, const stQr qr, const char *en)
 {
-	mkOneQrTi(a, qr.qr[0], &en[0]);
-	mkOneQrTi(a, qr.qr[1], &en[5]);
-	mkOneQrTi(a, qr.qr[2], &en[10]);
-	mkOneQrTi(a, qr.qr[3], &en[15]);
+	mkOneQrTi(a, qr.ph1, &en[0]);
+	mkOneQrTi(a, qr.ph2, &en[5]);
+	mkOneQrTi(a, qr.ph3, &en[10]);
+	mkOneQrTi(a, qr.ph4, &en[15]);
 	return 0;
 }
 ///生成一条记录中的所有瞬时量数据数组
