@@ -51,6 +51,7 @@ void form_sysFunction(webs_t wp, char_t *path, char_t *query)
 		break;
 	case RET_SAMPLE_PROC:		///@待定
 		system("killall -9 hl3104_com");
+		system("killall -9 com_srv");
 		break;
 	case RET_RTU:
 		//reflash_this_wp(wp, PAGE_RESET);

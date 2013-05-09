@@ -24,42 +24,53 @@
 #include "define.h"
 ///仅在本文件中使用的静态函数定义.
 static int webRece_history_data(webs_t wp);
-static int check_mtrnum(int mtrnum);
-
-static int add_mtr_tou(jsObj *oMtr, int mtrNo, char const *abTou,
-        TimeRange const range, const char *enable);
-static int add_mtr_instant(jsObj *oMtr, int mtrNo, char const *abInstant,
-        TimeRange const range);
+//
+static int add_mtr_tou(jsObj *oMtr, int mtrNo,
+        char const *abTou, TimeRange const range);
+static int add_mtr_qr(jsObj *oMtr, int mtrNo,
+        char const *abQr, TimeRange const range);
+static int add_mtr_instant(jsObj *oMtr, int mtrNo,
+        char const *abInstant, TimeRange const range);
 static int add_mtr_maxn(jsObj *oMtr, int mtrNo,
         char const *abMaxn, TimeRange const range);
-
-static int load_tou_dat(jsObj *oMtr, uint32_t mtr_no,
-        TimeRange const range, const char* enable);
-static int load_instant_dat(jsObj *aInstant, uint32_t mtr_no,
-        TimeRange const range, const char *enable);
-static int load_maxn_dat(jsObj *oMtr, uint32_t mtr_no,
-        TimeRange const range, const char* abMaxn);
-
-static int mkOneTouDataRecord(jsObj *OneTimeTou,
-        time_t t2, const stTou tou, int i, int mtr_no, const char *enable);
-static int mkOneInstantDataRecord(jsObj *aInstantData,
-        time_t t2, const stInstant instant, int i, int mtr_no, const char *enable);
-static int mkOneMaxnDataRecord(jsObj *OneTimeTou, time_t t2, const stMaxn maxn,
-        int i, int mtr_no, const char *en);
-
-static int mkTouDataArray(jsObj *a, const stTou tou, const char *en);
-static int mkInstantDataArray(jsObj *a, const stInstant instant, const char *enable);
-static int mkMaxnDataArray(jsObj *a, const stMaxn manx, const char *en);
-
-static int webWriteOneTI(jsObj *o, touTi_Category ti, const char *enable);
-static int mkTi_Instant(jsObj *o, int isPQ, const Ti* ti, const char *enable);
-static int mkOneMaxnTI(jsObj *o, stMaxn_Ti_Category ti, const char *en);
 //
-static char * float2string(uint8_t const float_array[4], char * strval);
+static int search_records_tou(jsObj *oMtr, uint32_t mtr_no,
+        TimeRange const range, const char* enable);
+static int search_records_instant(jsObj *aInstant, uint32_t mtr_no,
+        TimeRange const range, const char *enable);
+static int search_records_maxn(jsObj *oMtr, uint32_t mtr_no,
+        TimeRange const range, const char* abMaxn);
+static int search_records_qr(jsObj *oMtr, uint32_t mtr_no,
+        TimeRange const range, const char *enable);
+//
+static int mkOneTouDataRecord(jsObj *OneTimeTou, time_t t2,
+        const stTou tou, int i, int mtr_no, const char *en);
+static int mkOneInstantDataRecord(jsObj *aInstantData, time_t t2,
+        const stInstant instant, int i, int mtr_no, const char *en);
+static int mkOneMaxnDataRecord(jsObj *OneTimeTou, time_t t2,
+        const stMaxn maxn, int i, int mtr_no, const char *en);
+static int mkOneQrDataRecord(jsObj *OneTimeTou, time_t t2,
+        const stQr qr, int i, int mtr_no, const char *en);
+//
+static int mkTouDataArray(jsObj *a, const stTou tou, const char *en);
+static int mkQrDataArray(jsObj *a, const stQr qr, const char *en);
+static int mkInstantDataArray(jsObj *a, const stInstant instant, const char *en);
+static int mkMaxnDataArray(jsObj *a, const stMaxn manx, const char *en);
+//
+static int mkOneTouTi(jsObj *a, const touTi_Category ti, const char *en);
+static int mkOneQrTi(jsObj *a, const touTi_Category ti, const char *en);
+static int mkOneInstantTi(jsObj *a, int isPQ, const Ti* ti, const char *en);
+static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en);
+
+//
 static int isRightDate(const stTouFilehead filehead, struct tm t);
+static int isRightDate_Qr(const stQrFilehead filehead, struct tm t);
 static int isRightDate_Instant(const stInstantFilehead filehead, struct tm t);
 static int isRightDate_Maxn(const stMaxnFilehead filehead, struct tm t);
+//
+static char * float2string(uint8_t const float_array[4], char * strval);
 static void timeToNextDayMorning(struct tm *stTime, time_t *time_t);
+static int check_mtrnum(int mtrnum);
 #if 0
 /**
  * 提交表单,历史电量数据.操作:获取.参数:时间范围,表号.
@@ -101,7 +112,7 @@ void form_history_tou(webs_t wp, char_t *path, char_t *query)
 	tr.e += (tz*60);
 	//printf("时间戳 (数值) 范围:%ld~%ld 表号:%d\n", tr.s, tr.e, mtr_no);
 	websHeader_pure(wp);
-	ret = load_tou_dat(mtr_no, tr, &tou, wp);
+	ret = search_records_tou(mtr_no, tr, &tou, wp);
 	if (ret==ERR) {
 		web_err_proc(EL);
 	}
@@ -172,14 +183,20 @@ static int webRece_history_data(webs_t wp)
 		for (i = 0; i<mtrnum; i++) {     //遍历所有表
 			if (abMtr[i]!='1')
 				continue;
-			add_mtr_tou(&oMtr, i, abTou, tr, abTou);
+			add_mtr_tou(&oMtr, i, abTou, tr);
 			jsonAdd(&aMtr, NULL, oMtr);
 			jsonClear(&oMtr);
 		}
 	} else if (strcmp(datatType, "qr")==0) {
 		char * abQr = websGetVar(wp, T("qr"), T(""));
 		jsonAdd(&oHistoryData, "abQr", abQr);
-		printf(WEBS_DBG"无功电量实现中...\n");
+		for (i = 0; i<mtrnum; i++) {     //遍历所有表
+			if (abMtr[i]!='1')
+				continue;
+			add_mtr_qr(&oMtr, i, abQr, tr);
+			jsonAdd(&aMtr, NULL, oMtr);
+			jsonClear(&oMtr);
+		}
 	} else if (strcmp(datatType, "instant")==0) {
 		char * abV = websGetVar(wp, T("v"), T(""));
 		char * abI = websGetVar(wp, T("i"), T(""));
@@ -217,7 +234,7 @@ static int webRece_history_data(webs_t wp)
 	}
 	jsonAdd(&oHistoryData, "mtr", aMtr);     //添加整个表对象
 #if DEBUG_PRINT_HISTORY_DAT
-	printf(WEBS_DBG"历史数据:%s\n", oHistoryData);
+	                printf(WEBS_DBG"历史数据:%s\n", oHistoryData);
 #endif
 	wpsend(wp, oHistoryData);
 	jsonFree(&oMtr);
@@ -225,9 +242,63 @@ static int webRece_history_data(webs_t wp)
 	jsonFree(&oHistoryData);
 	return 0;
 }
-static int
-add_mtr_maxn(jsObj *oMtr, int mtrNo, char const *abMaxn,
-        TimeRange const range)
+
+
+//一个表(mtrNo)在一段时间范围(range)内特定电量项目(abTou)保存到oMtr json数组中.
+static int add_mtr_tou(jsObj *oMtr, int mtrNo,
+	char const *abTou, TimeRange const range)
+{
+	if (strlen(abTou)!=TOUNUM) {
+		web_err_proc(EL);
+		return -100;
+	}
+	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
+	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
+	search_records_tou(&aTou, mtrNo, range, abTou);
+	jsonAdd(oMtr, "tou", aTou);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"tou:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aTou);
+	return 0;
+}
+static int add_mtr_qr(jsObj *oMtr, int mtrNo,
+	char const *abQr, TimeRange const range)
+{
+	if (strlen(abQr)!=TOUNUM) {
+		web_err_proc(EL);
+		return -100;
+	}
+	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
+	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
+	search_records_qr(&aTou, mtrNo, range, abQr);
+	jsonAdd(oMtr, "qr", aTou);
+#if DEBUG_PRINT_REALTIME_TOU_DAT
+	printf(WEBS_DBG"qr:%s\n",*oMtr);
+#endif
+	jsonFree(&aOneDate);
+	jsonFree(&aTou);
+	return 0;
+}
+static int add_mtr_instant(jsObj *oMtr, int mtrNo,
+	char const *abInstant,TimeRange const range)
+{
+	printf(WEBS_DBG"enable %s", abInstant);
+	if (strlen(abInstant)!=PHASENUM+PHASENUM+PQCNUM+PQCNUM+PQCNUM) {
+		web_err_proc(EL);
+	}
+	jsObj aInstant = jsonNewArray();     //[正有,反有,正无,反无]
+	search_records_instant(&aInstant, mtrNo, range, abInstant);
+	jsonAdd(oMtr, "instant", aInstant);
+#if 0
+	printf(WEBS_DBG"instant:%s\n",*oMtr);
+#endif
+	jsonFree(&aInstant);
+	return 0;
+}
+static int add_mtr_maxn(jsObj *oMtr, int mtrNo,
+	char const *abMaxn,TimeRange const range)
 {
 	if (strlen(abMaxn)!=TOUNUM) {
 		web_err_proc(EL);
@@ -235,7 +306,7 @@ add_mtr_maxn(jsObj *oMtr, int mtrNo, char const *abMaxn,
 	}
 	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
 	jsObj aMaxn = jsonNewArray();     //[正有,反有,正无,反无]
-	load_maxn_dat(&aMaxn, mtrNo, range, abMaxn);
+	search_records_maxn(&aMaxn, mtrNo, range, abMaxn);
 #if DEBUG_PRINT_HISTORY_DAT && DEBUG_PRINT_HISTORY_DAT_MAXN
 	printf(WEBS_DBG"maxn_array:%s\n",aMaxn);
 #endif
@@ -245,200 +316,6 @@ add_mtr_maxn(jsObj *oMtr, int mtrNo, char const *abMaxn,
 #endif
 	jsonFree(&aOneDate);
 	jsonFree(&aMaxn);
-	return 0;
-}
-
-//一个表(mtrNo)在一段时间范围(range)内特定电量项目(abTou)保存到oMtr json数组中.
-static int
-add_mtr_tou(jsObj *oMtr, int mtrNo, char const *abTou,
-        TimeRange const range, const char *enable)
-{
-	if (strlen(abTou)!=TOUNUM) {
-		web_err_proc(EL);
-		return -100;
-	}
-	jsObj aOneDate = jsonNewArray();     //一个电量数据=[电量,有效位...]
-	jsObj aTou = jsonNewArray();     //[正有,反有,正无,反无]
-	load_tou_dat(&aTou, mtrNo, range, enable);
-	jsonAdd(oMtr, "tou", aTou);
-#if DEBUG_PRINT_REALTIME_TOU_DAT
-	printf(WEBS_DBG"tou:%s\n",*oMtr);
-#endif
-	jsonFree(&aOneDate);
-	jsonFree(&aTou);
-	return 0;
-}
-/**
- * 查找文件,找到所有n条记录
- * @param aInstant
- * @param mtr_no
- * @param range
- * @param enable
- * @return
- */
-static int
-load_instant_dat(jsObj *aInstant, uint32_t mtr_no,
-        TimeRange const range, const char *enable)
-{
-	stInstantFilehead filehead;
-	if (range.e<range.s) {
-		web_errno = tou_timerange_err;
-		return ERR;
-	}
-	if (range.e==0) {
-		web_errno = tou_stime_err;
-		return ERR;
-	}
-	if (range.e==0) {
-		web_errno = tou_etime_err;
-		return ERR;
-	}
-	char file[256] = { 0 };
-	struct tm stTime;
-	struct tm stToday_0;     //今日凌晨00点00分
-	time_t today_0_t;
-	time_t start_t = range.s;     //开始时刻
-	time_t end_t = range.e;     //结束时刻
-	time_t t2;     //时刻
-	time_t minCycle_t = 0;
-	stInstant instant;
-	memset(&instant, 0x0, sizeof(stInstant));
-	FILE*fp;
-	int flen;
-	int i = 0;
-	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
-	for (t2 = start_t; t2<=end_t; /*t2 += (mincycle * 60)*/) {
-		Start:
-		#if __arm__ ==2
-		gmtime_r(&t2,&stTime);
-		gmtime_r(&t2,&stToday_0);
-		//		printf("gmtime_r %02d-%02d %02d:%02d %s stTime.tm_gmtoff=%d \n",
-		//				t.tm_mon+1,stTime.tm_mday,stTime.tm_hour,stTime.tm_min,
-		//				stTime.tm_zone,stTime.tm_gmtoff);
-#else
-		localtime_r(&t2, &stTime);
-		localtime_r(&t2, &stToday_0);
-#endif
-		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
-		                stTime.tm_mday, INSTANT_DAT_SUFFIX);
-		fp = fopen(file, "r");
-		if (fp==NULL ) {     //这一天没有数据,直接跳到次日零点,这不是错误
-			printf(WEBS_INF"%d:%04d-%02d-%02d没有数据文件\n",
-			                mtr_no, stTime.tm_year+1900, stTime.tm_mon+1
-			                                , stTime.tm_mday);
-			web_errno = open_tou_file;
-			//到下一天的凌晨,即下一个文件.
-			timeToNextDayMorning(&stTime, &t2);
-			continue;
-		}
-		fseek(fp, 0, SEEK_END);
-		flen = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-		int n = fread(&filehead, sizeof(stInstantFilehead), 1, fp);
-		if (n!=1) {
-			web_errno = read_tou_file_filehead;
-			fclose(fp);
-			timeToNextDayMorning(&stTime, &t2);
-			continue;
-		}
-		///@note 检查文件头中是否和请求的日期相一致.
-		if (isRightDate_Instant(filehead, stTime)==0) {     //这也不算错误,最多算信息.
-			fclose(fp);
-			timeToNextDayMorning(&stTime, &t2);
-			continue;
-		}
-		int cycle = (filehead.save_cycle_hi*256)
-		                +filehead.save_cycle_lo;
-		minCycle_t = cycle;
-		//stTou at[24 * 60 / cycle];
-		int t_mod = t2%(minCycle_t*60);     //向上园整至采样周期.
-		if (t_mod!=0) {     //需要园整
-			t2 += (minCycle_t*60-t_mod);
-		}
-		//}
-		/**@note 判断开始时间+周期是否跨度到了第二天,如果跨度到第二天则需要
-		 打开另一个(下一天)数据文件.
-		 */
-		stToday_0.tm_hour = 0;
-		stToday_0.tm_min = 0;
-		stToday_0.tm_sec = 0;
-		today_0_t = mktime(&stToday_0);
-		if (t2-today_0_t>=(60*60*24)) {     //t2已经时间跨过本日了.次日则文件等等需要重新打开.
-			fclose(fp);
-			goto Start;
-		}
-		///移动文件指针,指向开始的数据结构.
-		int DeltaSec = t2-today_0_t;     //本采样时刻举今日凌晨几秒
-		int NumCycle = DeltaSec/(minCycle_t*60);     //从凌晨开始向后偏移几个采样周期
-		int offset = sizeof(stInstant)*NumCycle;     //每个样本长度*采样个数
-		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
-
-		if (ftell(fp)>=flen) {
-			printf(WEBS_WAR"本日的数据不够.filesize=%d,fseek=%ld:%s\n",
-			                flen, ftell(fp), file);
-			t2 += (minCycle_t*60);
-			fclose(fp);
-			continue;
-		}
-		while (ftell(fp)<flen&&t2<=end_t) {
-			memset(&instant, 0x0, sizeof(stInstant));
-			//t_cur += cycle * 60;
-			int n = fread(&instant, sizeof(stInstant), 1, fp);
-			if (n!=1) {
-				web_errno = read_tou_file_dat;
-				return ERR;
-			}
-			//成功
-			mkOneInstantDataRecord(aInstant, t2, instant, i, mtr_no, enable);
-			i++;
-			t2 += (minCycle_t*60);
-		}     // end while 在一个文件中
-		fclose(fp);
-	}     // end for
-	return 0;
-	return 0;
-}
-static int
-add_mtr_instant(jsObj *oMtr, int mtrNo, char const *abInstant,
-        TimeRange const range)
-{
-	printf(WEBS_DBG"enable %s", abInstant);
-	if (strlen(abInstant)!=PHASENUM+PHASENUM+PQCNUM+PQCNUM+PQCNUM) {
-		web_err_proc(EL);
-	}
-	jsObj aInstant = jsonNewArray();     //[正有,反有,正无,反无]
-	load_instant_dat(&aInstant, mtrNo, range, abInstant);
-	jsonAdd(oMtr, "instant", aInstant);
-#if 0
-	printf(WEBS_DBG"instant:%s\n",*oMtr);
-#endif
-	jsonFree(&aInstant);
-	return 0;
-}
-/**
- * 将时间推至次日凌晨0点,用于检索到下一个文件
- * @param stTime 时间结构体
- * @param time_t 时间戳(32位!bug Y2038)
- */
-static void timeToNextDayMorning(struct tm *stTime, time_t *time_t)
-{
-	stTime->tm_hour = 0;
-	stTime->tm_min = 0;
-	stTime->tm_sec = 0;
-	*time_t = mktime(stTime);
-	*time_t += (60*60*24);
-}
-///简单检查表数量合法性
-static int check_mtrnum(int mtrnum)
-{
-	if (mtrnum<=0) {
-		web_errno = eno_realtime_tou_mtrnum_too_small;
-		return -1000;
-	}
-	if (mtrnum>MAXMETER) {
-		web_errno = eno_realtime_tou_mtrnum_too_big;
-		return -1002;
-	}
 	return 0;
 }
 /**
@@ -467,7 +344,7 @@ static int check_mtrnum(int mtrnum)
  * @todo 分解,流程较为复杂
  */
 static int
-load_tou_dat(jsObj *oMtr, uint32_t mtr_no,
+search_records_tou(jsObj *oMtr, uint32_t mtr_no,
         TimeRange const range, const char *enable)
 {
 	stTouFilehead filehead;
@@ -588,7 +465,259 @@ load_tou_dat(jsObj *oMtr, uint32_t mtr_no,
 	return 0;
 }
 static int
-load_maxn_dat(jsObj *oMtr, uint32_t mtr_no,
+search_records_qr(jsObj *oMtr, uint32_t mtr_no,
+        TimeRange const range, const char *enable)
+{
+	stQrFilehead filehead;
+	if (range.e<range.s) {
+		web_errno = tou_timerange_err;
+		return ERR;
+	}
+	if (range.e==0) {
+		web_errno = tou_stime_err;
+		return ERR;
+	}
+	if (range.e==0) {
+		web_errno = tou_etime_err;
+		return ERR;
+	}
+	char file[256] = { 0 };
+	struct tm stTime;
+	struct tm stToday_0;     //今日凌晨00点00分
+	time_t today_0_t;
+	time_t start_t = range.s;     //开始时刻
+	time_t end_t = range.e;     //结束时刻
+	time_t t2;     //时刻
+	time_t minCycle_t = 0;
+	stQr qr;
+	memset(&qr, 0x0, sizeof(stQr));
+	FILE*fp;
+	int flen;
+	int i = 0;
+	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
+	for (t2 = start_t; t2<=end_t; /*t2 += (mincycle * 60)*/) {
+		Start:
+		#if __arm__ ==2
+		gmtime_r(&t2,&stTime);
+		gmtime_r(&t2,&stToday_0);
+//		printf("gmtime_r %02d-%02d %02d:%02d %s stTime.tm_gmtoff=%d \n",
+//				t.tm_mon+1,stTime.tm_mday,stTime.tm_hour,stTime.tm_min,
+//				stTime.tm_zone,stTime.tm_gmtoff);
+#else
+		localtime_r(&t2, &stTime);
+		localtime_r(&t2, &stToday_0);
+#endif
+		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
+		                stTime.tm_mday, QR_DAT_SUFFIX);
+		fp = fopen(file, "r");
+		if (fp==NULL ) {     //这一天没有数据,直接跳到次日零点,这不是错误
+			printf(WEBS_INF"%d:%04d-%02d-%02d没有数据文件\n",
+			                mtr_no, stTime.tm_year+1900, stTime.tm_mon+1
+			                                , stTime.tm_mday);
+			web_errno = open_tou_file;
+			//到下一天的凌晨,即下一个文件.
+			timeToNextDayMorning(&stTime, &t2);
+			continue;
+		}
+		fseek(fp, 0, SEEK_END);
+		flen = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		int n = fread(&filehead, sizeof(stQrFilehead), 1, fp);
+		if (n!=1) {
+			web_errno = read_tou_file_filehead;
+			fclose(fp);
+			timeToNextDayMorning(&stTime, &t2);
+			continue;
+		}
+		///@note 检查文件头中是否和请求的日期相一致.
+		if (isRightDate_Qr(filehead, stTime)==0) {     //这也不算错误,最多算信息.
+			fclose(fp);
+			timeToNextDayMorning(&stTime, &t2);
+			continue;
+		}
+		int cycle = (filehead.save_cycle_hi*256)
+		                +filehead.save_cycle_lo;
+		minCycle_t = cycle;
+		//stTou at[24 * 60 / cycle];
+		int t_mod = t2%(minCycle_t*60);     //向上园整至采样周期.
+		if (t_mod!=0) {     //需要园整
+			t2 += (minCycle_t*60-t_mod);
+		}
+		//}
+		/**@note 判断开始时间+周期是否跨度到了第二天,如果跨度到第二天则需要
+		 打开另一个(下一天)数据文件.
+		 */
+		stToday_0.tm_hour = 0;
+		stToday_0.tm_min = 0;
+		stToday_0.tm_sec = 0;
+		today_0_t = mktime(&stToday_0);
+		if (t2-today_0_t>=(60*60*24)) {     //t2已经时间跨过本日了.次日则文件等等需要重新打开.
+			fclose(fp);
+			goto Start;
+		}
+		///移动文件指针,指向开始的数据结构.
+		int DeltaSec = t2-today_0_t;     //本采样时刻举今日凌晨几秒
+		int NumCycle = DeltaSec/(minCycle_t*60);     //从凌晨开始向后偏移几个采样周期
+		int offset = sizeof(stQr)*NumCycle;     //每个样本长度*采样个数
+		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
+
+		if (ftell(fp)>=flen) {
+			printf(WEBS_WAR"本日的数据不够.filesize=%d,fseek=%ld:%s\n", flen,
+			                ftell(fp), file);
+			t2 += (minCycle_t*60);
+			fclose(fp);
+			continue;
+		}
+		while (ftell(fp)<flen&&t2<=end_t) {
+			memset(&qr, 0x0, sizeof(stQr));
+			//t_cur += cycle * 60;
+			int n = fread(&qr, sizeof(stQr), 1, fp);
+			if (n!=1) {
+				web_errno = read_tou_file_dat;
+				return ERR;
+			}
+			//成功
+			mkOneQrDataRecord(oMtr, t2, qr, i, mtr_no, enable);
+			i++;
+			t2 += (minCycle_t*60);
+		}     // end while 在一个文件中
+		fclose(fp);
+	}     // end for
+	return 0;
+}
+/**
+ * 查找文件,找到所有n条记录
+ * @param aInstant
+ * @param mtr_no
+ * @param range
+ * @param enable
+ * @return
+ */
+static int
+search_records_instant(jsObj *aInstant, uint32_t mtr_no,
+        TimeRange const range, const char *enable)
+{
+	stInstantFilehead filehead;
+	if (range.e<range.s) {
+		web_errno = tou_timerange_err;
+		return ERR;
+	}
+	if (range.e==0) {
+		web_errno = tou_stime_err;
+		return ERR;
+	}
+	if (range.e==0) {
+		web_errno = tou_etime_err;
+		return ERR;
+	}
+	char file[256] = { 0 };
+	struct tm stTime;
+	struct tm stToday_0;     //今日凌晨00点00分
+	time_t today_0_t;
+	time_t start_t = range.s;     //开始时刻
+	time_t end_t = range.e;     //结束时刻
+	time_t t2;     //时刻
+	time_t minCycle_t = 0;
+	stInstant instant;
+	memset(&instant, 0x0, sizeof(stInstant));
+	FILE*fp;
+	int flen;
+	int i = 0;
+	//从开始时刻到结束时刻,按分钟遍历,步距为周期,可变.[start,end]两边闭区间
+	for (t2 = start_t; t2<=end_t; /*t2 += (mincycle * 60)*/) {
+		Start:
+		#if __arm__ ==2
+		gmtime_r(&t2,&stTime);
+		gmtime_r(&t2,&stToday_0);
+		//		printf("gmtime_r %02d-%02d %02d:%02d %s stTime.tm_gmtoff=%d \n",
+		//				t.tm_mon+1,stTime.tm_mday,stTime.tm_hour,stTime.tm_min,
+		//				stTime.tm_zone,stTime.tm_gmtoff);
+#else
+		localtime_r(&t2, &stTime);
+		localtime_r(&t2, &stToday_0);
+#endif
+		sprintf(file, "%s/mtr%03d%02d%02d.%s", TOU_DAT_DIR, mtr_no, 0,
+		                stTime.tm_mday, INSTANT_DAT_SUFFIX);
+		fp = fopen(file, "r");
+		if (fp==NULL ) {     //这一天没有数据,直接跳到次日零点,这不是错误
+			printf(WEBS_INF"%d:%04d-%02d-%02d没有数据文件\n",
+			                mtr_no, stTime.tm_year+1900, stTime.tm_mon+1
+			                                , stTime.tm_mday);
+			web_errno = open_tou_file;
+			//到下一天的凌晨,即下一个文件.
+			timeToNextDayMorning(&stTime, &t2);
+			continue;
+		}
+		fseek(fp, 0, SEEK_END);
+		flen = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		int n = fread(&filehead, sizeof(stInstantFilehead), 1, fp);
+		if (n!=1) {
+			web_errno = read_tou_file_filehead;
+			fclose(fp);
+			timeToNextDayMorning(&stTime, &t2);
+			continue;
+		}
+		///@note 检查文件头中是否和请求的日期相一致.
+		if (isRightDate_Instant(filehead, stTime)==0) {     //这也不算错误,最多算信息.
+			fclose(fp);
+			timeToNextDayMorning(&stTime, &t2);
+			continue;
+		}
+		int cycle = (filehead.save_cycle_hi*256)
+		                +filehead.save_cycle_lo;
+		minCycle_t = cycle;
+		//stTou at[24 * 60 / cycle];
+		int t_mod = t2%(minCycle_t*60);     //向上园整至采样周期.
+		if (t_mod!=0) {     //需要园整
+			t2 += (minCycle_t*60-t_mod);
+		}
+		//}
+		/**@note 判断开始时间+周期是否跨度到了第二天,如果跨度到第二天则需要
+		 打开另一个(下一天)数据文件.
+		 */
+		stToday_0.tm_hour = 0;
+		stToday_0.tm_min = 0;
+		stToday_0.tm_sec = 0;
+		today_0_t = mktime(&stToday_0);
+		if (t2-today_0_t>=(60*60*24)) {     //t2已经时间跨过本日了.次日则文件等等需要重新打开.
+			fclose(fp);
+			goto Start;
+		}
+		///移动文件指针,指向开始的数据结构.
+		int DeltaSec = t2-today_0_t;     //本采样时刻举今日凌晨几秒
+		int NumCycle = DeltaSec/(minCycle_t*60);     //从凌晨开始向后偏移几个采样周期
+		int offset = sizeof(stInstant)*NumCycle;     //每个样本长度*采样个数
+		fseek(fp, offset, SEEK_CUR);     ///当前位置为除去文件头的第一个数据体.
+
+		if (ftell(fp)>=flen) {
+			printf(WEBS_WAR"本日的数据不够.filesize=%d,fseek=%ld:%s\n",
+			                flen, ftell(fp), file);
+			t2 += (minCycle_t*60);
+			fclose(fp);
+			continue;
+		}
+		while (ftell(fp)<flen&&t2<=end_t) {
+			memset(&instant, 0x0, sizeof(stInstant));
+			//t_cur += cycle * 60;
+			int n = fread(&instant, sizeof(stInstant), 1, fp);
+			if (n!=1) {
+				web_errno = read_tou_file_dat;
+				return ERR;
+			}
+			//成功
+			mkOneInstantDataRecord(aInstant, t2, instant, i, mtr_no, enable);
+			i++;
+			t2 += (minCycle_t*60);
+		}     // end while 在一个文件中
+		fclose(fp);
+	}     // end for
+	return 0;
+	return 0;
+}
+
+static int
+search_records_maxn(jsObj *oMtr, uint32_t mtr_no,
         TimeRange const range, const char *abMaxn)
 {
 	stMaxnFilehead filehead;
@@ -720,7 +849,7 @@ load_maxn_dat(jsObj *oMtr, uint32_t mtr_no,
  */
 static int
 mkOneTouDataRecord(jsObj *OneTimeTou, time_t t2, const stTou tou,
-        int i, int mtr_no, const char *enable)
+        int i, int mtr_no, const char *en)
 {
 	struct tm t;
 #if __arm__ ==2
@@ -736,8 +865,52 @@ mkOneTouDataRecord(jsObj *OneTimeTou, time_t t2, const stTou tou,
 	                                t.tm_year+1900,
 	                                t.tm_mon+1, t.tm_mday, t.tm_hour,
 	                                t.tm_min, t.tm_sec, t.tm_zone));
-	mkTouDataArray(&oneRecord, tou, enable);
+	mkTouDataArray(&oneRecord, tou, en);
 	jsonAdd(OneTimeTou, NULL, oneRecord);
+	jsonClear(&oneRecord);
+	return 0;
+}
+static int mkOneQrDataRecord(jsObj *OneTimeTou, time_t t2,
+        const stQr qr, int i, int mtr_no, const char *en)
+{
+	struct tm t;
+#if __arm__ ==2
+	gmtime_r(&t2,&t);
+#else
+	localtime_r(&t2, &t);
+#endif
+	jsObj oneRecord = jsonNewArray();     //一条记录(某个表一个时刻所有电量)
+	char tmp[128];
+	jsonAdd(&oneRecord, NULL, toStr(tmp, "%d", mtr_no));     //表号
+	jsonAdd(&oneRecord, NULL,
+	                toStr(tmp, "%04d-%02d-%02d %02d:%02d:%02d",
+	                                t.tm_year+1900,
+	                                t.tm_mon+1, t.tm_mday, t.tm_hour,
+	                                t.tm_min, t.tm_sec, t.tm_zone));
+	mkQrDataArray(&oneRecord, qr, en);
+	jsonAdd(OneTimeTou, NULL, oneRecord);
+	jsonClear(&oneRecord);
+	return 0;
+}
+static int mkOneInstantDataRecord(jsObj *aInstantData, time_t t2,
+        const stInstant instant, int i, int mtr_no, const char *en)
+{
+	struct tm t;
+#if __arm__ ==2
+	gmtime_r(&t2,&t);
+#else
+	localtime_r(&t2, &t);
+#endif
+	jsObj oneRecord = jsonNewArray();     //一条记录(某个表一个时刻所有电量)
+	char tmp[128];
+	jsonAdd(&oneRecord, NULL, toStr(tmp, "%d", mtr_no));     //表号
+	jsonAdd(&oneRecord, NULL,
+	                toStr(tmp, "%04d-%02d-%02d %02d:%02d:%02d",
+	                                t.tm_year+1900,
+	                                t.tm_mon+1, t.tm_mday, t.tm_hour,
+	                                t.tm_min, t.tm_sec, t.tm_zone));
+	mkInstantDataArray(&oneRecord, instant, en);
+	jsonAdd(aInstantData, NULL, oneRecord);
 	jsonClear(&oneRecord);
 	return 0;
 }
@@ -763,33 +936,81 @@ static int mkOneMaxnDataRecord(jsObj *OneTimeTou, time_t t2,
 	jsonClear(&oneRecord);
 	return 0;
 }
-static int
-mkOneInstantDataRecord(jsObj *aInstantData, time_t t2, const stInstant instant,
-        int i, int mtr_no, const char *enable)
+/**
+ * 生成一条记录中的所有电量数据数组
+ * @param[out] a json格式4*5个电量数据数组
+ * @param[in] tou 文件中读取到的数据
+ * @param[in] en 根据请求只大发送指定(使能)的某些数据,如正有功总等等
+ * @return
+ */
+static int mkTouDataArray(jsObj *a, const stTou tou, const char *en)
 {
-	struct tm t;
-#if __arm__ ==2
-	gmtime_r(&t2,&t);
-#else
-	localtime_r(&t2, &t);
-#endif
-	jsObj oneRecord = jsonNewArray();     //一条记录(某个表一个时刻所有电量)
-	char tmp[128];
-	jsonAdd(&oneRecord, NULL, toStr(tmp, "%d", mtr_no));     //表号
-	jsonAdd(&oneRecord, NULL,
-	                toStr(tmp, "%04d-%02d-%02d %02d:%02d:%02d",
-	                                t.tm_year+1900,
-	                                t.tm_mon+1, t.tm_mday, t.tm_hour,
-	                                t.tm_min, t.tm_sec, t.tm_zone));
-	mkInstantDataArray(&oneRecord, instant, enable);
-	jsonAdd(aInstantData, NULL, oneRecord);
-	jsonClear(&oneRecord);
+	mkOneTouTi(a, tou.FA, &en[0]);     ///正向有功
+	mkOneTouTi(a, tou.RA, &en[5]);     ///正向无功
+	mkOneTouTi(a, tou.FR, &en[10]);     ///反向有功
+	mkOneTouTi(a, tou.RR, &en[15]);     ///反向无功
+	return 0;
+}
+static int mkQrDataArray(jsObj *a, const stQr qr, const char *en)
+{
+	mkOneQrTi(a, qr.qr[0], &en[0]);
+	mkOneQrTi(a, qr.qr[1], &en[5]);
+	mkOneQrTi(a, qr.qr[2], &en[10]);
+	mkOneQrTi(a, qr.qr[3], &en[15]);
+	return 0;
+}
+///生成一条记录中的所有瞬时量数据数组
+static int mkInstantDataArray(jsObj *a, const stInstant instant, const char *en)
+{
+	const int isVI = 0;
+	const int isPQ = 1;
+	int offset = 0;
+	jsObj oitem = jsonNew();
+	jsObj aitem = jsonNewArray();
+	//v
+	mkOneInstantTi(&aitem, isVI, instant.v, en+offset);
+	jsonAdd(&oitem, "v", aitem);
+	jsonClear(&aitem);
+	offset += PHASENUM;
+	//i
+	mkOneInstantTi(&aitem, isVI, instant.i, en+offset);
+	jsonAdd(&oitem, "i", aitem);
+	jsonClear(&aitem);
+	offset += PHASENUM;
+	//p
+	mkOneInstantTi(&aitem, isPQ, instant.p, en+offset);
+	jsonAdd(&oitem, "p", aitem);
+	jsonClear(&aitem);
+	offset += PQCNUM;
+	//q
+	mkOneInstantTi(&aitem, isPQ, instant.q, en+offset);
+	jsonAdd(&oitem, "q", aitem);
+	jsonClear(&aitem);
+	offset += PQCNUM;
+	//pf
+	mkOneInstantTi(&aitem, isPQ, instant.pf, en+offset);
+	jsonAdd(&oitem, "pf", aitem);
+	jsonClear(&aitem);
+	offset += PQCNUM;
+	//ok
+	jsonAdd(a, NULL, oitem);
+	jsonFree(&oitem);
+	jsonFree(&aitem);
+	return 0;
+}
+
+static int mkMaxnDataArray(jsObj *a, const stMaxn manx, const char *en)
+{
+	mkOneMaxnTI(a, manx.FA, &en[0]);     ///正向有功
+	mkOneMaxnTI(a, manx.RA, &en[5]);     ///正向无功
+	mkOneMaxnTI(a, manx.FR, &en[10]);     ///反向有功
+	mkOneMaxnTI(a, manx.RR, &en[15]);     ///反向无功
 	return 0;
 }
 time_t ToUnixTimestarmp(stTime st)
 {
 
-	if (st.year<=0 ||st.month<=0 ||st.day<=0 ) {
+	if (st.year<=0||st.month<=0||st.day<=0) {
 		return 0;
 	}
 	time_t t;
@@ -801,10 +1022,10 @@ time_t ToUnixTimestarmp(stTime st)
 	tm.tm_mon = st.month-1;     //unix 标准月0~11
 	///@note 表计的年可能与表计有关,目前仅忽略之 可能会是@bug !
 	tm.tm_year = st.year+100;     //645-97表没有年,
-#if 1
-	printf(WEBS_DBG"sys: %04d-%02d-%02d %02d:%02d:%02d \n"
-	                , st.year+2000, st.month, st.day
-	                , st.hour, st.min, 0);
+#if 0
+	                printf(WEBS_DBG"sys: %04d-%02d-%02d %02d:%02d:%02d \n"
+			                , st.year+2000, st.month, st.day
+			                , st.hour, st.min, 0);
 #endif
 	t = mktime(&tm);
 #if 0
@@ -837,8 +1058,6 @@ static char * float2string(uint8_t const float_array[4], char * strval)
 	f.tmp[2]=float_array[2];
 	f.tmp[3]=float_array[3];
 	sprintf(strval, "%g", f.fot);
-	//float f2=*(float*) (&float_array[0]);
-	//sprintf(strval, "%g", f2);
 #else
 	sprintf(strval, "%g", *(float*) (&float_array[0]));
 #endif
@@ -851,51 +1070,95 @@ static char * float2string(uint8_t const float_array[4], char * strval)
  * @param enable
  * @return
  */
-static int webWriteOneTI(jsObj *o, touTi_Category ti, const char *enable)
+static int mkOneTouTi(jsObj *a, const touTi_Category ti, const char *en)
 {
 	char strval[32];
 	char tmp[32];
 	jsObj aTi = jsonNewArray();
 	//printf(WEBS_DBG"使能:%s\n", enable);
-	if (enable[0]=='1') {
+	if (en[0]=='1') {
 		//printf(WEBS_DBG"总采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.total.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.total.iv));
-		jsonAdd(o, NULL, aTi);
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
-	if (enable[1]=='1') {
+	if (en[1]=='1') {
 		//printf(WEBS_DBG"尖采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.tip.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.tip.iv));
-		jsonAdd(o, NULL, aTi);
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
-	if (enable[2]=='1') {
+	if (en[2]=='1') {
 		//printf(WEBS_DBG"峰采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.peak.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.peak.iv));
-		jsonAdd(o, NULL, aTi);
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
-	if (enable[3]=='1') {
+	if (en[3]=='1') {
 		//printf(WEBS_DBG"平采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.flat.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.flat.iv));
-		jsonAdd(o, NULL, aTi);
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
-	if (enable[4]=='1') {
+	if (en[4]=='1') {
 		//printf(WEBS_DBG"谷采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.valley.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.valley.iv));
-		jsonAdd(o, NULL, aTi);
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
 	jsonFree(&aTi);
 	return 0;
 }
-static int mkOneMaxnTI(jsObj *o, stMaxn_Ti_Category ti, const char *en)
+static int mkOneQrTi(jsObj *a, const touTi_Category ti, const char *en)
+{
+	char strval[32];
+	char tmp[32];
+	jsObj aTi = jsonNewArray();
+	//printf(WEBS_DBG"使能:%s\n", en);
+	if (en[0]=='1') {
+		//printf(WEBS_DBG"总采集\n");
+		jsonAdd(&aTi, NULL, float2string(ti.total.fake_float_val, strval));
+		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.total.iv));
+		jsonAdd(a, NULL, aTi);
+		jsonClear(&aTi);
+	}
+	if (en[1]=='1') {
+		//printf(WEBS_DBG"尖采集\n");
+		jsonAdd(&aTi, NULL, float2string(ti.tip.fake_float_val, strval));
+		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.tip.iv));
+		jsonAdd(a, NULL, aTi);
+		jsonClear(&aTi);
+	}
+	if (en[2]=='1') {
+		//printf(WEBS_DBG"峰采集\n");
+		jsonAdd(&aTi, NULL, float2string(ti.peak.fake_float_val, strval));
+		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.peak.iv));
+		jsonAdd(a, NULL, aTi);
+		jsonClear(&aTi);
+	}
+	if (en[3]=='1') {
+		//printf(WEBS_DBG"平采集\n");
+		jsonAdd(&aTi, NULL, float2string(ti.flat.fake_float_val, strval));
+		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.flat.iv));
+		jsonAdd(a, NULL, aTi);
+		jsonClear(&aTi);
+	}
+	if (en[4]=='1') {
+		//printf(WEBS_DBG"谷采集\n");
+		jsonAdd(&aTi, NULL, float2string(ti.valley.fake_float_val, strval));
+		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.valley.iv));
+		jsonAdd(a, NULL, aTi);
+		jsonClear(&aTi);
+	}
+	jsonFree(&aTi);
+	return 0;
+}
+static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en)
 {
 	char tmp[32];
 	jsObj aTi = jsonNewArray();
@@ -903,58 +1166,58 @@ static int mkOneMaxnTI(jsObj *o, stMaxn_Ti_Category ti, const char *en)
 	if (en[0]=='1') {
 		//printf(WEBS_DBG"总采集\n");
 		jsonAdd(&aTi, NULL,
-			float2string(ti.total.fake_float_val, tmp));
+		                float2string(ti.total.fake_float_val, tmp));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.total.iv));
 		jsonAdd(&aTi, NULL,
-			toStr(tmp, "%d",ToUnixTimestarmp(ti.total.time)));
-		jsonAdd(o, NULL, aTi);
+		                toStr(tmp, "%d", ToUnixTimestarmp(ti.total.time)));
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
 	if (en[1]=='1') {
 		//printf(WEBS_DBG"尖采集\n");
 		jsonAdd(&aTi, NULL,
-			float2string(ti.tip.fake_float_val, tmp));
+		                float2string(ti.tip.fake_float_val, tmp));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.tip.iv));
 		jsonAdd(&aTi, NULL,
-			toStr(tmp, "%d",ToUnixTimestarmp(ti.tip.time)));
-		jsonAdd(o, NULL, aTi);
+		                toStr(tmp, "%d", ToUnixTimestarmp(ti.tip.time)));
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
 	if (en[2]=='1') {
 		//printf(WEBS_DBG"峰采集\n");
 		jsonAdd(&aTi, NULL,
-			float2string(ti.peak.fake_float_val, tmp));
+		                float2string(ti.peak.fake_float_val, tmp));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.peak.iv));
 		jsonAdd(&aTi, NULL,
-			toStr(tmp, "%d",ToUnixTimestarmp(ti.peak.time)));
-		jsonAdd(o, NULL, aTi);
+		                toStr(tmp, "%d", ToUnixTimestarmp(ti.peak.time)));
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
 	if (en[3]=='1') {
 		//printf(WEBS_DBG"平采集\n");
 		jsonAdd(&aTi, NULL,
-			float2string(ti.flat.fake_float_val, tmp));
+		                float2string(ti.flat.fake_float_val, tmp));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.flat.iv));
 		jsonAdd(&aTi, NULL,
-			toStr(tmp, "%d",ToUnixTimestarmp(ti.flat.time)));
-		jsonAdd(o, NULL, aTi);
+		                toStr(tmp, "%d", ToUnixTimestarmp(ti.flat.time)));
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
 	if (en[4]=='1') {
 		//printf(WEBS_DBG"谷采集\n");
 		jsonAdd(&aTi, NULL,
-			float2string(ti.valley.fake_float_val, tmp));
+		                float2string(ti.valley.fake_float_val, tmp));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.valley.iv));
 		jsonAdd(&aTi, NULL,
-			toStr(tmp, "%d",ToUnixTimestarmp(ti.valley.time)));
-		jsonAdd(o, NULL, aTi);
+		                toStr(tmp, "%d", ToUnixTimestarmp(ti.valley.time)));
+		jsonAdd(a, NULL, aTi);
 		jsonClear(&aTi);
 	}
 	jsonFree(&aTi);
 	return 0;
 }
-static int mkTi_Instant(jsObj *o, int isPQ,
-        const Ti* ti, const char *enable)
+static int mkOneInstantTi(jsObj *a, int isPQ,
+        const Ti* ti, const char *en)
 {
 	char strval[32];
 	char tmp[32];
@@ -963,79 +1226,17 @@ static int mkTi_Instant(jsObj *o, int isPQ,
 	int i;
 	int arraylen = (isPQ==1) ? 4 : 3;
 	for (i = 0; i<arraylen; i++) {
-		if (enable[i]=='1') {
+		if (en[i]=='1') {
 			jsonAdd(&aTi, NULL, float2string(ti[i].fake_float_val, strval));
 			jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti[i].iv));
-			jsonAdd(o, NULL, aTi);
+			jsonAdd(a, NULL, aTi);
 			jsonClear(&aTi);
 		}
 	}
 	jsonFree(&aTi);
 	return 0;
 }
-/**
- * 生成一条记录中的所有电量数据数组
- * @param[out] a json格式4*5个电量数据数组
- * @param[in] tou 文件中读取到的数据
- * @param[in] en 根据请求只大发送指定(使能)的某些数据,如正有功总等等
- * @return
- */
-static int mkTouDataArray(jsObj *a, const stTou tou, const char *en)
-{
-	webWriteOneTI(a, tou.FA, &en[0]);     ///正向有功
-	webWriteOneTI(a, tou.RA, &en[5]);     ///正向无功
-	webWriteOneTI(a, tou.FR, &en[10]);     ///反向有功
-	webWriteOneTI(a, tou.RR, &en[15]);     ///反向无功
-	return 0;
-}
 
-static int mkMaxnDataArray(jsObj *a, const stMaxn manx, const char *en)
-{
-	mkOneMaxnTI(a, manx.FA, &en[0]);     ///正向有功
-	mkOneMaxnTI(a, manx.RA, &en[5]);     ///正向无功
-	mkOneMaxnTI(a, manx.FR, &en[10]);     ///反向有功
-	mkOneMaxnTI(a, manx.RR, &en[15]);     ///反向无功
-	return 0;
-}
-///生成一条记录中的所有瞬时量数据数组
-static int mkInstantDataArray(jsObj *a, const stInstant instant, const char *enable)
-{
-	const int isVI = 0;
-	const int isPQ = 1;
-	int offset = 0;
-	jsObj oitem = jsonNew();
-	jsObj aitem = jsonNewArray();
-	//v
-	mkTi_Instant(&aitem, isVI, instant.v, enable+offset);
-	jsonAdd(&oitem, "v", aitem);
-	jsonClear(&aitem);
-	offset += PHASENUM;
-	//i
-	mkTi_Instant(&aitem, isVI, instant.i, enable+offset);
-	jsonAdd(&oitem, "i", aitem);
-	jsonClear(&aitem);
-	offset += PHASENUM;
-	//p
-	mkTi_Instant(&aitem, isPQ, instant.p, enable+offset);
-	jsonAdd(&oitem, "p", aitem);
-	jsonClear(&aitem);
-	offset += PQCNUM;
-	//q
-	mkTi_Instant(&aitem, isPQ, instant.q, enable+offset);
-	jsonAdd(&oitem, "q", aitem);
-	jsonClear(&aitem);
-	offset += PQCNUM;
-	//pf
-	mkTi_Instant(&aitem, isPQ, instant.pf, enable+offset);
-	jsonAdd(&oitem, "pf", aitem);
-	jsonClear(&aitem);
-	offset += PQCNUM;
-	//ok
-	jsonAdd(a, NULL, oitem);
-	jsonFree(&oitem);
-	jsonFree(&aitem);
-	return 0;
-}
 /**
  * 通过比较文件头中的日期字节和请求的日期,判断是否是正确的日期,没有差几个月
  * @param filehead
@@ -1043,6 +1244,16 @@ static int mkInstantDataArray(jsObj *a, const stInstant instant, const char *ena
  * @return
  */
 static int isRightDate(const stTouFilehead filehead, struct tm t)
+{
+	if (filehead.month!=t.tm_mon+1) {
+		return 0;
+	}
+	if (filehead.year+2000!=t.tm_year+1900) {
+		return 0;
+	}
+	return 1;
+}
+static int isRightDate_Qr(const stQrFilehead filehead, struct tm t)
 {
 	if (filehead.month!=t.tm_mon+1) {
 		return 0;
@@ -1077,4 +1288,30 @@ static int isRightDate_Maxn(const stMaxnFilehead filehead, struct tm t)
 		return 0;
 	}
 	return 1;
+}
+/**
+ * 将时间推至次日凌晨0点,用于检索到下一个文件
+ * @param stTime 时间结构体
+ * @param time_t 时间戳(32位!bug Y2038)
+ */
+static void timeToNextDayMorning(struct tm *stTime, time_t *time_t)
+{
+	stTime->tm_hour = 0;
+	stTime->tm_min = 0;
+	stTime->tm_sec = 0;
+	*time_t = mktime(stTime);
+	*time_t += (60*60*24);
+}
+///简单检查表数量合法性
+static int check_mtrnum(int mtrnum)
+{
+	if (mtrnum<=0) {
+		web_errno = eno_realtime_tou_mtrnum_too_small;
+		return -1000;
+	}
+	if (mtrnum>MAXMETER) {
+		web_errno = eno_realtime_tou_mtrnum_too_big;
+		return -1002;
+	}
+	return 0;
 }

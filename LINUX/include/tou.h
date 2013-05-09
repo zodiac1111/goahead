@@ -14,9 +14,16 @@
 #define TOU_DAT_DIR DATA_DIR
 #endif
 #define TOU_DAT_SUFFIX "tou" //电量数据文件后缀名
+#define QR_DAT_SUFFIX "qr" //无功数据文件后缀名
 #define INSTANT_DAT_SUFFIX "ta" //瞬时量数据文件后缀名
 #define MAXN_DAT_SUFFIX "mnt" //最大需量数据文件后缀名
 #define DEBUG_PRINT_HISTORY_DAT_MAXN 1 //最大需量打印测试
+typedef enum {
+	etou=1,
+	eqr,
+	einstant,
+	emaxn
+}eDatetype;
 ///tou 文件头
 typedef struct {
 	uint8_t year; //+2000
@@ -40,7 +47,19 @@ typedef struct {
 	uint8_t save_flag1;
 	uint8_t save_flag2;
 	uint8_t save_flag3;
-}  __attribute__((packed, aligned(1))) stInstantFilehead;
+	uint8_t save_flag4;
+}  __attribute__((packed, aligned(1)))stQrFilehead;
+typedef struct {
+	uint8_t year; //+2000
+	uint8_t month;
+	uint8_t day;
+	uint8_t save_cycle_lo;///<存储周期[分钟]
+	uint8_t save_cycle_hi;///<存储周期[分钟]
+	uint8_t save_number;
+	uint8_t save_flag1;
+	uint8_t save_flag2;
+	uint8_t save_flag3;
+}  __attribute__((packed, aligned(1)))stInstantFilehead;
 typedef struct {
 	uint8_t year; //+2000
 	uint8_t month;
@@ -80,6 +99,9 @@ typedef struct {
 	 touTi_Category FR;///<正无
 	 touTi_Category RR;///<反无
 }  __attribute__((packed, aligned(1))) stTou;
+typedef struct {
+	 touTi_Category qr[4];///
+}  __attribute__((packed, aligned(1))) stQr;
 ///一个瞬时量文件结构
 typedef struct {
 	Ti v[PHASENUM];
