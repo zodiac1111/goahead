@@ -20,6 +20,7 @@
 #include "autoUpdate.h"
 #include "wpsend.h"
 #include "commModule.h"
+#include "master.h"
 #include "sysfunction.h"
 #include "rtit.h"
 #include "upload.h"
