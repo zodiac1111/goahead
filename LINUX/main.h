@@ -16,12 +16,13 @@
 #include "conf.h"
 #include "json.h"
 #include "web_err.h"
-#include "autoUpdate.h"
-#include "rtit.h"
-#include "sysfunction.h"
-#include "wpsend.h"
-#include "upload.h"
 #include "externCShm.h" //主程序共享内存的道出接口
+#include "autoUpdate.h"
+#include "wpsend.h"
+#include "commModule.h"
+#include "sysfunction.h"
+#include "rtit.h"
+#include "upload.h"
 #define MTR_ADD 1 //增删查改?...
 #define MTR_DEL  2
 #define MTR_SEARCH  3

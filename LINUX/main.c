@@ -153,6 +153,140 @@ int main(int argc __attribute__ ((unused)),
 	return 0;
 }
 /**
+ * Initialize the web server.
+ * 初始化web服务的一些操作:
+ *   配置套接字
+ *   修改运行目录和配置www根目录
+ *   注册asp和form函数
+ * @return
+ */
+static int initWebs(void)
+{
+	struct hostent *hp;
+	struct in_addr intaddr;
+	char host[128];
+
+	char *cp;
+	char_t wbuf[128];
+	//先打开各种配置文件,主要是使能错误日志
+	int ret = load_webs_conf_info();
+	if (ret<0) {
+		web_err_proc(EL);
+		return ret;
+	}
+	//Initialize the socket subsystem
+	socketOpen();
+#ifdef USER_MANAGEMENT_SUPPORT
+	/*
+	 *	Initialize the User Management database
+	 */
+	umOpen();
+	umRestore(T("umconfig.txt"));
+#endif
+	/*
+	 *	Define the local Ip address, host name, default home page and the
+	 *	root web directory.
+	 */
+	if (gethostname(host, sizeof(host))<0) {
+		perror("gethostname");
+		error(E_L, E_LOG, T("Can't get hostname"));
+		web_err_proc(EL);
+		return -1000;
+	}
+	/// @note gethostbyname系统调佣需要hostname命令执行成功,老版本文件只读
+	if ((hp = gethostbyname(host))==NULL ) {
+		herror(WEBS_ERR"gethostbyname");
+		printf(WEBS_WAR"Try to use the IP 127.0.0.1 instead.");
+		error(E_L, E_LOG, T("Can't get host address"));
+		web_errno = ErrNotSupportHostNameFunction;
+		web_err_proc(EL);
+		memcpy((char *) &intaddr, (char *)"127.0.0.1",
+					strlen("127.0.0.1"));
+	}else{
+		memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
+			                (size_t) hp->h_length);
+	}
+	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
+	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.
+	chdir(webdir);
+	//Configure the web server options before opening the web server
+	websSetDefaultDir(webdir);
+	cp = inet_ntoa(intaddr);
+	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
+	websSetIpaddr(wbuf);
+	ascToUni(wbuf, host, min(strlen(host) + 1, sizeof(wbuf)));
+	websSetHost(wbuf);
+	//Configure the web server options before opening the web server
+	websSetDefaultPage(T("default.asp"));
+	websSetPassword(password);
+
+	/*
+	 * Open the web server on the given port. If that port is taken, try
+	 * the next sequential port for up to "retries" attempts.
+	 */
+	//websOpenServer(port, retries);
+	websOpenServer(atoi(webs_cfg.port), retries);
+
+	/*
+	 * First create the URL handlers. Note: handlers are called in sorted order
+	 * with the longest path handler examined first. Here we define the security
+	 * handler, forms handler and the default web page handler.
+	 */
+	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler,
+	                WEBS_HANDLER_FIRST);
+	websUrlHandlerDefine(T("/goform"), NULL, 0, websFormHandler, 0);
+	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
+	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
+	                WEBS_HANDLER_LAST);
+	//printf("监视端口文件:%s", MON_PORT_NAME_FILE);
+	//载入名称文件,给服务器程序显示用的.
+	if (-1==read_protocol_file(procotol_name,
+	                &procotol_num, webs_cfg.protocol)) {
+		web_err_proc(EL);
+	}
+	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
+	                webs_cfg.monparam_name)) {
+		printf("* %s\n", webs_cfg.monparam_name);
+		web_err_proc(EL);
+	}
+	//注册表单post函数. form define/用于post
+	websFormDefine(T("srv_time"), form_server_time);
+	websFormDefine(T("sysparam"), form_sysparam);
+	websFormDefine(T("sioplan"), form_sioplans);
+	websFormDefine(T("netpara"), form_netparas);
+	websFormDefine(T("monparas"), form_monparas);
+	websFormDefine(T("savecycle"), form_savecycle);
+	websFormDefine(T("collectcycle"), form_collect_cycle);
+	websFormDefine(T("mtrparams"), form_mtrparams);
+	websFormDefine(T("get_tou"), form_history_tou);
+	websFormDefine(T("realtime_tou"), form_realtime_tou);
+	websFormDefine(T("reset"), form_sysFunction);
+	websFormDefine(T("save_log"), form_save_log);
+	websFormDefine(T("load_log"), form_load_log);
+	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
+	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
+	websFormDefine(T("load_procotol_cfg"), form_load_procotol_cfgfile);
+	websFormDefine(T("save_procotol_cfg"), form_save_procotol_cfgfile);
+	websFormDefine(T("msg"), form_msg);
+	websFormDefine(T("msg_stop"), form_msg_stop);
+	websFormDefine(T("info"), form_info);
+	websFormDefine(T("upload_file"), form_upload_file);
+	websFormDefine(T("conf_file"), form_conf_file);
+	websFormDefine(T("comm_module"), form_commModule);
+#ifdef USER_MANAGEMENT_SUPPORT
+	//Create the Form handlers for the User Management pages
+	formDefineUserMgmt();
+#endif
+	//Create a handler for the default home page
+	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
+	///加载系统参数
+	if (-1==load_sysparam(&sysparam, webs_cfg.syspara)) {
+		web_err_proc(EL);
+		//return -1;
+	}
+	return 0;
+}
+/**
  * 系统参数设置表单提交触发的函数.
  * 判断数据合法,写入到sysspara.cfg文件中.一共一项,大小7字节,脉冲数目已经废弃.
  * @param wp
@@ -430,143 +564,7 @@ char *mkFullPath(const char *path, const char *name)
 #endif
 	return fullpath;
 }
-/**
- * Initialize the web server.
- * 初始化web服务的一些操作:
- *   配置套接字
- *   修改运行目录和配置www根目录
- *   注册asp和form函数
- * @return
- */
-static int initWebs(void)
-{
-	struct hostent *hp;
-	struct in_addr intaddr;
-	char host[128];
 
-	char *cp;
-	char_t wbuf[128];
-	//先打开各种配置文件,主要是使能错误日志
-	int ret = load_webs_conf_info();
-	if (ret<0) {
-		web_err_proc(EL);
-		return ret;
-	}
-	//Initialize the socket subsystem
-	socketOpen();
-#ifdef USER_MANAGEMENT_SUPPORT
-	/*
-	 *	Initialize the User Management database
-	 */
-	umOpen();
-	umRestore(T("umconfig.txt"));
-#endif
-	/*
-	 *	Define the local Ip address, host name, default home page and the
-	 *	root web directory.
-	 */
-	if (gethostname(host, sizeof(host))<0) {
-		perror("gethostname");
-		error(E_L, E_LOG, T("Can't get hostname"));
-		web_err_proc(EL);
-		return -1000;
-	}
-	/// @note gethostbyname系统调佣需要hostname命令执行成功,老版本文件只读
-	if ((hp = gethostbyname(host))==NULL ) {
-		herror(WEBS_ERR"gethostbyname");
-		printf(WEBS_WAR"Try to use the IP 127.0.0.1 instead.");
-		error(E_L, E_LOG, T("Can't get host address"));
-		web_errno = ErrNotSupportHostNameFunction;
-		web_err_proc(EL);
-		memcpy((char *) &intaddr, (char *)"127.0.0.1",
-					strlen("127.0.0.1"));
-	}else{
-		memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
-			                (size_t) hp->h_length);
-	}
-	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
-	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.
-	chdir(webdir);
-	//Configure the web server options before opening the web server
-	websSetDefaultDir(webdir);
-	cp = inet_ntoa(intaddr);
-	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
-	websSetIpaddr(wbuf);
-	ascToUni(wbuf, host, min(strlen(host) + 1, sizeof(wbuf)));
-	websSetHost(wbuf);
-	//Configure the web server options before opening the web server
-	websSetDefaultPage(T("default.asp"));
-	websSetPassword(password);
-
-	/*
-	 * Open the web server on the given port. If that port is taken, try
-	 * the next sequential port for up to "retries" attempts.
-	 */
-	//websOpenServer(port, retries);
-	websOpenServer(atoi(webs_cfg.port), retries);
-
-	/*
-	 * First create the URL handlers. Note: handlers are called in sorted order
-	 * with the longest path handler examined first. Here we define the security
-	 * handler, forms handler and the default web page handler.
-	 */
-	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler,
-	                WEBS_HANDLER_FIRST);
-	websUrlHandlerDefine(T("/goform"), NULL, 0, websFormHandler, 0);
-	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
-	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler,
-	                WEBS_HANDLER_LAST);
-	//printf("监视端口文件:%s", MON_PORT_NAME_FILE);
-	//载入名称文件,给服务器程序显示用的.
-	if (-1==read_protocol_file(procotol_name,
-	                &procotol_num, webs_cfg.protocol)) {
-		web_err_proc(EL);
-	}
-	if (-1==init_monparam_port_name(mon_port_name, &mon_port_num,
-	                webs_cfg.monparam_name)) {
-		printf("* %s\n", webs_cfg.monparam_name);
-		web_err_proc(EL);
-	}
-	/*
-	 * 注册asp函数,给予asp调用
-	 * [空]
-	 */
-	//注册表单post函数. form define/用于post
-	websFormDefine(T("srv_time"), form_server_time);
-	websFormDefine(T("sysparam"), form_sysparam);
-	websFormDefine(T("sioplan"), form_sioplans);
-	websFormDefine(T("netpara"), form_netparas);
-	websFormDefine(T("monparas"), form_monparas);
-	websFormDefine(T("savecycle"), form_savecycle);
-	websFormDefine(T("collectcycle"), form_collect_cycle);
-	websFormDefine(T("mtrparams"), form_mtrparams);
-	websFormDefine(T("get_tou"), form_history_tou);
-	websFormDefine(T("realtime_tou"), form_realtime_tou);
-	websFormDefine(T("reset"), form_sysFunction);
-	websFormDefine(T("save_log"), form_save_log);
-	websFormDefine(T("load_log"), form_load_log);
-	websFormDefine(T("load_monport_cfg"), form_load_monport_cfgfile);
-	websFormDefine(T("save_monport_cfg"), form_save_monport_cfgfile);
-	websFormDefine(T("load_procotol_cfg"), form_load_procotol_cfgfile);
-	websFormDefine(T("save_procotol_cfg"), form_save_procotol_cfgfile);
-	websFormDefine(T("msg"), form_msg);
-	websFormDefine(T("msg_stop"), form_msg_stop);
-	websFormDefine(T("info"), form_info);
-	websFormDefine(T("upload_file"), form_upload_file);
-	websFormDefine(T("conf_file"), form_conf_file);
-#ifdef USER_MANAGEMENT_SUPPORT
-	//Create the Form handlers for the User Management pages
-	formDefineUserMgmt();
-#endif
-	//Create a handler for the default home page
-	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
-	///加载系统参数
-	if (-1==load_sysparam(&sysparam, webs_cfg.syspara)) {
-		web_err_proc(EL);
-		//return -1;
-	}
-	return 0;
-}
 
 /**
  * 从配置文件和动态库中加载配置信息
