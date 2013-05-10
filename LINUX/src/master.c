@@ -5,6 +5,7 @@
 #include "master.h"
 static int webRece_master(webs_t wp);
 static int webSend_master(webs_t wp);
+static int addInterFaceList(jsObj *oMaster);
 static void print_array(const char *a, const int len);
 void form_master(webs_t wp, char_t *path, char_t *query)
 {
@@ -34,6 +35,7 @@ static int webRece_master(webs_t wp)
 	jsObj oOneParam=jsonNew();
 	web_err_procEx(EL,"读取主站参数");
 	web_err_procEx(EL,"读取主站参数 ret=%d",1);
+	addInterFaceList(&oMaster);
 	for (i=0;i<4;i++){
 		ret = GetMaster(&m_Master, i);
 		printf(WEBS_DBG"ret=%d\n", ret);
@@ -65,6 +67,21 @@ static int webRece_master(webs_t wp)
 }
 static int webSend_master(webs_t wp)
 {
+	return 0;
+}
+/**
+ * 向主站参数对象中添加接口列表,用于网页上选择接口(interface)字符串
+ * @param oMaster
+ * @return
+ */
+static int addInterFaceList(jsObj *oMaster)
+{
+	jsObj aList=jsonNewArray();
+	jsonAdd(&aList,NULL,"eth0");
+	jsonAdd(&aList,NULL,"eth1");
+	jsonAdd(&aList,NULL,"ppp0");
+	jsonAdd(oMaster,"interface",aList);
+	jsonFree(&aList);
 	return 0;
 }
 ///打印数组
