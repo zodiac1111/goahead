@@ -104,6 +104,7 @@ const char *myweberrstr[] = {
  * 服务器错误处理函数.
  * 处理web_errno错误号,控制台打印,清除web_errno.
  * 以较为简单的形式保存到文件.
+ * @param EL_ARGS
  */
 void web_err_proc(EL_ARGS)
 {
@@ -132,15 +133,27 @@ void web_err_proc(EL_ARGS)
 	web_errno = 0;
 	return;
 }
-void web_err_proc_Ex(EL_ARGS, ... )
+/**
+ * 扩展的错误处理函数,支持不定个数参数打印,
+ * 使用例子:
+ * 	web_err_proc_Ex(EL,"发生了错误.");
+ * 	web_err_proc_Ex(EL,"发生了错误,返回值:ret=%d.",iRet);
+ * 	web_err_proc_Ex(EL,"发生了错误,返回值:ret=%d value=%f v2=%s"
+ * 		,iRet,fValue,strSomeString);
+ * @param EL_ARGS (宏) EL (宏)
+ * @param format 格式化字符串 + ... 不定参数
+ */
+void web_err_procEx(EL_ARGS,const char*format, ... )
 {
 	time_t timer = time(NULL );
 	struct tm * t = localtime(&timer);
 	//错误时间
 	char strtime[25] = { 0 };
-	//错误描述
+	//错误描述 RealErrstring = errstring + errstringEx ;
 	char errstring[MAX_ERR_LOG_LINE_LENTH] = { 0 };
-	//错误等级
+	char errstringEx[MAX_ERR_LOG_LINE_LENTH] = { 0 };//扩展的描述信息
+	char RealErrstring[MAX_ERR_LOG_LINE_LENTH] = { 0 };
+	va_list ap;
 	if (web_errno<0) {
 		web_errno = 0;
 		return;
@@ -151,11 +164,16 @@ void web_err_proc_Ex(EL_ARGS, ... )
 	sprintf(errstring, "%s[%d](%s,%s:%d)%s[%d]",
 	                 myweberrstr[web_errno],web_errno,
 	                file, func, line, strerror(errno),errno);
+	// --- 扩展的字符串
+	va_start(ap,format);
+	vsprintf( errstringEx,format, ap);
+	va_end(ap);
+	sprintf(RealErrstring,"%s %s",errstring,errstringEx);
 	if (myweberrstr[web_errno]!=NULL ) {
-		printf(WEBS_ERR"%s %s\n", strtime, errstring);
+		printf(WEBS_ERR"%s %s\n", strtime, RealErrstring);
 	}
 	// 写入文件
-	save_log(strtime, errstring, webs_cfg.errlog);
+	save_log(strtime, RealErrstring, webs_cfg.errlog);
 	web_errno = 0;
 	return;
 }

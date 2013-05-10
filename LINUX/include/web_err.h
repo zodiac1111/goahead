@@ -10,7 +10,7 @@
 #define EL T(__FILE__),T(__FUNCTION__),__LINE__
 #define EL_ARGS	const char* file,const char* func,int line
 extern void web_err_proc(EL_ARGS);
-extern void web_err_proc_Ex(EL_ARGS, ... );
+extern void web_err_procEx(EL_ARGS,const char*format, ... );
 ///错误号
 extern int web_errno;
 ///错误描述

@@ -188,18 +188,14 @@ static int initWebs(void)
 	 *	root web directory.
 	 */
 	if (gethostname(host, sizeof(host))<0) {
-		perror("gethostname");
-		error(E_L, E_LOG, T("Can't get hostname"));
-		web_err_proc(EL);
+		web_err_procEx(EL,"获取hostname");
 		return -1000;
 	}
 	/// @note gethostbyname系统调佣需要hostname命令执行成功,老版本文件只读
 	if ((hp = gethostbyname(host))==NULL ) {
-		herror(WEBS_ERR"gethostbyname");
-		printf(WEBS_WAR"Try to use the IP 127.0.0.1 instead.");
-		error(E_L, E_LOG, T("Can't get host address"));
 		web_errno = ErrNotSupportHostNameFunction;
-		web_err_proc(EL);
+		web_err_procEx(EL,
+			"1.5版本不支持gethostbyname,使用默认的127.0.0.1代替");
 		memcpy((char *) &intaddr, (char *)"127.0.0.1",
 					strlen("127.0.0.1"));
 	}else{

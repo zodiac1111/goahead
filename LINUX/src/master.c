@@ -32,6 +32,8 @@ static int webRece_master(webs_t wp)
 	jsObj oMaster=jsonNew();
 	jsObj aMasterList=jsonNewArray();
 	jsObj oOneParam=jsonNew();
+	web_err_procEx(EL,"读取主站参数");
+	web_err_procEx(EL,"读取主站参数 ret=%d",1);
 	for (i=0;i<4;i++){
 		ret = GetMaster(&m_Master, i);
 		printf(WEBS_DBG"ret=%d\n", ret);
