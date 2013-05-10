@@ -26,7 +26,7 @@ jsObj jsonNew(void)
 	}
 	return obj;
 }
-///穿件空数组"[]" ,注意释放 free
+///创建空数组"[]" ,注意释放 free
 jsObj jsonNewArray(void)
 {
 	jsObj obj=malloc(strlen("[]")+1);
@@ -38,7 +38,8 @@ jsObj jsonNewArray(void)
 	return obj;
 }
 ///清空对象/数组内的内容.不是删除/释放对象!
-jsObj jsonClear(jsObj* pobj)
+///返回被清除后的指针,用于链式表达式
+jsObj jsonClean(jsObj* pobj)
 {
 	char s ;
 	char e ;//区分是像对象还是向数组添加名/值对.
@@ -281,13 +282,13 @@ void jsonDemo(void)
 	jsonAdd(&aTemp,NULL,"b");
 	printf(JSON_DEMO" Add a Element(b) to aTemp "
 		RED"%s"_COLOR"\n",aTemp);
-	jsonClear(&aTemp);
+	jsonClean(&aTemp);
 	printf(JSON_DEMO" Clear aTemp "
 		RED"%s"_COLOR"\n",aTemp);
 	jsonAdd(&aTemp,NULL,"c");
 	printf(JSON_DEMO" Add a Element(c) to aTemp "
 		RED"%s"_COLOR"\n",aTemp);
-	jsonClear(&aTemp);
+	jsonClean(&aTemp);
 	printf(JSON_DEMO" Clear aTemp "
 		RED"%s"_COLOR"\n",aTemp);
 	jsonFree(&aTemp);

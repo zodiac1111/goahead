@@ -1214,20 +1214,20 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 	jsonAdd(&aList, NULL, "偶");
 	jsonAdd(&aList, NULL, "奇");
 	jsonAdd(&oSioPlan, "parity", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	jsonAdd(&aList, NULL, "7");
 	jsonAdd(&aList, NULL, "8");
 	jsonAdd(&aList, NULL, "9");
 	jsonAdd(&oSioPlan, "data", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	jsonAdd(&aList, NULL, "0");
 	jsonAdd(&aList, NULL, "1");
 	jsonAdd(&oSioPlan, "stop", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	jsonAdd(&oSioPlan, "baud", "[300,600,1200,2400,4800,9600,19200]");
-	jsonClear(&aList);
+	jsonClean(&aList);
 	jsonAdd(&oSioPlan, "commtype", "[\"异步\",\"同步\"]");
-	jsonClear(&aList);
+	jsonClean(&aList);
 	for (no = 0; no<sp.sioplan_num; no++) {
 		if (-1==load_sioplan(&plan, webs_cfg.sioplan, no)) {
 			web_err_proc(EL);
@@ -1240,7 +1240,7 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 		jsonAdd(&oItem, "baud", u8toa(tmp, "%d", plan.baud));
 		jsonAdd(&oItem, "commtype", u8toa(tmp, "%d", plan.Commtype));
 		jsonAdd(&aItems, NULL, oItem);
-		jsonClear(&oItem);
+		jsonClean(&oItem);
 
 	}
 	jsonAdd(&oSioPlan, "item", aItems);
@@ -1354,7 +1354,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 		jsonAdd(&oItem, "forward_mtr_num",
 		                u8toa(tmp, "%d", monpara.forwardNum));
 		jsonAdd(&aItemList, NULL, oItem);
-		jsonClear(&oItem);
+		jsonClean(&oItem);
 	}
 	//printf(WEBS_DBG"%s\n",oMonPara);
 	jsonAdd(&oMonPara, "item", aItemList);
@@ -1807,7 +1807,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&aList, NULL, u8toa(tmp, "%d", i));
 	}
 	jsonAdd(&oAll, "portplan", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	//监视端口(端口)
 	if (mon_port_num<sysparam.sioports_num) {
 		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
@@ -1817,13 +1817,13 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&aList, NULL, mon_port_name[i]);
 	}
 	jsonAdd(&oAll, "port", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	//规约名称
 	for (i = 0; i<procotol_num; i++) {
 		jsonAdd(&aList, NULL, procotol_name[i]);
 	}
 	jsonAdd(&oAll, "procotol", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	//表计类型 JD/HA不一样
 	///@todo 去掉硬编码!
 	char *fact_HA[] = { HOLLEY, WEI_SHENG, LAN_JI_ER, HONG_XIANG, "哈表" };
@@ -1842,13 +1842,13 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&aList, NULL, fact[i]);
 	}
 	jsonAdd(&oAll, "factory", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	//电表类型,几相几线制
 	for (i = 0; i<(int) (sizeof(PW)/sizeof(PW[0])); i++) {
 		jsonAdd(&aList, NULL, PW[i]);
 	}
 	jsonAdd(&oAll, "type", aList);
-	jsonClear(&aList);
+	jsonClean(&aList);
 	//表计参数对象数组循环赋值
 	for (i = 0; i<mtrnum; i++) {
 		if (-1==load_mtrparam(&mtr, webs_cfg.mtrspara, i)) {
@@ -1875,7 +1875,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 		jsonAdd(&oMtrPara, "ie", toStr(tmp, "%.1f", mtr.ie/1000.0));
 		//添加到数组
 		jsonAdd(&aMtrParaList, NULL, oMtrPara);
-		jsonClear(&oMtrPara);
+		jsonClean(&oMtrPara);
 	}
 	jsonAdd(&oAll, "items", aMtrParaList);
 	wpsend(wp, oAll);
@@ -1991,7 +1991,7 @@ int webSend_savecycle(webs_t wp)
 #if DEBUG_PRINT_SAVE_CYCLE
 		printf(WEBS_DBG"oItem:%s\n",oItemArray);
 #endif
-		jsonClear(&oItem);
+		jsonClean(&oItem);
 	}
 	jsonAdd(&oSavCycle, "cycle", oCycleList);
 	jsonAdd(&oSavCycle, "item", oItemArray);
@@ -2031,7 +2031,7 @@ int webSend_collect_cycle(webs_t wp)
 #if DEBUG_PRINT_COLLECT_CYCLE
 		printf(WEBS_DBG"oItem:%s\n",oItemArray);
 #endif
-		jsonClear(&oItem);
+		jsonClean(&oItem);
 	}
 	jsonAdd(&oCollectCycle, "cycle", oCycleList);
 	jsonAdd(&oCollectCycle, "item", oItemArray);

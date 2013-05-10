@@ -10,7 +10,7 @@ typedef  char* jsObj;
 void jsonDemo(void);
 jsObj jsonNew(void);
 jsObj jsonNewArray(void);
-jsObj jsonClear(jsObj* pobj);
+jsObj jsonClean(jsObj* pobj);
 int jsonFree(jsObj *pobj);
 jsObj jsonAdd(jsObj*dobj,const char*name,const char*value);
 ///@todo 这几个函数因该被toStr函数安全的代替.

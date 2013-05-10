@@ -185,7 +185,7 @@ static int webRece_history_data(webs_t wp)
 				continue;
 			add_mtr_tou(&oMtr, i, abTou, tr);
 			jsonAdd(&aMtr, NULL, oMtr);
-			jsonClear(&oMtr);
+			jsonClean(&oMtr);
 		}
 	} else if (strcmp(datatType, "qr")==0) {
 		char * abQr = websGetVar(wp, T("qr"), T(""));
@@ -195,7 +195,7 @@ static int webRece_history_data(webs_t wp)
 				continue;
 			add_mtr_qr(&oMtr, i, abQr, tr);
 			jsonAdd(&aMtr, NULL, oMtr);
-			jsonClear(&oMtr);
+			jsonClean(&oMtr);
 		}
 	} else if (strcmp(datatType, "instant")==0) {
 		char * abV = websGetVar(wp, T("v"), T(""));
@@ -219,7 +219,7 @@ static int webRece_history_data(webs_t wp)
 				continue;
 			add_mtr_instant(&oMtr, i, abInstant, tr);
 			jsonAdd(&aMtr, NULL, oMtr);
-			jsonClear(&oMtr);
+			jsonClean(&oMtr);
 		}
 	} else if (strcmp(datatType, "maxn")==0) {
 		char * abMaxn = websGetVar(wp, T("maxn"), T(""));
@@ -229,7 +229,7 @@ static int webRece_history_data(webs_t wp)
 				continue;
 			add_mtr_maxn(&oMtr, i, abMaxn, tr);
 			jsonAdd(&aMtr, NULL, oMtr);
-			jsonClear(&oMtr);
+			jsonClean(&oMtr);
 		}
 	}
 	jsonAdd(&oHistoryData, "mtr", aMtr);     //添加整个表对象
@@ -867,7 +867,7 @@ mkOneTouDataRecord(jsObj *OneTimeTou, time_t t2, const stTou tou,
 	                                t.tm_min, t.tm_sec, t.tm_zone));
 	mkTouDataArray(&oneRecord, tou, en);
 	jsonAdd(OneTimeTou, NULL, oneRecord);
-	jsonClear(&oneRecord);
+	jsonClean(&oneRecord);
 	return 0;
 }
 static int mkOneQrDataRecord(jsObj *OneTimeTou, time_t t2,
@@ -889,7 +889,7 @@ static int mkOneQrDataRecord(jsObj *OneTimeTou, time_t t2,
 	                                t.tm_min, t.tm_sec, t.tm_zone));
 	mkQrDataArray(&oneRecord, qr, en);
 	jsonAdd(OneTimeTou, NULL, oneRecord);
-	jsonClear(&oneRecord);
+	jsonClean(&oneRecord);
 	return 0;
 }
 static int mkOneInstantDataRecord(jsObj *aInstantData, time_t t2,
@@ -911,7 +911,7 @@ static int mkOneInstantDataRecord(jsObj *aInstantData, time_t t2,
 	                                t.tm_min, t.tm_sec, t.tm_zone));
 	mkInstantDataArray(&oneRecord, instant, en);
 	jsonAdd(aInstantData, NULL, oneRecord);
-	jsonClear(&oneRecord);
+	jsonClean(&oneRecord);
 	return 0;
 }
 static int mkOneMaxnDataRecord(jsObj *OneTimeTou, time_t t2,
@@ -933,7 +933,7 @@ static int mkOneMaxnDataRecord(jsObj *OneTimeTou, time_t t2,
 	                                t.tm_min, t.tm_sec));
 	mkMaxnDataArray(&oneRecord, maxn, en);
 	jsonAdd(OneTimeTou, NULL, oneRecord);
-	jsonClear(&oneRecord);
+	jsonClean(&oneRecord);
 	return 0;
 }
 /**
@@ -970,27 +970,27 @@ static int mkInstantDataArray(jsObj *a, const stInstant instant, const char *en)
 	//v
 	mkOneInstantTi(&aitem, isVI, instant.v, en+offset);
 	jsonAdd(&oitem, "v", aitem);
-	jsonClear(&aitem);
+	jsonClean(&aitem);
 	offset += PHASENUM;
 	//i
 	mkOneInstantTi(&aitem, isVI, instant.i, en+offset);
 	jsonAdd(&oitem, "i", aitem);
-	jsonClear(&aitem);
+	jsonClean(&aitem);
 	offset += PHASENUM;
 	//p
 	mkOneInstantTi(&aitem, isPQ, instant.p, en+offset);
 	jsonAdd(&oitem, "p", aitem);
-	jsonClear(&aitem);
+	jsonClean(&aitem);
 	offset += PQCNUM;
 	//q
 	mkOneInstantTi(&aitem, isPQ, instant.q, en+offset);
 	jsonAdd(&oitem, "q", aitem);
-	jsonClear(&aitem);
+	jsonClean(&aitem);
 	offset += PQCNUM;
 	//pf
 	mkOneInstantTi(&aitem, isPQ, instant.pf, en+offset);
 	jsonAdd(&oitem, "pf", aitem);
-	jsonClear(&aitem);
+	jsonClean(&aitem);
 	offset += PQCNUM;
 	//ok
 	jsonAdd(a, NULL, oitem);
@@ -1081,35 +1081,35 @@ static int mkOneTouTi(jsObj *a, const touTi_Category ti, const char *en)
 		jsonAdd(&aTi, NULL, float2string(ti.total.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.total.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[1]=='1') {
 		//printf(WEBS_DBG"尖采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.tip.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.tip.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[2]=='1') {
 		//printf(WEBS_DBG"峰采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.peak.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.peak.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[3]=='1') {
 		//printf(WEBS_DBG"平采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.flat.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.flat.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[4]=='1') {
 		//printf(WEBS_DBG"谷采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.valley.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.valley.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	jsonFree(&aTi);
 	return 0;
@@ -1125,35 +1125,35 @@ static int mkOneQrTi(jsObj *a, const touTi_Category ti, const char *en)
 		jsonAdd(&aTi, NULL, float2string(ti.total.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.total.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[1]=='1') {
 		//printf(WEBS_DBG"尖采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.tip.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.tip.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[2]=='1') {
 		//printf(WEBS_DBG"峰采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.peak.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.peak.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[3]=='1') {
 		//printf(WEBS_DBG"平采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.flat.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.flat.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[4]=='1') {
 		//printf(WEBS_DBG"谷采集\n");
 		jsonAdd(&aTi, NULL, float2string(ti.valley.fake_float_val, strval));
 		jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti.valley.iv));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	jsonFree(&aTi);
 	return 0;
@@ -1171,7 +1171,7 @@ static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en)
 		jsonAdd(&aTi, NULL,
 		                toStr(tmp, "%d", ToUnixTimestarmp(ti.total.time)));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[1]=='1') {
 		//printf(WEBS_DBG"尖采集\n");
@@ -1181,7 +1181,7 @@ static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en)
 		jsonAdd(&aTi, NULL,
 		                toStr(tmp, "%d", ToUnixTimestarmp(ti.tip.time)));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[2]=='1') {
 		//printf(WEBS_DBG"峰采集\n");
@@ -1191,7 +1191,7 @@ static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en)
 		jsonAdd(&aTi, NULL,
 		                toStr(tmp, "%d", ToUnixTimestarmp(ti.peak.time)));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[3]=='1') {
 		//printf(WEBS_DBG"平采集\n");
@@ -1201,7 +1201,7 @@ static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en)
 		jsonAdd(&aTi, NULL,
 		                toStr(tmp, "%d", ToUnixTimestarmp(ti.flat.time)));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	if (en[4]=='1') {
 		//printf(WEBS_DBG"谷采集\n");
@@ -1211,7 +1211,7 @@ static int mkOneMaxnTI(jsObj *a, const stMaxn_Ti_Category ti, const char *en)
 		jsonAdd(&aTi, NULL,
 		                toStr(tmp, "%d", ToUnixTimestarmp(ti.valley.time)));
 		jsonAdd(a, NULL, aTi);
-		jsonClear(&aTi);
+		jsonClean(&aTi);
 	}
 	jsonFree(&aTi);
 	return 0;
@@ -1230,7 +1230,7 @@ static int mkOneInstantTi(jsObj *a, int isPQ,
 			jsonAdd(&aTi, NULL, float2string(ti[i].fake_float_val, strval));
 			jsonAdd(&aTi, NULL, toStr(tmp, "%d", ti[i].iv));
 			jsonAdd(a, NULL, aTi);
-			jsonClear(&aTi);
+			jsonClean(&aTi);
 		}
 	}
 	jsonFree(&aTi);

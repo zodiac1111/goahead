@@ -132,6 +132,33 @@ void web_err_proc(EL_ARGS)
 	web_errno = 0;
 	return;
 }
+void web_err_proc_Ex(EL_ARGS, ... )
+{
+	time_t timer = time(NULL );
+	struct tm * t = localtime(&timer);
+	//错误时间
+	char strtime[25] = { 0 };
+	//错误描述
+	char errstring[MAX_ERR_LOG_LINE_LENTH] = { 0 };
+	//错误等级
+	if (web_errno<0) {
+		web_errno = 0;
+		return;
+	}
+	sprintf(strtime, "%04d-%02d-%02d %02d:%02d:%02d",
+	                t->tm_year+1900, t->tm_mon+1, t->tm_mday,
+	                t->tm_hour, t->tm_min, t->tm_sec);
+	sprintf(errstring, "%s[%d](%s,%s:%d)%s[%d]",
+	                 myweberrstr[web_errno],web_errno,
+	                file, func, line, strerror(errno),errno);
+	if (myweberrstr[web_errno]!=NULL ) {
+		printf(WEBS_ERR"%s %s\n", strtime, errstring);
+	}
+	// 写入文件
+	save_log(strtime, errstring, webs_cfg.errlog);
+	web_errno = 0;
+	return;
+}
 /**
  * 保存服务器错误日志.
  * @param[in] errstring

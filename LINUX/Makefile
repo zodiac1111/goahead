@@ -87,7 +87,7 @@ endif
 #本实例需要的依赖
 my_obj	=	main.o src/param.o src/web_err.o src/tou.o src/json.o \
 	       	src/rtit.o src/wpsend.o src/autoUpdate.o src/upload.o \
-	       	src/sysfunction.o  src/commModule.o
+	       	src/sysfunction.o  src/commModule.o src/master.o
 # Dependencies
 DEPEND_FILES	= $(OPT_FILES) ../asp.o ../balloc.o ../mime64.o \
 		../cgi.o ../default.o  ../ejlex.o ../ejparse.o ../form.o \
@@ -130,7 +130,7 @@ update:all
 	-e "put $(NAME).update  -o $(update_dir);quit" && \
 	echo -e "\033[32mSuccess\033[0m"
 
-# 依赖(webs的)
+# 依赖(webs的) 
 main.o:  main.c ../wsIntrn.h ../webs.h ../ej.h ../ejIntrn.h ../uemf.h \
 	include/web_err.h include/conf.h ../version.h
 src/param.o: src/param.c include/param.h include/web_err.h include/conf.h
@@ -143,6 +143,7 @@ src/wpsend.o:src/wpsend.c include/wpsend.h
 src/upload.o:src/upload.c include/upload.h
 src/sysfunction.o:src/sysfunction.c include/sysfunction.h
 src/commModule.o:src/commModule.c include/commModule.h
+src/master.o:src/master.c include/master.h
 # Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
 ../balloc.o: ../balloc.c ../uemf.h

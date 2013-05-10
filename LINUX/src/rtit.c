@@ -93,7 +93,7 @@ webRece_realtime_tou(webs_t wp)
 		add_mtr_maxn(&oMtr, mtr[i], abMaxn);
 		//
 		jsonAdd(&aMtr, NULL, oMtr);
-		jsonClear(&oMtr);
+		jsonClean(&oMtr);
 	}
 	jsonAdd(&oRealTimeData, "mtr", aMtr);     //添加整个表对象
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -126,7 +126,7 @@ add_mtr_tou(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abTou)
 		iv = (mtr.Flag_TOU&(0x1<<j))>>j;
 		jsonAdd(&aOneDate, NULL, toStr(tmpstr, "%u", iv));
 		jsonAdd(&aTou, NULL, aOneDate);     //电量
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "tou", aTou);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -157,7 +157,7 @@ add_mtr_qr(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abQr)
 		iv = (mtr.Flag_QR&(0x1<<j))>>j;
 		jsonAdd(&aOneDate, NULL,toStr(tmpstr, "%u", iv));
 		jsonAdd(&aQr, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "qr", aQr);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -189,7 +189,7 @@ add_mtr_v(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abV)
 		iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 		jsonAdd(&aOneDate, NULL, toStr(tmpstr, "%u", iv));
 		jsonAdd(&aV, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "v", aV);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -220,7 +220,7 @@ add_mtr_i(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abI)
 		iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 		jsonAdd(&aOneDate, NULL, toStr(tmpstr, "%u", iv));
 		jsonAdd(&aI, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "i", aI);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -250,7 +250,7 @@ static int add_mtr_p(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 		jsonAdd(&aOneDate, NULL, toStr(tmpstr, "%u", iv));
 		jsonAdd(&aP, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "p", aP);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -280,7 +280,7 @@ static int add_mtr_q(jsObj *oMtr, struct stMeter_Run_data const mtr, char const 
 		iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 		jsonAdd(&aOneDate, NULL, toStr(tmpstr, "%u", iv));
 		jsonAdd(&aQ, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "q", aQ);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -311,7 +311,7 @@ add_mtr_pf(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abPf)
 		iv = (mtr.FLag_TA&(0x1<<(i+offset)))>>(i+offset);
 		jsonAdd(&aOneDate, NULL, toStr(tmpstr, "%u", iv));
 		jsonAdd(&aPf, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 	}
 	jsonAdd(oMtr, "pf", aPf);
 #if DEBUG_PRINT_REALTIME_TOU_DAT
@@ -344,7 +344,7 @@ add_mtr_maxn(jsObj *oMtr, struct stMeter_Run_data const mtr, char const *abMaxn)
 		                toStr(tmpstr, "%ld",
 		                                toUnixTimestamp(mtr.m_iMaxNT[i])));
 		jsonAdd(&aMaxn, NULL, aOneDate);
-		jsonClear(&aOneDate);
+		jsonClean(&aOneDate);
 
 	}
 	jsonAdd(oMtr, "maxn", aMaxn);
