@@ -52,8 +52,8 @@ static int webRece_master(webs_t wp)
 		jsonAdd(&oOneParam,"interface",m_Master.m_interface);
 		jsonAdd(&oOneParam,"host",m_Master.m_host);
 		jsonAdd(&oOneParam,"port",m_Master.m_port);
-		jsonAdd(&oOneParam,"addr",toStr(tmp,"%d",m_Master.m_addr));
 		jsonAdd(&oOneParam,"zone",toStr(tmp,"%d",m_Master.m_zone));
+		jsonAdd(&oOneParam,"addr",toStr(tmp,"%d",m_Master.m_addr));
 		jsonAdd(&oOneParam,"hb",toStr(tmp,"%d",m_Master.m_hb));
 		jsonAdd(&aMasterList,NULL,oOneParam);
 		jsonClean(&oOneParam);
