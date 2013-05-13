@@ -37,7 +37,6 @@ static int sentParam(webs_t wp)
 	addApnList(&oCommModule);
 	addItems(&oCommModule);
 	addStatus(&oCommModule);
-	printf(WEBS_DBG"sent %s\n",oCommModule);
 	wpsend(wp, oCommModule);
 	jsonFree(&oCommModule);
 	return 0;
@@ -69,8 +68,6 @@ static int addApnList(jsObj* oCommModule)
 }
 static int addItems(jsObj* oCommModule)
 {
-	jsObj aItems = jsonNewArray();
-	jsObj oItem = jsonNew();
 	char line[CONF_LINE_MAX_CHAR];
 	int strnum;
 	char n[CONF_LINE_MAX_CHAR] = { 0 };
@@ -87,22 +84,23 @@ static int addItems(jsObj* oCommModule)
 		if (strnum!=2) {
 			continue;
 		}
-		jsonAdd(&oItem, n, v);
-		jsonAdd(&aItems, NULL, oItem);
-		jsonClean(&oItem);
+		jsonAdd(oCommModule, n, v);
 	}
 	fclose(fp);
-	jsonAdd(oCommModule, "items", aItems);
-	jsonFree(&aItems);
-	jsonFree(&oItem);
 	return 0;
 }
 static int addStatus(jsObj* oCommModule)
 {
 	jsObj oStatus=jsonNew();
-	jsonAdd(&oStatus,"sig",GetGprsSig());
-	jsonAdd(&oStatus,"stat",GetGrpsStatus());
+	char tmp[32];
+	unsigned char* ret;
+	ret=GetGprsSig();
+	printf("GetGprsSig ret=%d\n",*ret);
+	jsonAdd(&oStatus,"sig",toStr(tmp,"%d",*ret));
+	ret=GetGrpsStatus();
+	printf("GetGrpsStatus ret=%d\n",*ret);
+	jsonAdd(&oStatus,"stat",toStr(tmp,"%d",*ret));
 	jsonAdd(oCommModule,"status",oStatus);
-	jsonFree(oStatus);
+	jsonFree(&oStatus);
 	return 0;
 }
