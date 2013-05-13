@@ -618,6 +618,9 @@ int load_webs_conf_info(void)
 	webs_cfg.retranTable = mkFullPath(webs_cfg.paradir, CFG_FORWARD_TABLE);
 	webs_cfg.stspara = mkFullPath(webs_cfg.paradir, CFG_SAVE_CYCLE);
 	webs_cfg.ctspara = mkFullPath(webs_cfg.paradir, CFG_COLLECT_CYCLE);
+	webs_cfg.apnList = mkFullPath(webs_cfg.paradir, CFG_APN_LIST);
+	//
+	webs_cfg.commModule = mkFullPath(webs_cfg.confdir, PARA_COMM_MODULE);
 	webs_cfg.protocol = mkFullPath(webs_cfg.confdir, PORC_FILE);
 	webs_cfg.monparam_name = mkFullPath(
 	                webs_cfg.confdir,
@@ -2213,7 +2216,7 @@ char *trim(char in[], int len)
 void webs_free(void)
 {
 	int i;
-	if (webdir!=NULL )     //不使用了就尽早释放.
+	if (webdir!=NULL )
 		free(webdir);
 	//
 	if (webs_cfg.main_version_string!=NULL ) {
@@ -2224,6 +2227,14 @@ void webs_free(void)
 	if (webs_cfg.appname!=NULL ) {
 		free(webs_cfg.appname);
 		webs_cfg.appname = NULL;
+	}
+	if (webs_cfg.commModule!=NULL ) {
+		free(webs_cfg.commModule);
+		webs_cfg.commModule = NULL;
+	}
+	if (webs_cfg.apnList!=NULL ) {
+		free(webs_cfg.apnList);
+		webs_cfg.apnList = NULL;
 	}
 	//配置文件项 WEBS_DEFAULT_PORT
 	if (webs_cfg.port!=NULL &&

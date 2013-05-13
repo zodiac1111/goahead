@@ -9,6 +9,7 @@ static int addInterFaceList(jsObj *oMaster);
 static void print_array(const char *a, const int len);
 char *arrayTo2Array(char * a1, int* from, int *to);
 int print_stMaster(struct stMasterConfig m_Master);
+
 void form_master(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
@@ -23,8 +24,8 @@ void form_master(webs_t wp, char_t *path, char_t *query)
 	}
 	websDone(wp, 200);
 	return;
-
 }
+
 static int webRece_master(webs_t wp)
 {
 	struct stMasterConfig m_Master;

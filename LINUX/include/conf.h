@@ -29,7 +29,9 @@ typedef struct cfg{
 	char *retranTable; //转发表
 	char *stspara; //储存周期
 	char *ctspara; //采集周期
-	char *master_interface; //主站参数-接口名称字符串
+	char *master_interface; //主站参数-接口名称字符串,保存在goahead.conf中
+	char *commModule;//gprs,通信模块配置文件
+	char *apnList;//apn列表,保存在conf目录下
 	//   conf目录(用于计算下面的绝对路径
 	char *confdir;
 	char *protocol; //规约配置
@@ -114,13 +116,13 @@ extern stCfg webs_cfg;
 #define CFG_FORWARD_TABLE "retranTable.cfg"///<转发表信息文件
 #define CFG_SAVE_CYCLE "stspara.cfg"///<保存周期和项目配置文件
 #define CFG_COLLECT_CYCLE "ctspara.cfg"///<采集周期和项目配置文件
-
+#define CFG_APN_LIST "Apns.txt"
 //para参数相关文件.
 //#define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
 #define PORC_FILE "protocol_config.txt"///<主站规约配置文件
 #define MAX_PROCOTOL_NUM 128 ///<规约文件中最大规约条目开始时分配这么多
 #define MON_PORT_NAME_FILE "monparam_name.conf"///<监视端口描述文件
-
+#define PARA_COMM_MODULE "gprs.txt"
 //打印欢迎信息
 #define PRINT_WELCOME {					\
 	printf("\t\tWelcome to use "		\
