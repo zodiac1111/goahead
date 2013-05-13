@@ -7,6 +7,7 @@
 static int sentParam(webs_t wp);
 static int addApnList(jsObj* oCommModule);
 static int addItems(jsObj* oCommModule);
+static int addStatus(jsObj* oCommModule);
 void form_commModule(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
@@ -35,6 +36,8 @@ static int sentParam(webs_t wp)
 	jsObj oCommModule = jsonNew();
 	addApnList(&oCommModule);
 	addItems(&oCommModule);
+	addStatus(&oCommModule);
+	printf(WEBS_DBG"sent %s\n",oCommModule);
 	wpsend(wp, oCommModule);
 	jsonFree(&oCommModule);
 	return 0;
@@ -44,16 +47,15 @@ static int addApnList(jsObj* oCommModule)
 	jsObj aApnList = jsonNewArray();
 	char line[CONF_LINE_MAX_CHAR];
 	int strnum;
-	char n[256] = { 0 };
-
+	char n[CONF_LINE_MAX_CHAR] = { 0 };
 	FILE* fp = fopen(webs_cfg.apnList, "r");
 	if (fp==NULL ) {
-		web_err_procEx(EL, "读取apn列表");
+		web_err_procEx(EL, "读取apn列表 filename=%s",webs_cfg.apnList);
 		return -1;
 	}
 	while (!feof(fp)) {
 		fgets(line, CONF_LINE_MAX_CHAR-1, fp);     //得到一行
-		strnum = sscanf(line, "%[^#\\r\\n]", n);     //去掉换行符
+		strnum = sscanf(line, "%[^#\r\n]", n);     //去掉换行符
 		if (strnum!=1) {
 			web_err_procEx(EL, "读取一行apn strnum=%d", strnum);
 			continue;
@@ -71,11 +73,11 @@ static int addItems(jsObj* oCommModule)
 	jsObj oItem = jsonNew();
 	char line[CONF_LINE_MAX_CHAR];
 	int strnum;
-	char n[256] = { 0 };
-	char v[256] = { 0 };
+	char n[CONF_LINE_MAX_CHAR] = { 0 };
+	char v[CONF_LINE_MAX_CHAR] = { 0 };
 	FILE* fp = fopen(webs_cfg.commModule, "r");
 	if (fp==NULL ) {
-		web_err_procEx(EL, "读取apn列表");
+		web_err_procEx(EL, "读取通信模块项目 filename=%s",webs_cfg.commModule);
 		return -1;
 	}
 	while (!feof(fp)) {
@@ -93,5 +95,14 @@ static int addItems(jsObj* oCommModule)
 	jsonAdd(oCommModule, "items", aItems);
 	jsonFree(&aItems);
 	jsonFree(&oItem);
+	return 0;
+}
+static int addStatus(jsObj* oCommModule)
+{
+	jsObj oStatus=jsonNew();
+	jsonAdd(&oStatus,"sig",GetGprsSig());
+	jsonAdd(&oStatus,"stat",GetGrpsStatus());
+	jsonAdd(oCommModule,"status",oStatus);
+	jsonFree(oStatus);
 	return 0;
 }

@@ -618,9 +618,9 @@ int load_webs_conf_info(void)
 	webs_cfg.retranTable = mkFullPath(webs_cfg.paradir, CFG_FORWARD_TABLE);
 	webs_cfg.stspara = mkFullPath(webs_cfg.paradir, CFG_SAVE_CYCLE);
 	webs_cfg.ctspara = mkFullPath(webs_cfg.paradir, CFG_COLLECT_CYCLE);
-	webs_cfg.apnList = mkFullPath(webs_cfg.paradir, CFG_APN_LIST);
+	webs_cfg.commModule = mkFullPath(webs_cfg.paradir, PARA_COMM_MODULE);
 	//
-	webs_cfg.commModule = mkFullPath(webs_cfg.confdir, PARA_COMM_MODULE);
+	webs_cfg.apnList = mkFullPath(webs_cfg.confdir, COMM_MOD_APN_LIST);
 	webs_cfg.protocol = mkFullPath(webs_cfg.confdir, PORC_FILE);
 	webs_cfg.monparam_name = mkFullPath(
 	                webs_cfg.confdir,

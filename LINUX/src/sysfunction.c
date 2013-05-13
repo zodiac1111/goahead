@@ -123,6 +123,7 @@ void form_load_procotol_cfgfile(webs_t wp, char_t *path, char_t *query)
 void form_load_monport_cfgfile(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
+	//printf("file= %s\n", webs_cfg.monparam_name);
 	webSend_txtfile(wp, webs_cfg.monparam_name);
 	return;
 }

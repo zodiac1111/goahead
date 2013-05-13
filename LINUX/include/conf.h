@@ -116,7 +116,7 @@ extern stCfg webs_cfg;
 #define CFG_FORWARD_TABLE "retranTable.cfg"///<转发表信息文件
 #define CFG_SAVE_CYCLE "stspara.cfg"///<保存周期和项目配置文件
 #define CFG_COLLECT_CYCLE "ctspara.cfg"///<采集周期和项目配置文件
-#define CFG_APN_LIST "Apns.txt"
+#define COMM_MOD_APN_LIST "Apns.txt"
 //para参数相关文件.
 //#define PROC_CFG_DIR "../conf/" ///<规约文本文件目录
 #define PORC_FILE "protocol_config.txt"///<主站规约配置文件

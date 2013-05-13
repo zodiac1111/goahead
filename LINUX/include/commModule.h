@@ -13,6 +13,9 @@
 #include "json.h"
 #include "web_err.h"
 #include "wpsend.h"
+#include "struct.h"
+#include "define.h"
+#include "externCShm.h"
 extern void form_commModule(webs_t wp, char_t *path, char_t *query);
 
 #endif /* COMMMODULE_H_ */
