@@ -29,6 +29,7 @@ typedef struct cfg{
 	char *retranTable; //转发表
 	char *stspara; //储存周期
 	char *ctspara; //采集周期
+	char *master_interface; //主站参数-接口名称字符串
 	//   conf目录(用于计算下面的绝对路径
 	char *confdir;
 	char *protocol; //规约配置
@@ -61,6 +62,7 @@ extern stCfg webs_cfg;
 //页面一次发送最大长度,超长则分多次发送.否则会截断.wpsend()函数调用
 #define WP_MAX_LEN (512)
 #define MAIN_PROGRAM_VERSION_STRING_MAX_LENGTH (128) //主程序版本字符串最大长度
+#define MASTER_INTERFACE_NUM 4 //主站参数接口个数,即master0-master3
 //服务器程序自动检查升级
 #define  AUTO_UPDATE 1
 #if AUTO_UPDATE

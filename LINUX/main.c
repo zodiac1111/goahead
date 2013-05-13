@@ -53,15 +53,15 @@ static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
 ///内存中的系统参数结构体.全局使用.
-stSysParam sysparam = { 0,0,0,0,0,0,0 };
+stSysParam sysparam = { 0, 0, 0, 0, 0, 0, 0 };
 ///规约文件中的规约名称.
- char *procotol_name[MAX_PROCOTOL_NUM];
+char *procotol_name[MAX_PROCOTOL_NUM];
 ///规约文件中的实际规约数,初始化为最大
- int procotol_num = MAX_PROCOTOL_NUM;
+int procotol_num = MAX_PROCOTOL_NUM;
 ///规约文件中的规约名称.
- char *mon_port_name[MAX_MON_PORT_NUM];
+char *mon_port_name[MAX_MON_PORT_NUM];
 ///规约文件中的实际规约数,初始化为最大
- int mon_port_num = MAX_MON_PORT_NUM;
+int mon_port_num = MAX_MON_PORT_NUM;
 stCfg webs_cfg;
 
 #define JSON 1
@@ -188,19 +188,19 @@ static int initWebs(void)
 	 *	root web directory.
 	 */
 	if (gethostname(host, sizeof(host))<0) {
-		web_err_procEx(EL,"获取hostname");
+		web_err_procEx(EL, "获取hostname");
 		return -1000;
 	}
 	/// @note gethostbyname系统调佣需要hostname命令执行成功,老版本文件只读
 	if ((hp = gethostbyname(host))==NULL ) {
 		web_errno = ErrNotSupportHostNameFunction;
 		web_err_procEx(EL,
-			"1.5版本不支持gethostbyname,使用默认的127.0.0.1代替");
-		memcpy((char *) &intaddr, (char *)"127.0.0.1",
-					strlen("127.0.0.1"));
-	}else{
+		                "1.5版本不支持gethostbyname,使用默认的127.0.0.1代替");
+		memcpy((char *) &intaddr, (char *) "127.0.0.1",
+		                strlen("127.0.0.1"));
+	} else {
 		memcpy((char *) &intaddr, (char *) hp->h_addr_list[0],
-			                (size_t) hp->h_length);
+		                (size_t) hp->h_length);
 	}
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.
@@ -501,8 +501,8 @@ char* getconf(const char * const name, char** value)
 	 */
 	//char* value=NULL;
 	char line[256] = { 0 };
-	char n[256] = { 0 };//name
-	char v[256] = { 0 };//value
+	char n[256] = { 0 };	             //name
+	char v[256] = { 0 };	             //value
 	char *pname = NULL;
 	char *pvalue = NULL;
 	int strnum = 0;
@@ -562,7 +562,6 @@ char *mkFullPath(const char *path, const char *name)
 	return fullpath;
 }
 
-
 /**
  * 从配置文件和动态库中加载配置信息
  */
@@ -583,6 +582,9 @@ int load_webs_conf_info(void)
 		web_err_proc(EL);
 		//从这里开始可以记录错误日志到文件了.
 	}
+	if (getconf("master_interface", &webs_cfg.master_interface)==NULL ) {
+		web_err_proc(EL);
+	}
 	if (getconf("paradir", &webs_cfg.paradir)==NULL ) {
 		web_err_proc(EL);
 		return -2001;
@@ -595,6 +597,9 @@ int load_webs_conf_info(void)
 		webs_cfg.port = WEBS_DEFAULT_PORT;
 		webs_cfg.default_port = 1;
 		web_errno = use_backup_port;
+		web_err_proc(EL);
+	}
+	if (getconf("master_interface", &webs_cfg.master_interface)==NULL ) {
 		web_err_proc(EL);
 	}
 #ifdef WEBS_SSL_SUPPORT
@@ -621,12 +626,12 @@ int load_webs_conf_info(void)
 	webs_cfg.main_version_string =
 	                (char*) malloc(MAIN_PROGRAM_VERSION_STRING_MAX_LENGTH);
 	unsigned char * v = GetSoftVersion();
-	if(v!=NULL){
+	if (v!=NULL ) {
 		sprintf(webs_cfg.main_version_string,
-	                "%d.%d %d.%02d.%02d %c%c",
-	                v[0], v[1], v[2], v[3], v[4], v[5], v[6]);
+		                "%d.%d %d.%02d.%02d %c%c",
+		                v[0], v[1], v[2], v[3], v[4], v[5], v[6]);
 		//printf("%s\n",webs_cfg.main_version_string);
-	}else{
+	} else {
 		sprintf(webs_cfg.main_version_string,
 		                "hl3104_com is not start.");
 		web_err_proc(EL);
@@ -887,8 +892,8 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_N
 	if (websTestVar(wp, T("portplan"))) {
 #if DEBUG_PRINT_MTRPARAM
 		printf(
-		                "portplan= %s\n",
-		                websGetVar(wp, T("portplan"), T("null")));
+				"portplan= %s\n",
+				websGetVar(wp, T("portplan"), T("null")));
 #endif
 		n[13] = split(portplan,
 		                websGetVar(wp, T("portplan"), T("null")));
@@ -899,8 +904,8 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_N
 	if (websTestVar(wp, T("protocol"))) {
 #if DEBUG_PRINT_MTRPARAM
 		printf(
-		                "protocol= %s\n",
-		                websGetVar(wp, T("protocol"), T("null")));
+				"protocol= %s\n",
+				websGetVar(wp, T("protocol"), T("null")));
 #endif
 		n[14] = split(protocol,
 		                websGetVar(wp, T("protocol"), T("null")));
@@ -911,8 +916,8 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_N
 	if (websTestVar(wp, T("ph_wire"))) {
 #if DEBUG_PRINT_MTRPARAM
 		printf(
-		                "ph_wire= %s\n",
-		                websGetVar(wp, T("ph_wire"), T("null")));
+				"ph_wire= %s\n",
+				websGetVar(wp, T("ph_wire"), T("null")));
 #endif
 		n[15] = split(ph_wire, websGetVar(wp, T("ph_wire"), T("null")));
 	} else {
@@ -923,8 +928,8 @@ static int getmtrparams(stMtr amtr[MAX_MTR_NUM], webs_t wp, uint32_t e[MAX_MTR_N
 	if (websTestVar(wp, T("factory"))) {
 #if DEBUG_PRINT_MTRPARAM
 		printf(
-		                "factory= %s\n",
-		                websGetVar(wp, T("factory"), T("null")));
+				"factory= %s\n",
+				websGetVar(wp, T("factory"), T("null")));
 #endif
 		n[16] = split(factory, websGetVar(wp, T("factory"), T("null")));
 	} else {
@@ -1956,7 +1961,7 @@ int webRece_savecycle(webs_t wp)
 		}
 		cycle = point2next(&cycle, ' ');
 	}
-	if(save_savecycle(sav, webs_cfg.stspara)<0){
+	if (save_savecycle(sav, webs_cfg.stspara)<0) {
 		web_err_proc(EL);
 	}
 	return 0;
@@ -2023,7 +2028,7 @@ int webSend_collect_cycle(webs_t wp)
 		jsonAdd(&oCycleList, NULL, COLLECT_CYCLE[j]);
 	}
 	for (j = 0; j<COLLECT_CYCLE_ITEM; j++) {
-		jsonAdd(&oItemArray, NULL,addCollectItem(&oItem, sav[j]));
+		jsonAdd(&oItemArray, NULL, addCollectItem(&oItem, sav[j]));
 #if DEBUG_PRINT_COLLECT_CYCLE
 		printf(WEBS_DBG"oItem:%s\n",oItemArray);
 #endif
@@ -2054,7 +2059,7 @@ int webRece_collect_cycle(webs_t wp)
 	char *flags = websGetVar(wp, T("flag"), T("null"));
 	char *cycle = websGetVar(wp, T("cycle"), T("null"));
 	for (i = 0; i<COLLECT_CYCLE_ITEM; i++) {
-		printf(WEBS_DBG"i=%d\n",i);
+		printf(WEBS_DBG"i=%d\n", i);
 		n = sscanf(flags, "%hhu", &sav[i].enable);
 		if (n!=1) {
 			web_err_proc(EL);
@@ -2068,7 +2073,7 @@ int webRece_collect_cycle(webs_t wp)
 		}
 		cycle = point2next(&cycle, ' ');
 	}
-	if(save_collect_cycle(sav, webs_cfg.ctspara)<0){
+	if (save_collect_cycle(sav, webs_cfg.ctspara)<0) {
 		web_err_proc(EL);
 	}
 	return 0;
@@ -2099,9 +2104,6 @@ char *addCollectItem(char **oItem, stCollect_cycle sav)
 	jsonAdd(oItem, "t", toStr(value, "%d", sav.cycle));
 	return *oItem;
 }
-
-
-
 
 /**
  * 以split为分割字符,指向下一个项.
@@ -2288,6 +2290,10 @@ void webs_free(void)
 	if (webs_cfg.monparam_name!=NULL ) {
 		free(webs_cfg.monparam_name);
 		webs_cfg.monparam_name = NULL;
+	}
+	if (webs_cfg.master_interface!=NULL ) {
+		free(webs_cfg.master_interface);
+		webs_cfg.master_interface = NULL;
 	}
 	//监视参数端口名称
 	for (i = 0; i<mon_port_num; i++) {
