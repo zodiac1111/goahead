@@ -2020,7 +2020,7 @@ int webSend_collect_cycle(webs_t wp)
 	stCollect_cycle sav[COLLECT_CYCLE_ITEM];
 	int ret = load_collect_cycle(sav, webs_cfg.ctspara);
 	if (ret==-1) {
-		//错误则与终端处理方法一致:全使能,5分钟
+		//错误则与终端处理方法一致:全部使能,5分钟
 		web_err_proc(EL);
 		for (i = 0; i<sizeof(COLLECT_CYCLE)/sizeof(COLLECT_CYCLE[0]);
 		                i++) {

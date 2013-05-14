@@ -247,7 +247,7 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 	stMtr_File mtr_file;
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "r+");
+	fp = fopen(file, "w+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
@@ -542,7 +542,7 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "r+");
+	fp = fopen(file, "w+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
@@ -586,7 +586,7 @@ int save_monparam(const stMonparam * mon, const char * file, int no)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "r+");
+	fp = fopen(file, "w+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
@@ -630,7 +630,7 @@ int save_netport(const stNetparam * net, const char * file, int no)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "r+");
+	fp = fopen(file, "w+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
@@ -805,7 +805,7 @@ int save_collect_cycle(const stCollect_cycle sav[], const char * file)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "r+");
+	fp = fopen(file, "w+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
@@ -882,7 +882,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "r+");
+	fp = fopen(file, "w+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
