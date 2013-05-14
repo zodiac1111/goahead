@@ -1622,7 +1622,9 @@ int webRece_netparas(webs_t wp)
 		//gateway
 		ipstr2ipfile(gateway, netparam.gateway);
 		gateway = point2next(&gateway, ' ');
-		save_netport(&netparam, webs_cfg.netpara, param_no);
+		if(save_netport(&netparam, webs_cfg.netpara, param_no)<0){
+			web_err_procEx(EL,"保存网络参数");
+		}
 	}
 	return 0;
 }
@@ -2021,13 +2023,7 @@ int webSend_collect_cycle(webs_t wp)
 	stCollect_cycle sav[COLLECT_CYCLE_ITEM];
 	int ret = load_collect_cycle(sav, webs_cfg.ctspara);
 	if (ret==-1) {
-		//错误则与终端处理方法一致:全部使能,5分钟
 		web_err_proc(EL);
-		for (i = 0; i<sizeof(COLLECT_CYCLE)/sizeof(COLLECT_CYCLE[0]);
-		                i++) {
-			sav[i].cycle = 1;
-			sav[i].enable = 1;
-		}
 	}
 	char* oCollectCycle = jsonNew();
 	char* oCycleList = jsonNewArray();

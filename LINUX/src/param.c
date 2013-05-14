@@ -23,6 +23,11 @@ static int update_monparamfile(const stSysParam param);
 //表计参数转换
 static int mtr_file2men(stMtr* pmtr, const stMtr_File * pmtr_file);
 static int mtr_men2file(stMtr_File * pmtr_file, const stMtr* pmtr);
+//
+int load_default_sysparam( stSysParam * param);
+int load_default_netparam( stNetparam * param);
+int load_default_sioparam( stUart_plan * param);
+int load_default_collect_cycle( stCollect_cycle collect[],int n);
 //电表类型 几相几线制
 const char *PW[2] = { [0]=CSTR_3P3W,
 [1]=CSTR_3P4W
@@ -247,12 +252,16 @@ int save_mtrparam(const stMtr * mtr, const char * file, int const no)
 	stMtr_File mtr_file;
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "w+");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
 		web_errno = ErrOpenMtrcfgFile;
-		return -1;
+		web_err_proc(EL);
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存表计参数,打开文件,新建文件失败");
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	long int flen = ftell(fp);
@@ -363,7 +372,9 @@ int load_sysparam(stSysParam * param, const char * file)
 		perror("open sysparam.cfg");
 		PRINT_HERE
 		web_errno = ErrOpen_sysparam_file;
-		return -1;
+		web_err_procEx(EL,"使用默认系统参数");
+		load_default_sysparam(param);
+		return 0;
 	}
 	fseek(fp, 0, SEEK_END);
 	long int flen = ftell(fp);
@@ -438,12 +449,16 @@ int save_sysparam(const stSysParam * param, const char * file)
 	//stSysParam mtr_file;
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "wb");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open sysparam.cfg");
 		PRINT_HERE
 		web_errno = ErrOpen_sysparam_file;
-		return -1;
+		web_err_proc(EL);
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存系统参数,打开文件,新建文件失败");
+		}
 	}
 	int fd = fileno(fp);
 	///确保文件的大小,大了截断,小了添0,这个文件应该是正好sizeof(stSysParam)大小,
@@ -504,9 +519,10 @@ int load_sioplan(stUart_plan * plan, const char * file, int no)
 	fp = fopen(file, "rb");
 	if (fp==NULL ) {
 		perror("open");
-		PRINT_HERE
 		web_errno = open_sioplan_cfgfile_err;
-		return -1;
+		web_err_procEx(EL,"读取串口参数,打开文件失败,使用默认配置");
+		load_default_sioparam(plan);
+		return 0;
 	}
 	fseek(fp, 0, SEEK_END);
 	uint flen = ftell(fp);
@@ -542,12 +558,16 @@ int save_sioplan(const stUart_plan * plan, const char * file, int no)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "w+");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
 		web_errno = open_sioplan_cfgfile_err;
-		return (-1);
+		web_err_proc(EL);
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存串口参数,打开文件,新建文件失败");
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	long flen = ftell(fp);
@@ -586,12 +606,16 @@ int save_monparam(const stMonparam * mon, const char * file, int no)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "w+");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
 		web_errno = open_monparam_cfgfile_err;
-		return (-1);
+		web_err_proc(EL);
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存监视参数,打开文件,新建文件失败");
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	long unsigned int flen = ftell(fp);
@@ -630,12 +654,16 @@ int save_netport(const stNetparam * net, const char * file, int no)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "w+");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
 		web_errno = open_netparam_cfgfile_err;
-		return (-1);
+		web_err_procEx(EL,"保存网络参数,打开文件,新建文件");
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存网络参数,打开文件,新建文件失败");
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	long unsigned int flen = ftell(fp);
@@ -648,6 +676,7 @@ int save_netport(const stNetparam * net, const char * file, int no)
 		int fd = fileno(fp);
 		///确保文件的大小,大了截断,小了添0,这个文件应该是正好sizeof(stSysParam)大小,
 		///不应该小一个字节或者大一个字节.
+		web_err_procEx(EL,"保存网络参数,截断文件 flen=%d",flen);
 		ret = ftruncate(fd, sizeof(stNetparam)*(no+1));
 	}
 	fseek(fp, 0, SEEK_SET);
@@ -657,6 +686,7 @@ int save_netport(const stNetparam * net, const char * file, int no)
 		perror("write");
 		PRINT_HERE
 		web_errno = write_netparam_cfgfile_err;
+		web_err_procEx(EL,"保存网络参数,写入文件ret=%d",ret);
 		fclose(fp);
 		return (-1);
 	}
@@ -679,7 +709,9 @@ int load_netparam(stNetparam * netparam, const char * file, int no)
 		perror("open");
 		PRINT_HERE
 		web_errno = open_netparam_cfgfile_err;
-		return -1;
+		web_err_procEx(EL,"加载网络参数,打开文件");
+		load_default_netparam(netparam);
+		return 0;
 	}
 	fseek(fp, 0, SEEK_END);
 	uint32_t flen = ftell(fp);
@@ -760,7 +792,9 @@ int load_collect_cycle(stCollect_cycle collect[], const char * file)
 		perror("open");
 		PRINT_HERE
 		web_errno = open_collect_cycle_cfgfile_err;
-		return -1;
+		web_err_procEx(EL,"使用默认采集周期参数");
+		load_default_collect_cycle(collect,COLLECT_CYCLE_ITEM);
+		return 0;
 	}
 	fseek(fp, 0, SEEK_END);
 	int flen = ftell(fp);
@@ -805,12 +839,16 @@ int save_collect_cycle(const stCollect_cycle sav[], const char * file)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "w+");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
 		web_errno = open_collect_cycle_cfgfile_err;
-		return (-1);
+		web_err_proc(EL);
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存采集周期参数,打开文件,新建文件失败");
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	int flen = ftell(fp);
@@ -882,12 +920,16 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 {
 	FILE* fp;
 	int ret = 0;
-	fp = fopen(file, "w+");
+	fp = fopen(file, "r+");
 	if (fp==NULL ) {
 		perror("open");
 		PRINT_HERE
 		web_errno = open_savecycle_cfgfile_err;
-		return (-1);
+		web_err_proc(EL);
+		fp = fopen(file, "w");
+		if (fp==NULL ){
+			web_err_procEx(EL,"保存存储参数,打开文件,新建文件失败");
+		}
 	}
 	fseek(fp, 0, SEEK_END);
 	int flen = ftell(fp);
@@ -920,7 +962,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 static int update_mtrfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.mtrspara, "rb+");
+	FILE* fp = fopen(webs_cfg.mtrspara, "wb+");
 	if (fp==NULL ) {
 		web_errno = ErrOpenMtrcfgFile;
 		return -1;
@@ -943,7 +985,7 @@ static int update_mtrfile(const stSysParam param)
 static int update_siofile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.sioplan, "rb+");
+	FILE* fp = fopen(webs_cfg.sioplan, "wb+");
 	if (fp==NULL ) {
 		web_errno = open_sioplan_cfgfile_err;
 		return -1;
@@ -965,7 +1007,7 @@ static int update_siofile(const stSysParam param)
 static int update_netparamfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.netpara, "rb+");
+	FILE* fp = fopen(webs_cfg.netpara, "wb+");
 	if (fp==NULL ) {
 		web_errno = open_netparam_cfgfile_err;
 		return -1;
@@ -988,7 +1030,7 @@ static int update_netparamfile(const stSysParam param)
 static int update_monparamfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.monpara, "rb+");
+	FILE* fp = fopen(webs_cfg.monpara, "wb+");
 	if (fp==NULL ) {
 		web_errno = open_monparam_cfgfile_err;
 		return -1;
@@ -1002,7 +1044,42 @@ static int update_monparamfile(const stSysParam param)
 	fclose(fp);
 	return 0;
 }
-
+///给前端返回默认的系统参数
+int load_default_sysparam( stSysParam * param)
+{
+	memset(param,0,sizeof(stSysParam));
+	return 0;
+}
+///默认的网络参数,当文件不存在时
+int load_default_netparam( stNetparam * param)
+{
+	int i;
+	param->no=0;
+	memset(param->ip,0x0,IPV4_LEN);
+	for (i=0;i<12;i+=3){
+		param->mask[i+0]=2;
+		param->mask[i+1]=5;
+		param->mask[i+2]=5;
+	}
+	memset(param->gateway,0x0,IPV4_LEN);
+	memset(param->port,0x0,5);
+	return 0;
+}
+int load_default_sioparam( stUart_plan * param)
+{
+	memset(param,0,sizeof(stUart_plan));
+	param->data=8;//8位数据位 UART_DAT_BIT数组中定义的
+	return 0;
+}
+int load_default_collect_cycle( stCollect_cycle collect[],int n)
+{
+	int i=0;
+	for(i=0;i<n;i++){
+		collect[i].enable=1;
+		collect[i].cycle=2;
+	}
+	return 0;
+}
 static void TransBcdArray2BinArray(uint8_t* srcbuf, uint8_t* desbuf, uint8_t flag)
 {
 	unsigned char i;

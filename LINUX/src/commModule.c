@@ -76,7 +76,8 @@ static int addApnList(jsObj* oCommModule)
 	FILE* fp = fopen(webs_cfg.apnList, "r");
 	if (fp==NULL ) {
 		web_err_procEx(EL, "读取apn列表 filename=%s", webs_cfg.apnList);
-		return -1;
+		jsonAdd(&aApnList, NULL, "没有Apns.txt文件");
+		goto LOAD_DEFAULT_PARAM;
 	}
 	while (!feof(fp)) {
 		fgets(line, CONF_LINE_MAX_CHAR-1, fp);     //得到一行
@@ -88,6 +89,7 @@ static int addApnList(jsObj* oCommModule)
 		jsonAdd(&aApnList, NULL, n);
 	}
 	fclose(fp);
+LOAD_DEFAULT_PARAM:
 	jsonAdd(oCommModule, "apn_list", aApnList);
 	jsonFree(&aApnList);
 	return 0;
@@ -122,7 +124,13 @@ static int addItems(jsObj* oCommModule)
 	FILE* fp = fopen(webs_cfg.commModule, "r");
 	if (fp==NULL ) {
 		web_err_procEx(EL, "读取通信模块项目 filename=%s", webs_cfg.commModule);
-		return -1;
+		//使用默认设置
+		jsonAdd(oCommModule, "simc", "##默认参数##");
+		jsonAdd(oCommModule, "mode", "client");
+		jsonAdd(oCommModule, "apn", "CMNET");
+		jsonAdd(oCommModule, "pitc", "0");
+		jsonAdd(oCommModule, "hbcy", "5");
+		return 0;
 	}
 	while (!feof(fp)) {
 		fgets(line, CONF_LINE_MAX_CHAR-1, fp);     //得到一行
