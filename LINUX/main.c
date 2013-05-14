@@ -1959,7 +1959,8 @@ int webRece_savecycle(webs_t wp)
 		flags = point2next(&flags, ' ');
 		n = sscanf(cycle, "%hhu", &sav[i].cycle);
 		if (n!=1) {
-			web_err_proc(EL);
+			web_err_procEx(EL,"保存采集周期,前端参数个数:%d,循环%d"
+					,n,i);
 			break;
 		}
 		cycle = point2next(&cycle, ' ');
