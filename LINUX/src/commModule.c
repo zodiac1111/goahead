@@ -201,7 +201,7 @@ static char* toStatusStr(char *tmp, uint8_t Status)
 		sprintf(tmp, "%s", " ");
 		break;
 	}
-	if (Status&0x80==1) {
+	if (Status&0x80) {
 		strcat(tmp, "Fail");
 	} else {
 		strcat(tmp, "Succ");

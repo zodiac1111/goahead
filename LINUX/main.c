@@ -2016,22 +2016,28 @@ int webSend_savecycle(webs_t wp)
  */
 int webSend_collect_cycle(webs_t wp)
 {
+	uint i;
 	stCollect_cycle sav[COLLECT_CYCLE_ITEM];
 	int ret = load_collect_cycle(sav, webs_cfg.ctspara);
 	if (ret==-1) {
+		//错误则与终端处理方法一致:全使能,5分钟
 		web_err_proc(EL);
-		return -1;
+		for (i = 0; i<sizeof(COLLECT_CYCLE)/sizeof(COLLECT_CYCLE[0]);
+		                i++) {
+			sav[i].cycle = 1;
+			sav[i].enable = 1;
+		}
 	}
 	char* oCollectCycle = jsonNew();
 	char* oCycleList = jsonNewArray();
 	char* oItem = jsonNew();
 	char* oItemArray = jsonNewArray();
-	uint j;
-	for (j = 0; j<sizeof(COLLECT_CYCLE)/sizeof(COLLECT_CYCLE[0]); j++) {
-		jsonAdd(&oCycleList, NULL, COLLECT_CYCLE[j]);
+
+	for (i = 0; i<sizeof(COLLECT_CYCLE)/sizeof(COLLECT_CYCLE[0]); i++) {
+		jsonAdd(&oCycleList, NULL, COLLECT_CYCLE[i]);
 	}
-	for (j = 0; j<COLLECT_CYCLE_ITEM; j++) {
-		jsonAdd(&oItemArray, NULL, addCollectItem(&oItem, sav[j]));
+	for (i = 0; i<COLLECT_CYCLE_ITEM; i++) {
+		jsonAdd(&oItemArray, NULL, addCollectItem(&oItem, sav[i]));
 #if DEBUG_PRINT_COLLECT_CYCLE
 		printf(WEBS_DBG"oItem:%s\n",oItemArray);
 #endif
