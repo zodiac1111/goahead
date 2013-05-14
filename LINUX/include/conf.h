@@ -30,8 +30,8 @@ typedef struct cfg{
 	char *stspara; //储存周期
 	char *ctspara; //采集周期
 	char *master_interface; //主站参数-接口名称字符串,保存在goahead.conf中
-	char *commModule;//gprs,通信模块配置文件
-	char *apnList;//apn列表,保存在conf目录下
+	char *commModule;//gprs.txt,通信模块配置文件
+	char *apnList;//apn列表,保存在conf目录下 Apns.txt
 	//   conf目录(用于计算下面的绝对路径
 	char *confdir;
 	char *protocol; //规约配置

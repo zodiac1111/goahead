@@ -11,10 +11,12 @@ extern "C" {
 const char * const hb_str[HB_STR_CONTER] = { "IEC102 Heart", "Zj Heart",
                 "Gw Heart", "Gw Heart", "Gx Heart" };
 static int sentParam(webs_t wp);
+static int reciParam(webs_t wp);
 static int addApnList(jsObj* oCommModule);
 static int addHbcyList(jsObj* oCommModule);
 static int addItems(jsObj* oCommModule);
 static int addStatus(jsObj* oCommModule);
+static int saveItems(webs_t wp);
 static char* toStatusStr(char *tmp, uint8_t Status);
 void form_commModule(webs_t wp, char_t *path, char_t *query)
 {
@@ -24,7 +26,7 @@ void form_commModule(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(action, "get")==0) {
 		sentParam(wp);
 	} else if (strcmp(action, "set")==0) {
-		//reciParam(wp);
+		reciParam(wp);
 	} else {
 		web_err_proc(EL);
 	}
@@ -50,6 +52,21 @@ static int sentParam(webs_t wp)
 	jsonFree(&oCommModule);
 	return 0;
 }
+/**
+ * 从前端接受要设置的参数,保存到终端
+ * @param wp
+ * @return
+ */
+static int reciParam(webs_t wp)
+{
+	//saveItems(wp);
+	return 0;
+}
+/**
+ * apn列表
+ * @param oCommModule
+ * @return
+ */
 static int addApnList(jsObj* oCommModule)
 {
 	jsObj aApnList = jsonNewArray();
@@ -91,6 +108,11 @@ static int addHbcyList(jsObj* oCommModule)
 	jsonFree(&aHbcy);
 	return 0;
 }
+/**
+ * 项目
+ * @param oCommModule
+ * @return
+ */
 static int addItems(jsObj* oCommModule)
 {
 	char line[CONF_LINE_MAX_CHAR];
@@ -114,27 +136,48 @@ static int addItems(jsObj* oCommModule)
 	fclose(fp);
 	return 0;
 }
+/**
+ * 返回状态
+ * @param oCommModule
+ * @return
+ */
 static int addStatus(jsObj* oCommModule)
 {
-
 	jsObj oStatus = jsonNew();
 	char tmp[32];
 	unsigned char* ret;
-	uint32_t ip = GetInterfaceIpC("ppp0");
-	jsonAdd(&oStatus, "ip", toStr(tmp, "%d.%d.%d.%d"
-			, (ip&0xf000)>>24,(ip&0x0f00)>>16,(ip&0x00f0)>>8,(ip&0x000f)>>0));
+	union ip {
+		uint32_t val;
+		uint8_t byte[4];
+	} Ip;
+	///1 gprs状态
+	ret = GetGrpsStatus();
+#if 0
+	printf("GetGrpsStatus ret=%d\n", *ret);
+#endif
+	jsonAdd(&oStatus, "stat", toStr(tmp, "0x%02X", *ret));
+	jsonAdd(&oStatus, "stat_str", toStatusStr(tmp, *ret));
+	///2 信号强度
 	ret = GetGprsSig();
+#if 0
 	printf("GetGprsSig ret=%d\n", *ret);
+#endif
 	jsonAdd(&oStatus, "sig", toStr(tmp, "%d", *ret));
 	jsonAdd(&oStatus, "sig_str", toStr(tmp, "%d%%", (*ret+1)/32*100));
-	ret = GetGrpsStatus();
-	printf("GetGrpsStatus ret=%d\n", *ret);
-	jsonAdd(&oStatus, "stat", toStr(tmp, "%d", *ret));
-	jsonAdd(&oStatus, "stat_str", toStatusStr(tmp, *ret));
+	///3 ip address @bug @note ONLY ipv4
+	Ip.val = GetInterfaceIpC("ppp0");
+#if 0
+	printf(WEBS_DBG"ip=%X\n", Ip.val);
+	printf(WEBS_DBG"%d %d %d %d \n",Ip.byte[0],Ip.byte[1],Ip.byte[2],Ip.byte[3]);
+#endif
+	jsonAdd(&oStatus, "ip", toStr(tmp, "%d.%d.%d.%d"
+	                , Ip.byte[0], Ip.byte[1], Ip.byte[2], Ip.byte[3]));
+	///完成 结束
 	jsonAdd(oCommModule, "status", oStatus);
 	jsonFree(&oStatus);
 	return 0;
 }
+/// 状态量=>状态文字说明
 static char* toStatusStr(char *tmp, uint8_t Status)
 {
 	switch (Status&0xf)
@@ -146,7 +189,7 @@ static char* toStatusStr(char *tmp, uint8_t Status)
 		sprintf(tmp, "%s", "Sea ");
 		break;
 	case 3:
-		sprintf(tmp, "%s", "SIM");
+		sprintf(tmp, "%s", "SIM ");
 		break;
 	case 5:
 		sprintf(tmp, "%s", "Reg ");
@@ -158,16 +201,55 @@ static char* toStatusStr(char *tmp, uint8_t Status)
 		sprintf(tmp, "%s", " ");
 		break;
 	}
-	if (Status==6){
-		sprintf(tmp, "%s", "成功");
+	if (Status&0x80==1) {
+		strcat(tmp, "Fail");
+	} else {
+		strcat(tmp, "Succ");
+	}
+	//明确的2种状态,其他状态都是中间(过渡)状态
+	if (Status==6) {
+		sprintf(tmp, "%s", "在线");
+	} else if(Status==0) {
+		sprintf(tmp, "%s", "离线");
 	}
 	/*
-	if (Status&0x80) {
-		sprintf(tmp, "%s", "失败");
-	} else {
-		sprintf(tmp, "%s", "成功");
-	}*/
+	 if (Status&0x80) {
+	 sprintf(tmp, "%s", "失败");
+	 } else {
+	 sprintf(tmp, "%s", "成功");
+	 }*/
 	return tmp;
+}
+static int saveItems(webs_t wp)
+{
+	//char tmp[8];
+	FILE* fp = fopen(webs_cfg.commModule, "w");
+	if (fp==NULL ) {
+		web_err_procEx(EL, "写入通信模块项目 filename=%s", webs_cfg.commModule);
+		return -1;
+	}
+	char *simc = websGetVar(wp,T("simc"), T("null"));
+	char *mode = websGetVar(wp,T("mode"), T("null"));
+	char *apn = websGetVar(wp,T("apn"), T("null"));
+	char *pitc = websGetVar(wp,T("pitc"), T("null"));
+	char *hbcy = websGetVar(wp,T("bhcy"), T("null"));
+	if(fprintf(fp,"%s:%s\n","simc",simc)!=2){
+		web_err_proc(EL);
+	}
+	if(fprintf(fp,"%s:%s\n","mode",mode)!=2){
+		web_err_proc(EL);
+	}
+	if(fprintf(fp,"%s:%s\n","apn",apn)!=2){
+		web_err_proc(EL);
+	}
+	if(fprintf(fp,"%s:%d\n","pitc",atoi(pitc))!=2){
+		web_err_proc(EL);
+	}
+	if(fprintf(fp,"%s:%d\n","hbcy",atoi(hbcy))!=2){
+		web_err_proc(EL);
+	}
+	fclose(fp);
+	return 0;
 }
 #ifdef __cplusplus
 } /* End of 'C' functions       */
