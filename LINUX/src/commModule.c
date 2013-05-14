@@ -4,10 +4,18 @@
  */
 #include "commModule.h"
 #define CONF_LINE_MAX_CHAR 256 //一行最大字符
+#define HB_STR_CONTER 5 //心跳类型个数
+#ifdef __cplusplus
+extern "C" {
+#endif
+const char * const hb_str[HB_STR_CONTER] = { "IEC102 Heart", "Zj Heart",
+                "Gw Heart", "Gw Heart", "Gx Heart" };
 static int sentParam(webs_t wp);
 static int addApnList(jsObj* oCommModule);
+static int addHbcyList(jsObj* oCommModule);
 static int addItems(jsObj* oCommModule);
 static int addStatus(jsObj* oCommModule);
+static char* toStatusStr(char *tmp, uint8_t Status);
 void form_commModule(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
@@ -35,6 +43,7 @@ static int sentParam(webs_t wp)
 {
 	jsObj oCommModule = jsonNew();
 	addApnList(&oCommModule);
+	addHbcyList(&oCommModule);
 	addItems(&oCommModule);
 	addStatus(&oCommModule);
 	wpsend(wp, oCommModule);
@@ -49,7 +58,7 @@ static int addApnList(jsObj* oCommModule)
 	char n[CONF_LINE_MAX_CHAR] = { 0 };
 	FILE* fp = fopen(webs_cfg.apnList, "r");
 	if (fp==NULL ) {
-		web_err_procEx(EL, "读取apn列表 filename=%s",webs_cfg.apnList);
+		web_err_procEx(EL, "读取apn列表 filename=%s", webs_cfg.apnList);
 		return -1;
 	}
 	while (!feof(fp)) {
@@ -66,6 +75,22 @@ static int addApnList(jsObj* oCommModule)
 	jsonFree(&aApnList);
 	return 0;
 }
+/**
+ * 心跳类型列表
+ * @param oCommModule
+ * @return
+ */
+static int addHbcyList(jsObj* oCommModule)
+{
+	jsObj aHbcy = jsonNewArray();
+	int i = 0;
+	for (i = 0; i<HB_STR_CONTER; i++) {
+		jsonAdd(&aHbcy, NULL, hb_str[i]);
+	}
+	jsonAdd(oCommModule, "hbcy_list", aHbcy);
+	jsonFree(&aHbcy);
+	return 0;
+}
 static int addItems(jsObj* oCommModule)
 {
 	char line[CONF_LINE_MAX_CHAR];
@@ -74,7 +99,7 @@ static int addItems(jsObj* oCommModule)
 	char v[CONF_LINE_MAX_CHAR] = { 0 };
 	FILE* fp = fopen(webs_cfg.commModule, "r");
 	if (fp==NULL ) {
-		web_err_procEx(EL, "读取通信模块项目 filename=%s",webs_cfg.commModule);
+		web_err_procEx(EL, "读取通信模块项目 filename=%s", webs_cfg.commModule);
 		return -1;
 	}
 	while (!feof(fp)) {
@@ -91,16 +116,59 @@ static int addItems(jsObj* oCommModule)
 }
 static int addStatus(jsObj* oCommModule)
 {
-	jsObj oStatus=jsonNew();
+
+	jsObj oStatus = jsonNew();
 	char tmp[32];
 	unsigned char* ret;
-	ret=GetGprsSig();
-	printf("GetGprsSig ret=%d\n",*ret);
-	jsonAdd(&oStatus,"sig",toStr(tmp,"%d",*ret));
-	ret=GetGrpsStatus();
-	printf("GetGrpsStatus ret=%d\n",*ret);
-	jsonAdd(&oStatus,"stat",toStr(tmp,"%d",*ret));
-	jsonAdd(oCommModule,"status",oStatus);
+	uint32_t ip = GetInterfaceIpC("ppp0");
+	jsonAdd(&oStatus, "ip", toStr(tmp, "%d.%d.%d.%d"
+			, (ip&0xf000)>>24,(ip&0x0f00)>>16,(ip&0x00f0)>>8,(ip&0x000f)>>0));
+	ret = GetGprsSig();
+	printf("GetGprsSig ret=%d\n", *ret);
+	jsonAdd(&oStatus, "sig", toStr(tmp, "%d", *ret));
+	jsonAdd(&oStatus, "sig_str", toStr(tmp, "%d%", (*ret+1)/32*100));
+	ret = GetGrpsStatus();
+	printf("GetGrpsStatus ret=%d\n", *ret);
+	jsonAdd(&oStatus, "stat", toStr(tmp, "%d", *ret));
+	jsonAdd(&oStatus, "stat_str", toStatusStr(tmp, *ret));
+	jsonAdd(oCommModule, "status", oStatus);
 	jsonFree(&oStatus);
 	return 0;
 }
+static char* toStatusStr(char *tmp, uint8_t Status)
+{
+	switch (Status&0xf)
+	{
+	case 0:
+		sprintf(tmp, "%s", "off ");
+		break;
+	case 2:
+		sprintf(tmp, "%s", "Sea ");
+		break;
+	case 3:
+		sprintf(tmp, "%s", "SIM");
+		break;
+	case 5:
+		sprintf(tmp, "%s", "Reg ");
+		break;
+	case 6:
+		sprintf(tmp, "%s", "Dial ");
+		break;
+	default:
+		sprintf(tmp, "%s", " ");
+		break;
+	}
+	if (Status==6){
+		sprintf(tmp, "%s", "成功");
+	}
+	/*
+	if (Status&0x80) {
+		sprintf(tmp, "%s", "失败");
+	} else {
+		sprintf(tmp, "%s", "成功");
+	}*/
+	return tmp;
+}
+#ifdef __cplusplus
+} /* End of 'C' functions       */
+#endif

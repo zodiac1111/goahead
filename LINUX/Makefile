@@ -8,8 +8,8 @@ my_cc=arm-linux-gcc
 my_cxx=arm-linux-g++
 include_dir=$(HL3104_HOME)/include
 lib_dir=$(HL3104_HOME)/lib
-lib_obj = -lsys_utl
-lib_obj += -lexternCShm
+lib_obj = -lexternCShm
+lib_obj += -lsys_utl
 
 #用于上传到终端的ip,指定ftp的用户名,密码,ftp上传文件夹路径(需要lftp支持,CentOS自带)
 #老版本root,linux,ftp服务器根目录需要注意,可能是 / /mnt /mnt/nor 这几种
@@ -142,7 +142,7 @@ src/rtit.o: include/rtit.h src/rtit.c
 src/wpsend.o:src/wpsend.c include/wpsend.h
 src/upload.o:src/upload.c include/upload.h
 src/sysfunction.o:src/sysfunction.c include/sysfunction.h
-src/commModule.o:src/commModule.c include/commModule.h
+src/commModule.o:src/commModule.c include/commModule.h 
 src/master.o:src/master.c include/master.h
 # Dependencies(goahead本身的)
 ../asp.o:  ../webs.h ../wsIntrn.h ../ej.h ../ejIntrn.h ../uemf.h
