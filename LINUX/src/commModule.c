@@ -126,7 +126,7 @@ static int addStatus(jsObj* oCommModule)
 	ret = GetGprsSig();
 	printf("GetGprsSig ret=%d\n", *ret);
 	jsonAdd(&oStatus, "sig", toStr(tmp, "%d", *ret));
-	jsonAdd(&oStatus, "sig_str", toStr(tmp, "%d%", (*ret+1)/32*100));
+	jsonAdd(&oStatus, "sig_str", toStr(tmp, "%d%%", (*ret+1)/32*100));
 	ret = GetGrpsStatus();
 	printf("GetGrpsStatus ret=%d\n", *ret);
 	jsonAdd(&oStatus, "stat", toStr(tmp, "%d", *ret));
