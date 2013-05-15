@@ -1053,14 +1053,10 @@ int load_default_sysparam( stSysParam * param)
 ///默认的网络参数,当文件不存在时
 int load_default_netparam( stNetparam * param)
 {
-	int i;
 	param->no=0;
+	uint8_t mask[IPV4_LEN]={2,5,5,2,5,5,2,5,5,0,0,0};
 	memset(param->ip,0x0,IPV4_LEN);
-	for (i=0;i<12;i+=3){
-		param->mask[i+0]=2;
-		param->mask[i+1]=5;
-		param->mask[i+2]=5;
-	}
+	memcpy(param->mask,mask,IPV4_LEN);
 	memset(param->gateway,0x0,IPV4_LEN);
 	memset(param->port,0x0,5);
 	return 0;
