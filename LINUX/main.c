@@ -53,7 +53,7 @@ static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
 ///内存中的系统参数结构体.全局使用.
-stSysParam sysparam = { 0, 0, 0, 0, 0, 0, 0 };
+stSysParam g_sysparam = { 0, 0, 0, 0, 0, 0, 0 };
 ///规约文件中的规约名称.
 char *procotol_name[MAX_PROCOTOL_NUM];
 ///规约文件中的实际规约数,初始化为最大
@@ -277,7 +277,7 @@ static int initWebs(void)
 	//Create a handler for the default home page
 	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0);
 	///加载系统参数
-	if (-1==load_sysparam(&sysparam, webs_cfg.syspara)) {
+	if (-1==load_sysparam(&g_sysparam, webs_cfg.syspara)) {
 		web_err_proc(EL);
 		//return -1;
 	}
@@ -298,7 +298,7 @@ void form_sysparam(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(action, "get")==0) {
 		webSend_syspara(wp);
 	} else {
-		webRece_syspara(wp, &sysparam);
+		webRece_syspara(wp, &g_sysparam);
 	}
 	websDone(wp, 200);
 	return;
@@ -340,7 +340,7 @@ void form_sioplans(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "init")==0) {
-		webSend_sioplans(wp, sysparam);
+		webSend_sioplans(wp, g_sysparam);
 	} else if (strcmp(action, "set")==0) {
 		webRece_sioplans(wp);
 	} else {
@@ -361,7 +361,7 @@ void form_netparas(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * init = websGetVar(wp, T("init"), T("null"));
 	if (*init=='1') {
-		webSend_netparas(wp, sysparam.netports_num);
+		webSend_netparas(wp, g_sysparam.netports_num);
 	} else {
 		webRece_netparas(wp);
 	}
@@ -381,7 +381,7 @@ void form_mtrparams(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "get")==0) {
-		webSend_mtrparams(wp, sysparam.meter_num);
+		webSend_mtrparams(wp, g_sysparam.meter_num);
 	} else if (strcmp(action, "set")==0) {
 		webRece_mtrparams(wp);
 	} else {     //其他未知命令一律忽略
@@ -403,7 +403,7 @@ void form_monparas(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "get")==0) {
-		webSend_monparas(wp, sysparam);
+		webSend_monparas(wp, g_sysparam);
 	} else if (strcmp(action, "set")==0) {
 		webRece_monparas(wp);
 	} else {
@@ -1708,7 +1708,7 @@ int webSend_syspara(webs_t wp)
 {
 	//stSysParam sysparam;
 	//读取并更新内存中的 全局变量 sysparam 结构,保持一致
-	int ret = load_sysparam(&sysparam, webs_cfg.syspara);
+	int ret = load_sysparam(&g_sysparam, webs_cfg.syspara);
 	if (ret==-1) {
 		web_err_proc(EL);
 		return -1;
@@ -1721,27 +1721,27 @@ int webSend_syspara(webs_t wp)
 	 */
 	char* oSysPara = jsonNew();
 	char tmp[128] = { 0 };
-	jsonAdd(&oSysPara, "meter_num", toStr(tmp, "%u", sysparam.meter_num));
+	jsonAdd(&oSysPara, "meter_num", toStr(tmp, "%u", g_sysparam.meter_num));
 	jsonAdd(
 	                &oSysPara,
 	                "sioplan_num",
-	                toStr(tmp, "%u", sysparam.sioplan_num));
+	                toStr(tmp, "%u", g_sysparam.sioplan_num));
 	jsonAdd(
 	                &oSysPara,
 	                "monitor_ports",
-	                toStr(tmp, "%u", sysparam.monitor_ports));
+	                toStr(tmp, "%u", g_sysparam.monitor_ports));
 	jsonAdd(
 	                &oSysPara,
 	                "netports_num",
-	                toStr(tmp, "%u", sysparam.netports_num));
+	                toStr(tmp, "%u", g_sysparam.netports_num));
 	jsonAdd(
 	                &oSysPara,
 	                "sioports_num",
-	                toStr(tmp, "%u", sysparam.sioports_num));
+	                toStr(tmp, "%u", g_sysparam.sioports_num));
 	jsonAdd(
 	                &oSysPara,
 	                "control_ports",
-	                toStr(tmp, "%u", sysparam.control_ports));
+	                toStr(tmp, "%u", g_sysparam.control_ports));
 	wpsend(wp, oSysPara);
 	jsonFree(&oSysPara);
 	return 0;
@@ -1808,17 +1808,17 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	jsObj aMtrParaList = jsonNewArray();     //所有表计参数的集合,是一个数组
 	jsObj oMtrPara = jsonNew();     //一个表计参数
 	//串口方案
-	for (i = 0; i<sysparam.sioplan_num; i++) {
+	for (i = 0; i<g_sysparam.sioplan_num; i++) {
 		jsonAdd(&aList, NULL, u8toa(tmp, "%d", i));
 	}
 	jsonAdd(&oAll, "portplan", aList);
 	jsonClean(&aList);
 	//监视端口(端口)
-	if (mon_port_num<sysparam.sioports_num) {
+	if (mon_port_num<g_sysparam.sioports_num) {
 		printf(WEBS_ERR"mon_port_num is less than sioports_num!\n");
 		web_err_proc(EL);
 	}
-	for (i = 0; i<sysparam.sioports_num; i++) {
+	for (i = 0; i<g_sysparam.sioports_num; i++) {
 		jsonAdd(&aList, NULL, mon_port_name[i]);
 	}
 	jsonAdd(&oAll, "port", aList);
