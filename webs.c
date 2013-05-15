@@ -530,7 +530,7 @@ void websReadEvent(webs_t wp)
 					memcpy(&wp->postData[wp->lenPostData], text, nbytes);
 					wp->lenPostData += nbytes;
 				}
-
+				memcpy(wp->query,"1",2);///ie两次状态8,不明真相的修改,可用.
 			} else {
 				/*				wp->query = bstrdup(B_L, text);*/
 				wp->postData = bmemdup(B_L, text, nbytes);
