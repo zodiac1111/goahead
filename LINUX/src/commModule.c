@@ -59,7 +59,15 @@ static int sentParam(webs_t wp)
  */
 static int reciParam(webs_t wp)
 {
-	//saveItems(wp);
+	jsObj oCommModule = jsonNew();
+	if(saveItems(wp)==0){
+		jsonAdd(&oCommModule,"ret","0");
+	}else{
+		jsonAdd(&oCommModule,"ret","-1");
+		jsonAdd(&oCommModule,"ret_str","失败");
+	}
+	wpsend(wp, oCommModule);
+	jsonFree(&oCommModule);
 	return 0;
 }
 /**
@@ -231,7 +239,7 @@ static char* toStatusStr(char *tmp, uint8_t Status)
 static int saveItems(webs_t wp)
 {
 	//char tmp[8];
-	FILE* fp = fopen(webs_cfg.commModule, "w");
+	FILE* fp = fopen(webs_cfg.commModule, "w");//全文件重写
 	if (fp==NULL ) {
 		web_err_procEx(EL, "写入通信模块项目 filename=%s", webs_cfg.commModule);
 		return -1;
@@ -240,20 +248,20 @@ static int saveItems(webs_t wp)
 	char *mode = websGetVar(wp,T("mode"), T("null"));
 	char *apn = websGetVar(wp,T("apn"), T("null"));
 	char *pitc = websGetVar(wp,T("pitc"), T("null"));
-	char *hbcy = websGetVar(wp,T("bhcy"), T("null"));
-	if(fprintf(fp,"%s:%s\n","simc",simc)!=2){
+	char *hbcy = websGetVar(wp,T("hbcy"), T("null"));
+	if(fprintf(fp,"%s:%s\n","simc",simc)<0){
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%s\n","mode",mode)!=2){
+	if(fprintf(fp,"%s:%s\n","mode",mode)<0){
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%s\n","apn",apn)!=2){
+	if(fprintf(fp,"%s:%s\n","apn",apn)<0){
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%d\n","pitc",atoi(pitc))!=2){
+	if(fprintf(fp,"%s:%d\n","pitc",atoi(pitc))<0){
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%d\n","hbcy",atoi(hbcy))!=2){
+	if(fprintf(fp,"%s:%d\n","hbcy",atoi(hbcy))<0){
 		web_err_proc(EL);
 	}
 	fclose(fp);

@@ -213,7 +213,6 @@ static int webRece_history_data(webs_t wp)
 		char abInstant[128];
 		sprintf(abInstant, "%s%s%s%s%s%s",
 		                abV, abI, abP, abQ, abPf, abF);
-		printf(WEBS_DBG"顺势量电量实现中 ...\n");
 		for (i = 0; i<mtrnum; i++) {     //遍历所有表
 			if (abMtr[i]!='1')
 				continue;
