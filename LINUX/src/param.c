@@ -962,7 +962,7 @@ int save_savecycle(const stSave_cycle sav[], const char * file)
 static int update_mtrfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.mtrspara, "wb+");
+	FILE* fp = fopen(webs_cfg.mtrspara, "rb+");
 	if (fp==NULL ) {
 		web_errno = ErrOpenMtrcfgFile;
 		return -1;
@@ -985,7 +985,7 @@ static int update_mtrfile(const stSysParam param)
 static int update_siofile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.sioplan, "wb+");
+	FILE* fp = fopen(webs_cfg.sioplan, "rb+");
 	if (fp==NULL ) {
 		web_errno = open_sioplan_cfgfile_err;
 		return -1;
@@ -1007,7 +1007,7 @@ static int update_siofile(const stSysParam param)
 static int update_netparamfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.netpara, "wb+");
+	FILE* fp = fopen(webs_cfg.netpara, "rb+");
 	if (fp==NULL ) {
 		web_errno = open_netparam_cfgfile_err;
 		return -1;
@@ -1030,7 +1030,7 @@ static int update_netparamfile(const stSysParam param)
 static int update_monparamfile(const stSysParam param)
 {
 	int ret = -1;
-	FILE* fp = fopen(webs_cfg.monpara, "wb+");
+	FILE* fp = fopen(webs_cfg.monpara, "rb+");
 	if (fp==NULL ) {
 		web_errno = open_monparam_cfgfile_err;
 		return -1;
