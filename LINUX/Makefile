@@ -29,7 +29,7 @@ else
 CC=$(my_cc)
 CXX=$(my_cxx)
 endif
-DFLAGS  = -Os 
+DFLAGS  = -g #-Os 
 DFLAGS  += -Wall -Wno-unused-parameter
 
 default:  gold
