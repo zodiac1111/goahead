@@ -202,7 +202,7 @@ webExport_sys(webs_t wp)
 		"tar cvf tmp/sys.tar /mnt/nor ");
 	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){
-		web_err_proc(EL);
+		web_err_procEx(EL,"备份整个系统目录/mnt/nor目录");
 	}
 	return 0;
 }
@@ -229,7 +229,7 @@ webExport_webs_installer(webs_t wp)
 		,version,version);
 	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){
-		web_err_proc(EL);
+		web_err_procEx(EL,"执行下载webs程序包错误");
 	}
 	return 0;
 }
