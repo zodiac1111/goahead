@@ -626,16 +626,17 @@ int load_webs_conf_info(void)
 	                webs_cfg.confdir,
 	                MON_PORT_NAME_FILE);
 	//版本信息字符串
-	webs_cfg.main_version_string =
+	webs_cfg.ver_array =
 	                (char*) malloc(MAIN_PROGRAM_VERSION_STRING_MAX_LENGTH);
 	unsigned char * v = GetSoftVersion();
 	if (v!=NULL ) {
-		sprintf(webs_cfg.main_version_string,
+		memcpy(webs_cfg.ver_array,v,7);//7=version char array len
+		/*sprintf(webs_cfg.main_version_string,
 		                "%d.%d %d.%02d.%02d %c%c",
-		                v[0], v[1], v[2], v[3], v[4], v[5], v[6]);
+		                v[0], v[1], v[2], v[3], v[4], v[5], v[6]);*/
 		//printf("%s\n",webs_cfg.main_version_string);
 	} else {
-		sprintf(webs_cfg.main_version_string,
+		sprintf(webs_cfg.ver_array,
 		                "hl3104_com is not start.");
 		web_err_proc(EL);
 	}
@@ -2221,9 +2222,9 @@ void webs_free(void)
 	if (webdir!=NULL )
 		free(webdir);
 	//
-	if (webs_cfg.main_version_string!=NULL ) {
-		free(webs_cfg.main_version_string);
-		webs_cfg.main_version_string = NULL;
+	if (webs_cfg.ver_array!=NULL ) {
+		free(webs_cfg.ver_array);
+		webs_cfg.ver_array = NULL;
 	}
 	//应用程序名称
 	if (webs_cfg.appname!=NULL ) {

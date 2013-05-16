@@ -270,7 +270,11 @@ static int webSend_info(webs_t wp)
 	}
 	char* oInfo = jsonNew();
 	char tmp[256] = { 0 };
-	jsonAdd(&oInfo, "main_version_string", webs_cfg.main_version_string);
+	jsonAdd(&oInfo, "main_version_string",toStr(tmp,"%d.%d %d.%02d.%02d %c%c",
+			webs_cfg.ver_array[0], webs_cfg.ver_array[1],
+			webs_cfg.ver_array[2], webs_cfg.ver_array[3],
+			webs_cfg.ver_array[4], webs_cfg.ver_array[5],
+			webs_cfg.ver_array[6]) );
 	jsonAdd(&oInfo, "info_webbin", dir);
 	jsonAdd(&oInfo, "info_webconf", CONF_FILE);
 	jsonAdd(&oInfo, "info_weblog", webs_cfg.errlog);

@@ -10,7 +10,7 @@
 #include "color.h"
 ///webs服务器配置参数.开始时加载到内存,结束时释放
 typedef struct cfg{
-	char *main_version_string;//主程序版本字符串
+	char *ver_array;//主程序版本字符串
 	char *appname;//应用程序全路径
 	char *port;//默认端口
 	int default_port; //若使用了硬编码的端口,在webs_free()时不需要释放内存.

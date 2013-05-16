@@ -13,6 +13,7 @@
 #include "autoUpdate.h"
 static int webExport_conf(webs_t wp);
 static int webExport_sys(webs_t wp);
+static int webExport_webs_installer(webs_t wp);
 char tip[]="可能需要<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"
 		"IE:工具菜单-Internet选项-常规(选项卡)-删除-勾选Internet临时文件-删除(Ctrl+Shift+Del)<br>"
 		"FireFox:工具菜单-清空最近历史记录-勾选缓存-立即清除(Ctrl+Shift+Del)<br>"
@@ -158,7 +159,10 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(action, "sys")==0) {
 		printf(WEBS_INF"导出系统(/mnt/nor/目录)\n");
 		webExport_sys(wp);
-	} else {
+	} else if (strcmp(action, "webs_installer")==0) {
+		printf(WEBS_INF"导出web安装程序\n");
+		webExport_webs_installer(wp);
+	} else  {
 		web_err_procEx(EL,"配置文件导入导出: action=%s",action);
 	}
 	websDone(wp, 200);
@@ -202,4 +206,30 @@ webExport_sys(webs_t wp)
 	}
 	return 0;
 }
-
+static int
+webExport_webs_installer(webs_t wp)
+{
+	char cmd[4096];
+	char version[3];//2个字符的版本名称 ha ja jd
+	version[0]=tolower(webs_cfg.ver_array[5]);
+	version[1]=tolower(webs_cfg.ver_array[6]);
+	version[2]='\0';
+	//保存到www根目录
+	toStr(cmd,
+		"cp /mnt/nor/bin/webs /mnt/nor/bin/webs.update;"
+		"rm tmp/webs-binary-hl3104*.tar.gz -f;"
+		"tar cvf tmp/webs-binary-hl3104%s.tar "
+		"  /mnt/nor/www "
+		"  /mnt/nor/bin/webs "
+		"  /mnt/nor/bin/webs.update "
+		"  /mnt/nor/conf/goahead.conf "
+		"  /mnt/nor/conf/monparam_name.conf "
+		" && "
+		"gzip tmp/webs-binary-hl3104%s.tar "
+		,version,version);
+	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
+	if(system(cmd)<0){
+		web_err_proc(EL);
+	}
+	return 0;
+}
