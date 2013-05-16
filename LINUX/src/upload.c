@@ -13,6 +13,10 @@
 #include "autoUpdate.h"
 static int webExport_conf(webs_t wp);
 static int webExport_sys(webs_t wp);
+char tip[]="可能需要<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"
+		"IE:工具菜单-Internet选项-常规(选项卡)-删除-勾选Internet临时文件-删除(Ctrl+Shift+Del)<br>"
+		"FireFox:工具菜单-清空最近历史记录-勾选缓存-立即清除(Ctrl+Shift+Del)<br>"
+		"Chrome:设置按钮-工具-清除浏览器数据-清空缓存(Shift+Ctrl+Delete)<br>";
 void form_upload_file(webs_t wp, char_t *path, char_t *query)
 {
 	//PRINT_FORM_INFO;
@@ -123,7 +127,8 @@ void form_upload_file(webs_t wp, char_t *path, char_t *query)
 	wpsend(wp, oUpdate);
 	jsonFree(&oUpdate);
 	websWrite(wp, "<br>重启服务器...<br>");
-	websWrite(wp, T("<font color=green>更新完成</font>.请<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"));
+	websWrite(wp, T("<font color=green>更新完成</font><br>"));
+	websWrite(wp, T(tip));
 	autoUpdate();     //自动升级
 	websDone(wp, 200);
 	return;
@@ -146,7 +151,6 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 	websHeader_pure(wp);
 	char * action = websGetVar(wp, T("action"), T("null"));
 	if (strcmp(action, "import")==0) {
-		//todo
 		printf(WEBS_WAR"未实现:配置文件导入\n");
 	} else if (strcmp(action, "export")==0) {
 		printf(WEBS_INF"配置文件导出\n");
@@ -155,13 +159,13 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 		printf(WEBS_INF"导出系统(/mnt/nor/目录)\n");
 		webExport_sys(wp);
 	} else {
-		web_err_proc(EL);
+		web_err_procEx(EL,"配置文件导入导出: action=%s",action);
 	}
 	websDone(wp, 200);
 	return;
 }
 /**
- * 打包配置文件
+ * 打包配置文件,都是以www根目录为当前目录
  * @param wp
  * @return
  */
@@ -171,7 +175,7 @@ webExport_conf(webs_t wp)
 	char cmd[4096];
 	char *items = websGetVar(wp, T("items"), T("null"));
 	//保存到www根目录
-	toStr(cmd, " ln -s /tmp tmp ; tar cvf tmp/backup.tar %s ",
+	toStr(cmd, "tar cvf tmp/backup.tar %s ",
 		items);
 	printf(WEBS_INF"备份命令:%s\n",cmd);
 	if(system(cmd)<0){
@@ -190,7 +194,7 @@ webExport_sys(webs_t wp)
 {
 	char cmd[4096];
 	//保存到www根目录
-	toStr(cmd, "ln -s /tmp tmp ; rm /mnt/nor/www/tmp/sys.tar -f;"
+	toStr(cmd, "rm tmp/sys.tar -f;"
 		"tar cvf tmp/sys.tar /mnt/nor ");
 	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){
@@ -198,3 +202,4 @@ webExport_sys(webs_t wp)
 	}
 	return 0;
 }
+

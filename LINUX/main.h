@@ -96,5 +96,5 @@ static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
         int arg, char_t *url, char_t *path, char_t *query);
 static void sigintHandler(int);
 int jsonSavCycle(webs_t wp,const char* name,const stSave_cycle sav);
-
+int mkLink(void);
 #endif /* MAIN_H_ */

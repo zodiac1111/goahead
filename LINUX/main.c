@@ -78,7 +78,6 @@ int main(int argc __attribute__ ((unused)),
 #if DEBUG_JSON_DEMO
 	jsonDemo();     ///@note json操作示例.对操作不熟悉可以反注释来查看
 #endif
-
 #if DLINK_TEST
 #define SOFILE "sys_utl.so"
 	struct stMeter_Run_data* (*GetData)(void);
@@ -205,6 +204,7 @@ static int initWebs(void)
 	///改变程序的当前目录,所有相对路径都是相对当前目录的.当前目录为www(demo)目录
 	///除了配置文件(多数)中定义的绝对路径的文件,其他相对路型以webdir为起点.
 	chdir(webdir);
+	mkLink();///建立符号链接
 	//Configure the web server options before opening the web server
 	websSetDefaultDir(webdir);
 	cp = inet_ntoa(intaddr);
@@ -735,7 +735,7 @@ static int is_all_equ(int n[], int num)
 	int i;
 	for (i = 1; i<num; i++) {
 		if (n[i]!=n[0]) {
-			web_err_procEx(EL,"项目序号:%d,项目数量%d,表数目=%d 总数据\n"
+			web_err_procEx(EL,"项目序号:%d,项目数量%d,表数目=%d 总数据"
 		                , i, n[i], n[0],num);
 			return -2000;
 		}
@@ -2331,5 +2331,17 @@ void response_ok(webs_t wp)
 {
 	websWrite(wp, T("{\"ret\":\"ok\"}"));
 }
-
 //#pragma  GCC diagnostic ignored  "-Wunused-parameter"
+
+/**
+ * 建立符号tmp目录链接.
+ * @return
+ */
+int mkLink(void)
+{
+	if(access("tmp", 0)!=0){
+		web_err_procEx(EL,"在根目录(%s)下建立tmp符号链接指向/tmp.",webdir);
+		system("ln -s /tmp tmp");
+	}
+	return 0;
+}
