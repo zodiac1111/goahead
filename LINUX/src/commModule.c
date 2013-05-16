@@ -60,11 +60,11 @@ static int sentParam(webs_t wp)
 static int reciParam(webs_t wp)
 {
 	jsObj oCommModule = jsonNew();
-	if(saveItems(wp)==0){
-		jsonAdd(&oCommModule,"ret","0");
-	}else{
-		jsonAdd(&oCommModule,"ret","-1");
-		jsonAdd(&oCommModule,"ret_str","失败");
+	if (saveItems(wp)==0) {
+		jsonAdd(&oCommModule, "ret", "0");
+	} else {
+		jsonAdd(&oCommModule, "ret", "-1");
+		jsonAdd(&oCommModule, "ret_str", "失败");
 	}
 	wpsend(wp, oCommModule);
 	jsonFree(&oCommModule);
@@ -97,7 +97,7 @@ static int addApnList(jsObj* oCommModule)
 		jsonAdd(&aApnList, NULL, n);
 	}
 	fclose(fp);
-LOAD_DEFAULT_PARAM:
+	LOAD_DEFAULT_PARAM:
 	jsonAdd(oCommModule, "apn_list", aApnList);
 	jsonFree(&aApnList);
 	return 0;
@@ -225,8 +225,10 @@ static char* toStatusStr(char *tmp, uint8_t Status)
 	//明确的2种状态,其他状态都是中间(过渡)状态
 	if (Status==6) {
 		sprintf(tmp, "%s", "在线");
-	} else if(Status==0) {
+	} else if (Status==0) {
 		sprintf(tmp, "%s", "离线");
+	}else{
+		strcat(tmp, " 离线");
 	}
 	/*
 	 if (Status&0x80) {
@@ -239,29 +241,29 @@ static char* toStatusStr(char *tmp, uint8_t Status)
 static int saveItems(webs_t wp)
 {
 	//char tmp[8];
-	FILE* fp = fopen(webs_cfg.commModule, "w");//全文件重写
+	FILE* fp = fopen(webs_cfg.commModule, "w");		//全文件重写
 	if (fp==NULL ) {
 		web_err_procEx(EL, "写入通信模块项目 filename=%s", webs_cfg.commModule);
 		return -1;
 	}
-	char *simc = websGetVar(wp,T("simc"), T("null"));
-	char *mode = websGetVar(wp,T("mode"), T("null"));
-	char *apn = websGetVar(wp,T("apn"), T("null"));
-	char *pitc = websGetVar(wp,T("pitc"), T("null"));
-	char *hbcy = websGetVar(wp,T("hbcy"), T("null"));
-	if(fprintf(fp,"%s:%s\n","simc",simc)<0){
+	char *simc = websGetVar(wp, T("simc"), T("null"));
+	char *mode = websGetVar(wp, T("mode"), T("null"));
+	char *apn = websGetVar(wp, T("apn"), T("null"));
+	char *pitc = websGetVar(wp, T("pitc"), T("null"));
+	char *hbcy = websGetVar(wp, T("hbcy"), T("null"));
+	if (fprintf(fp, "%s:%s\n", "simc", simc)<0) {
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%s\n","mode",mode)<0){
+	if (fprintf(fp, "%s:%s\n", "mode", mode)<0) {
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%s\n","apn",apn)<0){
+	if (fprintf(fp, "%s:%s\n", "apn", apn)<0) {
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%d\n","pitc",atoi(pitc))<0){
+	if (fprintf(fp, "%s:%d\n", "pitc", atoi(pitc))<0) {
 		web_err_proc(EL);
 	}
-	if(fprintf(fp,"%s:%d\n","hbcy",atoi(hbcy))<0){
+	if (fprintf(fp, "%s:%d\n", "hbcy", atoi(hbcy))<0) {
 		web_err_proc(EL);
 	}
 	fclose(fp);
