@@ -171,7 +171,7 @@ webExport_conf(webs_t wp)
 	char cmd[4096];
 	char *items = websGetVar(wp, T("items"), T("null"));
 	//保存到www根目录
-	toStr(cmd, "tar cvf /mnt/nor/www/backup.tar %s ",
+	toStr(cmd, " ln -s /tmp tmp ; tar cvf tmp/backup.tar %s ",
 		items);
 	printf(WEBS_INF"备份命令:%s\n",cmd);
 	if(system(cmd)<0){
@@ -190,9 +190,8 @@ webExport_sys(webs_t wp)
 {
 	char cmd[4096];
 	//保存到www根目录
-	toStr(cmd, "rm /mnt/nor/www/sys.tar -f;"
-		"tar cvf /tmp/sys.tar /mnt/nor && "
-		"mv /tmp/sys.tar /mnt/nor/www");
+	toStr(cmd, "ln -s /tmp tmp ; rm /mnt/nor/www/tmp/sys.tar -f;"
+		"tar cvf tmp/sys.tar /mnt/nor ");
 	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){
 		web_err_proc(EL);
