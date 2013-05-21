@@ -8,8 +8,14 @@ static int webSend_master(webs_t wp);
 static int addInterFaceList(jsObj *oMaster);
 static void print_array(const char *a, const int len);
 char *arrayTo2Array(char * a1, int* from, int *to);
-int print_stMaster(struct stMasterConfig m_Master);
+int print_stMaster(const struct stMasterConfig m_Master);
 
+/**
+ * 主站参数表单句柄函数
+ * @param wp
+ * @param path
+ * @param query 查询字符串
+ */
 void form_master(webs_t wp, char_t *path, char_t *query)
 {
 	PRINT_FORM_INFO;
@@ -25,7 +31,11 @@ void form_master(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 	return;
 }
-
+/**
+ * 发送终端主站参数数据到页面.
+ * @param wp 页面
+ * @return
+ */
 static int webRece_master(webs_t wp)
 {
 	struct stMasterConfig m_Master;
@@ -71,7 +81,12 @@ static int webRece_master(webs_t wp)
 	jsonFree(&oMaster);
 	return 0;
 }
-int print_stMaster(struct stMasterConfig m_Master)
+/**
+ * 简单的打印一下结构体,用于调试
+ * @param m_Master
+ * @return
+ */
+int print_stMaster(const struct stMasterConfig m_Master)
 {
 	printf(WEBS_DBG"结构体 interface=%s host=%s port=%s zone=%d addr=%d hb=%d\n"
 	                , m_Master.m_interface, m_Master.m_host
