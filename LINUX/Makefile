@@ -46,12 +46,9 @@ distclean:clean
 	rm -rf ../version.h
 	rm -rf *~ ../*~
 	
-#文档(简化的文档,主要给使用人员阅读)	
-doc-simple::
-	doxygen Doxyfile
 #给开发人员的更详细的文档
 doc::
-	doxygen Doxyfile-dev
+	doxygen Doxyfile
 
 ARCH	= libwebs.a
 NAME	= webs
