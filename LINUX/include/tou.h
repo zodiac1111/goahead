@@ -1,3 +1,6 @@
+/**
+ * @file 历史数据头文件。
+ */
 #ifndef _TOU_H_
 #define _TOU_H_
 #include <time.h>
@@ -19,10 +22,10 @@
 #define MAXN_DAT_SUFFIX "mnt" //最大需量数据文件后缀名
 #define DEBUG_PRINT_HISTORY_DAT_MAXN 1 //最大需量打印测试
 typedef enum {
-	etou=1,
-	eqr,
-	einstant,
-	emaxn
+	etou=1,  //!< etou
+	eqr,     //!< eqr
+	einstant,//!< einstant
+	emaxn    //!< emaxn
 }eDatetype;
 ///tou 文件头
 typedef struct {

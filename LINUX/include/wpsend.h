@@ -1,6 +1,6 @@
 /**
  * @file wpsend.h
- *
+ * 简单的将json数据拆分发送到页面,对websWrite的简单封装.
  */
 
 #ifndef WPSEND_H_

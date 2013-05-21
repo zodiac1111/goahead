@@ -1,13 +1,12 @@
 /**
- * @file upload.c
  * 1. 实现客户端上传文件功能,主要用于更新程序.
  *  在更新时非常实用.使用了goahead上传文件补丁
  * 2. 实现配置文件的导入导出操作.
- */
-/** 文件上传补丁由 http://velep.com/archives/321.html 下载.
+ * 文件上传补丁由 http://velep.com/archives/321.html 下载.
  * 仅适用goahead2.5和2.1.1(老版本)现在该公司已经被收购,维护需要靠自己.
  * for test html upload file to web server
  * add by gyr 2011.10.15
+ * @file upload.c
  */
 #include "upload.h"
 #include "autoUpdate.h"

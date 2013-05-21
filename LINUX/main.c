@@ -3,7 +3,7 @@
  * main.c -- Main program for the GoAhead WebServer (LINUX version)
  * Copyright (c) GoAhead Software Inc., 1995-2010. All Rights Reserved.
  * See the file "license.txt" for usage and redistribution license requirements
- * @note 尽量只操作处理数据,样式和行为应该交给前端控制.[历史电量数据部分未完成]
+ * @note 尽量只操作处理数据,样式和行为应该交给前端控制.
  * @note 给前端发送的数据可以使用JSON.接收前端的数据就还是使用goahead的getVal吧.
  * 	后端仅进行一些必要的数值合法性验证.
  */
@@ -1301,12 +1301,6 @@ int ipstr2ipfile(char *ipstr, uint8_t ipfile[12])
 	ipfile[11] = (val[3]/1)%10;
 	return j+1;
 }
-char* itoa(char* str, const char*format, int value)
-{
-	sprintf(str, format, value);
-	return str;
-}
-
 /**
  * 从文件读取监视参数,显示到页面
  * @param[out] wp 写到这个页面
