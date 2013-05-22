@@ -1237,12 +1237,12 @@ int webSend_sioplans(webs_t wp, stSysParam sp)
 			web_err_proc(EL);
 			continue;
 		}
-		jsonAdd(&oItem, "no", u8toa(tmp, "%d", no));
-		jsonAdd(&oItem, "parity", u8toa(tmp, "%d", plan.parity));
-		jsonAdd(&oItem, "data", u8toa(tmp, "%d", plan.data));
-		jsonAdd(&oItem, "stop", u8toa(tmp, "%d", plan.stop));
-		jsonAdd(&oItem, "baud", u8toa(tmp, "%d", plan.baud));
-		jsonAdd(&oItem, "commtype", u8toa(tmp, "%d", plan.Commtype));
+		jsonAdd(&oItem, "no", toStr(tmp, "%d", no));
+		jsonAdd(&oItem, "parity", toStr(tmp, "%d", plan.parity));
+		jsonAdd(&oItem, "data", toStr(tmp, "%d", plan.data));
+		jsonAdd(&oItem, "stop", toStr(tmp, "%d", plan.stop));
+		jsonAdd(&oItem, "baud", toStr(tmp, "%d", plan.baud));
+		jsonAdd(&oItem, "commtype", toStr(tmp, "%d", plan.Commtype));
 		jsonAdd(&aItems, NULL, oItem);
 		jsonClean(&oItem);
 
@@ -1319,7 +1319,7 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 	char* oItem = jsonNew();
 	int i;
 	jsonAdd(&oMonPara, "sioplan_num",
-	                u8toa(tmp, "%d", sysparam.sioplan_num));
+	                toStr(tmp, "%d", sysparam.sioplan_num));
 
 	for (i = 0; i<mon_port_num; i++) {
 		jsonAdd(&aCommList, NULL, mon_port_name[i]);
@@ -1336,21 +1336,21 @@ int webSend_monparas(webs_t wp, stSysParam sysparam)
 			web_err_proc(EL);
 			continue;
 		}
-		jsonAdd(&oItem, "mon_no", u8toa(tmp, "%d", no));
+		jsonAdd(&oItem, "mon_no", toStr(tmp, "%d", no));
 		jsonAdd(&oItem, "commport",
-		                u8toa(tmp, "%d", monpara.comm_port));
+		                toStr(tmp, "%d", monpara.comm_port));
 		webWrite_listen_port(tmp, monpara);
 		jsonAdd(&oItem, "listenport", tmp);
-		jsonAdd(&oItem, "sioplan", u8toa(tmp, "%d", monpara.sioplan));
+		jsonAdd(&oItem, "sioplan", toStr(tmp, "%d", monpara.sioplan));
 		jsonAdd(&oItem, "protocol",
-		                u8toa(tmp, "%d", monpara.port_type));
+		                toStr(tmp, "%d", monpara.port_type));
 		jsonAdd(&oItem, "rtu_addr", webWrite_rtu_addr(tmp, monpara));
 		jsonAdd(&oItem, "time_syn_chk",
-		                u8toa(tmp, "%d", monpara.bTimeSyn));
+		                toStr(tmp, "%d", monpara.bTimeSyn));
 		jsonAdd(&oItem, "forward_chk",
-		                u8toa(tmp, "%d", monpara.bForward));
+		                toStr(tmp, "%d", monpara.bForward));
 		jsonAdd(&oItem, "forward_mtr_num",
-		                u8toa(tmp, "%d", monpara.forwardNum));
+		                toStr(tmp, "%d", monpara.forwardNum));
 		jsonAdd(&aItemList, NULL, oItem);
 		jsonClean(&oItem);
 	}
@@ -1804,7 +1804,7 @@ int webSend_mtrparams(webs_t wp, int mtrnum)
 	jsObj oMtrPara = jsonNew();     //一个表计参数
 	//串口方案
 	for (i = 0; i<g_sysparam.sioplan_num; i++) {
-		jsonAdd(&aList, NULL, u8toa(tmp, "%d", i));
+		jsonAdd(&aList, NULL, toStr(tmp, "%d", i));
 	}
 	jsonAdd(&oAll, "portplan", aList);
 	jsonClean(&aList);

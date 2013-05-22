@@ -90,21 +90,6 @@ char* toStr(char *str,const char*format,...)
 	va_end(ap);
 	return str;
 }
-/**向str中按照format格式打印value,并且放回str的指针.
- * 参考系统的sprintf,多了返回指针的功能.
- * 多了限制:str必须已经分配足够的内存用于打印.
- * @note 已经废弃,正在从代码中剔除,使用toStr()函数代替
- * */
-char* u8toa(char* str, const char*format, uint8_t value)
-{
-	sprintf(str, format, value);
-	return str;
-}
-char* ftoa(char* str, const char*format, double value)
-{
-	sprintf(str, format, value);
-	return str;
-}
 /**
  * 向json对象/数组最末尾中添加一个名/值对或对象.
  * 能过简单的自动区分是向(对象/数组)内添加(对象/数组/名值对).通过判断"{"
