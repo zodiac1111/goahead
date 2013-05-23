@@ -163,7 +163,7 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 		printf(WEBS_INF"导出web安装程序\n");
 		webExport_webs_installer(wp);
 	} else if (strcmp(action, "gdbserver")==0) {
-		char * ip = websGetVar(wp, T("ip"), T("192.168.1.113"));
+		char * ip = websGetVar(wp, T("ip"), T(""));
 		char * port = websGetVar(wp, T("port"), T("3104"));
 		web_err_procEx(EL,"启用远程调试:%s:%s",ip,port);
 		InvokeGdbserver(wp);
@@ -219,7 +219,7 @@ webExport_sys(webs_t wp)
 static int
 InvokeGdbserver(webs_t wp)
 {
-	char * ip = websGetVar(wp, T("ip"), T("192.168.1.113"));
+	char * ip = websGetVar(wp, T("ip"), T(""));
 	char * port = websGetVar(wp, T("port"), T("3104"));
 	char addr[32];
 	sprintf(addr,"%s:%s",ip,port);
