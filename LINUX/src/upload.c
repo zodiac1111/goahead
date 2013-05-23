@@ -212,7 +212,15 @@ webExport_sys(webs_t wp)
 	return 0;
 }
 /**
- * 转而执行gdbserver，此时webs已经停止工作，需要远方arm-linux-gdb链接并调试运行
+ * 转而执行(target-shell) gdbserver <IP>:3104 webs
+ * 	IP为空则监听所有链接.
+ * 	如果设置则设置成为gdb运行的计算机的IP,终端必须ping通这个ip
+ * 	此时webs已经停止工作，需要远方arm-linux-gdb链接并调试运行
+ * 远程执行 (host-shell) arm-linux-gdb webs (webs为应用程序）
+ * 附着与终端进程： (gdb)target remote  <终端ip>:<监听端口>
+ * 	监听端口默认3104
+ * 结束调试,并释放进程,webs将继续运行:
+ * 	(gdb) detach
  * @param wp
  * @return
  */
