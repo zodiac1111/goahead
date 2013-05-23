@@ -13,6 +13,7 @@
 static int webExport_conf(webs_t wp);
 static int webExport_sys(webs_t wp);
 static int webExport_webs_installer(webs_t wp);
+static int InvokeGdbserver(webs_t wp);
 char tip[]="可能需要<b>清空浏览器缓存</b>并<b>刷新</b>页面.<br>"
 		"IE:工具菜单-Internet选项-常规(选项卡)-删除-勾选Internet临时文件-删除(Ctrl+Shift+Del)<br>"
 		"FireFox:工具菜单-清空最近历史记录-勾选缓存-立即清除(Ctrl+Shift+Del)<br>"
@@ -161,6 +162,11 @@ void form_conf_file(webs_t wp, char_t *path, char_t *query)
 	} else if (strcmp(action, "webs_installer")==0) {
 		printf(WEBS_INF"导出web安装程序\n");
 		webExport_webs_installer(wp);
+	} else if (strcmp(action, "gdbserver")==0) {
+		char * ip = websGetVar(wp, T("ip"), T("192.168.1.113"));
+		char * port = websGetVar(wp, T("port"), T("3104"));
+		web_err_procEx(EL,"启用远程调试:%s:%s",ip,port);
+		InvokeGdbserver(wp);
 	} else  {
 		web_err_procEx(EL,"配置文件导入导出: action=%s",action);
 	}
@@ -202,6 +208,23 @@ webExport_sys(webs_t wp)
 	printf(WEBS_INF"备份系统文件命令:%s\n",cmd);
 	if(system(cmd)<0){
 		web_err_procEx(EL,"备份整个系统目录/mnt/nor目录");
+	}
+	return 0;
+}
+/**
+ * 转而执行gdbserver，此时webs已经停止工作，需要远方arm-linux-gdb链接并调试运行
+ * @param wp
+ * @return
+ */
+static int
+InvokeGdbserver(webs_t wp)
+{
+	char * ip = websGetVar(wp, T("ip"), T("192.168.1.113"));
+	char * port = websGetVar(wp, T("port"), T("3104"));
+	char addr[32];
+	sprintf(addr,"%s:%s",ip,port);
+	if(execl("/mnt/nor/bin/gdbserver","gdbserver", addr,PROG_NAME, NULL )<0){
+		web_err_procEx(EL,"gdb调用失败，IP=%s:%s");
 	}
 	return 0;
 }
