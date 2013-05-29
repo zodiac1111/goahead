@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 const char * const hb_str[HB_STR_CONTER] = { "IEC102 Heart", "Zj Heart",
-                "Gw Heart", "Gw Heart", "Gx Heart" };
+                "Gw Heart", "Sh Heart", "Gx Heart" };
 static int sentParam(webs_t wp);
 static int reciParam(webs_t wp);
 static int addApnList(jsObj* oCommModule);
@@ -87,7 +87,10 @@ static int addApnList(jsObj* oCommModule)
 		jsonAdd(&aApnList, NULL, "没有Apns.txt文件");
 		goto LOAD_DEFAULT_PARAM;
 	}
-	while (!feof(fp)) {
+	fseek(fp, 0, SEEK_END);
+	int flen = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	while (ftell(fp)<flen) {
 		fgets(line, CONF_LINE_MAX_CHAR-1, fp);     //得到一行
 		strnum = sscanf(line, "%[^#\r\n]", n);     //去掉换行符
 		if (strnum!=1) {
